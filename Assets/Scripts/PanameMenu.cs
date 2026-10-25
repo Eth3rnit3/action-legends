@@ -49,7 +49,7 @@ namespace Paname
             for(int hero=0;hero<4;hero++)
             {
                 float x=46+hero*298;Color accent=PlayerColors[selectedSlot];bool selected=slots[selectedSlot].hero==hero;
-                var card=new Rect(x,211,286,350);
+                var card=new Rect(x,211,286,380);
                 if(GUI.Button(card,GUIContent.none,GUIStyle.none))SelectHero(selectedSlot,hero);
                 IllustratedPanel(card,selected?Color.white:new Color(.8f,.85f,.85f,1));
                 if(selected){Panel(x+14,222,258,28,accent);Label(x+18,222,250,28,PlayerTag(selectedSlot)+"  ·  SÉLECTIONNÉ",13,Ink,true,TextAnchor.MiddleCenter);}
@@ -57,8 +57,8 @@ namespace Paname
                 Portrait(x+49,252,hero,accent,1.12f);
                 Label(x+16,450,254,28,HeroNames[hero],21,Cream,true,TextAnchor.MiddleCenter);
                 Label(x+16,478,254,20,HeroRoles[hero],11,selected?accent:C("9AAFB2"),true,TextAnchor.MiddleCenter);
-                Panel(x+18,501,250,44,C("07192A"));
-                Label(x+22,506,242,32,HeroSpecials[hero],13,Cream,false,TextAnchor.MiddleCenter);
+                Panel(x+18,515,250,44,C("07192A"));
+                Label(x+22,520,242,32,HeroSpecials[hero],13,Cream,false,TextAnchor.MiddleCenter);
             }
             for(int i=0;i<4;i++)if(slots[i].joined)
             {

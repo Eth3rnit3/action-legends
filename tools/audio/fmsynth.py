@@ -20,6 +20,8 @@ PATCHES = {
     'stab':   dict(r1=1, idx=2.6, sus_idx=.3, idec=.06, r2=1, idx2=.6, a=.004, d=.09, s=.25, rel=.05, vib=0, vibd=1, bright=1.0),
     # Darker, growling lead for the boss: modulator an octave down, slow brightness decay.
     'growl':  dict(r1=.5, idx=4.0, sus_idx=.6, idec=.25, r2=1, idx2=1.4, a=.006, d=.2, s=.8, rel=.08, vib=.009, vibd=.15, bright=1.0, detune=7),
+    # Breathy high fife, after the Provençal galoubet: low index, quick vibrato.
+    'fife':   dict(r1=1, idx=.9, sus_idx=.45, idec=.04, r2=2, idx2=.18, a=.018, d=.1, s=.8, rel=.05, vib=.009, vibd=.1, bright=.7),
     'pad':    dict(r1=1, idx=1.1, sus_idx=1, idec=1, r2=2, idx2=.2, a=.12, d=.3, s=.8, rel=.25, vib=.003, vibd=.3, bright=.6, detune=6),
 }
 
@@ -185,7 +187,7 @@ def write_wav(path, x, rate=22050, fade=True):
 
 
 CHORD_SHAPES = {'': (0, 4, 7), 'm': (0, 3, 7), '7': (0, 4, 7, 10), 'dim7': (0, 3, 6, 9)}
-ROOTS = {'C': 36, 'D': 38, 'Eb': 39, 'E': 40, 'F': 41, 'F#': 42, 'G': 43, 'A': 45, 'Bb': 46, 'B': 47}
+ROOTS = {'C': 36, 'Db': 37, 'D': 38, 'Eb': 39, 'E': 40, 'F': 41, 'F#': 42, 'G': 43, 'Ab': 44, 'A': 45, 'Bb': 46, 'B': 47}
 
 
 def chord(name):

@@ -31,6 +31,10 @@ Ramasser les caisses pour obtenir une mitrailleuse, un triple tir, des roquettes
 
 La fréquence des bonus, les munitions et la durée du turbo dépendent de la difficulté. Détente conserve le réglage de la version 0.4.3 : un bonus pour quinze ennemis et des caisses espacées de 72 unités. Les autres modes distribuent moins de ressources.
 
+## Deuxième mission : Mistral Gagnant
+
+Marseille en 2026 : dix assauts du Vieux-Port à la Canebière en passant par le Panier, puis l'hélicoptère d'une chaîne d'info en continu au pied de Notre-Dame-de-la-Garde. Musique arcade sur La Coupo Santo. Choisir la mission avec les flèches du menu. Détails dans [docs/MISSION_MARSEILLE.md](docs/MISSION_MARSEILLE.md).
+
 ## État de cette version
 
 - Déplacements, sauts, tirs, dégâts, renforts, score, pause, victoire et défaite.

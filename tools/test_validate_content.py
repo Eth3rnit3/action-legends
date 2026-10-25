@@ -48,6 +48,12 @@ class MissionValidationTests(unittest.TestCase):
                 data = copy.deepcopy(self.data)
                 data[key] = value
                 self.assertTrue(validate_mission(data, self.resources))
+    def test_bad_order_is_rejected(self):
+        for order in (-1, 1000, 1.5, True, "2"):
+            with self.subTest(order=order):
+                data = copy.deepcopy(self.data)
+                data["order"] = order
+                self.assertTrue(validate_mission(data, self.resources))
     def test_bad_boss_settings_are_rejected(self):
         for boss in ({"enabled": "yes"}, {"health": 0}, {"health": True}, {"name": "X" * 31}, "MACRON"):
             with self.subTest(boss=boss):

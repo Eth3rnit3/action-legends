@@ -17,6 +17,9 @@ def validate_mission(data, resources):
         return ["The mission must be a JSON object"]
     if data.get("schemaVersion") != 1:
         errors.append("schemaVersion must be 1")
+    order = data.get("order", 1)
+    if type(order) is not int or not 0 <= order <= 999:
+        errors.append("order must be an integer between 0 and 999")
     for key, limit in {"id": 60, "title": 45, "location": 45, "intro": 80, "exitLabel": 40, "winTitle": 80}.items():
         value = data.get(key)
         if not isinstance(value, str) or not value.strip() or len(value) > limit:

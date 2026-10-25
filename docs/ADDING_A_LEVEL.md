@@ -10,6 +10,7 @@ Dupliquer ce fichier dans le même dossier. Lui donner un nom unique en minuscul
 |---|---|
 | `schemaVersion` | Garder `1`. |
 | `id` | Identifiant unique, identique au nom du fichier sans `.json`. |
+| `order` | Facultatif. Position dans le menu, de `0` à `999`, `1` par défaut. À égalité, les missions sont classées par `id`. |
 | `title` | Nom affiché dans le menu. |
 | `location` | Ville, lieu ou époque affichés dans la fiche de mission. |
 | `intro`, `exitLabel`, `winTitle` | Messages de début, de sortie et de victoire. |

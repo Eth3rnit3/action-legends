@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 1,
+  "order": 2,
+  "id": "mistral-gagnant",
+  "title": "Mistral Gagnant",
+  "location": "Marseille, 2026",
+  "intro": "CAP SUR LA BONNE MÈRE !",
+  "exitLabel": "NOTRE-DAME-DE-LA-GARDE",
+  "winTitle": "MARSEILLE VOUS FAIT LA BISE.",
+  "backgrounds": [
+    "Art/marseille/vieux-port",
+    "Art/marseille/panier",
+    "Art/marseille/canebiere"
+  ],
+  "ground": "Art/marseille/sol",
+  "music": "Audio/Music/coupo-santo-arcade",
+  "bossMusic": "Audio/Music/coupo-santo-boss",
+  "length": 360,
+  "exitX": 357,
+  "cameraMin": 7,
+  "cameraMax": 354,
+  "waves": [
+    {
+      "atX": 14,
+      "baseEnemies": 14,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 22,
+      "spawnInterval": 0.17,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 47,
+      "baseEnemies": 14,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 22,
+      "spawnInterval": 0.17,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 80,
+      "baseEnemies": 17,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 22,
+      "spawnInterval": 0.17,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 113,
+      "baseEnemies": 17,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 23,
+      "spawnInterval": 0.15,
+      "enemyPattern": [
+        1,
+        0,
+        1,
+        1,
+        0,
+        2,
+        1
+      ]
+    },
+    {
+      "atX": 146,
+      "baseEnemies": 17,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 23,
+      "spawnInterval": 0.15,
+      "enemyPattern": [
+        1,
+        0,
+        1,
+        1,
+        0,
+        2,
+        1
+      ]
+    },
+    {
+      "atX": 179,
+      "baseEnemies": 20,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 23,
+      "spawnInterval": 0.15,
+      "enemyPattern": [
+        1,
+        0,
+        1,
+        1,
+        0,
+        2,
+        1
+      ]
+    },
+    {
+      "atX": 212,
+      "baseEnemies": 20,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 23,
+      "spawnInterval": 0.14,
+      "enemyPattern": [
+        2,
+        0,
+        1,
+        2,
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "atX": 245,
+      "baseEnemies": 20,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 24,
+      "spawnInterval": 0.14,
+      "enemyPattern": [
+        2,
+        0,
+        1,
+        2,
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "atX": 278,
+      "baseEnemies": 23,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 24,
+      "spawnInterval": 0.14,
+      "enemyPattern": [
+        2,
+        0,
+        1,
+        2,
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "atX": 311,
+      "baseEnemies": 23,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 24,
+      "spawnInterval": 0.14,
+      "enemyPattern": [
+        2,
+        0,
+        1,
+        2,
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "boss": {
+    "enabled": true,
+    "name": "LE DIRECT",
+    "sprite": "Art/marseille/news-helicopter",
+    "intro": "ÉDITION SPÉCIALE : L'HÉLICO DU DIRECT !",
+    "rage": "LE DIRECT S'EMBALLE !",
+    "defeat": "FIN DE L'ANTENNE !",
+    "health": 1.2
+  }
+}

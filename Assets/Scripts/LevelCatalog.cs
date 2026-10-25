@@ -19,7 +19,7 @@ namespace Paname
     }
     [Serializable] public sealed class MissionDefinition
     {
-        public int schemaVersion=1;
+        public int schemaVersion=1,order=1;
         public string id,title,location,intro,exitLabel,winTitle;
         public string[] backgrounds;
         public string ground="Art/paris",music="Audio/Music/marseillaise-arcade",bossMusic="Audio/Music/marseillaise-boss";
@@ -40,6 +40,7 @@ namespace Paname
         public void Validate()
         {
             if(schemaVersion!=1)throw new ArgumentException("schemaVersion doit être 1");
+            if(order<0||order>999)throw new ArgumentException("order doit être entre 0 et 999");
             if(string.IsNullOrWhiteSpace(id)||string.IsNullOrWhiteSpace(title)||string.IsNullOrWhiteSpace(location))throw new ArgumentException("id, title et location sont requis");
             if(string.IsNullOrWhiteSpace(intro)||string.IsNullOrWhiteSpace(exitLabel)||string.IsNullOrWhiteSpace(winTitle))throw new ArgumentException("intro, exitLabel et winTitle sont requis");
             if(id.Length>60||title.Length>45||location.Length>45||intro.Length>80||exitLabel.Length>40||winTitle.Length>80)throw new ArgumentException("Identifiants ou titres trop longs");
@@ -79,7 +80,7 @@ namespace Paname
                 if(!ids.Add(mission.id))throw new ArgumentException("Mission dupliquée : "+mission.id);
                 missions.Add(mission);
             }
-            missions.Sort((a,b)=>string.CompareOrdinal(a.id,b.id));
+            missions.Sort((a,b)=>a.order!=b.order?a.order.CompareTo(b.order):string.CompareOrdinal(a.id,b.id));
             if(missions.Count==0)throw new ArgumentException("Aucune mission dans Resources/Levels");
             return missions.ToArray();
         }

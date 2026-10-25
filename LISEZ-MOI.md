@@ -1,6 +1,6 @@
 # Action Legends — guide de jeu
 
-Prototype Unity 2D — version 0.4.2 : quatre héros sélectionnables et coopération locale sur un même écran. Première mission : Panique à Paname, Paris en 2026.
+Prototype Unity 2D — version 0.4.3 : quatre héros sélectionnables et coopération locale sur un même écran. Première mission : Panique à Paname, Paris en 2026.
 
 ## Jouer
 
@@ -27,6 +27,8 @@ Le clavier contrôle uniquement le joueur 1. Pour jouer à plusieurs, brancher d
 Avancer vers la droite à travers douze assauts, puis rejoindre la sortie à Bastille. Le parcours est six fois plus long que celui de la version 0.4.0 ; la progression reste libre pendant les combats. Trois types d'ennemis : fonceur, lanceur de projectiles et costaud au bouclier. Les attaques spéciales se rechargent en cinq secondes. Chaque joueur commence avec six points de vie ; les renforts sont partagés. Tous les trois assauts déployés, les héros encore debout reçoivent des soins et un renfort est ajouté. Il n'y a pas de tirs entre alliés.
 
 Ramasser les caisses pour obtenir une mitrailleuse, un triple tir, des roquettes, des soins, dix secondes de turbo ou des points. Les armes bonus ont des munitions limitées ; le fusil de base est illimité. Le chronomètre permet de comparer ses temps de parcours.
+
+Depuis la version 0.4.3, un ennemi laisse un bonus tous les quinze ennemis éliminés, contre cinq auparavant. Les caisses du parcours sont espacées de 72 unités, contre 34, avec la première à 24 unités. La puissance et les munitions des armes restent identiques : les bonus sont des coups de pouce plus ponctuels.
 
 ## État de cette version
 

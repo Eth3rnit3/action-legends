@@ -8,6 +8,8 @@ namespace Paname
         sealed class Pickup {public int kind;public Vector2 position;public Transform root;public float age;}
         readonly List<Pickup> pickups=new List<Pickup>();
         static Texture2D bonusTexture;static readonly Sprite[] bonusSprites=new Sprite[6];
+        const int KillsPerBonus=15;
+        const float FirstSupplyX=24,SupplySpacing=72;
         int kills,nextSupply;float comboClock;int combo;
         public int KillCount=>kills;
         public int BonusCount=>pickups.Count;
@@ -44,8 +46,8 @@ namespace Paname
         void TickBonuses(float dt)
         {
             comboClock-=dt;if(comboClock<=0)combo=0;
-            while(nextSupply*34+13<CurrentMission.length-5&&LeaderX()+13>=nextSupply*34+13)
-            {SpawnPickup(new Vector2(nextSupply*34+13,0),nextSupply%6);nextSupply++;}
+            while(nextSupply*SupplySpacing+FirstSupplyX<CurrentMission.length-5&&LeaderX()+13>=nextSupply*SupplySpacing+FirstSupplyX)
+            {SpawnPickup(new Vector2(nextSupply*SupplySpacing+FirstSupplyX,0),nextSupply%6);nextSupply++;}
             for(int i=pickups.Count-1;i>=0;i--)
             {
                 var item=pickups[i];item.age+=dt;item.root.position=item.position+Vector2.up*(Mathf.Sin(SimulationTime*5+i)*.11f);
@@ -60,7 +62,7 @@ namespace Paname
         void RecordKill(Vector2 at)
         {
             kills++;combo++;comboClock=2;Score+=100*Mathf.Min(5,1+combo/8);
-            if(kills%5==0)SpawnPickup(at,(kills/5-1)%6);
+            if(kills%KillsPerBonus==0)SpawnPickup(at,(kills/KillsPerBonus-1)%6);
         }
         void FirePlayer(Player p,int slot)
         {

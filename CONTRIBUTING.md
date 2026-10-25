@@ -18,4 +18,4 @@ Ne pas ajouter `Library`, `Temp`, `Logs`, `UserSettings`, `WebBuild`, licences U
 
 Conserver le style arcade et des silhouettes lisibles. Les décors s’enchaînent horizontalement avec une ligne de sol cohérente. Le moteur gère le défilement en parallaxe et adapte sa couverture au cadrage.
 
-N’ajouter que des contenus que vous avez le droit de partager. Les conditions de redistribution du projet seront précisées avant l’ouverture publique du dépôt.
+N’ajouter que des contenus que vous avez le droit de partager. Le code contribué est distribué sous [licence MIT](LICENSE) ; les illustrations et l’audio contribués rejoignent les ressources du jeu, distribuées selon la section Licence du README.

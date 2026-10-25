@@ -46,4 +46,6 @@ La vérification contrôle le format, les images référencées, la sortie, l’
 
 Version 0.5.1 : un joueur au clavier et jusqu’à trois partenaires à la manette, quatre héros sélectionnables, trois types d’ennemis, douze assauts, six types de bonus et une première mission prolongée jusqu’à Bastille. Quatre difficultés sélectionnables, boss final en hélicoptère, tir vers le haut, musique arcade et annonces vocales des bonus. Les bonus sont espacés selon la difficulté. Tirs renforcés, chronomètre, effets arcade et renforts partagés. Jeu en ligne jusqu’à quatre joueurs avec un lien d’invitation, sans serveur de jeu : voir [le jeu en ligne](docs/ONLINE.md). Les navigateurs de bureau sont la cible de cette version ; les commandes tactiles ne sont pas prévues.
 
-Les scripts et visuels sont consultables dans le dépôt public. Leur licence de redistribution reste à choisir ; aucune licence de redistribution n’est accordée par ce README.
+## Licence
+
+Le code est sous [licence MIT](LICENSE) : scripts C#, shaders, page web, outils et données de mission. Les illustrations, la musique, les voix et les bruitages (`Assets/Resources/Art`, `Assets/Resources/Audio`, `Assets/ArtSources`) restent tous droits réservés : ils peuvent servir à jouer, tester et contribuer au projet, mais pas être réutilisés ailleurs sans accord.

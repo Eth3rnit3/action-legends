@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+IMAGES = (".png", ".jpg", ".jpeg")
+SOUNDS = (".wav", ".ogg", ".mp3")
 
 
 def validate_mission(data, resources):
@@ -42,8 +44,33 @@ def validate_mission(data, resources):
         for path in backgrounds:
             if not isinstance(path, str) or not path.startswith("Art/") or ".." in path or ":" in path or "\\" in path:
                 errors.append("Invalid background path")
-            elif not any((resources / (path + ext)).is_file() for ext in (".png", ".jpg", ".jpeg")):
+            elif not any((resources / (path + ext)).is_file() for ext in IMAGES):
                 errors.append(f"Missing background: {path}")
+    def resource(label, value, prefix, extensions):
+        # Optional fields: an absent or empty value falls back to the Paris default.
+        if value is None or isinstance(value, str) and not value.strip():
+            return
+        if not isinstance(value, str) or not value.startswith(prefix) or ".." in value or ":" in value or "\\" in value:
+            errors.append(f"Invalid {label} path")
+        elif not any((resources / (value + ext)).is_file() for ext in extensions):
+            errors.append(f"Missing {label}: {value}")
+    resource("ground", data.get("ground"), "Art/", IMAGES)
+    resource("music", data.get("music"), "Audio/", SOUNDS)
+    resource("bossMusic", data.get("bossMusic"), "Audio/", SOUNDS)
+    boss = data.get("boss", {})
+    if not isinstance(boss, dict):
+        errors.append("boss must be an object")
+    else:
+        if not isinstance(boss.get("enabled", True), bool):
+            errors.append("boss.enabled must be true or false")
+        for key, limit in {"name": 30, "intro": 80, "rage": 80, "defeat": 80}.items():
+            value = boss.get(key)
+            if value is not None and (not isinstance(value, str) or len(value) > limit):
+                errors.append(f"boss.{key}: string, maximum {limit} characters")
+        health = boss.get("health", 1)
+        if isinstance(health, bool) or not isinstance(health, (int, float)) or not math.isfinite(health) or not .25 <= health <= 4:
+            errors.append("boss.health must be between .25 and 4")
+        resource("boss sprite", boss.get("sprite"), "Art/", IMAGES)
     waves = data.get("waves")
     if not isinstance(waves, list) or not 1 <= len(waves) <= 20:
         errors.append("waves must contain one to twenty waves")

@@ -32,22 +32,25 @@ namespace Paname
         void SpawnBoss()
         {
             bossStarted=true;bossArenaX=cameraX;
-            bossMaxHealth=Mathf.RoundToInt((DifficultyIndex==0?300:DifficultyIndex==1?560:DifficultyIndex==2?800:1100)*(1+.65f*(JoinedCount-1)));
+            var boss=CurrentMission.boss;
+            bossMaxHealth=Mathf.RoundToInt((DifficultyIndex==0?300:DifficultyIndex==1?560:DifficultyIndex==2?800:1100)*(1+.65f*(JoinedCount-1))*boss.health);
             bossHealth=bossMaxHealth;bossTimer=.8f;bossAttack=0;bossVolley=0;bossTime=0;
             foreach(var e in enemies){e.root.gameObject.SetActive(false);Destroy(e.root.gameObject);}enemies.Clear();pending=0;Wave=CurrentMission.waves.Length;
-            bossRoot=new GameObject("Boss • Macron en hélico").transform;bossRoot.SetParent(actors,false);
-            var texture=Resources.Load<Texture2D>("Art/macron-helicopter");
+            bossRoot=new GameObject("Boss • "+boss.name).transform;bossRoot.SetParent(actors,false);
+            var texture=Resources.Load<Texture2D>(boss.sprite);
             if(texture)
             {
                 bossRenderer=bossRoot.gameObject.AddComponent<SpriteRenderer>();
                 bossRenderer.sprite=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),new Vector2(.5f,.5f),texture.width/8.8f,0,SpriteMeshType.FullRect);bossRenderer.sortingOrder=35;
-                if(!bossBombSprite)bossBombSprite=CreateBossBombSprite(texture);
             }
+            // The missile is cut from fixed coordinates of the helicopter, whatever image the mission uses.
+            var helicopter=Resources.Load<Texture2D>("Art/macron-helicopter");
+            if(!bossBombSprite&&helicopter)bossBombSprite=CreateBossBombSprite(helicopter);
             bossRotor=Shape(bossRoot,"Rotor animé",-1,1.35f,6.5f,.055f,C("B8C8C9"),36);
             Shape(bossRoot,"Rotor ombre",-1,1.28f,5.6f,.04f,new Color(.08f,.14f,.19f,.6f),36);
             bossSight=Shape(actors,"Visée de la mitrailleuse",0,.06f,1,.055f,Coral,42);
             bossSight.gameObject.SetActive(false);
-            Announce("BOSS : MACRON EN HÉLICO !");Speak(bossVoice);shake=.25f;
+            Announce(boss.intro);Speak(bossVoice);shake=.25f;
         }
         Player BossTarget()
         {
@@ -60,6 +63,12 @@ namespace Paname
         }
         void TickBoss(float dt)
         {
+            if(!CurrentMission.boss.enabled)
+            {
+                // Without a boss the mission ends once every wave is cleared and the exit is reached.
+                if(phase==Phase.Playing&&Wave>=CurrentMission.waves.Length&&LeaderX()>=CurrentMission.exitX){phase=Phase.Won;Announce("MISSION ACCOMPLIE !");Speak(winVoice);}
+                return;
+            }
             if(!bossStarted&&LeaderX()>=CurrentMission.exitX-18)SpawnBoss();
             if(!bossStarted)return;
             if(bossDefeated)
@@ -193,18 +202,18 @@ namespace Paname
         {
             if(!BossActive)return;
             bossHealth=Mathf.Max(0,bossHealth-amount);bossFlash=.065f;
-            if(!bossEnraged&&bossHealth>0&&bossHealth<=bossMaxHealth/2){bossEnraged=true;bossRageTime=0;bossTimer=Mathf.Min(bossTimer,.35f);Announce("MACRON S'EMBALLE !");}
+            if(!bossEnraged&&bossHealth>0&&bossHealth<=bossMaxHealth/2){bossEnraged=true;bossRageTime=0;bossTimer=Mathf.Min(bossTimer,.35f);Announce(CurrentMission.boss.rage);}
             if(bossHealth>0)return;
             bossDefeated=true;bossDeathClock=2.5f;bossExplosionTimer=0;Score+=10000;
             if(bossSight)bossSight.gameObject.SetActive(false);
             for(int i=bossBombs.Count-1;i>=0;i--)RemoveBossBomb(i,false);
             foreach(var shot in shots)if(shot.Hostile)shot.life=0;
-            Announce("HÉLICO HORS SERVICE !");Sound(bossDownClip);
+            Announce(CurrentMission.boss.defeat);Sound(bossDownClip);
         }
         void DrawBossHUD()
         {
             if(!BossActive)return;
-            Label(370,622,510,20,"MACRON",12,Gold,true);
+            Label(370,622,510,20,CurrentMission.boss.name,12,Gold,true);
             if(bossEnraged)Label(887,622,24,20,"!",16,Coral,true,TextAnchor.MiddleRight);
             Panel(370,646,540,10,new Color(.035f,.09f,.14f,.85f));
             Panel(372,648,536*(bossHealth/(float)bossMaxHealth),6,Coral);

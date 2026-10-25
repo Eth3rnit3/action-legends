@@ -36,8 +36,8 @@ namespace Paname
             if(HostOnly(()=>SelectMission(direction))||phase!=Phase.Lobby||missions==null)return;
             missionIndex=(missionIndex+direction+missions.Length)%missions.Length;
             if(world){world.gameObject.SetActive(false);Destroy(world.gameObject);}
-            world=new GameObject("Décor de mission").transform;world.SetParent(transform,false);Street(world,CurrentMission.backgrounds,CurrentMission.length);
-            cameraX=CurrentMission.cameraMin;BuildLobbyActors();
+            world=new GameObject("Décor de mission").transform;world.SetParent(transform,false);Street(world,CurrentMission.backgrounds,CurrentMission.length,CurrentMission.ground);
+            cameraX=CurrentMission.cameraMin;LoadMissionMusic();BuildLobbyActors();
         }
         public int Score {get;private set;}
         public int Wave {get;private set;}
@@ -90,7 +90,7 @@ namespace Paname
             font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             if(!gameCamera) {var go=new GameObject("Main Camera");gameCamera=go.AddComponent<Camera>();go.tag="MainCamera";}
             gameCamera.orthographic=true; gameCamera.orthographicSize=ViewHalfHeight; gameCamera.backgroundColor=C("C6DFD9"); gameCamera.transform.position=new Vector3(cameraX,3.6f,-10);
-            world=new GameObject("Décor de mission").transform; world.SetParent(transform,false); Street(world,CurrentMission.backgrounds,CurrentMission.length);
+            world=new GameObject("Décor de mission").transform; world.SetParent(transform,false); Street(world,CurrentMission.backgrounds,CurrentMission.length,CurrentMission.ground);
             actors=new GameObject("Acteurs et effets").transform;actors.SetParent(transform,false);
             audioOut=gameObject.AddComponent<AudioSource>();audioOut.volume=.2f;
             projectileRoot=new GameObject("Projectiles • pool").transform;projectileRoot.SetParent(transform,false);

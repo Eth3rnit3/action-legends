@@ -34,6 +34,26 @@ class MissionValidationTests(unittest.TestCase):
     def test_bad_schema_is_rejected(self):
         self.data["schemaVersion"] = 99
         self.assertTrue(validate_mission(self.data, self.resources))
+    def test_explicit_defaults_are_valid(self):
+        self.data.update(ground="Art/paris", music="Audio/Music/marseillaise-arcade", bossMusic="Audio/Music/marseillaise-boss",
+                         boss={"enabled": True, "name": "MACRON", "sprite": "Art/macron-helicopter", "health": 1})
+        self.assertEqual(validate_mission(self.data, self.resources), [])
+    def test_mission_without_boss_is_valid(self):
+        self.data["boss"] = {"enabled": False}
+        self.assertEqual(validate_mission(self.data, self.resources), [])
+    def test_missing_ground_music_or_boss_art_is_rejected(self):
+        for key, value in (("ground", "Art/does-not-exist"), ("music", "Audio/Music/does-not-exist"), ("bossMusic", "Art/paris"),
+                           ("boss", {"sprite": "Art/../../private"})):
+            with self.subTest(key=key):
+                data = copy.deepcopy(self.data)
+                data[key] = value
+                self.assertTrue(validate_mission(data, self.resources))
+    def test_bad_boss_settings_are_rejected(self):
+        for boss in ({"enabled": "yes"}, {"health": 0}, {"health": True}, {"name": "X" * 31}, "MACRON"):
+            with self.subTest(boss=boss):
+                data = copy.deepcopy(self.data)
+                data["boss"] = boss
+                self.assertTrue(validate_mission(data, self.resources))
 
 if __name__ == "__main__":
     unittest.main()

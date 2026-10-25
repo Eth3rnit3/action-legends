@@ -21,7 +21,7 @@ namespace Paname
         {
             musicOut=gameObject.AddComponent<AudioSource>();musicOut.loop=true;musicOut.volume=.22f;
             voiceOut=gameObject.AddComponent<AudioSource>();voiceOut.volume=.95f;
-            musicClip=Resources.Load<AudioClip>("Audio/Music/marseillaise-arcade");bossMusicClip=Resources.Load<AudioClip>("Audio/Music/marseillaise-boss");
+            LoadMissionMusic();
             for(int i=0;i<6;i++)bonusVoices[i]=Takes("bonus-"+i);
             bossVoice=Takes("boss-alert");winVoice=Takes("victory");
             pistolClip=Sfx("tir-D-pistolet-sec");machineGunClip=Sfx("tir-A-mitraille");tripleClip=Sfx("tir-B-laser-snes");rocketClip=Sfx("roquette-depart");bossGunClip=Sfx("tir-C-blaster-cps1");
@@ -29,6 +29,10 @@ namespace Paname
             explosionClips=new[]{Sfx("explosion-A-grosse"),Sfx("explosion-B-courte"),Sfx("explosion-C-bombe-neo")};
             playerHitClip=Sfx("joueur-touche");bossDownClip=Sfx("boss-explose");pickupClip=Sfx("bonus-ramasse");
             coinClip=Sfx("bonus-coin");selectClip=Sfx("menu-select");startClip=Sfx("menu-start");
+        }
+        void LoadMissionMusic()
+        {
+            musicClip=Resources.Load<AudioClip>(CurrentMission.music);bossMusicClip=Resources.Load<AudioClip>(CurrentMission.bossMusic);
         }
         AudioClip Pick(AudioClip[] clips)=>clips==null||clips.Length==0?null:clips[audioRandom.Next(clips.Length)];
         void Sound(AudioClip[] clips)=>Sound(Pick(clips));

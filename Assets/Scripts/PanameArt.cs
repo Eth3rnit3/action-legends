@@ -81,7 +81,7 @@ namespace Paname
             CheckGlyphs(text); var t=g.AddComponent<TextMesh>(); t.text=text; t.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); t.fontSize=48; t.characterSize=size/10; t.anchor=TextAnchor.MiddleCenter; t.color=color;
             var r=g.GetComponent<MeshRenderer>(); r.sharedMaterial=t.font.material; r.sortingOrder=order;
         }
-        public static void Street(Transform root,string[] routePaths=null,float length=80)
+        public static void Street(Transform root,string[] routePaths=null,float length=80,string groundPath="Art/paris")
         {
             if(routePaths==null)routePaths=new[]{"Art/route-01","Art/route-02","Art/route-03"};
             var first=Resources.Load<Texture2D>(routePaths[0]);
@@ -100,7 +100,7 @@ namespace Paname
                     if(blend){var shader=Resources.Load<Shader>("BackgroundBlend");if(shader){r.sharedMaterial=new Material(shader);r.sharedMaterial.SetFloat("_LeftFade",1.5f/sprite.bounds.size.x);}}
                     RouteWidth+=sprite.bounds.size.x;RouteSegments++;
                 }
-                var ground=Resources.Load<Texture2D>("Art/paris");
+                var ground=Resources.Load<Texture2D>(groundPath);
                 if(ground)
                 {
                     var road=Sprite.Create(ground,new Rect(0,0,ground.width,ground.height*.2f),new Vector2(0,1),ground.height/13f,0,SpriteMeshType.FullRect);

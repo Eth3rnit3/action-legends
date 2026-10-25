@@ -39,6 +39,8 @@ namespace ActionLegends.Editor
             Configure();string path=Path.GetFullPath("WebBuild");
             var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Paris2026.unity"},target=BuildTarget.WebGL,locationPathName=path,options=BuildOptions.None});
             if(report.summary.result!=BuildResult.Succeeded)throw new BuildFailedException("Compilation web échouée : "+report.summary.result);
+            // GameCI valide une méthode de build personnalisée en cherchant ce texte exact dans la sortie Unity.
+            Console.WriteLine("Build succeeded!");
         }
         [PostProcessBuild(50)]
         public static void Finish(BuildTarget target,string path)

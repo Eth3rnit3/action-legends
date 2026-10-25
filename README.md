@@ -1,6 +1,6 @@
 # Action Legends
 
-Jeu d’action arcade 2D pour un à quatre joueurs en coopération locale, construit avec Unity. Première mission : **Panique à Paname**, à Paris en 2026.
+Jeu d’action arcade 2D pour un à quatre joueurs en coopération locale, construit avec Unity. Deux missions : **Panique à Paname**, à Paris en 2026, et **Mistral Gagnant**, à Marseille.
 
 Le jeu est conçu pour tourner dans un navigateur de bureau à partir de fichiers statiques. Aucun compte joueur, serveur de jeu ou base de données n’est nécessaire.
 
@@ -44,7 +44,7 @@ La vérification contrôle le format, les images référencées, la sortie, l’
 
 ## Portée actuelle
 
-Version 0.5.1 : un joueur au clavier et jusqu’à trois partenaires à la manette, quatre héros sélectionnables, trois types d’ennemis, douze assauts, six types de bonus et une première mission prolongée jusqu’à Bastille. Quatre difficultés sélectionnables, boss final en hélicoptère, tir vers le haut, musique arcade et annonces vocales des bonus. Les bonus sont espacés selon la difficulté. Tirs renforcés, chronomètre, effets arcade et renforts partagés. Jeu en ligne jusqu’à quatre joueurs avec un lien d’invitation, sans serveur de jeu : voir [le jeu en ligne](docs/ONLINE.md). Les navigateurs de bureau sont la cible de cette version ; les commandes tactiles ne sont pas prévues.
+Version 0.5.1 : un joueur au clavier et jusqu’à trois partenaires à la manette, quatre héros sélectionnables, trois types d’ennemis, douze assauts, six types de bonus, une première mission prolongée jusqu’à Bastille et une deuxième mission à Marseille, de dix assauts, avec son propre boss et sa musique. Quatre difficultés sélectionnables, boss final en hélicoptère, tir vers le haut, musique arcade et annonces vocales des bonus. Les bonus sont espacés selon la difficulté. Tirs renforcés, chronomètre, effets arcade et renforts partagés. Jeu en ligne jusqu’à quatre joueurs avec un lien d’invitation, sans serveur de jeu : voir [le jeu en ligne](docs/ONLINE.md). Les navigateurs de bureau sont la cible de cette version ; les commandes tactiles ne sont pas prévues.
 
 ## Licence
 

@@ -1,0 +1,457 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using static Paname.PanameArt;
+
+namespace Paname
+{
+    public sealed partial class PanameGame : MonoBehaviour
+    {
+        public static readonly string[] HeroNames={"CHUCK NORRIS","ARNOLD","JEAN-CLAUDE","SYLVESTER"};
+        public static readonly string[] HeroRoles={"LE RANGER","LE COLOSSE","LE VOLTIGEUR","LE COMMANDO"};
+        public static readonly string[] HeroSpecials={"Coup circulaire","Rafale lourde","Double coup sauté","Salve explosive"};
+        public static readonly Color[] PlayerColors={C("F5BD56"),C("59CCBA"),C("F98A72"),C("A7AFF5")};
+        static readonly float[] Speed={6.5f,5.3f,7.6f,6.1f}, Rate={.19f,.12f,.22f,.23f};
+        public readonly LocalSlot[] slots={new LocalSlot{joined=true},new LocalSlot{hero=1},new LocalSlot{hero=2},new LocalSlot{hero=3}};
+        public enum Phase { Lobby, Playing, Paused, Won, Lost }
+        public Phase phase=Phase.Lobby;
+        MissionDefinition[] missions;
+        int missionIndex;
+        public MissionDefinition CurrentMission=>missions[missionIndex];
+        public int MissionCount=>missions?.Length??0;
+        public int MissionIndex=>missionIndex;
+        public void PauseFromBrowser(){if(phase==Phase.Playing)phase=Phase.Paused;}
+        public void SelectMission(int direction)
+        {
+            if(phase!=Phase.Lobby||missions==null)return;
+            missionIndex=(missionIndex+direction+missions.Length)%missions.Length;
+            if(world){world.gameObject.SetActive(false);Destroy(world.gameObject);}
+            world=new GameObject("Décor de mission").transform;world.SetParent(transform,false);Street(world,CurrentMission.backgrounds);
+            cameraX=CurrentMission.cameraMin;BuildLobbyActors();
+        }
+        public int Score {get;private set;}
+        public int Wave {get;private set;}
+        public int Reserves {get;private set;}
+        public int EnemyCount => enemies.Count;
+        public int JoinedCount {get{int n=0;foreach(var s in slots)if(s.joined)n++;return n;}}
+        public float SimulationTime {get;private set;}
+        public Camera gameCamera;
+        readonly Player[] players=new Player[4];
+        readonly List<Enemy> enemies=new List<Enemy>();
+        readonly List<Shot> shots=new List<Shot>();
+        readonly List<Spark> sparks=new List<Spark>();
+        Transform actors,world;
+        ArcadeEffects effects;
+        MaterialPropertyBlock flashProperties;
+        public int ActiveEffects => effects?.ActiveCount ?? 0;
+        public int EffectPoolCapacity => effects?.Capacity ?? 0;
+        Font font;
+        float spawnTimer,announcementTimer,shake;
+        int pending;
+        bool waveLive;
+        string announcement="";
+        float cameraX=7;
+        AudioSource audioOut;
+        AudioClip fireClip,hitClip,specialClip;
+        readonly System.Random random=new System.Random(2026);
+        readonly PlayerCommand[] frameInputs=new PlayerCommand[4];
+        public sealed class Player
+        {
+            public Vector2 position; public float vertical,fireTimer,specialTimer,invulnerable,downTimer,walk,recoil,flash,dust;
+            public int hp=6,hero,facing=1; public bool moving; public Transform root,leftLeg,rightLeg; public SpriteRenderer illustrated;
+        }
+        sealed class Enemy
+        {
+            public Vector2 position; public int hp,kind,facing=-1; public float attackTimer,walk,flash,stagger,knockback;
+            public Transform root,leftLeg,rightLeg; public SpriteRenderer illustrated;
+        }
+        sealed class Shot
+        {
+            public Vector2 position,velocity; public float life=1.8f; public int damage; public bool hostile,explosive; public Transform root;
+        }
+        sealed class Spark { public Transform root; public Vector2 velocity; public float life; }
+
+        void Awake()
+        {
+            Application.targetFrameRate=60;
+            flashProperties=new MaterialPropertyBlock();
+            missions=LevelCatalog.LoadAll();cameraX=CurrentMission.cameraMin;
+            font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if(!gameCamera) {var go=new GameObject("Main Camera");gameCamera=go.AddComponent<Camera>();go.tag="MainCamera";}
+            gameCamera.orthographic=true; gameCamera.orthographicSize=5.8f; gameCamera.backgroundColor=C("C6DFD9"); gameCamera.transform.position=new Vector3(cameraX,3.6f,-10);
+            world=new GameObject("Décor de mission").transform; world.SetParent(transform,false); Street(world,CurrentMission.backgrounds);
+            actors=new GameObject("Acteurs et effets").transform;actors.SetParent(transform,false);
+            audioOut=gameObject.AddComponent<AudioSource>();audioOut.volume=.2f;
+            effects=new ArcadeEffects(transform);
+            fireClip=ArcadeAudio.Create("Tir arcade",0);hitClip=ArcadeAudio.Create("Impact métallique",1);specialClip=ArcadeAudio.Create("Explosion",2);
+            BuildLobbyActors();
+        }
+        void Sound(AudioClip clip){if(audioOut&&clip)audioOut.PlayOneShot(clip);}
+        void ResetActors()
+        {
+            for(int i=actors.childCount-1;i>=0;i--){var child=actors.GetChild(i).gameObject;child.SetActive(false);Destroy(child);}
+            Array.Clear(players,0,4);enemies.Clear();shots.Clear();sparks.Clear();effects?.Clear();
+        }
+        void BuildLobbyActors()
+        {
+            ResetActors();
+            for(int i=0;i<4;i++)if(slots[i].joined)SpawnPlayer(i,3+i*1.6f);
+        }
+        void SpawnPlayer(int i,float x)
+        {
+            var p=new Player{position=new Vector2(x,0),hero=slots[i].hero,invulnerable=2};
+            p.root=Actor(actors,p.hero,PlayerColors[i]);p.root.name="J"+(i+1)+" • "+HeroNames[p.hero];
+            p.illustrated=p.root.Find("Illustration")?.GetComponent<SpriteRenderer>();
+            p.leftLeg=p.root.Find("Jambe arrière");p.rightLeg=p.root.Find("Jambe avant");
+            players[i]=p;SyncPlayer(i);
+        }
+        public void BeginRound()
+        {
+            ResetActors();Score=0;Wave=0;Reserves=JoinedCount*3;pending=0;waveLive=false;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
+            for(int i=0;i<4;i++)if(slots[i].joined)SpawnPlayer(i,2+i*1.3f);
+            phase=Phase.Playing;Announce(CurrentMission.intro);
+        }
+        public void ReturnToLobby(){phase=Phase.Lobby;cameraX=CurrentMission.cameraMin;BuildLobbyActors();}
+        public void AddSecondKeyboard()
+        {
+            if(slots[1].joined)return;slots[1].joined=true;slots[1].secondKeyboard=true;
+            if(phase==Phase.Lobby)BuildLobbyActors();else SpawnPlayer(1,LeaderX()-1);
+        }
+        void Update()
+        {
+            if(Keyboard.current!=null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            {
+                if(phase==Phase.Playing)phase=Phase.Paused;else if(phase==Phase.Paused)phase=Phase.Playing;
+                else if(phase==Phase.Won||phase==Phase.Lost)ReturnToLobby();
+            }
+            CheckControllers();
+            if(phase==Phase.Lobby)
+            {
+                var k=Keyboard.current;
+                if(k!=null){if(k.qKey.wasPressedThisFrame||k.aKey.wasPressedThisFrame)ChangeHero(0,-1);if(k.eKey.wasPressedThisFrame||k.dKey.wasPressedThisFrame)ChangeHero(0,1);if(k.f2Key.wasPressedThisFrame)AddSecondKeyboard();if(k.leftArrowKey.wasPressedThisFrame)SelectMission(-1);if(k.rightArrowKey.wasPressedThisFrame)SelectMission(1);if(k.enterKey.wasPressedThisFrame)BeginRound();}
+                for(int i=0;i<4;i++)if(slots[i].joined&&slots[i].Connected)
+                {
+                    if(i==0&&slots[i].pad.leftShoulder.wasPressedThisFrame)SelectMission(-1);
+                    if(i==0&&slots[i].pad.rightShoulder.wasPressedThisFrame)SelectMission(1);
+                    if(slots[i].pad.dpad.left.wasPressedThisFrame)ChangeHero(i,-1);
+                    if(slots[i].pad.dpad.right.wasPressedThisFrame)ChangeHero(i,1);
+                    if(slots[i].pad.startButton.wasPressedThisFrame){BeginRound();break;}
+                }
+            }
+            else if(phase==Phase.Playing)
+            {
+                for(int i=0;i<4;i++)frameInputs[i]=slots[i].joined?LocalControls.Read(slots[i],i):default;
+                // Bounded substeps keep collisions stable on slower machines.
+                float remaining=Mathf.Min(Time.deltaTime,.1f);
+                while(remaining>0){float dt=Mathf.Min(remaining,1f/60);TickSimulation(dt,frameInputs);for(int i=0;i<4;i++){frameInputs[i].jump=false;frameInputs[i].special=false;}remaining-=dt;}
+            }
+            UpdateCamera(Time.unscaledDeltaTime);
+        }
+        void CheckControllers()
+        {
+            foreach(var pad in Gamepad.all)
+            {
+                bool assigned=false;for(int i=0;i<4;i++)if(slots[i].pad==pad){assigned=true;break;}
+                if(assigned)continue;
+                if(pad.buttonSouth.wasPressedThisFrame && (phase==Phase.Lobby||phase==Phase.Playing))
+                {
+                    int index=-1;
+                    for(int i=0;i<4;i++)if(slots[i].pad!=null&&!slots[i].Connected){index=i;break;}
+                    if(index<0 && slots[0].pad==null)index=0;
+                    if(index<0)for(int i=1;i<4;i++)if(!slots[i].joined){index=i;break;}
+                    if(index<0)continue;
+                    slots[index].joined=true;slots[index].pad=pad;
+                    if(players[index]==null){if(phase==Phase.Lobby)BuildLobbyActors();else SpawnPlayer(index,LeaderX()-1);}
+                }
+            }
+            for(int i=0;i<4;i++)if(slots[i].Connected && slots[i].pad.startButton.wasPressedThisFrame)
+            {
+                if(phase==Phase.Playing)phase=Phase.Paused;else if(phase==Phase.Paused)phase=Phase.Playing;
+            }
+        }
+        void ChangeHero(int slot,int direction)
+        {
+            slots[slot].hero=(slots[slot].hero+direction+4)%4;BuildLobbyActors();
+        }
+        public Vector2 GetPlayerPosition(int slot)=>players[slot]?.position??Vector2.zero;
+        public int GetPlayerHealth(int slot)=>players[slot]?.hp??0;
+        public void TickSimulation(float dt,PlayerCommand[] commands)
+        {
+            if(phase!=Phase.Playing)return;
+            SimulationTime+=dt;announcementTimer=Mathf.Max(0,announcementTimer-dt);shake=Mathf.Max(0,shake-dt*2);
+            float rear=LeaderX()-16;
+            for(int i=0;i<4;i++)
+            {
+                var p=players[i];if(p==null)continue;
+                p.invulnerable=Mathf.Max(0,p.invulnerable-dt);p.specialTimer=Mathf.Max(0,p.specialTimer-dt);p.fireTimer-=dt;p.recoil=Mathf.Max(0,p.recoil-dt);p.flash=Mathf.Max(0,p.flash-dt);p.dust-=dt;
+                if(p.hp<=0)
+                {
+                    p.downTimer-=dt;
+                    if(p.downTimer<=0&&Reserves>0){Reserves--;p.hp=6;p.position=new Vector2(Mathf.Clamp(LeaderX()-1,1,CurrentMission.length-1),0);p.vertical=0;p.invulnerable=3;p.root.gameObject.SetActive(true);}
+                    else {p.root.gameObject.SetActive(false);continue;}
+                }
+                PlayerCommand input=i<commands.Length?commands[i]:default;
+                float move=Mathf.Clamp(input.move,-1,1);p.moving=Mathf.Abs(move)>.1f;if(Mathf.Abs(move)>.1f)p.facing=move>0?1:-1;
+                p.position.x+=move*Speed[p.hero]*dt;p.walk+=Mathf.Abs(move)*dt*13;
+                float limit=Wave<CurrentMission.waves.Length?CurrentMission.waves[Wave].atX+3:CurrentMission.length;
+                p.position.x=Mathf.Clamp(p.position.x,Mathf.Max(.5f,rear),Mathf.Min(CurrentMission.length,limit));
+                if(input.jump&&p.position.y<=.001f)p.vertical=p.hero==2?12.8f:11;
+                p.vertical-=29*dt;p.position.y+=p.vertical*dt;if(p.position.y<0){p.position.y=0;p.vertical=0;}
+                if(input.fire&&p.fireTimer<=0){Shoot(p.position+new Vector2(p.facing*1.24f,1.2f),new Vector2(p.facing*22,0),p.hero==1?2:1,false,PlayerColors[i]);p.fireTimer=Rate[p.hero];p.recoil=.065f;effects.Casing(p.position+new Vector2(p.facing*.45f,1.25f),p.facing);shake=Mathf.Max(shake,p.hero==1?.09f:.035f);Sound(fireClip);}
+                if(input.special&&p.specialTimer<=0)Special(p,i);
+                if(p.moving&&p.position.y<.03f&&p.dust<=0){effects.Play(3,p.position+new Vector2(-p.facing*.28f,.1f),.42f,.3f,1,new Vector2(-p.facing*.18f,.2f));p.dust=.19f;}
+                SyncPlayer(i);
+            }
+            UpdateWaves(dt);UpdateEnemies(dt);UpdateShots(dt);UpdateSparks(dt);effects.Tick(dt);
+            bool alive=false;foreach(var p in players)if(p!=null&&p.hp>0)alive=true;
+            if(!alive&&Reserves==0){phase=Phase.Lost;Announce("ON REMET ÇA ?");}
+            if(Wave>=CurrentMission.waves.Length&&LeaderX()>=CurrentMission.exitX){phase=Phase.Won;Announce("MISSION ACCOMPLIE !");}
+        }
+        void Special(Player p,int i)
+        {
+            p.specialTimer=8;shake=.35f;Sound(specialClip);
+            if(p.hero==0||p.hero==2)
+            {
+                effects.Play(1,p.position+new Vector2(p.facing*.7f,1),2.8f,.25f,p.facing);
+                effects.Play(3,p.position+Vector2.up*.3f,1.8f,.4f);
+                float radius=p.hero==0?4:3.2f;
+                for(int e=enemies.Count-1;e>=0;e--)if(Vector2.Distance(p.position,enemies[e].position)<radius)HitEnemy(e,8,p.facing);
+                p.invulnerable=1;if(p.hero==2)p.vertical=12.8f;
+            }
+            else
+            {
+                for(int j=-3;j<=3;j++)Shoot(p.position+new Vector2(p.facing*1.24f,1.2f),new Vector2(p.facing*(p.hero==1?26:19),j*(p.hero==1?.8f:2)),p.hero==1?4:5,false,PlayerColors[i],true);
+            }
+        }
+        void SyncPlayer(int i)
+        {
+            var p=players[i];if(p==null||!p.root)return;
+            p.root.position=p.position;p.root.localScale=new Vector3(p.facing,1,1);
+            if(p.illustrated)
+            {
+                int frame=p.position.y>.1f?3:p.moving?1+((int)(p.walk*.7f)%2):0;
+                p.illustrated.sprite=Frame(false,p.hero,frame);
+                p.illustrated.transform.localPosition=new Vector3(-p.recoil*1.2f,p.moving&&p.position.y<.1f?Mathf.Abs(Mathf.Sin(p.walk))*.045f:0,0);
+                ArcadeEffects.HitFlash(p.illustrated,p.flash>0?1:0,flashProperties);
+            }
+            if(p.leftLeg)p.leftLeg.localRotation=Quaternion.Euler(0,0,Mathf.Sin(p.walk)*16);
+            if(p.rightLeg)p.rightLeg.localRotation=Quaternion.Euler(0,0,-Mathf.Sin(p.walk)*16);
+            float alpha=p.invulnerable>0&&Mathf.Sin(SimulationTime*35)>0?.45f:1;
+            foreach(var r in p.root.GetComponentsInChildren<SpriteRenderer>()){var c=r.color;c.a=alpha;r.color=c;}
+        }
+        float LeaderX(){float x=2;foreach(var p in players)if(p!=null&&p.hp>0)x=Mathf.Max(x,p.position.x);return x;}
+        float AverageX(){float x=0;int n=0;foreach(var p in players)if(p!=null&&p.hp>0){x+=p.position.x;n++;}return n==0?cameraX:x/n;}
+        void Announce(string text){announcement=text;announcementTimer=2.5f;}
+        void UpdateWaves(float dt)
+        {
+            if(Wave>=CurrentMission.waves.Length)return;
+            var wave=CurrentMission.waves[Wave];
+            float gate=wave.atX;
+            if(!waveLive&&LeaderX()>gate-9){waveLive=true;pending=wave.baseEnemies+JoinedCount*wave.enemiesPerPlayer;spawnTimer=.2f;Announce("VAGUE "+(Wave+1)+"  /  "+CurrentMission.waves.Length);}
+            if(!waveLive)return;
+            spawnTimer-=dt;
+            if(pending>0&&spawnTimer<=0&&enemies.Count<wave.maxAlive)
+            {
+                float x=Mathf.Clamp(LeaderX()+(pending%4==0?-7.5f:8.7f),.5f,CurrentMission.length);
+                SpawnEnemy(x,wave.enemyPattern[pending%wave.enemyPattern.Length]);pending--;spawnTimer=wave.spawnInterval;
+            }
+            if(pending==0&&enemies.Count==0)
+            {
+                Wave++;waveLive=false;Reserves++;foreach(var p in players)if(p!=null&&p.hp>0)p.hp=Mathf.Min(6,p.hp+2);
+                Announce(Wave==CurrentMission.waves.Length?"PASSAGE LIBRE  →  "+CurrentMission.exitLabel+" !":"QUARTIER SÉCURISÉ  →");Score+=500;
+            }
+        }
+        void SpawnEnemy(float x,int kind)
+        {
+            var e=new Enemy{position=new Vector2(x,0),kind=kind,hp=kind==2?6:kind==1?3:2,attackTimer=1};
+            e.root=Actor(actors,0,Coral,true,kind);e.illustrated=e.root.Find("Illustration")?.GetComponent<SpriteRenderer>();e.root.position=e.position;e.leftLeg=e.root.Find("Jambe arrière");e.rightLeg=e.root.Find("Jambe avant");enemies.Add(e);
+            effects.Play(3,e.position+Vector2.up*.12f,.6f,.3f);
+        }
+        void UpdateEnemies(float dt)
+        {
+            foreach(var e in enemies)
+            {
+                Player target=null;float best=float.MaxValue;
+                foreach(var p in players)if(p!=null&&p.hp>0){float distance=Mathf.Abs(p.position.x-e.position.x);if(distance<best){best=distance;target=p;}}
+                if(target==null)continue;
+                e.flash=Mathf.Max(0,e.flash-dt);e.stagger=Mathf.Max(0,e.stagger-dt);
+                e.position.x=Mathf.Clamp(e.position.x+e.knockback*dt,.2f,CurrentMission.length+1);e.knockback=Mathf.Lerp(e.knockback,0,Mathf.Min(1,dt*14));
+                e.facing=target.position.x>=e.position.x?1:-1;e.attackTimer-=dt;
+                float desired=e.kind==1?5:.6f;
+                if(best>desired&&e.stagger<=0){e.position.x+=e.facing*(e.kind==0?2.8f:e.kind==1?1.6f:1.35f)*dt;e.walk+=dt*11;}
+                if(e.kind==1&&best<10&&e.attackTimer<=0&&e.stagger<=0)
+                {
+                    var aim=(target.position+Vector2.up-e.position-Vector2.up*1.17f).normalized;
+                    Shoot(e.position+new Vector2(e.facing*.85f,1.17f),aim*8,1,true,Coral,true);e.attackTimer=2.2f;
+                }
+                if(best<.9f&&target.position.y<1.35f&&e.attackTimer<=0&&e.stagger<=0){Damage(target,1);e.attackTimer=1;}
+                e.root.position=e.position;e.root.localScale=new Vector3(e.facing,1,1);
+                if(e.illustrated){int frame=best>desired?1+((int)(e.walk*.7f)%2):e.attackTimer> .8f?3:0;e.illustrated.sprite=Frame(true,e.kind,frame);ArcadeEffects.HitFlash(e.illustrated,e.flash>0?1:0,flashProperties);e.illustrated.transform.localRotation=Quaternion.Euler(0,0,e.stagger>0?-7:0);}
+                if(e.leftLeg)e.leftLeg.localRotation=Quaternion.Euler(0,0,Mathf.Sin(e.walk)*18);
+                if(e.rightLeg)e.rightLeg.localRotation=Quaternion.Euler(0,0,-Mathf.Sin(e.walk)*18);
+            }
+        }
+        void Damage(Player p,int amount)
+        {
+            if(p.invulnerable>0||p.hp<=0)return;p.hp-=amount;p.invulnerable=1.3f;p.flash=.075f;shake=.15f;effects.Impact(p.position+Vector2.up,-p.facing);Sound(hitClip);
+            if(p.hp<=0){p.downTimer=2.5f;p.root.gameObject.SetActive(false);}
+        }
+        void Shoot(Vector2 pos,Vector2 velocity,int damage,bool hostile,Color color,bool heavy=false)
+        {
+            var s=new Shot{position=pos,velocity=velocity,damage=damage,hostile=hostile,explosive=heavy&&!hostile};
+            int direction=velocity.x>=0?1:-1;
+            if(hostile)
+            {
+                s.root=Shape(actors,"Projectile ennemi",pos.x,pos.y,.18f,.23f,Coral,60,true);
+                Box(s.root,"Mèche",0,.6f,.12f,.3f,Gold,61);
+            }
+            else
+            {
+                var g=new GameObject(heavy?"Projectile puissant":"Traceur chaud");g.transform.SetParent(actors,false);s.root=g.transform;s.root.position=pos;
+                s.root.localRotation=Quaternion.Euler(0,0,Mathf.Atan2(velocity.y,velocity.x)*Mathf.Rad2Deg);
+                Shape(s.root,"Halo ambré",-.1f,0,heavy?.7f:.48f,heavy?.17f:.1f,new Color(1,.45f,.08f,.65f),59,true);
+                Shape(s.root,"Cœur blanc",0,0,heavy?.45f:.28f,heavy?.095f:.045f,C("FFF5CC"),61,true);
+                effects.Muzzle(pos,direction,heavy||damage>1);
+            }
+            shots.Add(s);
+        }
+        // Swept segment collision avoids fast bullets passing through actors at low frame rates.
+        static float SegmentDistance(Vector2 a,Vector2 b,Vector2 p)
+        {Vector2 v=b-a;float t=v.sqrMagnitude>.0001f?Mathf.Clamp01(Vector2.Dot(p-a,v)/v.sqrMagnitude):0;return Vector2.Distance(p,a+t*v);}
+        void UpdateShots(float dt)
+        {
+            for(int i=shots.Count-1;i>=0;i--)
+            {
+                var s=shots[i];var before=s.position;s.position+=s.velocity*dt;s.life-=dt;bool hit=false;
+                if(s.hostile)
+                {
+                    foreach(var p in players)if(p!=null&&p.hp>0&&SegmentDistance(before,s.position,p.position+Vector2.up)<.53f){Damage(p,s.damage);hit=true;break;}
+                }
+                else for(int e=0;e<enemies.Count;e++)if(SegmentDistance(before,s.position,enemies[e].position+Vector2.up)<(enemies[e].kind==2?.68f:.5f)){HitEnemy(e,s.damage,s.velocity.x>=0?1:-1,s.explosive);hit=true;break;}
+                if(hit||s.life<=0||s.position.y<-.3f){s.root.gameObject.SetActive(false);Destroy(s.root.gameObject);shots.RemoveAt(i);}else s.root.position=s.position;
+            }
+        }
+        void HitEnemy(int index,int damage,int direction=1,bool explosive=false)
+        {
+            var e=enemies[index];e.hp-=damage;e.flash=.065f;e.stagger=.11f;e.knockback=direction*(e.kind==2?1.2f:3.5f);
+            effects.Impact(e.position+Vector2.up*1.1f,direction,e.kind==2,explosive);
+            if(e.illustrated)ArcadeEffects.HitFlash(e.illustrated,1,flashProperties);
+            Sound(explosive?specialClip:hitClip);shake=Mathf.Max(shake,explosive?.3f:.055f);
+            if(e.hp<=0)
+            {
+                Score+=e.kind==2?150:100;
+                effects.Play(3,e.position+Vector2.up*.65f,1.5f,.5f,1,new Vector2(direction*.5f,.6f));
+                if(e.kind==2)effects.Play(1,e.position+Vector2.up*.8f,1.5f,.22f);
+                if(e.illustrated)effects.Defeat(e.illustrated,direction);
+                e.root.gameObject.SetActive(false);Destroy(e.root.gameObject);enemies.RemoveAt(index);
+            }
+        }
+        void Burst(Vector2 pos,Color color,int count)
+        {
+            for(int i=0;i<count;i++)
+            {
+                if(sparks.Count>200)break;
+                var s=new Spark{life=.18f+(float)random.NextDouble()*.24f,velocity=new Vector2(((float)random.NextDouble()-.5f)*7,(float)random.NextDouble()*6)};
+                s.root=Shape(actors,"Étincelle",pos.x,pos.y,.08f,.08f,color,65);sparks.Add(s);
+            }
+        }
+        void UpdateSparks(float dt)
+        {
+            for(int i=sparks.Count-1;i>=0;i--){var s=sparks[i];s.life-=dt;if(s.life<=0){s.root.gameObject.SetActive(false);Destroy(s.root.gameObject);sparks.RemoveAt(i);}else{s.velocity+=Vector2.down*18*dt;s.root.position+=(Vector3)s.velocity*dt;}}
+        }
+        void UpdateCamera(float dt)
+        {
+            float target=phase==Phase.Lobby?CurrentMission.cameraMin:Mathf.Clamp(AverageX()+2.5f,CurrentMission.cameraMin,CurrentMission.cameraMax);
+            cameraX=Mathf.Lerp(cameraX,target,1-Mathf.Exp(-dt*5));
+            // Expand for a spread-out squad, within a deliberate 16-unit tether.
+            float min=100,max=0;foreach(var p in players)if(p!=null&&p.hp>0){min=Mathf.Min(min,p.position.x);max=Mathf.Max(max,p.position.x);}
+            float width=max>=min?max-min:0;float size=Mathf.Max(5.8f,(width*.5f+3)/Mathf.Max(.8f,gameCamera.aspect));
+            gameCamera.orthographicSize=Mathf.Lerp(gameCamera.orthographicSize,size,1-Mathf.Exp(-dt*5));
+            UpdatePanorama(cameraX,gameCamera.orthographicSize*gameCamera.aspect,CurrentMission.cameraMin,CurrentMission.cameraMax);
+            gameCamera.transform.position=new Vector3(cameraX+(phase==Phase.Playing?Mathf.Sin(Time.unscaledTime*70)*shake*.15f:0),3.6f,-10);
+        }
+        void OnGUI()
+        {
+            float scale=Mathf.Min(Screen.width/1280f,Screen.height/720f);float ox=(Screen.width-1280*scale)*.5f,oy=(Screen.height-720*scale)*.5f;
+            GUI.matrix=Matrix4x4.TRS(new Vector3(ox,oy,0),Quaternion.identity,Vector3.one*scale);
+            if(phase==Phase.Lobby){DrawLobby();return;}
+            DrawHUD();
+            if(phase==Phase.Paused)Overlay("ON SOUFFLE UN PEU.","PAUSE",()=>phase=Phase.Playing,"REPRENDRE");
+            if(phase==Phase.Won)Overlay(CurrentMission.winTitle,"NIVEAU TERMINÉ  •  "+Score.ToString("N0")+" POINTS",ReturnToLobby,"CHOISIR LES HÉROS");
+            if(phase==Phase.Lost)Overlay("ÇA SE JOUE À UN POIL.","PLUS DE RENFORTS  •  "+Score.ToString("N0")+" POINTS",BeginRound,"REJOUER");
+        }
+        GUIStyle Style(int size,Color color,bool bold=false,TextAnchor align=TextAnchor.MiddleLeft)
+        {return new GUIStyle(GUI.skin.label){font=font,fontSize=size,fontStyle=bold?FontStyle.Bold:FontStyle.Normal,alignment=align,normal={textColor=color},wordWrap=true};}
+        void Label(float x,float y,float w,float h,string text,int size,Color color,bool bold=false,TextAnchor align=TextAnchor.MiddleLeft){GUI.Label(new Rect(x,y,w,h),text,Style(size,color,bold,align));}
+        void Panel(float x,float y,float w,float h,Color color){GUI.color=color;GUI.DrawTexture(new Rect(x,y,w,h),Texture2D.whiteTexture);GUI.color=Color.white;}
+        bool Button(float x,float y,float w,float h,string text,Color color,bool dark=false)
+        {
+            var rect=new Rect(x,y,w,h);bool hover=rect.Contains(Event.current.mousePosition);
+            Panel(x+2,y+4,w,h,new Color(0,0,0,.45f));
+            Panel(x,y,w,h,hover?Color.Lerp(color,Cream,.18f):color);
+            Panel(x+1,y+1,w-2,2,new Color(1,1,1,.24f));Panel(x+1,y+h-2,w-2,2,new Color(0,0,0,.3f));
+            var style=Style(h<30?11:17,dark?Ink:Cream,true,TextAnchor.MiddleCenter);
+            return GUI.Button(rect,text,new GUIStyle(style){normal={background=null,textColor=dark?Ink:Cream},hover={textColor=dark?Ink:Gold},active={textColor=Coral},padding=new RectOffset(6,6,3,3)});
+        }
+        void Portrait(float x,float y,int hero,Color accent,float size=1)
+        {
+            var art=HeroesTexture;
+            if(art)
+            {
+                GUI.DrawTextureWithTexCoords(new Rect(x-11*size,y-13*size,190*size,190*size),art,new Rect(0,(3-hero)*.25f,.25f,.25f));
+                return;
+            }
+            float s=size;
+            Panel(x+26*s,y+107*s,104*s,59*s,hero==2?Cream:hero==0?C("A57B49"):C("3E5954"));
+            Panel(x+49*s,y+32*s,65*s,83*s,C("E3AB7A"));Panel(x+45*s,y+24*s,69*s,23*s,hero==0?C("935434"):C("3F3733"));
+            Panel(x+49*s,y+45*s,11*s,40*s,hero==0?C("935434"):C("3F3733"));
+            Panel(x+91*s,y+66*s,7*s,7*s,Ink);Panel(x+86*s,y+57*s,18*s,4*s,Ink);
+            Panel(x+80*s,y+96*s,24*s,4*s,Ink);Panel(x+29*s,y+117*s,11*s,28*s,accent);
+            if(hero==0)Panel(x+65*s,y+93*s,49*s,22*s,C("935434"));
+            if(hero==1)Panel(x+65*s,y+62*s,49*s,15*s,Ink);
+            if(hero>=2){Panel(x+45*s,y+44*s,69*s,10*s,hero==2?Teal:Coral);Panel(x+26*s,y+47*s,24*s,8*s,hero==2?Teal:Coral);}
+        }
+        void DrawHUD()
+        {
+            for(int i=0;i<4;i++)
+            {
+                float x=22+i*314;var p=players[i];var slot=slots[i];
+                Panel(x,18,292,80,new Color(.08f,.16f,.2f,.94f));Panel(x,18,4,80,slot.joined?PlayerColors[i]:C("527078"));
+                if(slot.joined&&p!=null)
+                {
+                    Label(x+14,25,265,23,"J"+(i+1)+"  "+HeroNames[p.hero],15,PlayerColors[i],true);
+                    for(int h=0;h<6;h++)Panel(x+15+h*22,58,16,8,h<p.hp?PlayerColors[i]:C("3F555F"));
+                    Label(x+160,50,120,23,p.hp<=0?(Reserves>0?"RETOUR EN COURS":"À TERRE"):p.specialTimer>0?"SPÉCIAL "+Mathf.CeilToInt(p.specialTimer)+"s":"SPÉCIAL PRÊT",11,p.specialTimer<=0?Cream:C("96AEAF"),true);
+                    if(slot.pad!=null&&!slot.Connected)Label(x+14,75,260,18,"MANETTE DÉCONNECTÉE • A / ✕ pour revenir",10,Coral);
+                }
+                else Label(x+15,34,260,42,"A / ✕ : REJOINDRE",14,C("8BAAAA"),false,TextAnchor.MiddleCenter);
+            }
+            Panel(22,111,250,35,Ink);Label(35,111,230,35,"SCORE  "+Score.ToString("000000"),17,Gold,true);
+            Panel(992,111,266,35,Ink);Label(1007,111,240,35,"RENFORTS  "+Reserves+"   •   "+Wave+"/"+CurrentMission.waves.Length+" VAGUES",14,Cream,true);
+            if(announcementTimer>0)
+            {
+                Panel(335,135,610,51,new Color(.08f,.16f,.2f,.9f));Label(345,135,590,51,announcement,25,Gold,true,TextAnchor.MiddleCenter);
+            }
+            Panel(0,674,1280,46,new Color(.06f,.13f,.17f,.95f));
+            Label(22,677,1240,36,"Q / A, D : bouger   ESPACE : saut   J : tir   K : spécial   •   MANETTE : stick · A / ✕ · X / □ ou RT · Y / △   •   ÉCHAP : pause",13,Cream);
+            foreach(var p in players)if(p!=null&&p.hp>0)
+            {
+                int i=Array.IndexOf(players,p);var v=gameCamera.WorldToScreenPoint(p.position+Vector2.up*2.25f);
+                float scale=Mathf.Min(Screen.width/1280f,Screen.height/720f),ox=(Screen.width-1280*scale)*.5f,oy=(Screen.height-720*scale)*.5f;
+                Label((v.x-ox)/scale-25,(Screen.height-v.y-oy)/scale-12,50,23,"J"+(i+1),15,PlayerColors[i],true,TextAnchor.MiddleCenter);
+            }
+        }
+        void Overlay(string title,string subtitle,Action action,string button)
+        {
+            Panel(-2000,-2000,5280,4720,new Color(.06f,.12f,.16f,.88f));
+            Label(90,223,1100,76,title,45,Cream,true,TextAnchor.MiddleCenter);Label(90,310,1100,45,subtitle,20,Gold,true,TextAnchor.MiddleCenter);
+            if(Button(440,393,400,58,button,Coral,true))action();
+            if(phase==Phase.Paused&&Button(440,467,400,46,"RETOUR À LA SÉLECTION",C("34515C")))ReturnToLobby();
+        }
+        void OnDestroy()
+        {
+            if(fireClip)Destroy(fireClip);if(hitClip)Destroy(hitClip);if(specialClip)Destroy(specialClip);
+        }
+    }
+}

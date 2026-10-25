@@ -1,0 +1,72 @@
+name: Community checks and Web build
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: action-legends-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    name: Validate missions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+      - run: python tools/validate_content.py
+      - run: python -m unittest discover -s tools -p 'test_*.py'
+  build:
+    name: Build browser game
+    needs: validate
+    if: github.event_name != 'pull_request' && vars.UNITY_CI_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/cache@v6.1.0
+        with:
+          path: Library
+          key: WebGL-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: WebGL-
+      - uses: game-ci/unity-builder@v6.0.0
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: .
+          targetPlatform: WebGL
+          buildMethod: ActionLegends.Editor.WebBuilder.Build
+          versioning: None
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: action-legends-web
+          path: WebBuild
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-pages-artifact@v5.0.0
+        if: vars.PUBLISH_PAGES == 'true'
+        with:
+          path: WebBuild
+  deploy:
+    name: Publish GitHub Pages
+    needs: build
+    if: needs.build.result == 'success' && vars.PUBLISH_PAGES == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/configure-pages@v6.0.0
+      - name: Deploy validated build
+        id: deployment
+        uses: actions/deploy-pages@v5.0.1

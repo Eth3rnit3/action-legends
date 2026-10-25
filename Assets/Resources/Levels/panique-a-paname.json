@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "panique-a-paname",
+  "title": "Panique à Paname",
+  "location": "Paris, 2026",
+  "intro": "DIRECTION BASTILLE !",
+  "exitLabel": "BASTILLE",
+  "winTitle": "PARIS VOUS DIT MERCI.",
+  "backgrounds": ["Art/route-01", "Art/route-02", "Art/route-03"],
+  "length": 80,
+  "exitX": 77,
+  "cameraMin": 7,
+  "cameraMax": 74,
+  "waves": [
+    {"atX": 18, "baseEnemies": 7, "enemiesPerPlayer": 3, "maxAlive": 10, "spawnInterval": 0.65, "enemyPattern": [0, 1, 2]},
+    {"atX": 42, "baseEnemies": 10, "enemiesPerPlayer": 3, "maxAlive": 10, "spawnInterval": 0.65, "enemyPattern": [0, 1, 2]},
+    {"atX": 66, "baseEnemies": 13, "enemiesPerPlayer": 3, "maxAlive": 10, "spawnInterval": 0.65, "enemyPattern": [0, 1, 2]}
+  ]
+}

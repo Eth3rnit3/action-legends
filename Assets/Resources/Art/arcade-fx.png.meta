@@ -1,0 +1,3237 @@
+fileFormatVersion: 2
+guid: f43ed60c790f5482680dc541b172c312
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4974244987890811000
+    second: arcade-fx_0
+  - first:
+      213: -4838664499076134655
+    second: arcade-fx_1
+  - first:
+      213: -3135631912880011342
+    second: arcade-fx_2
+  - first:
+      213: -8185981241921432379
+    second: arcade-fx_3
+  - first:
+      213: -5555360972763935457
+    second: arcade-fx_4
+  - first:
+      213: 318639338172197187
+    second: arcade-fx_5
+  - first:
+      213: 3860391697351974149
+    second: arcade-fx_6
+  - first:
+      213: -7881277518215878379
+    second: arcade-fx_7
+  - first:
+      213: 2392218530375948373
+    second: arcade-fx_8
+  - first:
+      213: -8782791341409165691
+    second: arcade-fx_9
+  - first:
+      213: -8059784642730461996
+    second: arcade-fx_10
+  - first:
+      213: -4760272384263922094
+    second: arcade-fx_11
+  - first:
+      213: -2891716817924838476
+    second: arcade-fx_12
+  - first:
+      213: -2251384464962316878
+    second: arcade-fx_13
+  - first:
+      213: -4107756656495382311
+    second: arcade-fx_14
+  - first:
+      213: -4145838990146558359
+    second: arcade-fx_15
+  - first:
+      213: 4457982579826009544
+    second: arcade-fx_16
+  - first:
+      213: 7975302016428613765
+    second: arcade-fx_17
+  - first:
+      213: 8389010763382142977
+    second: arcade-fx_18
+  - first:
+      213: 1674535970623738316
+    second: arcade-fx_19
+  - first:
+      213: -3720693861376453520
+    second: arcade-fx_20
+  - first:
+      213: -7141352733191259708
+    second: arcade-fx_21
+  - first:
+      213: -3525486337751892114
+    second: arcade-fx_22
+  - first:
+      213: 6644529351964746286
+    second: arcade-fx_23
+  - first:
+      213: -7850945676504764573
+    second: arcade-fx_24
+  - first:
+      213: -1988250783337804868
+    second: arcade-fx_25
+  - first:
+      213: 8293552428437076506
+    second: arcade-fx_26
+  - first:
+      213: 2511792349413940745
+    second: arcade-fx_27
+  - first:
+      213: -8107356098961889378
+    second: arcade-fx_28
+  - first:
+      213: 7125647818898796177
+    second: arcade-fx_29
+  - first:
+      213: -3129994554672311587
+    second: arcade-fx_30
+  - first:
+      213: -3333718942418321662
+    second: arcade-fx_31
+  - first:
+      213: 9103173570303246631
+    second: arcade-fx_32
+  - first:
+      213: -4682406161479061790
+    second: arcade-fx_33
+  - first:
+      213: -750146601436745457
+    second: arcade-fx_34
+  - first:
+      213: -4825736031092841637
+    second: arcade-fx_35
+  - first:
+      213: 7909143150495884453
+    second: arcade-fx_36
+  - first:
+      213: -8756035393219951557
+    second: arcade-fx_37
+  - first:
+      213: 4535038174900281692
+    second: arcade-fx_38
+  - first:
+      213: 7354154246131788716
+    second: arcade-fx_39
+  - first:
+      213: 6987856400414736779
+    second: arcade-fx_40
+  - first:
+      213: 1693152059938921782
+    second: arcade-fx_41
+  - first:
+      213: -3145142295218659796
+    second: arcade-fx_42
+  - first:
+      213: -3399246303327673891
+    second: arcade-fx_43
+  - first:
+      213: 4496461861213813992
+    second: arcade-fx_44
+  - first:
+      213: 7498239745318113016
+    second: arcade-fx_45
+  - first:
+      213: -1315037222867798989
+    second: arcade-fx_46
+  - first:
+      213: 4489494730566710871
+    second: arcade-fx_47
+  - first:
+      213: 6406039877865171377
+    second: arcade-fx_48
+  - first:
+      213: -8260323643913966509
+    second: arcade-fx_49
+  - first:
+      213: 2832357126208774967
+    second: arcade-fx_50
+  - first:
+      213: -4571925890383801287
+    second: arcade-fx_51
+  - first:
+      213: 8546739837428917306
+    second: arcade-fx_52
+  - first:
+      213: 1580118159751541761
+    second: arcade-fx_53
+  - first:
+      213: -7919037368154115270
+    second: arcade-fx_54
+  - first:
+      213: 1004793800616238310
+    second: arcade-fx_55
+  - first:
+      213: 8528031984129031110
+    second: arcade-fx_56
+  - first:
+      213: -8696347170916274797
+    second: arcade-fx_57
+  - first:
+      213: 2942805655378900895
+    second: arcade-fx_58
+  - first:
+      213: -3596789575492653072
+    second: arcade-fx_59
+  - first:
+      213: -272617995663272144
+    second: arcade-fx_60
+  - first:
+      213: -5165415075321659976
+    second: arcade-fx_61
+  - first:
+      213: -7830187624101517794
+    second: arcade-fx_62
+  - first:
+      213: -7450693958330863551
+    second: arcade-fx_63
+  - first:
+      213: -3990572600357297889
+    second: arcade-fx_64
+  - first:
+      213: 7609039846332074049
+    second: arcade-fx_65
+  - first:
+      213: 2407392933618818875
+    second: arcade-fx_66
+  - first:
+      213: 4560175725602912662
+    second: arcade-fx_67
+  - first:
+      213: 3918910701878593926
+    second: arcade-fx_68
+  - first:
+      213: 6560225292323180579
+    second: arcade-fx_69
+  - first:
+      213: -2654365537684286680
+    second: arcade-fx_70
+  - first:
+      213: 4476224262636957973
+    second: arcade-fx_71
+  - first:
+      213: 7650627936662305947
+    second: arcade-fx_72
+  - first:
+      213: 5519139188165195044
+    second: arcade-fx_73
+  - first:
+      213: 3511618858297501102
+    second: arcade-fx_74
+  - first:
+      213: -813545750822398855
+    second: arcade-fx_75
+  - first:
+      213: -8463360990052319845
+    second: arcade-fx_76
+  - first:
+      213: 8231085728672725541
+    second: arcade-fx_77
+  - first:
+      213: -3224995617582357267
+    second: arcade-fx_78
+  - first:
+      213: -2651466657598521419
+    second: arcade-fx_79
+  - first:
+      213: 3874165350117696637
+    second: arcade-fx_80
+  - first:
+      213: -8716444418625649131
+    second: arcade-fx_81
+  - first:
+      213: 5556036241242604296
+    second: arcade-fx_82
+  - first:
+      213: -2243723810590353271
+    second: arcade-fx_83
+  - first:
+      213: -3824754645625466104
+    second: arcade-fx_84
+  - first:
+      213: 5535443630584027663
+    second: arcade-fx_85
+  - first:
+      213: -9170636350647445604
+    second: arcade-fx_86
+  - first:
+      213: 1982616573724241305
+    second: arcade-fx_87
+  - first:
+      213: -3507747792193951004
+    second: arcade-fx_88
+  - first:
+      213: -7744290344001431723
+    second: arcade-fx_89
+  - first:
+      213: 6317319902521407456
+    second: arcade-fx_90
+  - first:
+      213: -3685008410161504076
+    second: arcade-fx_91
+  - first:
+      213: -2419307278991903787
+    second: arcade-fx_92
+  - first:
+      213: -152815318089578701
+    second: arcade-fx_93
+  - first:
+      213: 8968517276916858075
+    second: arcade-fx_94
+  - first:
+      213: -3771631734777246982
+    second: arcade-fx_95
+  - first:
+      213: 5802137679138519883
+    second: arcade-fx_96
+  - first:
+      213: -5444357231095398868
+    second: arcade-fx_97
+  - first:
+      213: 7552244353538289723
+    second: arcade-fx_98
+  - first:
+      213: 7735816956531011949
+    second: arcade-fx_99
+  - first:
+      213: 8685249867976915741
+    second: arcade-fx_100
+  - first:
+      213: -547266016356487701
+    second: arcade-fx_101
+  - first:
+      213: 7555842588746906410
+    second: arcade-fx_102
+  - first:
+      213: -1418645127060519306
+    second: arcade-fx_103
+  - first:
+      213: -5009815306583055114
+    second: arcade-fx_104
+  - first:
+      213: -1963724429021805634
+    second: arcade-fx_105
+  - first:
+      213: 7340176876449118913
+    second: arcade-fx_106
+  - first:
+      213: -8808563442940968729
+    second: arcade-fx_107
+  - first:
+      213: 7523776411571615009
+    second: arcade-fx_108
+  - first:
+      213: -2709432215878144733
+    second: arcade-fx_109
+  - first:
+      213: 5970643914777987779
+    second: arcade-fx_110
+  - first:
+      213: -9209040558680377288
+    second: arcade-fx_111
+  - first:
+      213: 2959036651406015652
+    second: arcade-fx_112
+  - first:
+      213: -1221497389850496964
+    second: arcade-fx_113
+  - first:
+      213: -5689764958873448208
+    second: arcade-fx_114
+  - first:
+      213: -5827008853201553385
+    second: arcade-fx_115
+  - first:
+      213: 2693019367047955209
+    second: arcade-fx_116
+  - first:
+      213: -8276367857444608872
+    second: arcade-fx_117
+  - first:
+      213: -3215155332364145001
+    second: arcade-fx_118
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 1
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: arcade-fx_0
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 941
+        width: 61
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88f3007c98ee7fab0800000000000000
+      internalID: -4974244987890811000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_1
+      rect:
+        serializedVersion: 2
+        x: 152
+        y: 879
+        width: 133
+        height: 131
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1090641464c99dcb0800000000000000
+      internalID: -4838664499076134655
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_2
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 931
+        width: 101
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b78866736ffb74d0800000000000000
+      internalID: -3135631912880011342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_3
+      rect:
+        serializedVersion: 2
+        x: 452
+        y: 911
+        width: 71
+        height: 89
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c413418e6d856e80800000000000000
+      internalID: -8185981241921432379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_4
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 959
+        width: 67
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1d465bf0a467e2b0800000000000000
+      internalID: -5555360972763935457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_5
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 957
+        width: 113
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34928333ac80c6400800000000000000
+      internalID: 318639338172197187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_6
+      rect:
+        serializedVersion: 2
+        x: 868
+        y: 945
+        width: 95
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50d1886abcdd29530800000000000000
+      internalID: 3860391697351974149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_7
+      rect:
+        serializedVersion: 2
+        x: 1508
+        y: 994
+        width: 28
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 519687e9ad310a290800000000000000
+      internalID: -7881277518215878379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_8
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 839
+        width: 43
+        height: 131
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5585a20341ed23120800000000000000
+      internalID: 2392218530375948373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_9
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 949
+        width: 7
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58e1ee6eec14d1680800000000000000
+      internalID: -8782791341409165691
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_10
+      rect:
+        serializedVersion: 2
+        x: 134
+        y: 965
+        width: 9
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d4f6ebe194e52090800000000000000
+      internalID: -8059784642730461996
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_11
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 961
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25ed8ddcc7d10fdb0800000000000000
+      internalID: -4760272384263922094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_12
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 963
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4bb219400ee8ed7d0800000000000000
+      internalID: -2891716817924838476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_13
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 963
+        width: 7
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b59619e1c971c0e0800000000000000
+      internalID: -2251384464962316878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_14
+      rect:
+        serializedVersion: 2
+        x: 284
+        y: 965
+        width: 11
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d0b8d1b5115ef6c0800000000000000
+      internalID: -4107756656495382311
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_15
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 947
+        width: 33
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 966a95077650776c0800000000000000
+      internalID: -4145838990146558359
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_16
+      rect:
+        serializedVersion: 2
+        x: 518
+        y: 948
+        width: 45
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c5a865798feddd30800000000000000
+      internalID: 4457982579826009544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_17
+      rect:
+        serializedVersion: 2
+        x: 682
+        y: 959
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5802fa1dde6fdae60800000000000000
+      internalID: 7975302016428613765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_18
+      rect:
+        serializedVersion: 2
+        x: 764
+        y: 951
+        width: 39
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1083258a7d0cb6470800000000000000
+      internalID: 8389010763382142977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_19
+      rect:
+        serializedVersion: 2
+        x: 846
+        y: 957
+        width: 25
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc154acd7952d3710800000000000000
+      internalID: 1674535970623738316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_20
+      rect:
+        serializedVersion: 2
+        x: 1032
+        y: 709
+        width: 281
+        height: 277
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0741eaa65a07d5cc0800000000000000
+      internalID: -3720693861376453520
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_21
+      rect:
+        serializedVersion: 2
+        x: 1086
+        y: 945
+        width: 13
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c9be529681d4ec90800000000000000
+      internalID: -7141352733191259708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_22
+      rect:
+        serializedVersion: 2
+        x: 1096
+        y: 966
+        width: 7
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6f3ec9cad4f21fc0800000000000000
+      internalID: -3525486337751892114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_23
+      rect:
+        serializedVersion: 2
+        x: 1110
+        y: 957
+        width: 9
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e22e38bcd3c163c50800000000000000
+      internalID: 6644529351964746286
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_24
+      rect:
+        serializedVersion: 2
+        x: 1304
+        y: 919
+        width: 43
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36f6b09d086db0390800000000000000
+      internalID: -7850945676504764573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_25
+      rect:
+        serializedVersion: 2
+        x: 1344
+        y: 925
+        width: 65
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbb02ce52705864e0800000000000000
+      internalID: -1988250783337804868
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_26
+      rect:
+        serializedVersion: 2
+        x: 1416
+        y: 895
+        width: 103
+        height: 91
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1af1171efd981370800000000000000
+      internalID: 8293552428437076506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_27
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 935
+        width: 27
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90e9c5075ddabd220800000000000000
+      internalID: 2511792349413940745
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_28
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 953
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e97a7c52592ec7f80800000000000000
+      internalID: -8107356098961889378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_29
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 743
+        width: 283
+        height: 211
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19eefff10f263e260800000000000000
+      internalID: 7125647818898796177
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_30
+      rect:
+        serializedVersion: 2
+        x: 718
+        y: 939
+        width: 17
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd299d339860094d0800000000000000
+      internalID: -3129994554672311587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_31
+      rect:
+        serializedVersion: 2
+        x: 742
+        y: 939
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20f3a20e8404cb1d0800000000000000
+      internalID: -3333718942418321662
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_32
+      rect:
+        serializedVersion: 2
+        x: 244
+        y: 741
+        width: 255
+        height: 209
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72146aaa128f45e70800000000000000
+      internalID: 9103173570303246631
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_33
+      rect:
+        serializedVersion: 2
+        x: 790
+        y: 741
+        width: 237
+        height: 211
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2eea0f29760c40fb0800000000000000
+      internalID: -4682406161479061790
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_34
+      rect:
+        serializedVersion: 2
+        x: 1376
+        y: 937
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0175e3f3a1f695f0800000000000000
+      internalID: -750146601436745457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_35
+      rect:
+        serializedVersion: 2
+        x: 1438
+        y: 927
+        width: 9
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5368e6c5aa870db0800000000000000
+      internalID: -4825736031092841637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_36
+      rect:
+        serializedVersion: 2
+        x: 1446
+        y: 933
+        width: 11
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a4650b7acbe2cd60800000000000000
+      internalID: 7909143150495884453
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_37
+      rect:
+        serializedVersion: 2
+        x: 76
+        y: 737
+        width: 151
+        height: 177
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b34806a83305c7680800000000000000
+      internalID: -8756035393219951557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_38
+      rect:
+        serializedVersion: 2
+        x: 482
+        y: 833
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5164c14131bfee30800000000000000
+      internalID: 4535038174900281692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_39
+      rect:
+        serializedVersion: 2
+        x: 1328
+        y: 755
+        width: 171
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cabad18a2543f0660800000000000000
+      internalID: 7354154246131788716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_40
+      rect:
+        serializedVersion: 2
+        x: 414
+        y: 775
+        width: 23
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8109287f5ad9f060800000000000000
+      internalID: 6987856400414736779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_41
+      rect:
+        serializedVersion: 2
+        x: 462
+        y: 763
+        width: 19
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 63d516be3d84f7710800000000000000
+      internalID: 1693152059938921782
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_42
+      rect:
+        serializedVersion: 2
+        x: 500
+        y: 797
+        width: 21
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2e5f650fb53a54d0800000000000000
+      internalID: -3145142295218659796
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_43
+      rect:
+        serializedVersion: 2
+        x: 210
+        y: 763
+        width: 21
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd128124f7373d0d0800000000000000
+      internalID: -3399246303327673891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_44
+      rect:
+        serializedVersion: 2
+        x: 230
+        y: 773
+        width: 15
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ecbdbf4d34a66e30800000000000000
+      internalID: 4496461861213813992
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_45
+      rect:
+        serializedVersion: 2
+        x: 478
+        y: 773
+        width: 7
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fec66c22591f0860800000000000000
+      internalID: 7498239745318113016
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_46
+      rect:
+        serializedVersion: 2
+        x: 484
+        y: 745
+        width: 25
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3347c88fc9c00cde0800000000000000
+      internalID: -1315037222867798989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_47
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 783
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 756ba6ccba3ed4e30800000000000000
+      internalID: 4489494730566710871
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_48
+      rect:
+        serializedVersion: 2
+        x: 1274
+        y: 775
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b9e3290453d6e850800000000000000
+      internalID: 6406039877865171377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_49
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 745
+        width: 15
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35c6fb2396f6d5d80800000000000000
+      internalID: -8260323643913966509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_50
+      rect:
+        serializedVersion: 2
+        x: 230
+        y: 711
+        width: 25
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73368b0cccd8e4720800000000000000
+      internalID: 2832357126208774967
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_51
+      rect:
+        serializedVersion: 2
+        x: 446
+        y: 749
+        width: 21
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 934134430a14d80c0800000000000000
+      internalID: -4571925890383801287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_52
+      rect:
+        serializedVersion: 2
+        x: 454
+        y: 761
+        width: 9
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3461ad799e1c9670800000000000000
+      internalID: 8546739837428917306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_53
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 753
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 104722f2815bde510800000000000000
+      internalID: 1580118159751541761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_54
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 757
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a333124787de91290800000000000000
+      internalID: -7919037368154115270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_55
+      rect:
+        serializedVersion: 2
+        x: 1004
+        y: 761
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ecde3653aeb1fd00800000000000000
+      internalID: 1004793800616238310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_56
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 727
+        width: 15
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6cb3e27f7e7a95670800000000000000
+      internalID: 8528031984129031110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_57
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 181
+        width: 1109
+        height: 563
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39def02c25e505780800000000000000
+      internalID: -8696347170916274797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_58
+      rect:
+        serializedVersion: 2
+        x: 758
+        y: 737
+        width: 13
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f97bed3e622f6d820800000000000000
+      internalID: 2942805655378900895
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_59
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 733
+        width: 35
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ffaeec00f2a51ec0800000000000000
+      internalID: -3596789575492653072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_60
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 585
+        width: 49
+        height: 127
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0379c199067773cf0800000000000000
+      internalID: -272617995663272144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_61
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 687
+        width: 47
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8bd31064b52c058b0800000000000000
+      internalID: -5165415075321659976
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_62
+      rect:
+        serializedVersion: 2
+        x: 174
+        y: 678
+        width: 37
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e16e4cc87d5955390800000000000000
+      internalID: -7830187624101517794
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_63
+      rect:
+        serializedVersion: 2
+        x: 206
+        y: 676
+        width: 7
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1403a830251d99890800000000000000
+      internalID: -7450693958330863551
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_64
+      rect:
+        serializedVersion: 2
+        x: 212
+        y: 651
+        width: 33
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f11eb49ec53ae98c0800000000000000
+      internalID: -3990572600357297889
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_65
+      rect:
+        serializedVersion: 2
+        x: 1312
+        y: 477
+        width: 177
+        height: 225
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1488a620d6db89960800000000000000
+      internalID: 7609039846332074049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_66
+      rect:
+        serializedVersion: 2
+        x: 1370
+        y: 699
+        width: 39
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3f92234e17c86120800000000000000
+      internalID: 2407392933618818875
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_67
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 421
+        width: 187
+        height: 253
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 699bbed59aff84f30800000000000000
+      internalID: 4560175725602912662
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_68
+      rect:
+        serializedVersion: 2
+        x: 188
+        y: 661
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 68943f32584c26630800000000000000
+      internalID: 3918910701878593926
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_69
+      rect:
+        serializedVersion: 2
+        x: 194
+        y: 659
+        width: 19
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 320d473552a9a0b50800000000000000
+      internalID: 6560225292323180579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_70
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 593
+        width: 31
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8231a4e5b9cc92bd0800000000000000
+      internalID: -2654365537684286680
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_71
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 647
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 511f575304ebe1e30800000000000000
+      internalID: 4476224262636957973
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_72
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 543
+        width: 15
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9cbf69d29d7c2a60800000000000000
+      internalID: 7650627936662305947
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_73
+      rect:
+        serializedVersion: 2
+        x: 212
+        y: 519
+        width: 35
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 425368899dbe79c40800000000000000
+      internalID: 5519139188165195044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_74
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 517
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea5a26b0fb6cbb030800000000000000
+      internalID: 3511618858297501102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_75
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 495
+        width: 11
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 974d3b13374b5b4f0800000000000000
+      internalID: -813545750822398855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_76
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 501
+        width: 15
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9d7806350a1c8a80800000000000000
+      internalID: -8463360990052319845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_77
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 463
+        width: 18
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52a335d2cd0ba3270800000000000000
+      internalID: 8231085728672725541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_78
+      rect:
+        serializedVersion: 2
+        x: 1307
+        y: 175
+        width: 229
+        height: 298
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de4efc392938e33d0800000000000000
+      internalID: -3224995617582357267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_79
+      rect:
+        serializedVersion: 2
+        x: 1382
+        y: 469
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5bf3c0c7f19143bd0800000000000000
+      internalID: -2651466657598521419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_80
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 449
+        width: 27
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7464e61cdcc3c530800000000000000
+      internalID: 3874165350117696637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_81
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 151
+        width: 201
+        height: 291
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 516c163abf7f80780800000000000000
+      internalID: -8716444418625649131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_82
+      rect:
+        serializedVersion: 2
+        x: 186
+        y: 177
+        width: 9
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 803467636810b1d40800000000000000
+      internalID: 5556036241242604296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_83
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 185
+        width: 11
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9881daff411bcd0e0800000000000000
+      internalID: -2243723810590353271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_84
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 271
+        width: 23
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 803187a0aedbbeac0800000000000000
+      internalID: -3824754645625466104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_85
+      rect:
+        serializedVersion: 2
+        x: 238
+        y: 0
+        width: 247
+        height: 199
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0ad82b67a8d1dc40800000000000000
+      internalID: 5535443630584027663
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_86
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 207
+        width: 15
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c97df53c3da5bb080800000000000000
+      internalID: -9170636350647445604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_87
+      rect:
+        serializedVersion: 2
+        x: 438
+        y: 223
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99da2aaf44ba38b10800000000000000
+      internalID: 1982616573724241305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_88
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 189
+        width: 19
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ea6e94c7f9f15fc0800000000000000
+      internalID: -3507747792193951004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_89
+      rect:
+        serializedVersion: 2
+        x: 470
+        y: 0
+        width: 323
+        height: 244
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5579e4096f0c68490800000000000000
+      internalID: -7744290344001431723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_90
+      rect:
+        serializedVersion: 2
+        x: 781
+        y: 18
+        width: 246
+        height: 192
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e73b421bf0aba750800000000000000
+      internalID: 6317319902521407456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_91
+      rect:
+        serializedVersion: 2
+        x: 974
+        y: 197
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b02ffdff583cdcc0800000000000000
+      internalID: -3685008410161504076
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_92
+      rect:
+        serializedVersion: 2
+        x: 1034
+        y: 0
+        width: 253
+        height: 202
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d3bb2909d4ec6ed0800000000000000
+      internalID: -2419307278991903787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_93
+      rect:
+        serializedVersion: 2
+        x: 1046
+        y: 167
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3374801274711edf0800000000000000
+      internalID: -152815318089578701
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_94
+      rect:
+        serializedVersion: 2
+        x: 1086
+        y: 227
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdc359432f2967c70800000000000000
+      internalID: 8968517276916858075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_95
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 191
+        width: 59
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: afa03019be878abc0800000000000000
+      internalID: -3771631734777246982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_96
+      rect:
+        serializedVersion: 2
+        x: 1248
+        y: 195
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4bf5f66a75558050800000000000000
+      internalID: 5802137679138519883
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_97
+      rect:
+        serializedVersion: 2
+        x: 1254
+        y: 189
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2eba3a91f1c174b0800000000000000
+      internalID: -5444357231095398868
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_98
+      rect:
+        serializedVersion: 2
+        x: 1284
+        y: 149
+        width: 19
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b30799dd936fec860800000000000000
+      internalID: 7552244353538289723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_99
+      rect:
+        serializedVersion: 2
+        x: 1288
+        y: 17
+        width: 227
+        height: 161
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d61797d29842b5b60800000000000000
+      internalID: 7735816956531011949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_100
+      rect:
+        serializedVersion: 2
+        x: 1310
+        y: 161
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1bb54e0db4388870800000000000000
+      internalID: 8685249867976915741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_101
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 261
+        width: 19
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bedad692578b768f0800000000000000
+      internalID: -547266016356487701
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_102
+      rect:
+        serializedVersion: 2
+        x: 1432
+        y: 191
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2bf6094dcebbd860800000000000000
+      internalID: 7555842588746906410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_103
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 0
+        width: 165
+        height: 150
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6760833f5c5ff4ce0800000000000000
+      internalID: -1418645127060519306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_104
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 83
+        width: 25
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f46dc4958f897ab0800000000000000
+      internalID: -5009815306583055114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_105
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 25
+        width: 17
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb3066b39037fb4e0800000000000000
+      internalID: -1963724429021805634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_106
+      rect:
+        serializedVersion: 2
+        x: 1260
+        y: 33
+        width: 21
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ca394daafb8dd560800000000000000
+      internalID: 7340176876449118913
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_107
+      rect:
+        serializedVersion: 2
+        x: 1302
+        y: 44
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e0030ae732b1c580800000000000000
+      internalID: -8808563442940968729
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_108
+      rect:
+        serializedVersion: 2
+        x: 1520
+        y: 53
+        width: 16
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 125703d98c2d96860800000000000000
+      internalID: 7523776411571615009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_109
+      rect:
+        serializedVersion: 2
+        x: 20
+        y: 29
+        width: 13
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32d659d31c9266ad0800000000000000
+      internalID: -2709432215878144733
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_110
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 31
+        width: 27
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ca80b4b10dfbd250800000000000000
+      internalID: 5970643914777987779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_111
+      rect:
+        serializedVersion: 2
+        x: 1114
+        y: 29
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 838f0b9476ae23080800000000000000
+      internalID: -9209040558680377288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_112
+      rect:
+        serializedVersion: 2
+        x: 1214
+        y: 36
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4acba64282c901920800000000000000
+      internalID: 2959036651406015652
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_113
+      rect:
+        serializedVersion: 2
+        x: 1502
+        y: 39
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c30f4ef789e5c0fe0800000000000000
+      internalID: -1221497389850496964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_114
+      rect:
+        serializedVersion: 2
+        x: 423
+        y: 25
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f012e26ae4e901b0800000000000000
+      internalID: -5689764958873448208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_115
+      rect:
+        serializedVersion: 2
+        x: 816
+        y: 13
+        width: 19
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7187dd1225e422fa0800000000000000
+      internalID: -5827008853201553385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_116
+      rect:
+        serializedVersion: 2
+        x: 828
+        y: 0
+        width: 77
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 903042a98d68f5520800000000000000
+      internalID: 2693019367047955209
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_117
+      rect:
+        serializedVersion: 2
+        x: 904
+        y: 23
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 894ad82a84f642d80800000000000000
+      internalID: -8276367857444608872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcade-fx_118
+      rect:
+        serializedVersion: 2
+        x: 1256
+        y: 17
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79e6bb482497163d0800000000000000
+      internalID: -3215155332364145001
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      arcade-fx_0: -4974244987890811000
+      arcade-fx_1: -4838664499076134655
+      arcade-fx_10: -8059784642730461996
+      arcade-fx_100: 8685249867976915741
+      arcade-fx_101: -547266016356487701
+      arcade-fx_102: 7555842588746906410
+      arcade-fx_103: -1418645127060519306
+      arcade-fx_104: -5009815306583055114
+      arcade-fx_105: -1963724429021805634
+      arcade-fx_106: 7340176876449118913
+      arcade-fx_107: -8808563442940968729
+      arcade-fx_108: 7523776411571615009
+      arcade-fx_109: -2709432215878144733
+      arcade-fx_11: -4760272384263922094
+      arcade-fx_110: 5970643914777987779
+      arcade-fx_111: -9209040558680377288
+      arcade-fx_112: 2959036651406015652
+      arcade-fx_113: -1221497389850496964
+      arcade-fx_114: -5689764958873448208
+      arcade-fx_115: -5827008853201553385
+      arcade-fx_116: 2693019367047955209
+      arcade-fx_117: -8276367857444608872
+      arcade-fx_118: -3215155332364145001
+      arcade-fx_12: -2891716817924838476
+      arcade-fx_13: -2251384464962316878
+      arcade-fx_14: -4107756656495382311
+      arcade-fx_15: -4145838990146558359
+      arcade-fx_16: 4457982579826009544
+      arcade-fx_17: 7975302016428613765
+      arcade-fx_18: 8389010763382142977
+      arcade-fx_19: 1674535970623738316
+      arcade-fx_2: -3135631912880011342
+      arcade-fx_20: -3720693861376453520
+      arcade-fx_21: -7141352733191259708
+      arcade-fx_22: -3525486337751892114
+      arcade-fx_23: 6644529351964746286
+      arcade-fx_24: -7850945676504764573
+      arcade-fx_25: -1988250783337804868
+      arcade-fx_26: 8293552428437076506
+      arcade-fx_27: 2511792349413940745
+      arcade-fx_28: -8107356098961889378
+      arcade-fx_29: 7125647818898796177
+      arcade-fx_3: -8185981241921432379
+      arcade-fx_30: -3129994554672311587
+      arcade-fx_31: -3333718942418321662
+      arcade-fx_32: 9103173570303246631
+      arcade-fx_33: -4682406161479061790
+      arcade-fx_34: -750146601436745457
+      arcade-fx_35: -4825736031092841637
+      arcade-fx_36: 7909143150495884453
+      arcade-fx_37: -8756035393219951557
+      arcade-fx_38: 4535038174900281692
+      arcade-fx_39: 7354154246131788716
+      arcade-fx_4: -5555360972763935457
+      arcade-fx_40: 6987856400414736779
+      arcade-fx_41: 1693152059938921782
+      arcade-fx_42: -3145142295218659796
+      arcade-fx_43: -3399246303327673891
+      arcade-fx_44: 4496461861213813992
+      arcade-fx_45: 7498239745318113016
+      arcade-fx_46: -1315037222867798989
+      arcade-fx_47: 4489494730566710871
+      arcade-fx_48: 6406039877865171377
+      arcade-fx_49: -8260323643913966509
+      arcade-fx_5: 318639338172197187
+      arcade-fx_50: 2832357126208774967
+      arcade-fx_51: -4571925890383801287
+      arcade-fx_52: 8546739837428917306
+      arcade-fx_53: 1580118159751541761
+      arcade-fx_54: -7919037368154115270
+      arcade-fx_55: 1004793800616238310
+      arcade-fx_56: 8528031984129031110
+      arcade-fx_57: -8696347170916274797
+      arcade-fx_58: 2942805655378900895
+      arcade-fx_59: -3596789575492653072
+      arcade-fx_6: 3860391697351974149
+      arcade-fx_60: -272617995663272144
+      arcade-fx_61: -5165415075321659976
+      arcade-fx_62: -7830187624101517794
+      arcade-fx_63: -7450693958330863551
+      arcade-fx_64: -3990572600357297889
+      arcade-fx_65: 7609039846332074049
+      arcade-fx_66: 2407392933618818875
+      arcade-fx_67: 4560175725602912662
+      arcade-fx_68: 3918910701878593926
+      arcade-fx_69: 6560225292323180579
+      arcade-fx_7: -7881277518215878379
+      arcade-fx_70: -2654365537684286680
+      arcade-fx_71: 4476224262636957973
+      arcade-fx_72: 7650627936662305947
+      arcade-fx_73: 5519139188165195044
+      arcade-fx_74: 3511618858297501102
+      arcade-fx_75: -813545750822398855
+      arcade-fx_76: -8463360990052319845
+      arcade-fx_77: 8231085728672725541
+      arcade-fx_78: -3224995617582357267
+      arcade-fx_79: -2651466657598521419
+      arcade-fx_8: 2392218530375948373
+      arcade-fx_80: 3874165350117696637
+      arcade-fx_81: -8716444418625649131
+      arcade-fx_82: 5556036241242604296
+      arcade-fx_83: -2243723810590353271
+      arcade-fx_84: -3824754645625466104
+      arcade-fx_85: 5535443630584027663
+      arcade-fx_86: -9170636350647445604
+      arcade-fx_87: 1982616573724241305
+      arcade-fx_88: -3507747792193951004
+      arcade-fx_89: -7744290344001431723
+      arcade-fx_9: -8782791341409165691
+      arcade-fx_90: 6317319902521407456
+      arcade-fx_91: -3685008410161504076
+      arcade-fx_92: -2419307278991903787
+      arcade-fx_93: -152815318089578701
+      arcade-fx_94: 8968517276916858075
+      arcade-fx_95: -3771631734777246982
+      arcade-fx_96: 5802137679138519883
+      arcade-fx_97: -5444357231095398868
+      arcade-fx_98: 7552244353538289723
+      arcade-fx_99: 7735816956531011949
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

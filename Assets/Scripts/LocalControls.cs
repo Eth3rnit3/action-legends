@@ -14,10 +14,9 @@ namespace Paname
     {
         public bool joined;
         public int hero;
-        public bool secondKeyboard;
         public Gamepad pad;
         public bool Connected => pad != null && pad.added;
-        public string DeviceName => Connected ? pad.displayName : secondKeyboard ? "Clavier 2" : "Clavier";
+        public string DeviceName => Connected ? pad.displayName : "Clavier";
     }
 
     public static class LocalControls
@@ -26,22 +25,12 @@ namespace Paname
         {
             var cmd = new PlayerCommand();
             var k = Keyboard.current;
-            if (k != null && (index == 0 || slot.secondKeyboard))
+            if (k != null && index == 0)
             {
-                if (slot.secondKeyboard)
-                {
-                    cmd.move = (k.rightArrowKey.isPressed ? 1 : 0) - (k.leftArrowKey.isPressed ? 1 : 0);
-                    cmd.jump = k.rightShiftKey.wasPressedThisFrame;
-                    cmd.fire = k.rightCtrlKey.isPressed || k.enterKey.isPressed;
-                    cmd.special = k.downArrowKey.wasPressedThisFrame;
-                }
-                else
-                {
-                    cmd.move = (k.dKey.isPressed ? 1 : 0) - ((k.aKey.isPressed || k.qKey.isPressed) ? 1 : 0);
-                    cmd.jump = k.spaceKey.wasPressedThisFrame;
-                    cmd.fire = k.jKey.isPressed;
-                    cmd.special = k.kKey.wasPressedThisFrame;
-                }
+                cmd.move = (k.dKey.isPressed ? 1 : 0) - ((k.aKey.isPressed || k.qKey.isPressed) ? 1 : 0);
+                cmd.jump = k.spaceKey.wasPressedThisFrame;
+                cmd.fire = k.jKey.isPressed;
+                cmd.special = k.kKey.wasPressedThisFrame;
             }
             if (slot.Connected)
             {

@@ -6,14 +6,208 @@
   "intro": "DIRECTION BASTILLE !",
   "exitLabel": "BASTILLE",
   "winTitle": "PARIS VOUS DIT MERCI.",
-  "backgrounds": ["Art/route-01", "Art/route-02", "Art/route-03"],
-  "length": 80,
-  "exitX": 77,
+  "backgrounds": [
+    "Art/route-01",
+    "Art/route-02",
+    "Art/canal-panorama",
+    "Art/bastille-panorama"
+  ],
+  "length": 480,
+  "exitX": 477,
   "cameraMin": 7,
-  "cameraMax": 74,
+  "cameraMax": 474,
   "waves": [
-    {"atX": 18, "baseEnemies": 7, "enemiesPerPlayer": 3, "maxAlive": 10, "spawnInterval": 0.65, "enemyPattern": [0, 1, 2]},
-    {"atX": 42, "baseEnemies": 10, "enemiesPerPlayer": 3, "maxAlive": 10, "spawnInterval": 0.65, "enemyPattern": [0, 1, 2]},
-    {"atX": 66, "baseEnemies": 13, "enemiesPerPlayer": 3, "maxAlive": 10, "spawnInterval": 0.65, "enemyPattern": [0, 1, 2]}
+    {
+      "atX": 14,
+      "baseEnemies": 14,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 22,
+      "spawnInterval": 0.17,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 52,
+      "baseEnemies": 14,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 22,
+      "spawnInterval": 0.17,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 90,
+      "baseEnemies": 14,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 22,
+      "spawnInterval": 0.17,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 128,
+      "baseEnemies": 17,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 22,
+      "spawnInterval": 0.17,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 166,
+      "baseEnemies": 17,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 23,
+      "spawnInterval": 0.14,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 204,
+      "baseEnemies": 17,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 23,
+      "spawnInterval": 0.14,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 242,
+      "baseEnemies": 20,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 23,
+      "spawnInterval": 0.14,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 280,
+      "baseEnemies": 20,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 23,
+      "spawnInterval": 0.14,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 318,
+      "baseEnemies": 20,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 24,
+      "spawnInterval": 0.14,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 356,
+      "baseEnemies": 23,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 24,
+      "spawnInterval": 0.14,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 394,
+      "baseEnemies": 23,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 24,
+      "spawnInterval": 0.14,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 432,
+      "baseEnemies": 23,
+      "enemiesPerPlayer": 5,
+      "maxAlive": 24,
+      "spawnInterval": 0.14,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    }
   ]
 }

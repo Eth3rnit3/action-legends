@@ -44,7 +44,7 @@ namespace Paname
         {
             if(frames[row,column])return frames[row,column];var t=Atlas;if(!t)return null;
             float w=t.width/6f,h=t.height/4f;
-            return frames[row,column]=Sprite.Create(t,new Rect(column*w,t.height-(row+1)*h,w,h),new Vector2(row==0?.2f:.5f,.5f),h);
+            return frames[row,column]=Sprite.Create(t,new Rect(column*w,t.height-(row+1)*h,w,h),new Vector2(row==0?.2f:.5f,.5f),h,0,SpriteMeshType.FullRect);
         }
         Effect Acquire()
         {

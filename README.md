@@ -44,6 +44,6 @@ La vérification contrôle le format, les images référencées, la sortie, l’
 
 ## Portée actuelle
 
-Clavier, manettes, quatre héros, trois types d’ennemis, trois vagues, effets arcade, renforts et premier niveau. Le multijoueur en ligne n’est pas implémenté. Les navigateurs de bureau sont la cible de cette version ; les commandes tactiles ne sont pas prévues.
+Version 0.4.2 : un joueur au clavier et jusqu’à trois partenaires à la manette, quatre héros sélectionnables, trois types d’ennemis, douze assauts, six types de bonus et une première mission prolongée jusqu’à Bastille. Tirs renforcés, chronomètre, effets arcade et renforts partagés. Le multijoueur en ligne n’est pas implémenté. Les navigateurs de bureau sont la cible de cette version ; les commandes tactiles ne sont pas prévues.
 
 Les scripts et visuels sont consultables dans le dépôt public. Leur licence de redistribution reste à choisir ; aucune licence de redistribution n’est accordée par ce README.

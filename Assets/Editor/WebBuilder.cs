@@ -15,7 +15,6 @@ namespace ActionLegends.Editor
         {
             Paname.LevelCatalog.LoadAll();
             PlayerSettings.productName="Action Legends";PlayerSettings.companyName="Action Legends";
-            PlayerSettings.bundleVersion="0.4.0";
             PlayerSettings.defaultScreenWidth=1280;PlayerSettings.defaultScreenHeight=720;
             PlayerSettings.WebGL.template="PROJECT:ActionLegends";
             PlayerSettings.WebGL.compressionFormat=WebGLCompressionFormat.Gzip;

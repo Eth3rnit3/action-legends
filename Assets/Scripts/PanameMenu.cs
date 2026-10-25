@@ -5,6 +5,7 @@ namespace Paname
     public sealed partial class PanameGame
     {
         Texture2D menuLogo,menuCard;
+        int menuPlayer;
         void LoadMenuArt()
         {
             if(!menuLogo)menuLogo=Resources.Load<Texture2D>("Art/action-legends-logo");
@@ -33,48 +34,43 @@ namespace Paname
             else Label(45,35,780,120,"ACTION LEGENDS",57,Cream,true);
             Label(54,171,800,26,"QUATRE LÉGENDES. UNE ÉQUIPE. À VOUS D'ÉCRIRE LA SUITE.",14,Gold,true);
             IllustratedPanel(new Rect(913,27,315,155),Color.white);
-            Label(938,43,265,23,"MISSION "+(MissionIndex+1).ToString("00"),13,Gold,true);
-            Label(938,70,265,35,CurrentMission.title.ToUpperInvariant(),20,Cream,true);
-            Label(938,112,265,24,CurrentMission.location.ToUpperInvariant()+"  /  COOP LOCALE",12,C("B2C7BD"),true);
+            Panel(935,51,270,105,C("07192A"));
+            Label(938,53,265,18,"MISSION "+(MissionIndex+1).ToString("00"),13,Gold,true);
+            Label(938,77,265,27,CurrentMission.title.ToUpperInvariant(),20,Cream,true);
+            Label(938,109,265,18,CurrentMission.location.ToUpperInvariant()+"  /  COOP LOCALE",12,C("B2C7BD"),true);
             if(MissionCount>1)
             {
                 if(Button(936,142,26,24,"‹",C("304C56")))SelectMission(-1);
                 Label(969,142,204,24,(MissionIndex+1)+" / "+MissionCount+" MISSIONS",11,Gold,true,TextAnchor.MiddleCenter);
                 if(Button(1179,142,26,24,"›",C("304C56")))SelectMission(1);
             }
-            else Label(938,140,265,24,JoinedCount+" / 4  HÉROS DANS L'ÉQUIPE",12,PlayerColors[1],true);
-            for(int i=0;i<4;i++)
+            else Label(938,132,265,20,JoinedCount+" / 4  HÉROS DANS L'ÉQUIPE",12,PlayerColors[1],true);
+            int selectedSlot=menuPlayer;
+            if(!slots[selectedSlot].joined){menuPlayer=0;selectedSlot=0;}
+            for(int hero=0;hero<4;hero++)
             {
-                float x=46+i*298;var slot=slots[i];Color accent=PlayerColors[i];
-                IllustratedPanel(new Rect(x,211,286,380),Color.white);
-                Panel(x+16,224,4,29,accent);
-                Label(x+28,224,140,28,"JOUEUR 0"+(i+1),13,accent,true);
-                Label(x+176,224,89,28,slot.joined?"PRÊT":"LIBRE",11,slot.joined?PlayerColors[1]:C("9AAFB2"),true,TextAnchor.MiddleRight);
-                // A subdued amber disc gives the portrait a readable silhouette without a flat card.
-                GUI.color=new Color(accent.r,accent.g,accent.b,.07f);
-                GUI.DrawTexture(new Rect(x+55,270,175,157),Circle.texture);GUI.color=Color.white;
-                Portrait(x+49,252,slot.hero,accent,1.12f);
-                Label(x+16,450,254,28,HeroNames[slot.hero],21,Cream,true,TextAnchor.MiddleCenter);
-                Label(x+16,478,254,20,HeroRoles[slot.hero],11,accent,true,TextAnchor.MiddleCenter);
+                float x=46+hero*298;Color accent=PlayerColors[selectedSlot];bool selected=slots[selectedSlot].hero==hero;
+                var card=new Rect(x,211,286,380);
+                if(GUI.Button(card,GUIContent.none,GUIStyle.none))SelectHero(selectedSlot,hero);
+                IllustratedPanel(card,selected?Color.white:new Color(.8f,.85f,.85f,1));
+                if(selected){Panel(x+14,222,258,28,accent);Label(x+18,222,250,28,"J"+(selectedSlot+1)+"  •  SÉLECTIONNÉ",13,Ink,true,TextAnchor.MiddleCenter);}
+                else Label(x+20,224,246,28,"CHOISIR CE HÉROS",12,C("A5BBB8"),true,TextAnchor.MiddleCenter);
+                Portrait(x+49,252,hero,accent,1.12f);
+                Label(x+16,450,254,28,HeroNames[hero],21,Cream,true,TextAnchor.MiddleCenter);
+                Label(x+16,478,254,20,HeroRoles[hero],11,selected?accent:C("9AAFB2"),true,TextAnchor.MiddleCenter);
                 Panel(x+18,501,250,44,C("07192A"));
-                if(Button(x+18,506,34,32,"‹",C("354F59")))ChangeHero(i,-1);
-                Label(x+57,506,172,32,HeroSpecials[slot.hero],12,Cream,false,TextAnchor.MiddleCenter);
-                if(Button(x+234,506,34,32,"›",C("354F59")))ChangeHero(i,1);
-                if(slot.joined)
-                {
-                    Label(x+20,550,246,23,slot.DeviceName.ToUpperInvariant(),11,C("ACC9C2"),true,TextAnchor.MiddleCenter);
-                }
-                else if(i==1)
-                {
-                    if(Button(x+27,548,232,26,"REJOINDRE AU CLAVIER",C("304C56")))AddSecondKeyboard();
-                }
-                else Label(x+20,548,246,28,"A / ✕  POUR REJOINDRE",12,C("A1BCB9"),true,TextAnchor.MiddleCenter);
+                Label(x+22,506,242,32,HeroSpecials[hero],13,Cream,false,TextAnchor.MiddleCenter);
+                Label(x+20,548,246,27,selected?"PRÊT À PARTIR":"CLIQUE POUR CHOISIR",11,selected?accent:C("9AAFB2"),true,TextAnchor.MiddleCenter);
             }
-            Label(51,610,800,25,"Q / E : héros   •   ← / → : mission   •   ENTRÉE : partir",14,Cream);
-            Label(51,637,800,23,"MANETTE : croix gauche / droite pour choisir, START pour partir",12,C("9AB6B6"));
+            for(int i=0;i<4;i++)if(slots[i].joined)
+            {
+                if(Button(50+i*218,596,208,28,"J"+(i+1)+"  "+slots[i].DeviceName,menuPlayer==i?PlayerColors[i]:C("304C56"),menuPlayer==i))menuPlayer=i;
+            }
+            Label(51,633,800,25,"CLIC ou ← / → : héros   •   ENTRÉE : partir",14,Cream);
+            Label(51,659,800,20,"A / ✕ sur une manette : rejoindre   •   START : partir",12,C("9AB6B6"));
             if(Button(932,609,296,59,"DÉPLOYER L'ÉQUIPE  →",Coral,true))BeginRound();
             Panel(49,685,1178,1,new Color(.6f,.75f,.7f,.24f));
-            Label(51,690,1176,22,"ACTION LEGENDS   /   1–4 JOUEURS   /   MISSION : "+CurrentMission.title.ToUpperInvariant()+"",10,C("92AEAE"),true);
+            Label(51,690,1176,22,"VERSION 0.4.2   /   ACTION LEGENDS   /   MISSION : "+CurrentMission.title.ToUpperInvariant()+"",10,C("92AEAE"),true);
         }
     }
 }

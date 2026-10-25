@@ -26,7 +26,8 @@ namespace Paname
             Texture2D t=enemy?(enemiesTexture?enemiesTexture:(enemiesTexture=Resources.Load<Texture2D>("Art/enemies"))):HeroesTexture;
             if(!t)return null;
             int rows=enemy?3:4;float w=t.width/4f,h=t.height/(float)rows;
-            var sprite=Sprite.Create(t,new Rect(frame*w,t.height-(row+1)*h,w,h),new Vector2(.4f,.045f),h*.9f/2.05f);
+            float left=w*.065f,right=w*.025f;
+            var sprite=Sprite.Create(t,new Rect(frame*w+left,t.height-(row+1)*h,w-left-right,h),new Vector2((w*.4f-left)/(w-left-right),.045f),h*.9f/2.05f,0,SpriteMeshType.FullRect);
             frames[group,row,frame]=sprite;return sprite;
         }
         public static readonly Color Ink = C("203441"), Cream = C("F6E8CC"), Teal = C("277D80"), Coral = C("F87854"), Gold = C("F4C65D");
@@ -71,7 +72,7 @@ namespace Paname
             var t=g.AddComponent<TextMesh>(); t.text=text; t.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); t.fontSize=48; t.characterSize=size/10; t.anchor=TextAnchor.MiddleCenter; t.color=color;
             var r=g.GetComponent<MeshRenderer>(); r.sharedMaterial=t.font.material; r.sortingOrder=order;
         }
-        public static void Street(Transform root,string[] routePaths=null)
+        public static void Street(Transform root,string[] routePaths=null,float length=80)
         {
             if(routePaths==null)routePaths=new[]{"Art/route-01","Art/route-02","Art/route-03"};
             var first=Resources.Load<Texture2D>(routePaths[0]);
@@ -83,8 +84,24 @@ namespace Paname
                 {
                     var texture=Resources.Load<Texture2D>(routePaths[i]);if(!texture)continue;
                     var sprite=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),new Vector2(0,.2f),texture.height/13f,0,SpriteMeshType.FullRect);
+                    bool blend=i>0&&(texture.width/(float)texture.height>2||Resources.Load<Texture2D>(routePaths[i-1]).width/(float)Resources.Load<Texture2D>(routePaths[i-1]).height>2);
+                    if(blend)RouteWidth-=1.5f;
                     var g=new GameObject(i==0?"Boulevard parisien":i==1?"Quais de Seine":"Place de la Bastille");g.transform.SetParent(routeRoot,false);g.transform.localPosition=new Vector3(RouteWidth,0,0);
-                    var r=g.AddComponent<SpriteRenderer>();r.sprite=sprite;r.sortingOrder=-80;RouteWidth+=sprite.bounds.size.x;RouteSegments++;
+                    var r=g.AddComponent<SpriteRenderer>();r.sprite=sprite;r.sortingOrder=-85+i;
+                    if(blend){var shader=Resources.Load<Shader>("BackgroundBlend");if(shader){r.sharedMaterial=new Material(shader);r.sharedMaterial.SetFloat("_LeftFade",1.5f/sprite.bounds.size.x);}}
+                    RouteWidth+=sprite.bounds.size.x;RouteSegments++;
+                }
+                var ground=Resources.Load<Texture2D>("Art/paris");
+                if(ground)
+                {
+                    var road=Sprite.Create(ground,new Rect(0,0,ground.width,ground.height*.2f),new Vector2(0,1),ground.height/13f,0,SpriteMeshType.FullRect);
+                    var shader=Resources.Load<Shader>("BackgroundBlend");var material=shader?new Material(shader):null;
+                    if(material){material.SetFloat("_LeftFade",.05f);material.SetFloat("_TopFade",.22f);}
+                    for(float x=-12;x<length+25;x+=road.bounds.size.x-2)
+                    {
+                        var go=new GameObject("Chaussée • premier plan");go.transform.SetParent(root,false);go.transform.localPosition=new Vector3(x,0,0);
+                        var r=go.AddComponent<SpriteRenderer>();r.sprite=road;r.sortingOrder=-35;if(material)r.sharedMaterial=material;
+                    }
                 }
                 return;
             }

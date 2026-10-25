@@ -2,11 +2,11 @@
 
 ## Ce qui fonctionne sans backend
 
-L’export Unity contient HTML, JavaScript, WebAssembly, images et données. GitHub Pages ou n’importe quel hébergement statique peut les servir. La coopération à plusieurs sur le même écran reste locale ; aucun serveur multijoueur n’est inclus.
+L’export Unity contient HTML, JavaScript, WebAssembly, images et données. GitHub Pages ou n’importe quel hébergement statique peut les servir. La coopération se joue sur le même écran ou en ligne : les navigateurs se connectent directement entre eux, sans serveur multijoueur (voir [le jeu en ligne](ONLINE.md)).
 
 Le template `Assets/WebGLTemplates/ActionLegends` propose une page de lancement, une barre de chargement, le plein écran et les commandes. Les chemins sont relatifs afin de fonctionner aussi sous `/action-legends/` sur GitHub Pages.
 
-L’export utilise gzip avec décompression de secours intégrée : il ne dépend pas d’une configuration spéciale des en-têtes du serveur. Le moteur est configuré sans threads WebAssembly pour ne pas exiger les en-têtes d’isolation croisée. Passer dans un autre onglet met une partie en pause.
+L’export utilise gzip avec décompression de secours intégrée : il ne dépend pas d’une configuration spéciale des en-têtes du serveur. Le moteur est configuré sans threads WebAssembly pour ne pas exiger les en-têtes d’isolation croisée. Passer dans un autre onglet met une partie locale en pause.
 
 ## Construire localement
 

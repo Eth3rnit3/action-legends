@@ -21,7 +21,7 @@ namespace Paname
         public bool BossActive=>bossStarted&&!bossDefeated;
         public bool BossDefeated=>bossDefeated;
         public int BossHealth=>bossHealth;
-        float ArenaHalfWidth=>gameCamera.orthographicSize*gameCamera.aspect;
+        float ArenaHalfWidth=>SimHalfWidth;
         void ResetBoss()
         {
             bossBombs.Clear();bossRoot=null;bossRotor=null;bossSight=null;bossRenderer=null;

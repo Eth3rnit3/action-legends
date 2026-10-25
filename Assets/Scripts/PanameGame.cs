@@ -21,10 +21,10 @@ namespace Paname
         public MissionDefinition CurrentMission=>missions[missionIndex];
         public int MissionCount=>missions?.Length??0;
         public int MissionIndex=>missionIndex;
-        public void PauseFromBrowser(){if(phase==Phase.Playing)phase=Phase.Paused;}
+        public void PauseFromBrowser(){if(!Online&&phase==Phase.Playing)phase=Phase.Paused;}
         public void SelectMission(int direction)
         {
-            if(phase!=Phase.Lobby||missions==null)return;
+            if(HostOnly(()=>SelectMission(direction))||phase!=Phase.Lobby||missions==null)return;
             missionIndex=(missionIndex+direction+missions.Length)%missions.Length;
             if(world){world.gameObject.SetActive(false);Destroy(world.gameObject);}
             world=new GameObject("Décor de mission").transform;world.SetParent(transform,false);Street(world,CurrentMission.backgrounds,CurrentMission.length);
@@ -56,7 +56,7 @@ namespace Paname
         float cameraX=7;
         AudioSource audioOut;
         AudioClip fireClip,hitClip,specialClip;
-        readonly System.Random random=new System.Random(2026);
+        System.Random random=new System.Random(2026);
         readonly PlayerCommand[] frameInputs=new PlayerCommand[4];
         public sealed class Player
         {
@@ -116,18 +116,20 @@ namespace Paname
         }
         public void BeginRound()
         {
-            ResetActors();Score=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
+            if(OnlineRound())return;
+            ResetActors();random=new System.Random(2026);Score=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
             for(int i=0;i<4;i++)if(slots[i].joined)SpawnPlayer(i,2+i*1.3f);
             phase=Phase.Playing;Announce(CurrentMission.intro);if(musicOut){musicOut.Stop();musicOut.clip=musicClip;}
         }
-        public void ReturnToLobby(){phase=Phase.Lobby;cameraX=CurrentMission.cameraMin;BuildLobbyActors();}
+        public void ReturnToLobby(){if(OnlineReturn())return;phase=Phase.Lobby;cameraX=CurrentMission.cameraMin;BuildLobbyActors();}
         public void SelectHero(int playerSlot,int hero)
         {
-            if(phase!=Phase.Lobby||playerSlot<0||playerSlot>=4||!slots[playerSlot].joined)return;
+            if(OnlineHero(hero)||phase!=Phase.Lobby||playerSlot<0||playerSlot>=4||!slots[playerSlot].joined)return;
             slots[playerSlot].hero=Mathf.Clamp(hero,0,3);BuildLobbyActors();
         }
         void Update()
         {
+            if(OnlineUpdate())return;
             if(Keyboard.current!=null && Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 if(phase==Phase.Playing)phase=Phase.Paused;else if(phase==Phase.Paused)phase=Phase.Playing;
@@ -192,11 +194,14 @@ namespace Paname
         }
         public Vector2 GetPlayerPosition(int slot)=>players[slot]?.position??Vector2.zero;
         public int GetPlayerHealth(int slot)=>players[slot]?.hp??0;
+        // The simulation sees a fixed 16:9 view so every browser computes the same game, whatever its window size.
+        const float SimHalfWidth=5.8f*16f/9f;
         public void TickSimulation(float dt,PlayerCommand[] commands)
         {
             if(phase!=Phase.Playing)return;
             SimulationTime+=dt;announcementTimer=Mathf.Max(0,announcementTimer-dt);shake=Mathf.Max(0,shake-dt*2);
-            float rear=Mathf.Max(.5f,cameraX-gameCamera.orthographicSize*gameCamera.aspect+.7f);
+            cameraX=Mathf.Max(cameraX,bossStarted?bossArenaX:Mathf.Clamp(LeaderX()+2.5f,CurrentMission.cameraMin,CurrentMission.cameraMax));
+            float rear=Mathf.Max(.5f,cameraX-SimHalfWidth+.7f);
             for(int i=0;i<4;i++)
             {
                 var p=players[i];if(p==null)continue;
@@ -289,7 +294,7 @@ namespace Paname
             for(int enemyIndex=enemies.Count-1;enemyIndex>=0;enemyIndex--)
             {
                 var e=enemies[enemyIndex];
-                if(e.position.x<cameraX-gameCamera.orthographicSize*gameCamera.aspect-5){e.root.gameObject.SetActive(false);Destroy(e.root.gameObject);enemies.RemoveAt(enemyIndex);continue;}
+                if(e.position.x<cameraX-SimHalfWidth-5){e.root.gameObject.SetActive(false);Destroy(e.root.gameObject);enemies.RemoveAt(enemyIndex);continue;}
                 Player target=null;float best=float.MaxValue;
                 foreach(var p in players)if(p!=null&&p.hp>0){float distance=Mathf.Abs(p.position.x-e.position.x);if(distance<best){best=distance;target=p;}}
                 if(target==null)continue;
@@ -397,8 +402,9 @@ namespace Paname
         {
             float scale=Mathf.Min(Screen.width/1280f,Screen.height/720f);float ox=(Screen.width-1280*scale)*.5f,oy=(Screen.height-720*scale)*.5f;
             GUI.matrix=Matrix4x4.TRS(new Vector3(ox,oy,0),Quaternion.identity,Vector3.one*scale);
+            if(DrawOnlineBlocker())return;
             if(phase==Phase.Lobby){DrawLobby();return;}
-            DrawHUD();DrawBossHUD();
+            DrawHUD();DrawBossHUD();DrawOnlineBanner();
             if(phase==Phase.Paused)Overlay("ON SOUFFLE UN PEU.","PAUSE",()=>phase=Phase.Playing,"REPRENDRE");
             if(phase==Phase.Won)Overlay(CurrentMission.winTitle,"TEMPS "+Clock(SimulationTime)+"  •  "+Score.ToString("N0")+" POINTS",ReturnToLobby,"CHOISIR LES HÉROS");
             if(phase==Phase.Lost)Overlay("ÇA SE JOUE À UN POIL.","PLUS DE RENFORTS  •  "+Score.ToString("N0")+" POINTS",BeginRound,"REJOUER");
@@ -446,7 +452,7 @@ namespace Paname
                 var p=players[i];if(!slots[i].joined||p==null)continue;
                 float x=22+i*314;
                 Panel(x,18,264,62,new Color(.035f,.09f,.14f,.76f));Panel(x,18,3,62,PlayerColors[i]);
-                Label(x+12,22,194,22,"J"+(i+1)+"  "+HeroShortNames[p.hero],13,PlayerColors[i],true);
+                Label(x+12,22,194,22,PlayerTag(i)+"  "+HeroShortNames[p.hero],13,PlayerColors[i],true);
                 Label(x+213,23,44,20,p.specialTimer>0?"★ "+Mathf.CeilToInt(p.specialTimer):"★",12,p.specialTimer<=0?Gold:C("7C929A"),true,TextAnchor.MiddleRight);
                 for(int h=0;h<MaxPlayerHealth;h++)Panel(x+13+h*17,56,11,6,h<p.hp?PlayerColors[i]:C("344A55"));
                 string ammo=p.weapon==0?"∞":(p.weapon==1?"MG":p.weapon==2?"3W":"R")+"  "+p.ammo;
@@ -463,14 +469,17 @@ namespace Paname
                 var p=players[i];if(p==null||p.hp<=0)continue;
                 var v=gameCamera.WorldToScreenPoint(p.position+Vector2.up*2.25f);
                 float scale=Mathf.Min(Screen.width/1280f,Screen.height/720f),ox=(Screen.width-1280*scale)*.5f,oy=(Screen.height-720*scale)*.5f;
-                Label((v.x-ox)/scale-14,(Screen.height-v.y-oy)/scale-9,28,18,(i+1).ToString(),12,PlayerColors[i],true,TextAnchor.MiddleCenter);
+                if(Online)Label((v.x-ox)/scale-60,(Screen.height-v.y-oy)/scale-12,120,23,PlayerTag(i),13,PlayerColors[i],true,TextAnchor.MiddleCenter);
+                else Label((v.x-ox)/scale-14,(Screen.height-v.y-oy)/scale-9,28,18,(i+1).ToString(),12,PlayerColors[i],true,TextAnchor.MiddleCenter);
             }
         }
         void Overlay(string title,string subtitle,Action action,string button)
         {
             Panel(-2000,-2000,5280,4720,new Color(.06f,.12f,.16f,.88f));
             Label(90,223,1100,76,title,45,Cream,true,TextAnchor.MiddleCenter);Label(90,310,1100,45,subtitle,20,Gold,true,TextAnchor.MiddleCenter);
-            if(Button(440,393,400,58,button,Coral,true))action();
+            if(Online&&!IsHost)Label(440,393,400,58,"L'HÔTE CHOISIT LA SUITE…",18,Gold,true,TextAnchor.MiddleCenter);
+            else if(Button(440,393,400,58,button,Coral,true))action();
+            if(Online&&IsHost&&phase==Phase.Lost&&Button(440,467,400,46,"RETOUR À LA SÉLECTION",C("34515C")))ReturnToLobby();
             if(phase==Phase.Paused)
             {
                 if(Button(440,467,400,46,"RETOUR À LA SÉLECTION",C("34515C")))ReturnToLobby();

@@ -41,7 +41,7 @@ La fréquence des bonus, les munitions et la durée du turbo dépendent de la di
 - 24 images d'effets animés : flammes de bouche, impacts, explosions et poussière. Traceurs à cœur clair, douilles, recul au tir, étincelles sur le bouclier, flash blanc, réaction de recul et défaite de l'ennemi.
 - Sons de tir, d'impact et d'explosion composés de plusieurs couches, musique en boucle et annonces vocales françaises des bonus.
 - Terrain plat : plateformes, vrais décors destructibles et animations plus riches restent à construire.
-- Les commandes sont séparées de la simulation. Le jeu en ligne nécessite encore une implémentation réseau et n'est pas disponible.
+- Les commandes sont séparées de la simulation. En ligne, chaque navigateur exécute la même simulation à partir des commandes de tous les joueurs : voir [docs/ONLINE.md](docs/ONLINE.md).
 
 ## Vérification
 

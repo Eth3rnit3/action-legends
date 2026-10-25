@@ -37,7 +37,7 @@ namespace Paname
             Panel(935,51,270,105,C("07192A"));
             Label(938,53,265,18,"MISSION "+(MissionIndex+1).ToString("00"),13,Gold,true);
             Label(938,77,265,27,CurrentMission.title.ToUpperInvariant(),20,Cream,true);
-            Label(938,109,265,18,CurrentMission.location.ToUpperInvariant()+"  /  COOP LOCALE",12,C("B2C7BD"),true);
+            Label(938,109,265,18,CurrentMission.location.ToUpperInvariant()+(Online?"  /  EN LIGNE":"  /  COOP LOCALE"),12,C("B2C7BD"),true);
             if(MissionCount>1)
             {
                 if(Button(936,142,26,24,"‹",C("304C56")))SelectMission(-1);
@@ -45,15 +45,15 @@ namespace Paname
                 if(Button(1179,142,26,24,"›",C("304C56")))SelectMission(1);
             }
             else Label(938,132,265,20,JoinedCount+" / 4  HÉROS DANS L'ÉQUIPE",12,PlayerColors[1],true);
-            int selectedSlot=menuPlayer;
-            if(!slots[selectedSlot].joined){menuPlayer=0;selectedSlot=0;}
+            int selectedSlot=Online?Mathf.Max(0,LocalSlotIndex):menuPlayer;
+            if(!Online&&!slots[selectedSlot].joined){menuPlayer=0;selectedSlot=0;}
             for(int hero=0;hero<4;hero++)
             {
                 float x=46+hero*298;Color accent=PlayerColors[selectedSlot];bool selected=slots[selectedSlot].hero==hero;
                 var card=new Rect(x,211,286,380);
                 if(GUI.Button(card,GUIContent.none,GUIStyle.none))SelectHero(selectedSlot,hero);
                 IllustratedPanel(card,selected?Color.white:new Color(.8f,.85f,.85f,1));
-                if(selected){Panel(x+14,222,258,28,accent);Label(x+18,222,250,28,"J"+(selectedSlot+1)+"  •  SÉLECTIONNÉ",13,Ink,true,TextAnchor.MiddleCenter);}
+                if(selected){Panel(x+14,222,258,28,accent);Label(x+18,222,250,28,PlayerTag(selectedSlot)+"  •  SÉLECTIONNÉ",13,Ink,true,TextAnchor.MiddleCenter);}
                 else Label(x+20,224,246,28,"CHOISIR CE HÉROS",12,C("A5BBB8"),true,TextAnchor.MiddleCenter);
                 Portrait(x+49,252,hero,accent,1.12f);
                 Label(x+16,450,254,28,HeroNames[hero],21,Cream,true,TextAnchor.MiddleCenter);
@@ -64,11 +64,14 @@ namespace Paname
             }
             for(int i=0;i<4;i++)if(slots[i].joined)
             {
-                if(Button(50+i*218,596,208,28,"J"+(i+1)+"  "+slots[i].DeviceName,menuPlayer==i?PlayerColors[i]:C("304C56"),menuPlayer==i))menuPlayer=i;
+                if(Button(50+i*218,596,208,28,SlotLabel(i),(Online?LocalSlotIndex:menuPlayer)==i?PlayerColors[i]:C("304C56"),(Online?LocalSlotIndex:menuPlayer)==i)&&!Online)menuPlayer=i;
             }
-            Label(51,633,800,22,"CLIC / ← / → : héros  •  ENTRÉE : partir  •  A / ✕ : rejoindre",13,Cream);
-            Label(51,659,800,20,DifficultyHints[DifficultyIndex],12,Gold,true);
-            if(Button(932,609,296,59,"DÉPLOYER L'ÉQUIPE  →",Coral,true))BeginRound();
+            if(!DrawOnlineLobbyFooter())
+            {
+                Label(51,633,800,22,"CLIC / ← / → : héros  •  ENTRÉE : partir  •  A / ✕ : rejoindre",13,Cream);
+                Label(51,659,800,20,DifficultyHints[DifficultyIndex],12,Gold,true);
+                if(Button(932,609,296,59,"DÉPLOYER L'ÉQUIPE  →",Coral,true))BeginRound();
+            }
             Panel(49,685,1178,1,new Color(.6f,.75f,.7f,.24f));
             Label(51,690,1176,22,"VERSION 0.5.1   /   ACTION LEGENDS   /   MISSION : "+CurrentMission.title.ToUpperInvariant()+"",10,C("92AEAE"),true);
         }

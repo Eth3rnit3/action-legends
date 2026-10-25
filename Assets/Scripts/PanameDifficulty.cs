@@ -18,7 +18,7 @@ namespace Paname
         float FirstSupplyX=>SelectedDifficulty==Difficulty.Detente?24:SelectedDifficulty==Difficulty.Arcade?35:SelectedDifficulty==Difficulty.Difficile?45:55;
         public void SetDifficulty(int index)
         {
-            if(phase!=Phase.Lobby)return;
+            if(HostOnly(()=>SetDifficulty(index))||phase!=Phase.Lobby)return;
             SelectedDifficulty=(Difficulty)Mathf.Clamp(index,0,3);
         }
         void DrawDifficulty()

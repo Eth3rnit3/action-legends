@@ -44,6 +44,6 @@ La vérification contrôle le format, les images référencées, la sortie, l’
 
 ## Portée actuelle
 
-Version 0.5.1 : un joueur au clavier et jusqu’à trois partenaires à la manette, quatre héros sélectionnables, trois types d’ennemis, douze assauts, six types de bonus et une première mission prolongée jusqu’à Bastille. Quatre difficultés sélectionnables, boss final en hélicoptère, tir vers le haut, musique arcade et annonces vocales des bonus. Les bonus sont espacés selon la difficulté. Tirs renforcés, chronomètre, effets arcade et renforts partagés. Le multijoueur en ligne n’est pas implémenté. Les navigateurs de bureau sont la cible de cette version ; les commandes tactiles ne sont pas prévues.
+Version 0.5.1 : un joueur au clavier et jusqu’à trois partenaires à la manette, quatre héros sélectionnables, trois types d’ennemis, douze assauts, six types de bonus et une première mission prolongée jusqu’à Bastille. Quatre difficultés sélectionnables, boss final en hélicoptère, tir vers le haut, musique arcade et annonces vocales des bonus. Les bonus sont espacés selon la difficulté. Tirs renforcés, chronomètre, effets arcade et renforts partagés. Jeu en ligne jusqu’à quatre joueurs avec un lien d’invitation, sans serveur de jeu : voir [le jeu en ligne](docs/ONLINE.md). Les navigateurs de bureau sont la cible de cette version ; les commandes tactiles ne sont pas prévues.
 
 Les scripts et visuels sont consultables dans le dépôt public. Leur licence de redistribution reste à choisir ; aucune licence de redistribution n’est accordée par ce README.

@@ -11,7 +11,7 @@ namespace Paname
         readonly AudioClip[][] bonusVoices=new AudioClip[6][];
         AudioClip[] bossVoice,winVoice,impactClips,explosionClips;
         AudioClip pistolClip,machineGunClip,tripleClip,rocketClip,bossGunClip,playerHitClip,bossDownClip,pickupClip,coinClip,selectClip,startClip;
-        // Cosmetic only: never draws from the seeded simulation generator, so online peers stay in sync.
+        // Cosmetic only: the simulation itself has no randomness, which keeps online peers in sync.
         readonly System.Random audioRandom=new System.Random();
         bool musicEnabled=true,voiceEnabled=true;
         float musicDuck;
@@ -58,7 +58,6 @@ namespace Paname
         {
             if(Button(740,45,153,27,musicEnabled?"MUSIQUE : OUI":"MUSIQUE : NON",C("2A414E")))musicEnabled=!musicEnabled;
             if(Button(740,81,153,27,voiceEnabled?"VOIX : OUI":"VOIX : NON",C("2A414E"))){voiceEnabled=!voiceEnabled;if(!voiceEnabled)voiceOut.Stop();}
-            Label(740,119,153,40,"LA MARSEILLAISE\nREMIX ARCADE FM",10,Gold,true,TextAnchor.MiddleCenter);
         }
     }
 }

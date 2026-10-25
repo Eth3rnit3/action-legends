@@ -57,7 +57,7 @@ namespace Paname
             Online=true;IsHost=config.mode=="host";netCode=config.code??"";netSelf=config.self??"";netName=CleanName(config.name);
             for(int i=0;i<4;i++){slots[i].joined=false;slots[i].pad=null;slotPeers[i]=null;playerNames[i]=null;}
             if(IsHost){slots[0].joined=true;slotPeers[0]=netSelf;playerNames[0]=netName;LocalSlotIndex=0;}
-            else {netStatus="CONNEXION À LA PARTIE…";NetSendAll(Hello());}
+            else {netStatus="CONNEXION À LA PARTIE...";NetSendAll(Hello());}
             BuildLobbyActors();ReportStatus();
         }
         string Hello()=>"J"+BuildId+"\t"+netName;
@@ -332,10 +332,10 @@ namespace Paname
         bool DrawOnlineLobbyFooter()
         {
             if(!Online)return false;
-            Label(51,633,860,22,"PARTIE EN LIGNE  •  CODE "+netCode+"  •  INVITE TES AMIS AVEC LE LIEN SOUS LE JEU",13,Cream,true);
-            Label(51,659,860,20,IsHost?"Tu es l'hôte : choisis la mission et la difficulté, puis déploie l'équipe.  "+DifficultyHints[DifficultyIndex]:"L'hôte choisit la mission et lance la partie. Choisis ton héros.",12,Gold,true);
-            if(IsHost){if(Button(932,609,296,59,"DÉPLOYER L'ÉQUIPE  →",Coral,true))BeginRound();}
-            else{Panel(932,609,296,59,C("304C56"));Label(932,609,296,59,"EN ATTENTE DE L'HÔTE…",16,Cream,true,TextAnchor.MiddleCenter);}
+            Label(51,633,860,22,"PARTIE EN LIGNE  ·  CODE "+netCode,13,Cream,true);
+            if(!IsHost)Label(51,659,860,20,"L'hôte lance la partie.",12,Gold,true);
+            if(IsHost){if(Button(932,609,296,59,"DÉPLOYER L'ÉQUIPE  »",Coral,true))BeginRound();}
+            else{Panel(932,609,296,59,C("304C56"));Label(932,609,296,59,"EN ATTENTE DE L'HÔTE...",16,Cream,true,TextAnchor.MiddleCenter);}
             return true;
         }
         string SlotLabel(int slot)=>Online?PlayerTag(slot)+(slot==0?"  (HÔTE)":slot==LocalSlotIndex?"  (TOI)":""):"J"+(slot+1)+"  "+slots[slot].DeviceName;
@@ -346,7 +346,7 @@ namespace Paname
             if(message.Length==0)return false;
             Panel(-2000,-2000,5280,4720,new Color(.06f,.12f,.16f,.96f));
             Label(140,250,1000,90,message,26,Cream,true,TextAnchor.MiddleCenter);
-            if(netError.Length==0)Label(140,340,1000,30,"Code de la partie : "+netCode+"  •  l'hôte doit garder son onglet ouvert",14,Gold,true,TextAnchor.MiddleCenter);
+            if(netError.Length==0)Label(140,340,1000,30,"Code de la partie : "+netCode+"  ·  l'hôte doit garder son onglet ouvert",14,Gold,true,TextAnchor.MiddleCenter);
             else if(Button(440,393,400,58,"JOUER EN LOCAL",Coral,true))LeaveOnline();
             return true;
         }
@@ -354,7 +354,7 @@ namespace Paname
         {
             if(!Online)return;
             if(NetDesync){Panel(335,224,610,30,new Color(.45f,.1f,.08f,.92f));Label(345,224,590,30,"DÉSYNCHRONISATION DÉTECTÉE ENTRE LES JOUEURS",14,Cream,true,TextAnchor.MiddleCenter);}
-            else if(!IsHost&&phase==Phase.Playing&&netWaitClock>1.5f){Panel(335,224,610,30,new Color(.08f,.16f,.2f,.92f));Label(345,224,590,30,"EN ATTENTE DE L'HÔTE…",14,Gold,true,TextAnchor.MiddleCenter);}
+            else if(!IsHost&&phase==Phase.Playing&&netWaitClock>1.5f){Panel(335,224,610,30,new Color(.08f,.16f,.2f,.92f));Label(345,224,590,30,"EN ATTENTE DE L'HÔTE...",14,Gold,true,TextAnchor.MiddleCenter);}
         }
     }
 }

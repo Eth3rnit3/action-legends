@@ -52,18 +52,20 @@ namespace Paname
             if(pool.Count>=128)return null;
             var go=new GameObject("Effet");go.transform.SetParent(parent,false);var e=new Effect{go=go,renderer=go.AddComponent<SpriteRenderer>(),active=true};pool.Add(e);return e;
         }
-        public void Play(int row,Vector2 position,float size,float duration,int direction=1,Vector2 velocity=default)
+        public void Play(int row,Vector2 position,float size,float duration,int direction=1,Vector2 velocity=default,float angle=0)
         {
             var sprite=Frame(row,0);if(!sprite)return;var e=Acquire();if(e==null)return;
             e.row=row;e.age=0;e.duration=duration;e.size=size;e.velocity=velocity;e.casing=false;e.spin=0;e.rotation=0;
             e.go.name=row==0?"Flamme de bouche":row==1?"Impact":row==2?"Explosion":"Fumée";
-            e.go.transform.position=position;e.go.transform.localScale=new Vector3(size*direction,size,1);e.go.transform.localRotation=Quaternion.identity;
+            e.go.transform.position=position;e.go.transform.localScale=new Vector3(size*direction,size,1);e.go.transform.localRotation=Quaternion.Euler(0,0,angle);
             e.renderer.sprite=sprite;e.renderer.sharedMaterial=FxMaterial?FxMaterial:NormalMaterial;e.renderer.color=Color.white;e.renderer.sortingOrder=row==3?43:75;
         }
-        public void Muzzle(Vector2 muzzle,int direction,bool heavy)
+        // The flash points along the shot: mirrored for left-facing shots, then tilted for upward or diagonal ones.
+        public void Muzzle(Vector2 muzzle,Vector2 aim,bool heavy)
         {
-            Play(0,muzzle,heavy?1.25f:.9f,.105f,direction);
-            Play(3,muzzle+new Vector2(direction*.12f,.08f),.4f,.32f,1,new Vector2(direction*.13f,.45f));
+            aim=aim.sqrMagnitude>.0001f?aim.normalized:Vector2.right;int direction=aim.x<-.01f?-1:1;
+            Play(0,muzzle,heavy?1.25f:.9f,.105f,direction,default,Mathf.Atan2(aim.y,Mathf.Abs(aim.x))*Mathf.Rad2Deg*direction);
+            Play(3,muzzle+aim*.12f+Vector2.up*.05f,.4f,.32f,1,aim*.13f+Vector2.up*.4f);
         }
         public void Impact(Vector2 at,int direction,bool metal=false,bool explosive=false)
         {

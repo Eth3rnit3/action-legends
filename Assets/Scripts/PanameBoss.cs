@@ -14,8 +14,10 @@ namespace Paname
         SpriteRenderer bossRenderer;
         Sprite bossBombSprite;
         Vector2 bossPosition,bossAim;
-        int bossHealth,bossMaxHealth,bossAttack,bossVolley;
-        float bossTime,bossTimer,bossShotTimer,bossFlash,bossArenaX,bossDeathClock,bossExplosionTimer;
+        int bossHealth,bossMaxHealth,bossAttack,bossVolley,bossBarrel;
+        float bossTime,bossTimer,bossShotTimer,bossFlash,bossArenaX,bossDeathClock,bossExplosionTimer,bossRageTime;
+        // Tips of the two nose guns on Art/macron-helicopter.png (drawn facing left), from the sprite centre.
+        static readonly Vector2[] BossBarrels={new Vector2(-4.35f,-.56f),new Vector2(-4.02f,-.87f)};
         bool bossStarted,bossDefeated,bossEnraged;
         float BossAttackPace=>bossEnraged?.72f:1;
         public bool BossActive=>bossStarted&&!bossDefeated;
@@ -25,7 +27,7 @@ namespace Paname
         void ResetBoss()
         {
             bossBombs.Clear();bossRoot=null;bossRotor=null;bossSight=null;bossRenderer=null;
-            bossStarted=false;bossDefeated=false;bossEnraged=false;bossHealth=0;bossTime=0;bossDeathClock=0;
+            bossStarted=false;bossDefeated=false;bossEnraged=false;bossHealth=0;bossTime=0;bossDeathClock=0;bossBarrel=0;
         }
         void SpawnBoss()
         {
@@ -105,19 +107,18 @@ namespace Paname
             {
                 if(bossShotTimer<=0)
                 {
-                    int facing=target.position.x<bossPosition.x?-1:1;
-                    Vector2 muzzle=bossPosition+new Vector2(facing*3.2f,-.5f);
+                    var barrel=BossBarrels[bossBarrel++%BossBarrels.Length];
+                    Vector2 muzzle=bossPosition+new Vector2(barrel.x*bossRoot.localScale.x,barrel.y);
                     Vector2 sweep=bossAim+Vector2.right*(Mathf.Sin((1.7f-bossTimer)*4.2f)*1.8f);
                     Vector2 aim=(sweep-muzzle).normalized;
-                    Shoot(muzzle,aim*(DifficultyIndex==0?13:16+DifficultyIndex*1.8f),1,true,Coral);
-                    effects.Muzzle(muzzle,facing,true);Sound(bossGunClip);bossShotTimer=(.14f-DifficultyIndex*.022f)*BossAttackPace;
+                    Shoot(ShotLook.Bullet,muzzle,aim*(DifficultyIndex==0?13:16+DifficultyIndex*1.8f),1);
+                    effects.Muzzle(muzzle,aim,true);Sound(bossGunClip);bossShotTimer=(.14f-DifficultyIndex*.022f)*BossAttackPace;
                 }
                 if(bossTimer<=0){bossAttack=0;bossTimer=.6f*AttackFactors[DifficultyIndex]*BossAttackPace;}
             }
             TickBossBombs(dt);
             if(bossHealth<bossMaxHealth*.5f&&bossTime%1<dt)effects.Play(3,bossPosition+Vector2.right*1.5f,.75f,.7f,1,Vector2.up*.6f);
         }
-        float bossRageTime;
         static Sprite CreateBossBombSprite(Texture2D texture)
         {
             // Reuse the pixels of the upper missile on the helicopter. A native sprite
@@ -182,9 +183,9 @@ namespace Paname
                 Vector2 axis=bomb.root.TransformVector(Vector2.left).normalized*.5f;
                 if(SegmentDistance(from,to,bomb.position)<.35f||SegmentDistance(from,to,bomb.position+axis)<.28f||SegmentDistance(from,to,bomb.position-axis)<.28f){RemoveBossBomb(i,false);return true;}
             }
-            // A capsule around the fuselage excludes the rotor and most of the tail.
+            // A capsule from the nose to the engine excludes the rotor and most of the tail.
             float facing=bossRoot.localScale.x;
-            for(int i=0;i<4;i++)if(SegmentDistance(from,to,bossPosition+new Vector2((-2+i*.85f)*facing,-.05f))<.95f)
+            for(int i=0;i<5;i++)if(SegmentDistance(from,to,bossPosition+new Vector2((-3.1f+i*.9f)*facing,-.05f))<.95f)
             {DamageBoss(damage);effects.Impact(to,1,true);return true;}
             return false;
         }
@@ -197,7 +198,7 @@ namespace Paname
             bossDefeated=true;bossDeathClock=2.5f;bossExplosionTimer=0;Score+=10000;
             if(bossSight)bossSight.gameObject.SetActive(false);
             for(int i=bossBombs.Count-1;i>=0;i--)RemoveBossBomb(i,false);
-            foreach(var shot in shots)if(shot.hostile)shot.life=0;
+            foreach(var shot in shots)if(shot.Hostile)shot.life=0;
             Announce("HÉLICO HORS SERVICE !");Sound(bossDownClip);
         }
         void DrawBossHUD()

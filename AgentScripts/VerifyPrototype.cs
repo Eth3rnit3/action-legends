@@ -33,7 +33,7 @@ public static class VerifyPrototype
             // Run the complete level with scripted commands; invulnerability isolates progression from balancing.
             var enemiesField=typeof(PanameGame).GetField("enemies",BindingFlags.Instance|BindingFlags.NonPublic);
             var playersField=typeof(PanameGame).GetField("players",BindingFlags.Instance|BindingFlags.NonPublic);
-            for(int n=0;n<7200 && g.phase==PanameGame.Phase.Playing;n++)
+            for(int n=0;n<60*400 && g.phase==PanameGame.Phase.Playing && !g.BossActive;n++)
             {
                 var foes=(IList)enemiesField.GetValue(g);var players=(Array)playersField.GetValue(g);
                 for(int i=0;i<4;i++)
@@ -51,7 +51,10 @@ public static class VerifyPrototype
                 g.TickSimulation(1f/60,commands);
             }
             Check(g.Score>0,"Projectiles : dégâts et score",results);
-            Check(g.Wave==3&&g.phase==PanameGame.Phase.Won,"Trois vagues puis arrivée à Bastille",results);
+            Check(g.Wave==g.CurrentMission.waves.Length&&g.BossActive,"Toutes les vagues jusqu'au boss",results);
+            typeof(PanameGame).GetMethod("DamageBoss",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(g,new object[]{100000});
+            for(int n=0;n<300&&g.phase==PanameGame.Phase.Playing;n++)g.TickSimulation(1f/60,new PlayerCommand[4]);
+            Check(g.phase==PanameGame.Phase.Won,"Boss abattu puis victoire",results);
             g.ReturnToLobby();Check(g.phase==PanameGame.Phase.Lobby,"Retour à la sélection",results);
             // Restore a clean single-player lobby after the checks.
             for(int i=1;i<4;i++)g.slots[i].joined=false;g.ReturnToLobby();

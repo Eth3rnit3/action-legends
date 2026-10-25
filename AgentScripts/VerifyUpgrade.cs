@@ -14,7 +14,7 @@ public static class VerifyUpgrade
         try
         {
             Check(Resources.Load<Texture2D>("Art/action-legends-logo")&&Resources.Load<Texture2D>("Art/menu-card"),"Logo et cadres du menu chargés",checks);
-            Check(PanameArt.RouteSegments==3,"Trois quartiers chargés",checks);
+            Check(PanameArt.RouteSegments==g.CurrentMission.backgrounds.Length,"Tous les décors de la mission chargés",checks);
             var master=new Texture2D(2,2,TextureFormat.RGBA32,false);ImageConversion.LoadImage(master,System.IO.File.ReadAllBytes("Assets/ArtSources/route-master.png"));var original=master.GetPixels32();bool exact=true;int offset=0;
             for(int n=1;n<=3;n++)
             {
@@ -25,14 +25,15 @@ public static class VerifyUpgrade
             Check(exact&&offset==master.width,"Découpes de décor identiques pixel par pixel à la fresque",checks);UnityEngine.Object.DestroyImmediate(master);
             var route=g.transform.Find("Décor de mission/Panorama • trois quartiers continus");
             var views=route.GetComponentsInChildren<SpriteRenderer>();
-            bool joins=true,covered=true;
-            foreach(float half in new[]{8f,10f,12.5f,14f})for(float x=7;x<=74;x+=.5f)
+            bool joins=true,covered=true;var mission=g.CurrentMission;int last=views.Length-1;
+            foreach(float half in new[]{8f,10f,12.5f,14f})for(float x=mission.cameraMin;x<=mission.cameraMax;x+=.5f)
             {
-                PanameArt.UpdatePanorama(x,half);
-                for(int n=0;n<2;n++)if(Mathf.Abs(views[n].bounds.max.x-views[n+1].bounds.min.x)>.001f)joins=false;
-                if(views[0].bounds.min.x>x-half+.01f||views[2].bounds.max.x<x+half-.01f)covered=false;
+                PanameArt.UpdatePanorama(x,half,mission.cameraMin,mission.cameraMax);
+                // Wide panoramas overlap their neighbour on purpose to cross-fade; only a gap is a fault.
+                for(int n=0;n<last;n++)if(views[n+1].bounds.min.x>views[n].bounds.max.x+.001f)joins=false;
+                if(views[0].bounds.min.x>x-half+.01f||views[last].bounds.max.x<x+half-.01f)covered=false;
             }
-            Check(joins,"Deux raccords géométriques sans trou ni chevauchement",checks);
+            Check(joins,"Raccords du décor sans trou",checks);
             Check(covered,"Panorama couvre tout le parcours et plusieurs formats d'écran",checks);
             Check(ArcadeEffects.HasAtlas,"Atlas des 24 effets chargé",checks);
             bool shaders=true;foreach(string name in new[]{"ArcadeSprite","ArcadeFX"}){var shader=Resources.Load<Shader>(name);if(!shader||!shader.isSupported||UnityEditor.ShaderUtil.GetShaderMessages(shader).Length>0)shaders=false;}

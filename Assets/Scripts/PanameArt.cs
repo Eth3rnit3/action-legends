@@ -32,6 +32,15 @@ namespace Paname
         }
         public static readonly Color Ink = C("203441"), Cream = C("F6E8CC"), Teal = C("277D80"), Coral = C("F87854"), Gold = C("F4C65D");
         public static Color C(string s) { ColorUtility.TryParseHtmlString("#" + s, out var c); return c; }
+        static readonly System.Collections.Generic.HashSet<string> glyphWarnings = new System.Collections.Generic.HashSet<string>();
+        // The browser build only embeds the Latin-1 glyphs of the built-in font: anything beyond renders blank there,
+        // while the editor silently falls back to system fonts. Warn while developing instead.
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        public static void CheckGlyphs(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+            foreach (char c in text) if (c > 'ÿ' && glyphWarnings.Add(text)) { Debug.LogWarning($"Caractère U+{(int)c:X4} « {c} » absent de la police web dans : {text}"); return; }
+        }
         public static Sprite Square
         {
             get
@@ -69,7 +78,7 @@ namespace Paname
         public static void Text(Transform p,string text,float x,float y,float size,Color color,int order)
         {
             var g=new GameObject(text); g.transform.SetParent(p,false); g.transform.localPosition=new Vector3(x,y,-.1f);
-            var t=g.AddComponent<TextMesh>(); t.text=text; t.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); t.fontSize=48; t.characterSize=size/10; t.anchor=TextAnchor.MiddleCenter; t.color=color;
+            CheckGlyphs(text); var t=g.AddComponent<TextMesh>(); t.text=text; t.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); t.fontSize=48; t.characterSize=size/10; t.anchor=TextAnchor.MiddleCenter; t.color=color;
             var r=g.GetComponent<MeshRenderer>(); r.sharedMaterial=t.font.material; r.sortingOrder=order;
         }
         public static void Street(Transform root,string[] routePaths=null,float length=80)
@@ -189,7 +198,7 @@ namespace Paname
                 float x=18+i*24; Box(root,"Barricade",x,.55f,2.1f,1.1f,C("B88C62"),-5);
                 for(int j=-1;j<=1;j++) Shape(root,"Planches",x,.3f+j*.3f,2.05f,.16f,C("D6AD77"),-3,false,j*5);
             }
-            Box(root,"Poteau sortie",79,1.9f,.14f,3.8f,Teal,-6); Box(root,"Sortie",79,3.7f,3,.65f,Teal,-4); Text(root,"BASTILLE  →",79,3.7f,1.1f,Cream,-2);
+            Box(root,"Poteau sortie",79,1.9f,.14f,3.8f,Teal,-6); Box(root,"Sortie",79,3.7f,3,.65f,Teal,-4); Text(root,"BASTILLE  »",79,3.7f,1.1f,Cream,-2);
             // Tricolour flag above the café.
             Shape(root,"Drapeau bleu",5.5f,4.3f,.22f,.7f,C("476C9B"),-10); Shape(root,"Drapeau blanc",5.72f,4.3f,.22f,.7f,Cream,-10); Shape(root,"Drapeau rouge",5.94f,4.3f,.22f,.7f,Coral,-10);
         }

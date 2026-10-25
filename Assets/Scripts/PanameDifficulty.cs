@@ -8,7 +8,6 @@ namespace Paname
         public Difficulty SelectedDifficulty {get;private set;}=Difficulty.Arcade;
         int DifficultyIndex=>(int)SelectedDifficulty;
         public static readonly string[] DifficultyNames={"DÉTENTE","ARCADE","DIFFICILE","LÉGENDE"};
-        static readonly string[] DifficultyHints={"6 PV • 3 renforts / joueur • bonus généreux", "5 PV • 2 renforts / joueur • ennemis plus agressifs", "4 PV • 1 renfort / joueur • peu de bonus", "3 PV • dégâts doublés • survie sans répit"};
         static readonly int[] HealthByDifficulty={6,5,4,3},LivesByDifficulty={3,2,1,1},BonusKills={15,22,28,35};
         static readonly float[] HealthFactors={1,1.8f,2.5f,3.2f},CountFactors={1,1.2f,1.5f,1.8f},SpeedFactors={1,1.12f,1.25f,1.4f},AttackFactors={1.15f,.85f,.65f,.5f};
         int MaxPlayerHealth=>HealthByDifficulty[DifficultyIndex];

@@ -25,7 +25,7 @@ public static class VerifyDifficultyAndBoss
             p.position=new Vector2(g.CurrentMission.exitX-18,0);p.invulnerable=1000;Call(g,"UpdateCamera",1f/60);
             g.TickSimulation(1f/60,new PlayerCommand[4]);Check(g.BossActive&&g.phase==PanameGame.Phase.Playing,"Boss avant victoire");
             int health=g.BossHealth;var boss=(Vector2)Field(g,"bossPosition");
-            p.position=new Vector2(boss.x,0);p.aimUp=true;p.moving=false;Call(g,"FirePlayer",p,0);
+            p.position=new Vector2(boss.x,0);p.aimUp=true;p.moving=false;Call(g,"FirePlayer",p);
             for(int i=0;i<30;i++)Call(g,"UpdateShots",1f/60);Check(g.BossHealth<health,"Tir vertical ne touche pas le boss");
             Call(g,"DropBossBomb",p.position.x);Call(g,"TickBossBombs",.8f);Check(((IList)Field(g,"bossBombs")).Count==1,"Bombe non créée");
             var bombs=(IList)Field(g,"bossBombs");var bomb=bombs[0];Vector2 bombPosition=(Vector2)bomb.GetType().GetField("position").GetValue(bomb);

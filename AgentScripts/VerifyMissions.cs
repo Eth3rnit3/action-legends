@@ -20,7 +20,9 @@ public static class VerifyMissions
             missionsField.SetValue(g,new[]{original[0],added});g.phase=PanameGame.Phase.Lobby;g.SelectMission(1);
             Check(g.MissionCount==2&&g.CurrentMission.id=="test-mission","Une mission supplémentaire devient sélectionnable",checks);
             for(int i=0;i<4;i++)g.slots[i].joined=i==0;g.BeginRound();var commands=new PlayerCommand[4];commands[0]=new PlayerCommand{move=1,fire=true};
-            for(int n=0;n<1800&&g.phase==PanameGame.Phase.Playing;n++)g.TickSimulation(1f/60,commands);
+            // The test mission ends with the boss like any other: shoot it down once it appears.
+            var damageBoss=typeof(PanameGame).GetMethod("DamageBoss",flags);
+            for(int n=0;n<1800&&g.phase==PanameGame.Phase.Playing;n++){if(g.BossActive)damageBoss.Invoke(g,new object[]{100000});g.TickSimulation(1f/60,commands);}
             Check(g.Wave==1&&g.phase==PanameGame.Phase.Won,"Une mission de longueur et de vagues différentes se termine",checks);
             g.BeginRound();g.PauseFromBrowser();Check(g.phase==PanameGame.Phase.Paused,"Quitter l'onglet peut mettre le jeu en pause",checks);
             bool rejected=false;try{added.waves[0].enemyPattern=new[]{99};added.Validate();}catch(ArgumentException){rejected=true;}

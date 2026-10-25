@@ -7,29 +7,64 @@
   <title>{{{ PRODUCT_NAME }}}</title>
   <style>
     :root{color-scheme:dark;--cream:#f7ebce;--muted:#a6bdb8;--gold:#f4c65d;--coral:#f87854;--ink:#08151e}
-    *{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:radial-gradient(ellipse at 50% 0,#233f48,transparent 65%),#08121b;color:var(--cream);font:15px/1.5 system-ui,sans-serif;min-height:100vh}main{width:min(1320px,96vw);margin:24px auto}header{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:14px}header img{width:210px;max-height:85px;object-fit:contain}.badge{border:1px solid #496460;padding:6px 13px;color:var(--gold);font-size:11px;letter-spacing:.14em;text-transform:uppercase}#stage{position:relative;aspect-ratio:16/9;overflow:hidden;background:#0a1926;border:1px solid #47616a;box-shadow:0 20px 70px #0008}canvas{width:100%;height:100%;display:block;outline:none}#cover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:15px;background:radial-gradient(ellipse at center,#234450,#07141e 80%);text-align:center;padding:24px}#cover img{width:min(640px,74%);max-height:220px;object-fit:contain}#cover p{color:var(--muted);max-width:560px;margin:0}button{background:var(--coral);color:#132a33;border:0;padding:15px 28px;font:800 15px system-ui;letter-spacing:.04em;cursor:pointer;box-shadow:0 4px 0 #713e32}button:hover{background:#ffa17a}button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:4px}button:disabled{cursor:wait;opacity:.65}button.secondary{background:#28434c;color:var(--cream);box-shadow:0 4px 0 #142a31}button.secondary:hover{background:#34575f}button.link{background:none;box-shadow:none;color:var(--gold);padding:4px 8px;font-weight:600;text-decoration:underline}.choices{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:center}label.name{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px}input{background:#0b1d27;color:var(--cream);border:1px solid #496460;padding:10px 12px;font:600 15px system-ui;width:190px}#invite-title{color:var(--gold);font-weight:800;letter-spacing:.06em}#loading{width:min(360px,80%);height:5px;background:#36535b;display:none}#fill{height:100%;background:var(--gold);width:0;transition:width .1s linear}.toolbar{display:flex;justify-content:space-between;gap:16px;margin-top:16px;align-items:center;color:var(--muted);font-size:13px}.toolbar button{padding:9px 15px;background:#28434c;color:var(--cream);font-size:12px;box-shadow:none}.commands{max-width:850px}#online{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-top:14px;padding:12px 14px;border:1px solid #496460;background:#0b1d27aa;font-size:13px;color:var(--muted)}#online[hidden]{display:none}#online strong{color:var(--gold)}#online input{flex:1 1 260px;font-size:12px;padding:8px 10px}#online button{padding:9px 14px;font-size:12px}.note{font-size:12px;color:#829c9e;margin-top:12px}#status[role=alert]{color:#ffad91;white-space:pre-wrap}a{color:var(--gold)}@media(max-width:700px){main{margin:12px auto}header img{width:150px}.badge{font-size:9px}.toolbar{align-items:flex-start;flex-direction:column}#cover{gap:10px}#cover p{font-size:12px}#cover img{max-height:100px}button{padding:10px 20px}}
+    *{box-sizing:border-box}[hidden]{display:none!important}
+    html,body{height:100%}
+    body{margin:0;background:radial-gradient(ellipse at 50% 0,#233f48,transparent 65%),#08121b;color:var(--cream);font:15px/1.5 system-ui,sans-serif;overflow:hidden}
+    /* The page is exactly one screen: a slim bar, then the game fitted to whatever space is left. */
+    main{height:100vh;height:100dvh;display:flex;flex-direction:column}
+    header{flex:none;display:flex;align-items:center;gap:20px;padding:8px 16px;border-bottom:1px solid #1d3540;background:#08151ecc}
+    header img{height:34px;width:auto}
+    .commands{flex:1;min-width:0;color:var(--muted);font-size:12px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .commands strong{color:var(--cream)}
+    #stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;container-type:size}
+    #screen{position:relative;aspect-ratio:16/9;width:min(100cqw,100cqh*16/9);overflow:hidden;background:#0a1926}
+    canvas{width:100%;height:100%;display:block;outline:none}
+    #cover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:15px;background:radial-gradient(ellipse at center,#234450,#07141e 80%);text-align:center;padding:24px}
+    #cover img{width:min(640px,74%);max-height:30%;object-fit:contain}
+    #cover p{color:var(--muted);max-width:560px;margin:0}
+    button{background:var(--coral);color:#132a33;border:0;padding:15px 28px;font:800 15px system-ui;letter-spacing:.04em;cursor:pointer;box-shadow:0 4px 0 #713e32}
+    button:hover{background:#ffa17a}button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:4px}button:disabled{cursor:wait;opacity:.65}
+    button.secondary{background:#28434c;color:var(--cream);box-shadow:0 4px 0 #142a31}button.secondary:hover{background:#34575f}
+    button.link{background:none;box-shadow:none;color:var(--gold);padding:4px 8px;font-weight:600;text-decoration:underline}
+    header button{flex:none;padding:8px 14px;background:#28434c;color:var(--cream);font-size:12px;box-shadow:none}header button:hover{background:#34575f}
+    .choices{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:center}
+    label.name{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px}
+    input{background:#0b1d27;color:var(--cream);border:1px solid #496460;padding:10px 12px;font:600 15px system-ui;width:190px}
+    #invite-title{color:var(--gold);font-weight:800;letter-spacing:.06em}
+    #loading{width:min(360px,80%);height:5px;background:#36535b;display:none}#fill{height:100%;background:var(--gold);width:0;transition:width .1s linear}
+    #online{flex:none;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px 16px;border-top:1px solid #1d3540;background:#0b1d27;font-size:13px;color:var(--muted)}
+    #online strong{color:var(--gold)}#online input{flex:1 1 260px;font-size:12px;padding:6px 10px}#online button{padding:7px 14px;font-size:12px}
+    #status[role=alert]{color:#ffad91;white-space:pre-wrap}a{color:var(--gold)}
+    @media(max-width:900px){.commands{display:none}header{justify-content:space-between}}
+    @media(max-height:560px){#cover{gap:8px;padding:12px}#tagline{display:none}button{padding:10px 20px}}
   </style>
 </head>
 <body>
 <main>
-  <header><img src="logo.png" alt="Action Legends"><span class="badge">Arcade · 1–4 joueurs · Local ou en ligne</span></header>
+  <header>
+    <img src="logo.png" alt="Action Legends">
+    <div class="commands"><strong>Q / A · D</strong> déplacer &nbsp; <strong>W / Z / ↑</strong> viser haut &nbsp; <strong>Espace</strong> sauter &nbsp; <strong>J</strong> tirer &nbsp; <strong>K</strong> spécial &nbsp; <strong>Échap</strong> pause &nbsp;·&nbsp; Manette : <strong>A / ✕</strong> pour rejoindre</div>
+    <button id="fullscreen" type="button">PLEIN ÉCRAN</button>
+  </header>
   <div id="stage">
-    <canvas id="unity-canvas" width="1280" height="720" tabindex="0" aria-label="Action Legends, zone de jeu"></canvas>
-    <div id="cover">
-      <img src="logo.png" alt="Action Legends">
-      <p id="invite-title" hidden></p>
-      <p id="tagline">Quatre légendes. Une équipe. Des missions à faire grandir ensemble.</p>
-      <label class="name" id="name-row">Ton pseudo <input id="name" maxlength="12" autocomplete="nickname" placeholder="Joueur"></label>
-      <div class="choices" id="choices">
-        <button id="local" type="button">JOUER EN LOCAL</button>
-        <button id="host" class="secondary" type="button" disabled>CRÉER UNE PARTIE EN LIGNE</button>
+    <div id="screen">
+      <canvas id="unity-canvas" width="1280" height="720" tabindex="0" aria-label="Action Legends, zone de jeu"></canvas>
+      <div id="cover">
+        <img src="logo.png" alt="Action Legends">
+        <p id="invite-title" hidden></p>
+        <p id="tagline" hidden></p>
+        <label class="name" id="name-row">Ton pseudo <input id="name" maxlength="12" autocomplete="nickname" placeholder="Joueur"></label>
+        <div class="choices" id="choices">
+          <button id="local" type="button">JOUER EN LOCAL</button>
+          <button id="host" class="secondary" type="button" disabled>CRÉER UNE PARTIE EN LIGNE</button>
+        </div>
+        <div class="choices" id="join-choices" hidden>
+          <button id="join" type="button" disabled>REJOINDRE LA PARTIE</button>
+          <button id="local-instead" class="link" type="button">Jouer en local à la place</button>
+        </div>
+        <div id="loading"><div id="fill"></div></div>
+        <p id="status" aria-live="polite"></p>
       </div>
-      <div class="choices" id="join-choices" hidden>
-        <button id="join" type="button" disabled>REJOINDRE LA PARTIE</button>
-        <button id="local-instead" class="link" type="button">Jouer en local à la place</button>
-      </div>
-      <div id="loading"><div id="fill"></div></div>
-      <p id="status" aria-live="polite">Clavier et manettes · En ligne : crée une partie et envoie le lien à tes amis.</p>
     </div>
   </div>
   <div id="online" hidden>
@@ -39,8 +74,6 @@
     <button id="copy" type="button">COPIER LE LIEN D'INVITATION</button>
     <button id="leave" class="secondary" type="button">QUITTER</button>
   </div>
-  <div class="toolbar"><div class="commands"><strong>Q / A · D</strong> déplacer &nbsp; <strong>W / Z / ↑</strong> viser haut &nbsp; <strong>Espace</strong> sauter &nbsp; <strong>J</strong> tirer &nbsp; <strong>K</strong> spécial &nbsp; <strong>Échap</strong> pause (local).<br>Sur manette : <strong>A / ✕</strong> pour rejoindre en local. Cliquez dans le jeu pour lui donner le clavier.</div><button id="fullscreen" type="button">PLEIN ÉCRAN</button></div>
-  <p class="note">Le jeu fonctionne dans votre navigateur, sans compte ni serveur de jeu. En ligne, les navigateurs se connectent directement entre eux ; l'hôte doit garder son onglet visible pendant la partie. Cette version se joue sur ordinateur.</p>
 </main>
 <script type="module" src="net.js"></script>
 <script>
@@ -55,7 +88,7 @@ $('name').value=store.get('al-name');
 if(invitedCode){
   const resuming=store.hostCode()===invitedCode;
   $('invite-title').hidden=false;$('invite-title').textContent=resuming?'TA PARTIE EN LIGNE · CODE '+invitedCode:'INVITATION À UNE PARTIE EN LIGNE · CODE '+invitedCode;
-  $('tagline').textContent=resuming?'Relance ta partie : tes amis pourront rejoindre avec le même lien.':'Choisis ton pseudo et rejoins l\'équipe.';
+  $('tagline').hidden=false;$('tagline').textContent=resuming?'Relance ta partie : tes amis pourront rejoindre avec le même lien.':'Choisis ton pseudo et rejoins l\'équipe.';
   $('choices').hidden=true;$('join-choices').hidden=false;$('join').textContent=resuming?'RELANCER LA PARTIE':'REJOINDRE LA PARTIE';
 }
 function failure(message){status.setAttribute('role','alert');status.textContent=String(message)+'\nRechargez la page pour réessayer.';for(const id of ['choices','join-choices','name-row'])$(id).hidden=true;}
@@ -104,7 +137,7 @@ $('copy').addEventListener('click',async()=>{
   setTimeout(()=>{$('copy').textContent='COPIER LE LIEN D\'INVITATION';},2200);
 });
 $('leave').addEventListener('click',()=>{location.href=location.pathname+location.search;});
-document.getElementById('fullscreen').addEventListener('click',()=>{if(instance)instance.SetFullscreen(1);else document.getElementById('stage').requestFullscreen?.().catch(()=>{});});
+document.getElementById('fullscreen').addEventListener('click',()=>{if(instance)instance.SetFullscreen(1);else document.getElementById('screen').requestFullscreen?.().catch(()=>{});});
 canvas.addEventListener('pointerdown',()=>canvas.focus());
 window.addEventListener('keydown',event=>{if(document.activeElement===canvas&&['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.code))event.preventDefault();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&instance)instance.SendMessage('Action Legends','PauseFromBrowser');});

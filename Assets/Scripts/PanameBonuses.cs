@@ -39,7 +39,7 @@ namespace Paname
             else if(kind==3){p.hp=Mathf.Min(MaxPlayerHealth,p.hp+(DifficultyIndex==0?3:2));Announce("SOINS !");}
             else if(kind==4){p.boost=DifficultyIndex==0?10:8-DifficultyIndex;Announce("TURBO !");}
             else {Score+=1500;Announce("BONUS +1500");}
-            effects.Play(1,p.position+Vector2.up,.95f,.2f);Speak(bonusVoices[Mathf.Clamp(kind,0,5)]);
+            effects.Play(1,p.position+Vector2.up,.95f,.2f);Sound(pickupClip);Speak(bonusVoices[Mathf.Clamp(kind,0,5)]);
         }
         void TickBonuses(float dt)
         {
@@ -72,7 +72,7 @@ namespace Paname
             else Shoot(muzzle,aim*speed,damage,false,PlayerColors[slot],mode==3);
             p.fireTimer=mode==1?.055f:mode==3?.19f:Rate[p.hero];p.recoil=.045f;
             if(mode>0&&--p.ammo<=0){p.weapon=0;p.ammo=0;}
-            effects.Casing(p.position+new Vector2(p.facing*.45f,1.25f),p.facing);shake=Mathf.Max(shake,p.hero==1?.07f:.025f);Sound(fireClip);
+            effects.Casing(p.position+new Vector2(p.facing*.45f,1.25f),p.facing);shake=Mathf.Max(shake,p.hero==1?.07f:.025f);Sound(FireClip(mode));
         }
         static Vector2 AimDirection(Player p)=>p.aimUp?(p.moving?new Vector2(p.facing,1).normalized:Vector2.up):new Vector2(p.facing,0);
         static string Clock(float time){int minutes=(int)time/60;return minutes.ToString("00")+":"+(time%60).ToString("00.0");}

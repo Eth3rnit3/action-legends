@@ -34,8 +34,9 @@ public static class VerifyDifficultyAndBoss
             Check((int)Field(g,"bossVolley")>=3,"Alternance des attaques du boss");
             Check(g.phase==PanameGame.Phase.Playing,"Victoire avant boss vaincu");
             Call(g,"DamageBoss",100000);g.TickSimulation(3,new PlayerCommand[4]);Check(g.BossDefeated&&g.phase==PanameGame.Phase.Won,"Victoire après boss");
-            for(int i=0;i<6;i++)Check(Resources.Load<AudioClip>("Audio/bonus-"+i),"Voix bonus manquante");
-            Check(Resources.Load<AudioClip>("Audio/cerises-arcade").length>30,"Musique manquante");
+            foreach(var line in new[]{"bonus-0","bonus-1","bonus-2","bonus-3","bonus-4","bonus-5","boss-alert","victory"})foreach(var take in new[]{"a","b","c"})Check(Resources.Load<AudioClip>("Audio/Voices/"+line+"-"+take),"Voix manquante : "+line+"-"+take);
+            Check(Resources.Load<AudioClip>("Audio/Music/marseillaise-arcade").length>30&&Resources.Load<AudioClip>("Audio/Music/marseillaise-boss").length>30,"Musique manquante");
+            foreach(var sfx in new[]{"tir-A-mitraille","tir-B-laser-snes","tir-C-blaster-cps1","tir-D-pistolet-sec","impact-A-metal","impact-B-tchak","impact-C-ping","explosion-A-grosse","explosion-B-courte","explosion-C-bombe-neo","bonus-ramasse","bonus-coin","joueur-touche","boss-explose","menu-select","menu-start","roquette-depart"})Check(Resources.Load<AudioClip>("Audio/Sfx/"+sfx),"Bruitage manquant : "+sfx);
             return new{difficulties=true,easyEnemyHealth=easyHealth,legendEnemyHealth=hardHealth,bonusCadence=true,upwardShotHitsBoss=true,bombsDestructible=true,bossAttacks=true,victoryAfterBoss=true,musicAndVoices=true};
         }
         finally{g.ReturnToLobby();g.SetDifficulty(1);Time.timeScale=old;}

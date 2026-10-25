@@ -7,6 +7,8 @@ until the boss is defeated. Bombs have ground warnings and can be shot down.
 
 ## Music and voices
 
+Superseded: the soundtrack, voices and effects were replaced afterwards, see [AUDIO.md](AUDIO.md).
+
 `Assets/Resources/Audio/cerises-arcade.wav` and `cerises-boss.wav` are newly synthesized
 arrangements of Antoine Renard's nineteenth-century melody **Le Temps des cerises**.
 Only the public-domain melody is used. The accompaniment, percussion, instrument

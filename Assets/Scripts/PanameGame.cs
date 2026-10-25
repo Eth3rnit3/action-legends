@@ -55,7 +55,6 @@ namespace Paname
         string announcement="";
         float cameraX=7;
         AudioSource audioOut;
-        AudioClip fireClip,hitClip,specialClip;
         System.Random random=new System.Random(2026);
         readonly PlayerCommand[] frameInputs=new PlayerCommand[4];
         public sealed class Player
@@ -88,7 +87,6 @@ namespace Paname
             audioOut=gameObject.AddComponent<AudioSource>();audioOut.volume=.2f;
             projectileRoot=new GameObject("Projectiles • pool").transform;projectileRoot.SetParent(transform,false);
             effects=new ArcadeEffects(transform);
-            fireClip=ArcadeAudio.Create("Tir arcade",0);hitClip=ArcadeAudio.Create("Impact métallique",1);specialClip=ArcadeAudio.Create("Explosion",2);
             for(int row=0;row<4;row++)for(int frame=0;frame<4;frame++)Frame(false,row,frame);
             for(int row=0;row<3;row++)for(int frame=0;frame<4;frame++)Frame(true,row,frame);
             for(int row=0;row<4;row++)for(int frame=0;frame<6;frame++)ArcadeEffects.Frame(row,frame);
@@ -119,13 +117,13 @@ namespace Paname
             if(OnlineRound())return;
             ResetActors();random=new System.Random(2026);Score=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
             for(int i=0;i<4;i++)if(slots[i].joined)SpawnPlayer(i,2+i*1.3f);
-            phase=Phase.Playing;Announce(CurrentMission.intro);if(musicOut){musicOut.Stop();musicOut.clip=musicClip;}
+            phase=Phase.Playing;Announce(CurrentMission.intro);Sound(startClip);if(musicOut){musicOut.Stop();musicOut.clip=musicClip;}
         }
         public void ReturnToLobby(){if(OnlineReturn())return;phase=Phase.Lobby;cameraX=CurrentMission.cameraMin;BuildLobbyActors();}
         public void SelectHero(int playerSlot,int hero)
         {
             if(OnlineHero(hero)||phase!=Phase.Lobby||playerSlot<0||playerSlot>=4||!slots[playerSlot].joined)return;
-            slots[playerSlot].hero=Mathf.Clamp(hero,0,3);BuildLobbyActors();
+            slots[playerSlot].hero=Mathf.Clamp(hero,0,3);BuildLobbyActors();Sound(selectClip);
         }
         void Update()
         {
@@ -179,7 +177,7 @@ namespace Paname
                     if(index<0)for(int i=1;i<4;i++)if(!slots[i].joined){index=i;break;}
                     if(index<0&&slots[0].pad==null)index=0;
                     if(index<0)continue;
-                    slots[index].joined=true;slots[index].pad=pad;
+                    slots[index].joined=true;slots[index].pad=pad;Sound(coinClip);
                     if(players[index]==null){if(phase==Phase.Lobby)BuildLobbyActors();else SpawnPlayer(index,LeaderX()-1);}
                 }
             }
@@ -229,7 +227,7 @@ namespace Paname
         }
         void Special(Player p,int i)
         {
-            p.specialTimer=5+DifficultyIndex;shake=.35f;Sound(specialClip);
+            p.specialTimer=5+DifficultyIndex;shake=.35f;Sound(explosionClips);
             if(p.hero==0||p.hero==2)
             {
                 effects.Play(1,p.position+new Vector2(p.facing*.7f,1),2.8f,.25f,p.facing);
@@ -317,7 +315,7 @@ namespace Paname
         }
         void Damage(Player p,int amount)
         {
-            if(bossDefeated||p.invulnerable>0||p.hp<=0)return;p.hp-=amount*(DifficultyIndex==3?2:1);p.invulnerable=DifficultyIndex==0?1.2f:DifficultyIndex==1?.75f:DifficultyIndex==2?.6f:.45f;p.flash=.075f;shake=.15f;effects.Impact(p.position+Vector2.up,-p.facing);Sound(hitClip);
+            if(bossDefeated||p.invulnerable>0||p.hp<=0)return;p.hp-=amount*(DifficultyIndex==3?2:1);p.invulnerable=DifficultyIndex==0?1.2f:DifficultyIndex==1?.75f:DifficultyIndex==2?.6f:.45f;p.flash=.075f;shake=.15f;effects.Impact(p.position+Vector2.up,-p.facing);Sound(playerHitClip);
             if(p.hp<=0){p.downTimer=2.5f;p.root.gameObject.SetActive(false);}
         }
         void Shoot(Vector2 pos,Vector2 velocity,int damage,bool hostile,Color color,bool heavy=false)
@@ -364,7 +362,7 @@ namespace Paname
             var e=enemies[index];e.hp-=damage;e.flash=.065f;e.stagger=.11f;e.knockback=direction*(e.kind==2?1.2f:3.5f);
             effects.Impact(e.position+Vector2.up*1.1f,direction,e.kind==2,explosive);
             if(e.illustrated)ArcadeEffects.HitFlash(e.illustrated,1,flashProperties);
-            Sound(explosive?specialClip:hitClip);shake=Mathf.Max(shake,explosive?.3f:.055f);
+            Sound(explosive?explosionClips:impactClips);shake=Mathf.Max(shake,explosive?.3f:.055f);
             if(e.hp<=0)
             {
                 RecordKill(e.position);if(e.kind==2)Score+=50;
@@ -424,7 +422,8 @@ namespace Paname
             Panel(x,y,w,h,hover?Color.Lerp(color,Cream,.18f):color);
             Panel(x+1,y+1,w-2,2,new Color(1,1,1,.24f));Panel(x+1,y+h-2,w-2,2,new Color(0,0,0,.3f));
             var style=Style(h<30?11:17,dark?Ink:Cream,true,TextAnchor.MiddleCenter);
-            return GUI.Button(rect,text,new GUIStyle(style){normal={background=null,textColor=dark?Ink:Cream},hover={textColor=dark?Ink:Gold},active={textColor=Coral},padding=new RectOffset(6,6,3,3)});
+            bool clicked=GUI.Button(rect,text,new GUIStyle(style){normal={background=null,textColor=dark?Ink:Cream},hover={textColor=dark?Ink:Gold},active={textColor=Coral},padding=new RectOffset(6,6,3,3)});
+            if(clicked)Sound(selectClip);return clicked;
         }
         void Portrait(float x,float y,int hero,Color accent,float size=1)
         {
@@ -486,10 +485,6 @@ namespace Paname
                 Label(220,538,840,70,"Q / A, D : bouger   •   W / Z / ↑ : viser haut   •   ESPACE : sauter\nJ : tirer   •   K : spécial   •   ÉCHAP : reprendre\nMANETTE : stick   •   A / ✕   •   X / RT   •   Y / RB",14,Cream,false,TextAnchor.MiddleCenter);
                 Label(220,622,840,24,DifficultyNames[DifficultyIndex]+"   •   "+Wave+" / "+CurrentMission.waves.Length+" ASSAUTS   •   "+Reserves+" RENFORTS",12,Gold,true,TextAnchor.MiddleCenter);
             }
-        }
-        void OnDestroy()
-        {
-            if(fireClip)Destroy(fireClip);if(hitClip)Destroy(hitClip);if(specialClip)Destroy(specialClip);
         }
     }
 }

@@ -39,7 +39,7 @@ La fréquence des bonus, les munitions et la durée du turbo dépendent de la di
 - Nouveau menu avec logo illustré, cadres métalliques, sélection au clavier, souris ou manette.
 - Boulevard, quais, canal Saint-Martin et Bastille : décors successifs avec fondus aux raccords, défilement en parallaxe et chaussée au premier plan.
 - 24 images d'effets animés : flammes de bouche, impacts, explosions et poussière. Traceurs à cœur clair, douilles, recul au tir, étincelles sur le bouclier, flash blanc, réaction de recul et défaite de l'ennemi.
-- Sons de tir, d'impact et d'explosion composés de plusieurs couches, musique en boucle et annonces vocales françaises des bonus.
+- Bruitages rétro différents selon l'arme, impacts et explosions variés, musique en boucle et annonces vocales françaises des bonus.
 - Terrain plat : plateformes, vrais décors destructibles et animations plus riches restent à construire.
 - Les commandes sont séparées de la simulation. En ligne, chaque navigateur exécute la même simulation à partir des commandes de tous les joueurs : voir [docs/ONLINE.md](docs/ONLINE.md).
 
@@ -70,7 +70,7 @@ Choisir Détente, Arcade (par défaut), Difficile ou Légende dans le menu. La d
 
 À Bastille, la caméra cadre une arène et le boss caricatural apparaît. Les repères rouges annoncent ses attaques. Bouger pour éviter le mitraillage, sauter au-dessus des explosions ou détruire les bombes en vol. Maintenir W / Z / flèche haut avec J pour tirer verticalement ; courir en visant vers le haut donne un tir diagonal. À la manette, diriger le stick vers le haut avec X / RT. La victoire exige de détruire l’hélico. Sa résistance augmente avec le nombre de joueurs.
 
-La musique est un nouvel arrangement synthétisé du Temps des cerises ; le boss dispose de sa propre variation. Les voix françaises sont synthétiques, avec un effet radio. Le menu permet de couper séparément musique et voix. Les voix baissent temporairement le volume des tirs et de la musique. Voir [les crédits et le prompt du visuel](docs/UPDATE_050.md).
+La musique est un arrangement arcade de La Marseillaise en synthèse FM ; le boss a sa propre version en mineur. Chaque annonce vocale existe en trois prises jouées au hasard. Voir [l'audio](docs/AUDIO.md). Le menu permet de couper séparément musique et voix. Les voix baissent temporairement le volume des tirs et de la musique. Voir [les crédits et le prompt du visuel](docs/UPDATE_050.md).
 
 La vérification ciblée `AgentScripts/VerifyDifficultyAndBoss.cs` contrôle les différences de difficulté, les dégâts doublés en Légende, la cadence des bonus, les tirs verticaux contre le boss, les bombes destructibles, l’alternance des attaques, la victoire et la présence des sons.
 

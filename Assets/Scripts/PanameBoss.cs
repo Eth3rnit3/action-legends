@@ -110,7 +110,7 @@ namespace Paname
                     Vector2 sweep=bossAim+Vector2.right*(Mathf.Sin((1.7f-bossTimer)*4.2f)*1.8f);
                     Vector2 aim=(sweep-muzzle).normalized;
                     Shoot(muzzle,aim*(DifficultyIndex==0?13:16+DifficultyIndex*1.8f),1,true,Coral);
-                    effects.Muzzle(muzzle,facing,true);Sound(fireClip);bossShotTimer=(.14f-DifficultyIndex*.022f)*BossAttackPace;
+                    effects.Muzzle(muzzle,facing,true);Sound(bossGunClip);bossShotTimer=(.14f-DifficultyIndex*.022f)*BossAttackPace;
                 }
                 if(bossTimer<=0){bossAttack=0;bossTimer=.6f*AttackFactors[DifficultyIndex]*BossAttackPace;}
             }
@@ -150,7 +150,7 @@ namespace Paname
             effects.Play(explosion?1:3,bomb.position,explosion?2.8f:1.1f,explosion?.35f:.25f);
             if(explosion)
             {
-                Sound(specialClip);shake=.25f;
+                Sound(explosionClips);shake=.25f;
                 foreach(var p in players)if(p!=null&&p.hp>0&&Mathf.Abs(p.position.x-bomb.position.x)<1.45f&&p.position.y<1)Damage(p,1);
             }
             bomb.root.gameObject.SetActive(false);bomb.marker.gameObject.SetActive(false);Destroy(bomb.root.gameObject);Destroy(bomb.marker.gameObject);bossBombs.RemoveAt(index);
@@ -198,7 +198,7 @@ namespace Paname
             if(bossSight)bossSight.gameObject.SetActive(false);
             for(int i=bossBombs.Count-1;i>=0;i--)RemoveBossBomb(i,false);
             foreach(var shot in shots)if(shot.hostile)shot.life=0;
-            Announce("HÉLICO HORS SERVICE !");Sound(specialClip);
+            Announce("HÉLICO HORS SERVICE !");Sound(bossDownClip);
         }
         void DrawBossHUD()
         {

@@ -10,7 +10,7 @@ Pour une nouvelle mission, consulter [le guide des niveaux](docs/ADDING_A_LEVEL.
 
 ## Vérifications
 
-Lancer les deux commandes Python du README. Le workflow GitHub exécute les mêmes contrôles. Les compilations Unity ne tournent sur GitHub qu’après configuration de leur activation et ne reçoivent pas les secrets du mainteneur depuis une pull request.
+Lancer les deux commandes Python du README. Le workflow GitHub exécute les mêmes contrôles. Les compilations Unity tournent sur `main` et ne reçoivent pas les secrets du mainteneur depuis une pull request.
 
 Ne pas ajouter `Library`, `Temp`, `Logs`, `UserSettings`, `WebBuild`, licences Unity ou fichiers d’identifiants au dépôt. Les fichiers `.meta` créés par Unity pour les nouveaux assets doivent accompagner ces assets.
 

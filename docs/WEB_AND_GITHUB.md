@@ -25,13 +25,13 @@ Le workflow `.github/workflows/community.yml` prévoit trois étapes :
 2. **Build browser game** : seulement sur `main` ou un lancement manuel, lorsque la variable de dépôt `UNITY_CI_ENABLED` vaut `true`.
 3. **Publish GitHub Pages** : seulement après une compilation réussie et lorsque `PUBLISH_PAGES` vaut `true`.
 
-`PUBLISH_PAGES` vaut `true`. `UNITY_CI_ENABLED` reste à `false` tant que les secrets Unity ne sont pas configurés, pour ne pas faire échouer chaque modification de `main`. La compilation ne s’exécute pas avec les secrets Unity pour les pull requests ; celles-ci passent par la validation et la revue avant d’être intégrées.
+`UNITY_CI_ENABLED` et `PUBLISH_PAGES` valent `true` : chaque modification de `main` est compilée puis publiée. La compilation ne s’exécute pas avec les secrets Unity pour les pull requests ; celles-ci passent par la validation et la revue avant d’être intégrées.
 
-## Activer la compilation GitHub
+## Configuration de la compilation GitHub
 
 GameCI requiert une activation Unity adaptée au compte utilisé pour compiler. Pour une licence Personal, sa documentation décrit les secrets `UNITY_LICENSE`, `UNITY_EMAIL` et `UNITY_PASSWORD`. Ils doivent être ajoutés depuis les paramètres GitHub Actions du dépôt, jamais au code, à un ticket ou à une conversation publique. L’assistant n’a ni extrait ni envoyé ces identifiants.
 
-Après configuration, définir `UNITY_CI_ENABLED=true` puis lancer le workflow. Une compilation réussie fournit l’archive `action-legends-web` dans les artifacts GitHub Actions, même sans site publié.
+Ces secrets sont configurés et `UNITY_CI_ENABLED` vaut `true`. Passer la variable à `false` suspend la compilation, par exemple le temps de renouveler la licence. Une compilation réussie fournit l’archive `action-legends-web` dans les artifacts GitHub Actions, même sans site publié.
 
 Références : [activation GameCI](https://game.ci/docs/github/activation/), [action Unity Builder](https://github.com/game-ci/unity-builder).
 

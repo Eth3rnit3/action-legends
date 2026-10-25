@@ -1,6 +1,6 @@
 # Action Legends — guide de jeu
 
-Prototype Unity 2D — version 0.4.3 : quatre héros sélectionnables et coopération locale sur un même écran. Première mission : Panique à Paname, Paris en 2026.
+Prototype Unity 2D — version 0.5.0 : quatre héros sélectionnables et coopération locale sur un même écran. Première mission : Panique à Paname, Paris en 2026.
 
 ## Jouer
 
@@ -13,6 +13,7 @@ Le joueur 1 peut jouer immédiatement au clavier. Sans manette, un seul joueur r
 | Action | Joueur 1 au clavier | Manette |
 |---|---|---|
 | Déplacement | Q ou A / D | Stick gauche ou croix directionnelle |
+| Viser vers le haut | W, Z ou flèche haut | Stick / croix vers le haut |
 | Saut | Espace | A / croix |
 | Tir | J | X / carré ou gâchette droite |
 | Attaque spéciale | K | Y / triangle ou bouton supérieur droit |
@@ -24,11 +25,11 @@ Le clavier contrôle uniquement le joueur 1. Pour jouer à plusieurs, brancher d
 
 ## Première mission : Panique à Paname
 
-Avancer vers la droite à travers douze assauts, puis rejoindre la sortie à Bastille. Le parcours est six fois plus long que celui de la version 0.4.0 ; la progression reste libre pendant les combats. Trois types d'ennemis : fonceur, lanceur de projectiles et costaud au bouclier. Les attaques spéciales se rechargent en cinq secondes. Chaque joueur commence avec six points de vie ; les renforts sont partagés. Tous les trois assauts déployés, les héros encore debout reçoivent des soins et un renfort est ajouté. Il n'y a pas de tirs entre alliés.
+Avancer vers la droite à travers douze assauts, puis affronter le boss en hélicoptère à Bastille. Le parcours est six fois plus long que celui de la version 0.4.0 ; la progression reste libre pendant les combats. Trois types d'ennemis : fonceur, lanceur de projectiles et costaud au bouclier. Les attaques spéciales se rechargent en cinq à huit secondes selon la difficulté. Les points de vie et les renforts dépendent de la difficulté ; les renforts sont partagés. En Détente, tous les trois assauts déployés, les héros encore debout reçoivent des soins et un renfort est ajouté ; en Arcade, cela arrive tous les quatre assauts. Difficile et Légende ne reçoivent pas ce réapprovisionnement. Il n'y a pas de tirs entre alliés.
 
 Ramasser les caisses pour obtenir une mitrailleuse, un triple tir, des roquettes, des soins, dix secondes de turbo ou des points. Les armes bonus ont des munitions limitées ; le fusil de base est illimité. Le chronomètre permet de comparer ses temps de parcours.
 
-Depuis la version 0.4.3, un ennemi laisse un bonus tous les quinze ennemis éliminés, contre cinq auparavant. Les caisses du parcours sont espacées de 72 unités, contre 34, avec la première à 24 unités. La puissance et les munitions des armes restent identiques : les bonus sont des coups de pouce plus ponctuels.
+La fréquence des bonus, les munitions et la durée du turbo dépendent de la difficulté. Détente conserve le réglage de la version 0.4.3 : un bonus pour quinze ennemis et des caisses espacées de 72 unités. Les autres modes distribuent moins de ressources.
 
 ## État de cette version
 
@@ -38,8 +39,8 @@ Depuis la version 0.4.3, un ennemi laisse un bonus tous les quinze ennemis élim
 - Nouveau menu avec logo illustré, cadres métalliques, sélection au clavier, souris ou manette.
 - Boulevard, quais, canal Saint-Martin et Bastille : décors successifs avec fondus aux raccords, défilement en parallaxe et chaussée au premier plan.
 - 24 images d'effets animés : flammes de bouche, impacts, explosions et poussière. Traceurs à cœur clair, douilles, recul au tir, étincelles sur le bouclier, flash blanc, réaction de recul et défaite de l'ennemi.
-- Sons de tir, d'impact et d'explosion composés de plusieurs couches. Pas encore de musique.
-- Terrain plat : plateformes, vrais décors destructibles, boss et animations plus riches restent à construire.
+- Sons de tir, d'impact et d'explosion composés de plusieurs couches, musique en boucle et annonces vocales françaises des bonus.
+- Terrain plat : plateformes, vrais décors destructibles et animations plus riches restent à construire.
 - Les commandes sont séparées de la simulation. Le jeu en ligne nécessite encore une implémentation réseau et n'est pas disponible.
 
 ## Vérification
@@ -55,3 +56,20 @@ Les dossiers `Library`, `Temp`, `Logs` et `obj` sont des fichiers de travail Uni
 ## Missions et navigateur
 
 Le nom du jeu est Action Legends. Les missions sont chargées depuis les JSON de `Assets/Resources/Levels` ; de nouvelles missions apparaissent automatiquement dans le menu après compilation. Voir le [README](README.md) pour la version navigateur et les contributions.
+
+## Difficultés et boss — version 0.5.0
+
+Choisir Détente, Arcade (par défaut), Difficile ou Légende dans le menu. La difficulté reste fixe pendant une partie. Elle modifie la résistance, le nombre et l’agressivité des ennemis, les bonus, les dégâts en Légende et la résistance du boss.
+
+| Difficulté | PV | Renforts par joueur | Bonus par éliminations |
+|---|---:|---:|---:|
+| Détente | 6 | 3 | 15 |
+| Arcade | 5 | 2 | 22 |
+| Difficile | 4 | 1 | 28 |
+| Légende | 3 | 1 | 35 |
+
+À Bastille, la caméra cadre une arène et le boss caricatural apparaît. Les repères rouges annoncent ses attaques. Bouger pour éviter le mitraillage, sauter au-dessus des explosions ou détruire les bombes en vol. Maintenir W / Z / flèche haut avec J pour tirer verticalement ; courir en visant vers le haut donne un tir diagonal. À la manette, diriger le stick vers le haut avec X / RT. La victoire exige de détruire l’hélico. Sa résistance augmente avec le nombre de joueurs.
+
+La musique est un nouvel arrangement synthétisé du Temps des cerises ; le boss dispose de sa propre variation. Les voix françaises sont synthétiques, avec un effet radio. Le menu permet de couper séparément musique et voix. Les voix baissent temporairement le volume des tirs et de la musique. Voir [les crédits et le prompt du visuel](docs/UPDATE_050.md).
+
+La vérification ciblée `AgentScripts/VerifyDifficultyAndBoss.cs` contrôle les différences de difficulté, les dégâts doublés en Légende, la cadence des bonus, les tirs verticaux contre le boss, les bombes destructibles, l’alternance des attaques, la victoire et la présence des sons.

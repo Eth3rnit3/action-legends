@@ -62,7 +62,7 @@ namespace Paname
         {
             public Vector2 position; public float vertical,fireTimer,specialTimer,invulnerable,downTimer,walk,recoil,flash,dust;
             public int weapon,ammo; public float boost;
-            public int hp=6,hero,facing=1; public bool moving; public Transform root,leftLeg,rightLeg; public SpriteRenderer illustrated; public SpriteRenderer[] renderers;
+            public int hp=6,hero,facing=1; public bool moving,aimUp; public Transform root,leftLeg,rightLeg; public SpriteRenderer illustrated; public SpriteRenderer[] renderers;
         }
         sealed class Enemy
         {
@@ -92,14 +92,14 @@ namespace Paname
             for(int row=0;row<4;row++)for(int frame=0;frame<4;frame++)Frame(false,row,frame);
             for(int row=0;row<3;row++)for(int frame=0;frame<4;frame++)Frame(true,row,frame);
             for(int row=0;row<4;row++)for(int frame=0;frame<6;frame++)ArcadeEffects.Frame(row,frame);
-            BuildLobbyActors();
+            LoadSoundtrack();BuildLobbyActors();
         }
         void Sound(AudioClip clip){if(audioOut&&clip)audioOut.PlayOneShot(clip);}
         void ResetActors()
         {
             for(int i=actors.childCount-1;i>=0;i--){var child=actors.GetChild(i).gameObject;child.SetActive(false);Destroy(child);}
             foreach(var shot in shots){shot.active=false;shot.root.gameObject.SetActive(false);}
-            Array.Clear(players,0,4);enemies.Clear();shots.Clear();sparks.Clear();effects?.Clear();ResetBonuses();
+            Array.Clear(players,0,4);enemies.Clear();shots.Clear();sparks.Clear();effects?.Clear();ResetBonuses();ResetBoss();
         }
         void BuildLobbyActors()
         {
@@ -108,7 +108,7 @@ namespace Paname
         }
         void SpawnPlayer(int i,float x)
         {
-            var p=new Player{position=new Vector2(x,0),hero=slots[i].hero,invulnerable=2};
+            var p=new Player{position=new Vector2(x,0),hero=slots[i].hero,hp=MaxPlayerHealth,invulnerable=2};
             p.root=Actor(actors,p.hero,PlayerColors[i]);p.root.name="J"+(i+1)+" • "+HeroNames[p.hero];
             p.illustrated=p.root.Find("Illustration")?.GetComponent<SpriteRenderer>();
             p.leftLeg=p.root.Find("Jambe arrière");p.rightLeg=p.root.Find("Jambe avant");
@@ -116,9 +116,9 @@ namespace Paname
         }
         public void BeginRound()
         {
-            ResetActors();Score=0;Wave=0;Reserves=JoinedCount*3;pending=0;waveLive=false;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
+            ResetActors();Score=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
             for(int i=0;i<4;i++)if(slots[i].joined)SpawnPlayer(i,2+i*1.3f);
-            phase=Phase.Playing;Announce(CurrentMission.intro);
+            phase=Phase.Playing;Announce(CurrentMission.intro);if(musicOut){musicOut.Stop();musicOut.clip=musicClip;}
         }
         public void ReturnToLobby(){phase=Phase.Lobby;cameraX=CurrentMission.cameraMin;BuildLobbyActors();}
         public void SelectHero(int playerSlot,int hero)
@@ -154,7 +154,7 @@ namespace Paname
                 float remaining=Mathf.Min(Time.deltaTime,.25f);
                 while(remaining>0){float dt=Mathf.Min(remaining,1f/60);TickSimulation(dt,frameInputs);for(int i=0;i<4;i++){frameInputs[i].jump=false;frameInputs[i].special=false;}remaining-=dt;}
             }
-            UpdateCamera(Time.unscaledDeltaTime);
+            UpdateCamera(Time.unscaledDeltaTime);UpdateSoundtrack(Time.unscaledDeltaTime);
         }
         void CheckControllers()
         {
@@ -204,13 +204,13 @@ namespace Paname
                 if(p.hp<=0)
                 {
                     p.downTimer-=dt;
-                    if(p.downTimer<=0&&Reserves>0){Reserves--;p.hp=6;p.position=new Vector2(Mathf.Clamp(LeaderX()-1,1,CurrentMission.length-1),0);p.vertical=0;p.invulnerable=3;p.root.gameObject.SetActive(true);}
+                    if(p.downTimer<=0&&Reserves>0){Reserves--;p.hp=MaxPlayerHealth;p.position=new Vector2(Mathf.Clamp(LeaderX()-1,1,CurrentMission.length-1),0);p.vertical=0;p.invulnerable=3;p.root.gameObject.SetActive(true);}
                     else {p.root.gameObject.SetActive(false);continue;}
                 }
                 PlayerCommand input=i<commands.Length?commands[i]:default;
                 float move=Mathf.Clamp(input.move,-1,1);p.moving=Mathf.Abs(move)>.1f;if(Mathf.Abs(move)>.1f)p.facing=move>0?1:-1;
                 p.position.x+=move*Speed[p.hero]*(p.boost>0?1.35f:1)*dt;p.walk+=Mathf.Abs(move)*dt*13;
-                p.position.x=Mathf.Clamp(p.position.x,rear,CurrentMission.length);
+                p.position.x=Mathf.Clamp(p.position.x,rear,BossActive?bossArenaX+ArenaHalfWidth-1:CurrentMission.length);p.aimUp=input.aimUp;
                 if(input.jump&&p.position.y<=.001f)p.vertical=p.hero==2?12.8f:11;
                 p.vertical-=29*dt;p.position.y+=p.vertical*dt;if(p.position.y<0){p.position.y=0;p.vertical=0;}
                 if(input.fire&&p.fireTimer<=0)FirePlayer(p,i);
@@ -218,25 +218,26 @@ namespace Paname
                 if(p.moving&&p.position.y<.03f&&p.dust<=0){effects.Play(3,p.position+new Vector2(-p.facing*.28f,.1f),.42f,.3f,1,new Vector2(-p.facing*.18f,.2f));p.dust=.19f;}
                 SyncPlayer(i);
             }
-            UpdateWaves(dt);UpdateEnemies(dt);UpdateShots(dt);UpdateSparks(dt);effects.Tick(dt);TickBonuses(dt);
+            TickBoss(dt);if(!bossStarted)UpdateWaves(dt);UpdateEnemies(dt);UpdateShots(dt);UpdateSparks(dt);effects.Tick(dt);TickBonuses(dt);
             bool alive=false;foreach(var p in players)if(p!=null&&p.hp>0)alive=true;
             if(!alive&&Reserves==0){phase=Phase.Lost;Announce("ON REMET ÇA ?");}
-            if(LeaderX()>=CurrentMission.exitX){phase=Phase.Won;Announce("MISSION ACCOMPLIE !");}
         }
         void Special(Player p,int i)
         {
-            p.specialTimer=5;shake=.35f;Sound(specialClip);
+            p.specialTimer=5+DifficultyIndex;shake=.35f;Sound(specialClip);
             if(p.hero==0||p.hero==2)
             {
                 effects.Play(1,p.position+new Vector2(p.facing*.7f,1),2.8f,.25f,p.facing);
                 effects.Play(3,p.position+Vector2.up*.3f,1.8f,.4f);
                 float radius=p.hero==0?4:3.2f;
                 for(int e=enemies.Count-1;e>=0;e--)if(Vector2.Distance(p.position,enemies[e].position)<radius)HitEnemy(e,8,p.facing);
+                if(BossActive&&Vector2.Distance(p.position+Vector2.up,bossPosition)<radius+1)DamageBoss(24);
                 p.invulnerable=1;if(p.hero==2)p.vertical=12.8f;
             }
             else
             {
-                for(int j=-3;j<=3;j++)Shoot(p.position+new Vector2(p.facing*1.24f,1.2f),new Vector2(p.facing*(p.hero==1?26:19),j*(p.hero==1?.8f:2)),p.hero==1?4:5,false,PlayerColors[i],true);
+                Vector2 aim=AimDirection(p),side=new Vector2(-aim.y,aim.x);
+                for(int j=-3;j<=3;j++)Shoot(p.position+Vector2.up*1.2f+aim*.85f,aim*(p.hero==1?26:19)+side*j*(p.hero==1?.8f:2),p.hero==1?4:5,false,PlayerColors[i],true);
             }
         }
         void SyncPlayer(int i)
@@ -263,23 +264,23 @@ namespace Paname
             if(Wave>=CurrentMission.waves.Length)return;
             var wave=CurrentMission.waves[Wave];
             float gate=wave.atX;
-            if(!waveLive&&LeaderX()>gate-9){waveLive=true;pending=wave.baseEnemies+JoinedCount*wave.enemiesPerPlayer;spawnTimer=.05f;Announce("VAGUE "+(Wave+1)+"  /  "+CurrentMission.waves.Length);}
+            if(!waveLive&&LeaderX()>gate-9){waveLive=true;pending=Mathf.CeilToInt((wave.baseEnemies+JoinedCount*wave.enemiesPerPlayer)*CountFactors[DifficultyIndex]);spawnTimer=.05f;Announce("VAGUE "+(Wave+1)+"  /  "+CurrentMission.waves.Length);}
             if(!waveLive)return;
             spawnTimer-=dt;
-            if(pending>0&&spawnTimer<=0&&enemies.Count<wave.maxAlive)
+            if(pending>0&&spawnTimer<=0&&enemies.Count<Mathf.Min(42,Mathf.CeilToInt(wave.maxAlive*CountFactors[DifficultyIndex])))
             {
                 float x=Mathf.Clamp(LeaderX()+(pending%5==0?-6.5f:9+(pending%3)*1.3f),.5f,CurrentMission.length);
-                SpawnEnemy(x,wave.enemyPattern[pending%wave.enemyPattern.Length]);pending--;spawnTimer=wave.spawnInterval;
+                SpawnEnemy(x,DifficultyIndex>0&&pending%4==0?1:wave.enemyPattern[pending%wave.enemyPattern.Length]);pending--;spawnTimer=wave.spawnInterval*AttackFactors[DifficultyIndex];
             }
             if(pending==0)
             {
-                Wave++;waveLive=false;if(Wave%3==0){Reserves++;foreach(var p in players)if(p!=null&&p.hp>0)p.hp=Mathf.Min(6,p.hp+2);}
+                Wave++;waveLive=false;if((DifficultyIndex==0&&Wave%3==0)||(DifficultyIndex==1&&Wave%4==0)){Reserves++;foreach(var p in players)if(p!=null&&p.hp>0)p.hp=Mathf.Min(MaxPlayerHealth,p.hp+(DifficultyIndex==0?2:1));}
                 Announce(Wave==CurrentMission.waves.Length?"PASSAGE LIBRE  →  "+CurrentMission.exitLabel+" !":"CONTINUEZ !  →");Score+=500;
             }
         }
         void SpawnEnemy(float x,int kind)
         {
-            var e=new Enemy{position=new Vector2(x,0),kind=kind,hp=kind==2?6:kind==1?3:2,attackTimer=1};
+            var e=new Enemy{position=new Vector2(x,0),kind=kind,hp=Mathf.CeilToInt((kind==2?6:kind==1?3:2)*HealthFactors[DifficultyIndex]),attackTimer=.7f};
             e.root=Actor(actors,0,Coral,true,kind);e.illustrated=e.root.Find("Illustration")?.GetComponent<SpriteRenderer>();e.root.position=e.position;e.leftLeg=e.root.Find("Jambe arrière");e.rightLeg=e.root.Find("Jambe avant");enemies.Add(e);
             effects.Play(3,e.position+Vector2.up*.12f,.6f,.3f);
         }
@@ -296,13 +297,13 @@ namespace Paname
                 e.position.x=Mathf.Clamp(e.position.x+e.knockback*dt,.2f,CurrentMission.length+1);e.knockback=Mathf.Lerp(e.knockback,0,Mathf.Min(1,dt*14));
                 e.facing=target.position.x>=e.position.x?1:-1;e.attackTimer-=dt;
                 float desired=e.kind==1?5:.6f;
-                if(best>desired&&e.stagger<=0){e.position.x+=e.facing*(e.kind==0?5.8f:e.kind==1?3.6f:3.3f)*dt;e.walk+=dt*11;}
+                if(best>desired&&e.stagger<=0){e.position.x+=e.facing*(e.kind==0?5.8f:e.kind==1?3.6f:3.3f)*SpeedFactors[DifficultyIndex]*dt;e.walk+=dt*11;}
                 if(e.kind==1&&best<10&&e.attackTimer<=0&&e.stagger<=0)
                 {
                     var aim=(target.position+Vector2.up-e.position-Vector2.up*1.17f).normalized;
-                    Shoot(e.position+new Vector2(e.facing*.85f,1.17f),aim*8,1,true,Coral,true);e.attackTimer=1.65f;
+                    Shoot(e.position+new Vector2(e.facing*.85f,1.17f),aim*(8+DifficultyIndex*2),1,true,Coral,true);e.attackTimer=1.65f*AttackFactors[DifficultyIndex];
                 }
-                if(best<.9f&&target.position.y<1.35f&&e.attackTimer<=0&&e.stagger<=0){Damage(target,1);e.attackTimer=1;}
+                if(best<.9f&&target.position.y<1.35f&&e.attackTimer<=0&&e.stagger<=0){Damage(target,1);e.attackTimer=AttackFactors[DifficultyIndex];}
                 e.root.position=e.position;e.root.localScale=new Vector3(e.facing,1,1);
                 if(e.illustrated){int frame=best>desired?1+((int)(e.walk*.7f)%2):e.attackTimer> .8f?3:0;e.illustrated.sprite=Frame(true,e.kind,frame);ArcadeEffects.HitFlash(e.illustrated,e.flash>0?1:0,flashProperties);e.illustrated.transform.localRotation=Quaternion.Euler(0,0,e.stagger>0?-7:0);}
                 if(e.leftLeg)e.leftLeg.localRotation=Quaternion.Euler(0,0,Mathf.Sin(e.walk)*18);
@@ -311,7 +312,7 @@ namespace Paname
         }
         void Damage(Player p,int amount)
         {
-            if(p.invulnerable>0||p.hp<=0)return;p.hp-=amount;p.invulnerable=.9f;p.flash=.075f;shake=.15f;effects.Impact(p.position+Vector2.up,-p.facing);Sound(hitClip);
+            if(bossDefeated||p.invulnerable>0||p.hp<=0)return;p.hp-=amount*(DifficultyIndex==3?2:1);p.invulnerable=DifficultyIndex==0?1.2f:DifficultyIndex==1?.75f:DifficultyIndex==2?.6f:.45f;p.flash=.075f;shake=.15f;effects.Impact(p.position+Vector2.up,-p.facing);Sound(hitClip);
             if(p.hp<=0){p.downTimer=2.5f;p.root.gameObject.SetActive(false);}
         }
         void Shoot(Vector2 pos,Vector2 velocity,int damage,bool hostile,Color color,bool heavy=false)
@@ -344,6 +345,7 @@ namespace Paname
                 {
                     foreach(var p in players)if(p!=null&&p.hp>0&&SegmentDistance(before,s.position,p.position+Vector2.up)<.53f){Damage(p,s.damage);hit=true;break;}
                 }
+                else if(HitBossOrBomb(before,s.position,s.damage))hit=true;
                 else for(int e=0;e<enemies.Count;e++)if(SegmentDistance(before,s.position,enemies[e].position+Vector2.up)<(enemies[e].kind==2?.68f:.5f)){
                     if(s.explosive){Vector2 blast=enemies[e].position+Vector2.up;for(int k=enemies.Count-1;k>=0;k--)if(Vector2.Distance(enemies[k].position+Vector2.up,blast)<2.5f)HitEnemy(k,s.damage,s.velocity.x>=0?1:-1,true);}
                     else HitEnemy(e,s.damage,s.velocity.x>=0?1:-1,false);
@@ -383,6 +385,7 @@ namespace Paname
         void UpdateCamera(float dt)
         {
             float target=phase==Phase.Lobby?CurrentMission.cameraMin:Mathf.Clamp(LeaderX()+2.5f,CurrentMission.cameraMin,CurrentMission.cameraMax);
+            if(bossStarted&&phase!=Phase.Lobby)target=bossArenaX;
             if(phase!=Phase.Lobby)target=Mathf.Max(cameraX,target);
             cameraX=phase==Phase.Lobby?Mathf.Lerp(cameraX,target,1-Mathf.Exp(-dt*5)):target;
             float size=5.8f;
@@ -395,7 +398,7 @@ namespace Paname
             float scale=Mathf.Min(Screen.width/1280f,Screen.height/720f);float ox=(Screen.width-1280*scale)*.5f,oy=(Screen.height-720*scale)*.5f;
             GUI.matrix=Matrix4x4.TRS(new Vector3(ox,oy,0),Quaternion.identity,Vector3.one*scale);
             if(phase==Phase.Lobby){DrawLobby();return;}
-            DrawHUD();
+            DrawHUD();DrawBossHUD();
             if(phase==Phase.Paused)Overlay("ON SOUFFLE UN PEU.","PAUSE",()=>phase=Phase.Playing,"REPRENDRE");
             if(phase==Phase.Won)Overlay(CurrentMission.winTitle,"TEMPS "+Clock(SimulationTime)+"  •  "+Score.ToString("N0")+" POINTS",ReturnToLobby,"CHOISIR LES HÉROS");
             if(phase==Phase.Lost)Overlay("ÇA SE JOUE À UN POIL.","PLUS DE RENFORTS  •  "+Score.ToString("N0")+" POINTS",BeginRound,"REJOUER");
@@ -445,7 +448,7 @@ namespace Paname
                 {
                     Label(x+14,25,265,23,"J"+(i+1)+"  "+HeroNames[p.hero],15,PlayerColors[i],true);
                     Label(x+14,75,260,18,WeaponName(p.weapon)+(p.weapon>0?"  "+p.ammo:"  ∞")+(p.boost>0?"   TURBO "+Mathf.CeilToInt(p.boost)+"s":""),10,Gold,true);
-                    for(int h=0;h<6;h++)Panel(x+15+h*22,58,16,8,h<p.hp?PlayerColors[i]:C("3F555F"));
+                    for(int h=0;h<MaxPlayerHealth;h++)Panel(x+15+h*22,58,16,8,h<p.hp?PlayerColors[i]:C("3F555F"));
                     Label(x+160,50,120,23,p.hp<=0?(Reserves>0?"RETOUR EN COURS":"À TERRE"):p.specialTimer>0?"SPÉCIAL "+Mathf.CeilToInt(p.specialTimer)+"s":"SPÉCIAL PRÊT",11,p.specialTimer<=0?Cream:C("96AEAF"),true);
                     if(slot.pad!=null&&!slot.Connected)Label(x+14,75,260,18,"MANETTE DÉCONNECTÉE • A / ✕ pour revenir",10,Coral);
                 }
@@ -453,13 +456,13 @@ namespace Paname
             }
             Panel(22,124,250,35,Ink);Label(35,124,230,35,"SCORE  "+Score.ToString("000000"),17,Gold,true);
             Panel(510,124,250,35,Ink);Label(522,124,226,35,"TEMPS  "+Clock(SimulationTime),17,Gold,true);
-            Panel(992,124,266,35,Ink);Label(1007,124,240,35,"RENFORTS  "+Reserves+"   •   "+Wave+"/"+CurrentMission.waves.Length+" VAGUES",14,Cream,true);
+            Panel(992,124,266,35,Ink);Label(1007,124,240,35,"RÉSERVES  "+Reserves+"   •   "+Wave+"/"+CurrentMission.waves.Length,14,Cream,true);
             if(announcementTimer>0)
             {
                 Panel(335,170,610,45,new Color(.08f,.16f,.2f,.9f));Label(345,170,590,45,announcement,25,Gold,true,TextAnchor.MiddleCenter);
             }
             Panel(0,674,1280,46,new Color(.06f,.13f,.17f,.95f));
-            Label(22,677,1240,36,"Q / A, D : bouger   ESPACE : saut   J : tir   K : spécial   •   MANETTE : stick · A / ✕ · X / □ ou RT · Y / △   •   ÉCHAP : pause",13,Cream);
+            Label(22,677,1240,36,"Q / A, D : bouger   W / Z / ↑ : viser haut   ESPACE : saut   J : tir   K : spécial   •   MANETTE : stick · A · X / RT · Y   •   ÉCHAP : pause",13,Cream);
             foreach(var p in players)if(p!=null&&p.hp>0)
             {
                 int i=Array.IndexOf(players,p);var v=gameCamera.WorldToScreenPoint(p.position+Vector2.up*2.25f);

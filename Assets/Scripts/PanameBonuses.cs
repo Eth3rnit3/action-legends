@@ -8,8 +8,6 @@ namespace Paname
         sealed class Pickup {public int kind;public Vector2 position;public Transform root;public float age;}
         readonly List<Pickup> pickups=new List<Pickup>();
         static Texture2D bonusTexture;static readonly Sprite[] bonusSprites=new Sprite[6];
-        const int KillsPerBonus=15;
-        const float FirstSupplyX=24,SupplySpacing=72;
         int kills,nextSupply;float comboClock;int combo;
         public int KillCount=>kills;
         public int BonusCount=>pickups.Count;
@@ -37,14 +35,15 @@ namespace Paname
         public void GiveBonus(int slot,int kind)
         {
             var p=players[slot];if(p==null||p.hp<=0)return;
-            if(kind<3){p.weapon=kind+1;p.ammo=kind==0?120:kind==1?55:20;Announce(WeaponName(p.weapon)+" !");}
-            else if(kind==3){p.hp=Mathf.Min(6,p.hp+3);Announce("SOINS +3");}
-            else if(kind==4){p.boost=10;Announce("TURBO 10 SECONDES !");}
+            if(kind<3){p.weapon=kind+1;p.ammo=Mathf.RoundToInt((kind==0?120:kind==1?55:20)*(1-DifficultyIndex*.15f));Announce(WeaponName(p.weapon)+" !");}
+            else if(kind==3){p.hp=Mathf.Min(MaxPlayerHealth,p.hp+(DifficultyIndex==0?3:2));Announce("SOINS !");}
+            else if(kind==4){p.boost=DifficultyIndex==0?10:8-DifficultyIndex;Announce("TURBO !");}
             else {Score+=1500;Announce("BONUS +1500");}
-            effects.Play(1,p.position+Vector2.up,.95f,.2f);
+            effects.Play(1,p.position+Vector2.up,.95f,.2f);Speak(bonusVoices[Mathf.Clamp(kind,0,5)]);
         }
         void TickBonuses(float dt)
         {
+            if(bossStarted)return;
             comboClock-=dt;if(comboClock<=0)combo=0;
             while(nextSupply*SupplySpacing+FirstSupplyX<CurrentMission.length-5&&LeaderX()+13>=nextSupply*SupplySpacing+FirstSupplyX)
             {SpawnPickup(new Vector2(nextSupply*SupplySpacing+FirstSupplyX,0),nextSupply%6);nextSupply++;}
@@ -67,13 +66,15 @@ namespace Paname
         void FirePlayer(Player p,int slot)
         {
             int mode=p.weapon;float speed=mode==3?24:36;int damage=mode==3?10:mode==1?5:p.hero==1?5:p.hero==3?4:3;
-            Vector2 muzzle=p.position+new Vector2(p.facing*1.24f,1.2f);
-            if(mode==2)for(int k=-1;k<=1;k++)Shoot(muzzle,new Vector2(p.facing*speed,k*3.3f),4,false,PlayerColors[slot]);
-            else Shoot(muzzle,new Vector2(p.facing*speed,0),damage,false,PlayerColors[slot],mode==3);
+            Vector2 aim=AimDirection(p),side=new Vector2(-aim.y,aim.x);
+            Vector2 muzzle=p.position+Vector2.up*1.2f+aim*(p.aimUp?.65f:1.24f);
+            if(mode==2)for(int k=-1;k<=1;k++)Shoot(muzzle,aim*speed+side*k*3.3f,4,false,PlayerColors[slot]);
+            else Shoot(muzzle,aim*speed,damage,false,PlayerColors[slot],mode==3);
             p.fireTimer=mode==1?.055f:mode==3?.19f:Rate[p.hero];p.recoil=.045f;
             if(mode>0&&--p.ammo<=0){p.weapon=0;p.ammo=0;}
             effects.Casing(p.position+new Vector2(p.facing*.45f,1.25f),p.facing);shake=Mathf.Max(shake,p.hero==1?.07f:.025f);Sound(fireClip);
         }
+        static Vector2 AimDirection(Player p)=>p.aimUp?(p.moving?new Vector2(p.facing,1).normalized:Vector2.up):new Vector2(p.facing,0);
         static string Clock(float time){int minutes=(int)time/60;return minutes.ToString("00")+":"+(time%60).ToString("00.0");}
     }
 }

@@ -7,7 +7,7 @@ namespace Paname
     public struct PlayerCommand
     {
         public float move;
-        public bool jump, fire, special;
+        public bool jump, fire, special, aimUp;
     }
 
     public sealed class LocalSlot
@@ -31,11 +31,13 @@ namespace Paname
                 cmd.jump = k.spaceKey.wasPressedThisFrame;
                 cmd.fire = k.jKey.isPressed;
                 cmd.special = k.kKey.wasPressedThisFrame;
+                cmd.aimUp = k.wKey.isPressed || k.zKey.isPressed || k.upArrowKey.isPressed;
             }
             if (slot.Connected)
             {
                 float x = slot.pad.leftStick.x.ReadValue() + slot.pad.dpad.x.ReadValue();
                 if (Mathf.Abs(x) > .18f) cmd.move = Mathf.Clamp(x, -1, 1);
+                cmd.aimUp |= slot.pad.leftStick.y.ReadValue() > .45f || slot.pad.dpad.up.isPressed;
                 cmd.jump |= slot.pad.buttonSouth.wasPressedThisFrame;
                 cmd.fire |= slot.pad.buttonWest.isPressed || slot.pad.rightTrigger.isPressed;
                 cmd.special |= slot.pad.buttonNorth.wasPressedThisFrame || slot.pad.rightShoulder.wasPressedThisFrame;

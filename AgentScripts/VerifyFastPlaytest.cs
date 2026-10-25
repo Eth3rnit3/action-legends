@@ -10,7 +10,7 @@ public static class VerifyFastPlaytest
         var flags=BindingFlags.NonPublic|BindingFlags.Instance;
         try
         {
-            for(int i=0;i<4;i++)g.slots[i].joined=i==0;g.ReturnToLobby();g.SelectHero(0,3);
+            for(int i=0;i<4;i++)g.slots[i].joined=i==0;g.ReturnToLobby();g.SetDifficulty(0);g.SelectHero(0,3);
             if(g.JoinedCount!=1||g.slots[0].hero!=3)throw new Exception("Sélection clavier");
             g.slots[1].joined=true;g.BeginRound();var commands=new PlayerCommand[4];commands[0]=new PlayerCommand{move=1,fire=true};
             var camera=typeof(PanameGame).GetMethod("UpdateCamera",flags);float start=g.GetPlayerPosition(0).x,previous=start;

@@ -32,7 +32,7 @@ namespace Paname
             Panel(-2000,190,5280,520,new Color(.025f,.06f,.085f,.48f));
             if(menuLogo)GUI.DrawTexture(new Rect(30,9,690,170),menuLogo,ScaleMode.ScaleToFit,true);
             else Label(45,35,780,120,"ACTION LEGENDS",57,Cream,true);
-            Label(54,171,800,26,"QUATRE LÉGENDES. UNE ÉQUIPE. À VOUS D'ÉCRIRE LA SUITE.",14,Gold,true);
+            DrawDifficulty();DrawSoundOptions();
             IllustratedPanel(new Rect(913,27,315,155),Color.white);
             Panel(935,51,270,105,C("07192A"));
             Label(938,53,265,18,"MISSION "+(MissionIndex+1).ToString("00"),13,Gold,true);
@@ -66,11 +66,11 @@ namespace Paname
             {
                 if(Button(50+i*218,596,208,28,"J"+(i+1)+"  "+slots[i].DeviceName,menuPlayer==i?PlayerColors[i]:C("304C56"),menuPlayer==i))menuPlayer=i;
             }
-            Label(51,633,800,25,"CLIC ou ← / → : héros   •   ENTRÉE : partir",14,Cream);
-            Label(51,659,800,20,"A / ✕ sur une manette : rejoindre   •   START : partir",12,C("9AB6B6"));
+            Label(51,633,800,22,"CLIC / ← / → : héros  •  ENTRÉE : partir  •  A / ✕ : rejoindre",13,Cream);
+            Label(51,659,800,20,DifficultyHints[DifficultyIndex],12,Gold,true);
             if(Button(932,609,296,59,"DÉPLOYER L'ÉQUIPE  →",Coral,true))BeginRound();
             Panel(49,685,1178,1,new Color(.6f,.75f,.7f,.24f));
-            Label(51,690,1176,22,"VERSION 0.4.3   /   ACTION LEGENDS   /   MISSION : "+CurrentMission.title.ToUpperInvariant()+"",10,C("92AEAE"),true);
+            Label(51,690,1176,22,"VERSION 0.5.0   /   ACTION LEGENDS   /   MISSION : "+CurrentMission.title.ToUpperInvariant()+"",10,C("92AEAE"),true);
         }
     }
 }

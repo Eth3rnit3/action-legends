@@ -4,7 +4,7 @@ Jeu d’action arcade 2D pour un à quatre joueurs en coopération locale, const
 
 Le jeu est conçu pour tourner dans un navigateur de bureau à partir de fichiers statiques. Aucun compte joueur, serveur de jeu ou base de données n’est nécessaire.
 
-**État du dépôt : privé. GitHub Pages n’est pas activé.** Les vérifications des contributions sont automatiques. Les compilations Unity sur GitHub et la publication sont désactivées tant que leur configuration n’a pas été validée.
+**État du dépôt : public. Le jeu est publié sur [GitHub Pages](https://eth3rnit3.github.io/action-legends/).** Les vérifications des contributions sont automatiques. Chaque modification de `main` est compilée puis publiée par GitHub Actions dès que la licence Unity est configurée dans les secrets du dépôt.
 
 ## Jouer et développer
 
@@ -46,4 +46,4 @@ La vérification contrôle le format, les images référencées, la sortie, l’
 
 Clavier, manettes, quatre héros, trois types d’ennemis, trois vagues, effets arcade, renforts et premier niveau. Le multijoueur en ligne n’est pas implémenté. Les navigateurs de bureau sont la cible de cette version ; les commandes tactiles ne sont pas prévues.
 
-Les scripts et visuels sont présents dans le dépôt privé. Leur licence de redistribution devra être choisie avant son ouverture publique ; aucune licence de redistribution n’est accordée par ce README.
+Les scripts et visuels sont consultables dans le dépôt public. Leur licence de redistribution reste à choisir ; aucune licence de redistribution n’est accordée par ce README.

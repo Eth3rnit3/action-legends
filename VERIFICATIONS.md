@@ -41,4 +41,4 @@ Compilation WebGL réussie dans Unity 6000.4.7f1, sans erreur ni avertissement. 
 
 La progression complète des missions est vérifiée par commandes simulées, avec invulnérabilité pour isoler les vagues de l’équilibrage. Le test manette utilise un périphérique virtuel. Quatre manettes physiques et plusieurs navigateurs restent à tester.
 
-Le dépôt GitHub est privé. Aucun site Pages n’a été activé. La compilation et le déploiement distants sont préparés mais désactivés ; leur fonctionnement sur GitHub n’a pas été testé avec une activation Unity distante.
+Le dépôt GitHub est public et GitHub Pages est activé avec GitHub Actions comme source. La publication est activée ; la compilation distante attend la configuration des secrets Unity et n’a pas encore été testée avec une activation Unity distante.

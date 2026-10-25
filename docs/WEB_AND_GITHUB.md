@@ -25,9 +25,9 @@ Le workflow `.github/workflows/community.yml` prévoit trois étapes :
 2. **Build browser game** : seulement sur `main` ou un lancement manuel, lorsque la variable de dépôt `UNITY_CI_ENABLED` vaut `true`.
 3. **Publish GitHub Pages** : seulement après une compilation réussie et lorsque `PUBLISH_PAGES` vaut `true`.
 
-Les deux variables sont volontairement désactivées par défaut. La compilation ne s’exécute pas avec les secrets Unity pour les pull requests ; celles-ci passent par la validation et la revue avant d’être intégrées.
+`PUBLISH_PAGES` vaut `true`. `UNITY_CI_ENABLED` reste à `false` tant que les secrets Unity ne sont pas configurés, pour ne pas faire échouer chaque modification de `main`. La compilation ne s’exécute pas avec les secrets Unity pour les pull requests ; celles-ci passent par la validation et la revue avant d’être intégrées.
 
-## Activer plus tard la compilation GitHub
+## Activer la compilation GitHub
 
 GameCI requiert une activation Unity adaptée au compte utilisé pour compiler. Pour une licence Personal, sa documentation décrit les secrets `UNITY_LICENSE`, `UNITY_EMAIL` et `UNITY_PASSWORD`. Ils doivent être ajoutés depuis les paramètres GitHub Actions du dépôt, jamais au code, à un ticket ou à une conversation publique. L’assistant n’a ni extrait ni envoyé ces identifiants.
 
@@ -35,10 +35,10 @@ Après configuration, définir `UNITY_CI_ENABLED=true` puis lancer le workflow. 
 
 Références : [activation GameCI](https://game.ci/docs/github/activation/), [action Unity Builder](https://github.com/game-ci/unity-builder).
 
-## Activer plus tard GitHub Pages
+## GitHub Pages
 
-Le dépôt reste privé et aucun site n’est activé. **La confidentialité du dépôt et celle du site sont distinctes** : un site Pages peut être public même si sa source est privée. Pages sur un dépôt privé demande une offre GitHub compatible ; publier un site Pages à accès privé est une fonctionnalité d’organisation Enterprise Cloud.
+Le dépôt est public et GitHub Pages est activé avec GitHub Actions comme source. Le jeu est servi à l’adresse <https://eth3rnit3.github.io/action-legends/>. Le site est public.
 
-Lorsque la publication aura été décidée, choisir GitHub Actions comme source Pages, vérifier la visibilité du site et définir `PUBLISH_PAGES=true`. Après une contribution fusionnée et une compilation réussie, l’export remplacera automatiquement la version publiée.
+Après chaque modification de `main` et une compilation réussie, l’export remplace automatiquement la version publiée. Un nouveau push sur `main` n’interrompt pas une publication en cours ; seules les vérifications de pull requests sont annulées lorsqu’une version plus récente arrive.
 
 Références : [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages), [visibilité d’un site](https://docs.github.com/en/enterprise-cloud@latest/pages/getting-started-with-github-pages/changing-the-visibility-of-your-github-pages-site), [décompression Unity Web](https://docs.unity3d.com/6000.4/Documentation/Manual/webgl-deploying.html).

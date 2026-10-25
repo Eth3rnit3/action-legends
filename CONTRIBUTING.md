@@ -1,6 +1,6 @@
 # Contribuer à Action Legends
 
-Le dépôt reste privé pour le moment. Ces règles préparent son futur fonctionnement communautaire.
+Le dépôt est public. Ces règles encadrent son fonctionnement communautaire.
 
 ## Proposer une modification
 

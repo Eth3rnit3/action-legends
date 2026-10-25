@@ -70,7 +70,7 @@ namespace Paname
             Label(51,659,800,20,DifficultyHints[DifficultyIndex],12,Gold,true);
             if(Button(932,609,296,59,"DÉPLOYER L'ÉQUIPE  →",Coral,true))BeginRound();
             Panel(49,685,1178,1,new Color(.6f,.75f,.7f,.24f));
-            Label(51,690,1176,22,"VERSION 0.5.0   /   ACTION LEGENDS   /   MISSION : "+CurrentMission.title.ToUpperInvariant()+"",10,C("92AEAE"),true);
+            Label(51,690,1176,22,"VERSION 0.5.1   /   ACTION LEGENDS   /   MISSION : "+CurrentMission.title.ToUpperInvariant()+"",10,C("92AEAE"),true);
         }
     }
 }

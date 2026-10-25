@@ -7,15 +7,17 @@ namespace Paname
     {
         sealed class BossBomb
         {
-            public Vector2 position;public float age;public Transform root,marker;public SpriteRenderer warning;
+            public Vector2 position,origin;public float age,delay,flight;public bool launched;public Transform root,marker;public SpriteRenderer warning;
         }
         readonly List<BossBomb> bossBombs=new List<BossBomb>();
         Transform bossRoot,bossRotor,bossSight;
         SpriteRenderer bossRenderer;
+        Sprite bossBombSprite;
         Vector2 bossPosition,bossAim;
         int bossHealth,bossMaxHealth,bossAttack,bossVolley;
         float bossTime,bossTimer,bossShotTimer,bossFlash,bossArenaX,bossDeathClock,bossExplosionTimer;
-        bool bossStarted,bossDefeated;
+        bool bossStarted,bossDefeated,bossEnraged;
+        float BossAttackPace=>bossEnraged?.72f:1;
         public bool BossActive=>bossStarted&&!bossDefeated;
         public bool BossDefeated=>bossDefeated;
         public int BossHealth=>bossHealth;
@@ -23,13 +25,13 @@ namespace Paname
         void ResetBoss()
         {
             bossBombs.Clear();bossRoot=null;bossRotor=null;bossSight=null;bossRenderer=null;
-            bossStarted=false;bossDefeated=false;bossHealth=0;bossTime=0;bossDeathClock=0;
+            bossStarted=false;bossDefeated=false;bossEnraged=false;bossHealth=0;bossTime=0;bossDeathClock=0;
         }
         void SpawnBoss()
         {
             bossStarted=true;bossArenaX=cameraX;
             bossMaxHealth=Mathf.RoundToInt((DifficultyIndex==0?300:DifficultyIndex==1?560:DifficultyIndex==2?800:1100)*(1+.65f*(JoinedCount-1)));
-            bossHealth=bossMaxHealth;bossTimer=1.4f;bossAttack=0;bossVolley=0;bossTime=0;
+            bossHealth=bossMaxHealth;bossTimer=.8f;bossAttack=0;bossVolley=0;bossTime=0;
             foreach(var e in enemies){e.root.gameObject.SetActive(false);Destroy(e.root.gameObject);}enemies.Clear();pending=0;Wave=CurrentMission.waves.Length;
             bossRoot=new GameObject("Boss • Macron en hélico").transform;bossRoot.SetParent(actors,false);
             var texture=Resources.Load<Texture2D>("Art/macron-helicopter");
@@ -37,6 +39,7 @@ namespace Paname
             {
                 bossRenderer=bossRoot.gameObject.AddComponent<SpriteRenderer>();
                 bossRenderer.sprite=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),new Vector2(.5f,.5f),texture.width/8.8f,0,SpriteMeshType.FullRect);bossRenderer.sortingOrder=35;
+                if(!bossBombSprite)bossBombSprite=CreateBossBombSprite(texture);
             }
             bossRotor=Shape(bossRoot,"Rotor animé",-1,1.35f,6.5f,.055f,C("B8C8C9"),36);
             Shape(bossRoot,"Rotor ombre",-1,1.28f,5.6f,.04f,new Color(.08f,.14f,.19f,.6f),36);
@@ -70,7 +73,11 @@ namespace Paname
                 return;
             }
             bossTime+=dt;bossFlash=Mathf.Max(0,bossFlash-dt);
-            bossPosition=new Vector2(bossArenaX+Mathf.Sin(bossTime*.7f)*Mathf.Min(4.5f,ArenaHalfWidth-4),3.65f+Mathf.Sin(bossTime*1.4f)*.65f);
+            float movementTime=bossTime*(1.2f+DifficultyIndex*.16f);
+            // The phase stays continuous when the boss enters its faster second phase.
+            if(bossEnraged)movementTime+=bossRageTime*.35f;
+            if(bossEnraged)bossRageTime+=dt;
+            bossPosition=new Vector2(bossArenaX+Mathf.Sin(movementTime)*Mathf.Min(5.2f,ArenaHalfWidth-4),3.65f+Mathf.Sin(movementTime*1.65f)*.75f);
             bossRoot.position=bossPosition;
             var target=BossTarget();if(target==null)return;
             bossRoot.localScale=new Vector3(target.position.x<bossPosition.x?1:-1,1,1);
@@ -82,40 +89,60 @@ namespace Paname
                 bossAim=target.position+Vector2.up*.9f;bossVolley++;
                 if(bossVolley%2==1)
                 {
-                    bossAttack=1;bossTimer=Mathf.Max(.55f,.95f-DifficultyIndex*.12f);
-                    bossSight.position=new Vector2(bossAim.x,.07f);bossSight.localScale=new Vector3(1.4f,.065f,1);bossSight.gameObject.SetActive(true);
-                    Announce("MITRAILLAGE : BOUGEZ !");
+                    bossAttack=1;bossTimer=Mathf.Max(.4f,.72f-DifficultyIndex*.09f)*BossAttackPace;
+                    bossSight.position=new Vector2(bossAim.x,.07f);bossSight.localScale=new Vector3(4.8f,.065f,1);bossSight.gameObject.SetActive(true);
+                    Announce("RAFALE EN BALAYAGE : BOUGEZ !");
                 }
                 else
                 {
-                    int count=2+DifficultyIndex;
+                    int count=2+DifficultyIndex+(bossEnraged?1:0);
                     for(int i=0;i<count;i++)DropBossBomb(Mathf.Clamp(target.position.x+(i-(count-1)*.5f)*2.6f,bossArenaX-ArenaHalfWidth+1,bossArenaX+ArenaHalfWidth-1));
-                    bossAttack=0;bossTimer=2.6f*AttackFactors[DifficultyIndex];Announce("BOMBES : ESQUIVEZ OU DÉTRUISEZ-LES !");
+                    bossAttack=0;bossTimer=1.35f*AttackFactors[DifficultyIndex]*BossAttackPace;Announce("BOMBES : ESQUIVEZ OU DÉTRUISEZ-LES !");
                 }
             }
-            else if(bossAttack==1&&bossTimer<=0){bossAttack=2;bossTimer=1.3f;bossShotTimer=0;bossSight.gameObject.SetActive(false);}
+            else if(bossAttack==1&&bossTimer<=0){bossAttack=2;bossTimer=1.7f;bossShotTimer=0;bossSight.gameObject.SetActive(false);}
             else if(bossAttack==2)
             {
                 if(bossShotTimer<=0)
                 {
                     int facing=target.position.x<bossPosition.x?-1:1;
                     Vector2 muzzle=bossPosition+new Vector2(facing*3.2f,-.5f);
-                    Vector2 aim=(bossAim-muzzle).normalized;
-                    Shoot(muzzle,aim*(DifficultyIndex==0?10:13+DifficultyIndex),1,true,Coral);
-                    effects.Muzzle(muzzle,facing,true);Sound(fireClip);bossShotTimer=.2f-DifficultyIndex*.035f;
+                    Vector2 sweep=bossAim+Vector2.right*(Mathf.Sin((1.7f-bossTimer)*4.2f)*1.8f);
+                    Vector2 aim=(sweep-muzzle).normalized;
+                    Shoot(muzzle,aim*(DifficultyIndex==0?13:16+DifficultyIndex*1.8f),1,true,Coral);
+                    effects.Muzzle(muzzle,facing,true);Sound(fireClip);bossShotTimer=(.14f-DifficultyIndex*.022f)*BossAttackPace;
                 }
-                if(bossTimer<=0){bossAttack=0;bossTimer=1.1f*AttackFactors[DifficultyIndex];}
+                if(bossTimer<=0){bossAttack=0;bossTimer=.6f*AttackFactors[DifficultyIndex]*BossAttackPace;}
             }
             TickBossBombs(dt);
             if(bossHealth<bossMaxHealth*.5f&&bossTime%1<dt)effects.Play(3,bossPosition+Vector2.right*1.5f,.75f,.7f,1,Vector2.up*.6f);
         }
+        float bossRageTime;
+        static Sprite CreateBossBombSprite(Texture2D texture)
+        {
+            // Reuse the pixels of the upper missile on the helicopter. A native sprite
+            // mesh follows its outline, excluding the surrounding rack and fuselage.
+            var rect=new Rect(texture.width*.323f,texture.height*.291f,texture.width*.244f,texture.height*.115f);
+            float ppu=texture.width/6.2f;
+            var sprite=Sprite.Create(texture,rect,new Vector2(.5f,.5f),ppu,0,SpriteMeshType.FullRect);
+            Vector2[] outline={new Vector2(0,.48f),new Vector2(.08f,.75f),new Vector2(.19f,.89f),new Vector2(.76f,.89f),new Vector2(.88f,.99f),new Vector2(.99f,.99f),new Vector2(.99f,.72f),new Vector2(.93f,.49f),new Vector2(.99f,.26f),new Vector2(.99f,.03f),new Vector2(.88f,.03f),new Vector2(.77f,.12f),new Vector2(.18f,.1f),new Vector2(.07f,.28f)};
+            var vertices=new Vector2[outline.Length+1];var triangles=new ushort[outline.Length*3];
+            for(int i=0;i<outline.Length;i++)
+            {
+                vertices[i+1]=new Vector2((outline[i].x-.5f)*rect.width/ppu,(outline[i].y-.5f)*rect.height/ppu);
+                triangles[i*3]=0;triangles[i*3+1]=(ushort)(i+1);triangles[i*3+2]=(ushort)((i+1)%outline.Length+1);
+            }
+            sprite.OverrideGeometry(vertices,triangles);return sprite;
+        }
+        Vector2 BossBombRack()=>bossPosition+new Vector2(-.5f*(bossRoot?bossRoot.localScale.x:1),-.68f);
         void DropBossBomb(float x)
         {
             var root=new GameObject("Bombe du boss").transform;root.SetParent(actors,false);
-            Shape(root,"Corps",0,0,.36f,.52f,C("C39B45"),46,true);Box(root,"Ailette",0,.22f,.45f,.08f,Ink,47);
+            var renderer=root.gameObject.AddComponent<SpriteRenderer>();renderer.sprite=bossBombSprite;renderer.sortingOrder=46;
             root.gameObject.SetActive(false);
             var marker=Shape(actors,"Danger au sol",x,.05f,2.8f,.1f,Coral,43);
-            bossBombs.Add(new BossBomb{root=root,marker=marker,warning=marker.GetComponent<SpriteRenderer>(),position=new Vector2(x,bossPosition.y+.4f)});
+            // Keep the impact mark at x, then visibly release each missile from the rack.
+            bossBombs.Add(new BossBomb{root=root,marker=marker,warning=marker.GetComponent<SpriteRenderer>(),position=BossBombRack(),origin=BossBombRack(),delay=Mathf.Max(.3f,.55f-DifficultyIndex*.04f)*BossAttackPace+bossBombs.Count*.1f});
         }
         void RemoveBossBomb(int index,bool explosion)
         {
@@ -134,15 +161,27 @@ namespace Paname
             {
                 var bomb=bossBombs[i];bomb.age+=dt;
                 if(bomb.warning)bomb.warning.color=new Color(1,.3f,.15f,.35f+.65f*Mathf.Abs(Mathf.Sin(bomb.age*14)));
-                if(bomb.age<.75f)continue;
-                bomb.root.gameObject.SetActive(true);bomb.position.y-=dt*(3.1f+DifficultyIndex*.65f);bomb.root.position=bomb.position;bomb.root.Rotate(0,0,dt*130);
-                if(bomb.position.y<=.25f){bomb.position.y=.25f;RemoveBossBomb(i,true);}
+                if(bomb.age<bomb.delay)continue;
+                if(!bomb.launched){bomb.launched=true;bomb.origin=BossBombRack();bomb.flight=0;bomb.root.gameObject.SetActive(true);}
+                bomb.flight+=dt;
+                float t=Mathf.Clamp01(bomb.flight/(.95f-DifficultyIndex*.08f));
+                Vector2 before=bomb.position,end=new Vector2(bomb.marker.position.x,.25f);
+                bomb.position=Vector2.Lerp(bomb.origin,end,t)+Vector2.up*(Mathf.Sin(t*Mathf.PI)*.3f);
+                Vector2 heading=bomb.position-before;
+                if(heading.sqrMagnitude>.000001f)bomb.root.rotation=Quaternion.Euler(0,0,Mathf.Atan2(heading.y,heading.x)*Mathf.Rad2Deg+180);
+                bomb.root.position=bomb.position;
+                if(t>=1)RemoveBossBomb(i,true);
             }
         }
         bool HitBossOrBomb(Vector2 from,Vector2 to,int damage)
         {
             if(!BossActive)return false;
-            for(int i=bossBombs.Count-1;i>=0;i--)if(bossBombs[i].age>.75f&&SegmentDistance(from,to,bossBombs[i].position)<.4f){RemoveBossBomb(i,false);return true;}
+            for(int i=bossBombs.Count-1;i>=0;i--)
+            {
+                var bomb=bossBombs[i];if(!bomb.launched)continue;
+                Vector2 axis=bomb.root.TransformVector(Vector2.left).normalized*.5f;
+                if(SegmentDistance(from,to,bomb.position)<.35f||SegmentDistance(from,to,bomb.position+axis)<.28f||SegmentDistance(from,to,bomb.position-axis)<.28f){RemoveBossBomb(i,false);return true;}
+            }
             // A capsule around the fuselage excludes the rotor and most of the tail.
             float facing=bossRoot.localScale.x;
             for(int i=0;i<4;i++)if(SegmentDistance(from,to,bossPosition+new Vector2((-2+i*.85f)*facing,-.05f))<.95f)
@@ -153,6 +192,7 @@ namespace Paname
         {
             if(!BossActive)return;
             bossHealth=Mathf.Max(0,bossHealth-amount);bossFlash=.065f;
+            if(!bossEnraged&&bossHealth>0&&bossHealth<=bossMaxHealth/2){bossEnraged=true;bossRageTime=0;bossTimer=Mathf.Min(bossTimer,.35f);Announce("MACRON S'EMBALLE !");}
             if(bossHealth>0)return;
             bossDefeated=true;bossDeathClock=2.5f;bossExplosionTimer=0;Score+=10000;
             if(bossSight)bossSight.gameObject.SetActive(false);
@@ -163,10 +203,10 @@ namespace Paname
         void DrawBossHUD()
         {
             if(!BossActive)return;
-            Panel(290,585,700,70,new Color(.035f,.09f,.15f,.95f));
-            Label(308,588,660,23,"BOSS  •  MACRON EN HÉLICO",17,Gold,true,TextAnchor.MiddleCenter);
-            Panel(310,617,660,9,C("324752"));Panel(310,617,660*(bossHealth/(float)bossMaxHealth),9,Coral);
-            Label(308,631,660,18,"W / Z / ↑ + J : VISER EN HAUT  •  SAUTEZ, ESQUIVEZ, DÉTRUISEZ LES BOMBES",11,Cream,true,TextAnchor.MiddleCenter);
+            Label(370,622,510,20,"MACRON",12,Gold,true);
+            if(bossEnraged)Label(887,622,24,20,"!",16,Coral,true,TextAnchor.MiddleRight);
+            Panel(370,646,540,10,new Color(.035f,.09f,.14f,.85f));
+            Panel(372,648,536*(bossHealth/(float)bossMaxHealth),6,Coral);
         }
     }
 }

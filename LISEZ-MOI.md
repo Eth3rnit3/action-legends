@@ -1,6 +1,6 @@
 # Action Legends — guide de jeu
 
-Prototype Unity 2D — version 0.5.0 : quatre héros sélectionnables et coopération locale sur un même écran. Première mission : Panique à Paname, Paris en 2026.
+Prototype Unity 2D — version 0.5.1 : quatre héros sélectionnables et coopération locale sur un même écran. Première mission : Panique à Paname, Paris en 2026.
 
 ## Jouer
 
@@ -73,3 +73,9 @@ Choisir Détente, Arcade (par défaut), Difficile ou Légende dans le menu. La d
 La musique est un nouvel arrangement synthétisé du Temps des cerises ; le boss dispose de sa propre variation. Les voix françaises sont synthétiques, avec un effet radio. Le menu permet de couper séparément musique et voix. Les voix baissent temporairement le volume des tirs et de la musique. Voir [les crédits et le prompt du visuel](docs/UPDATE_050.md).
 
 La vérification ciblée `AgentScripts/VerifyDifficultyAndBoss.cs` contrôle les différences de difficulté, les dégâts doublés en Légende, la cadence des bonus, les tirs verticaux contre le boss, les bombes destructibles, l’alternance des attaques, la victoire et la présence des sons.
+
+## Boss — version 0.5.1
+
+Les projectiles largués réutilisent directement les pixels des munitions dessinées sur l’hélicoptère. Ils partent désormais des supports et rejoignent les zones rouges annoncées au sol. L’hélico traverse plus vite l’arène, tire des rafales plus denses en balayage et laisse moins de répit entre ses attaques. À mi-vie, le mode Furie accélère encore ses déplacements et ses attaques et ajoute un projectile par largage. Les sons ne sont pas modifiés par cette mise à jour.
+
+Le HUD 0.5.1 affiche seulement des informations compactes : nom court et vie des joueurs, arme et munitions, spécial, score, chrono et renforts. Les bandeaux d’attaque et les consignes permanentes sont supprimés. La barre de vie du boss reste discrète en bas de l’écran. Échap / Start ouvre la pause avec le rappel des commandes.

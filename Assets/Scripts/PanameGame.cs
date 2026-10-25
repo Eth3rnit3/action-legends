@@ -438,36 +438,32 @@ namespace Paname
             if(hero==1)Panel(x+65*s,y+62*s,49*s,15*s,Ink);
             if(hero>=2){Panel(x+45*s,y+44*s,69*s,10*s,hero==2?Teal:Coral);Panel(x+26*s,y+47*s,24*s,8*s,hero==2?Teal:Coral);}
         }
+        static readonly string[] HeroShortNames={"CHUCK","ARNOLD","JCVD","SYLVESTER"};
         void DrawHUD()
         {
             for(int i=0;i<4;i++)
             {
-                float x=22+i*314;var p=players[i];var slot=slots[i];if(!slot.joined)continue;
-                Panel(x,18,292,96,new Color(.08f,.16f,.2f,.94f));Panel(x,18,4,96,slot.joined?PlayerColors[i]:C("527078"));
-                if(slot.joined&&p!=null)
-                {
-                    Label(x+14,25,265,23,"J"+(i+1)+"  "+HeroNames[p.hero],15,PlayerColors[i],true);
-                    Label(x+14,75,260,18,WeaponName(p.weapon)+(p.weapon>0?"  "+p.ammo:"  ∞")+(p.boost>0?"   TURBO "+Mathf.CeilToInt(p.boost)+"s":""),10,Gold,true);
-                    for(int h=0;h<MaxPlayerHealth;h++)Panel(x+15+h*22,58,16,8,h<p.hp?PlayerColors[i]:C("3F555F"));
-                    Label(x+160,50,120,23,p.hp<=0?(Reserves>0?"RETOUR EN COURS":"À TERRE"):p.specialTimer>0?"SPÉCIAL "+Mathf.CeilToInt(p.specialTimer)+"s":"SPÉCIAL PRÊT",11,p.specialTimer<=0?Cream:C("96AEAF"),true);
-                    if(slot.pad!=null&&!slot.Connected)Label(x+14,75,260,18,"MANETTE DÉCONNECTÉE • A / ✕ pour revenir",10,Coral);
-                }
-                else Label(x+15,34,260,42,"A / ✕ : REJOINDRE",14,C("8BAAAA"),false,TextAnchor.MiddleCenter);
+                var p=players[i];if(!slots[i].joined||p==null)continue;
+                float x=22+i*314;
+                Panel(x,18,264,62,new Color(.035f,.09f,.14f,.76f));Panel(x,18,3,62,PlayerColors[i]);
+                Label(x+12,22,194,22,"J"+(i+1)+"  "+HeroShortNames[p.hero],13,PlayerColors[i],true);
+                Label(x+213,23,44,20,p.specialTimer>0?"★ "+Mathf.CeilToInt(p.specialTimer):"★",12,p.specialTimer<=0?Gold:C("7C929A"),true,TextAnchor.MiddleRight);
+                for(int h=0;h<MaxPlayerHealth;h++)Panel(x+13+h*17,56,11,6,h<p.hp?PlayerColors[i]:C("344A55"));
+                string ammo=p.weapon==0?"∞":(p.weapon==1?"MG":p.weapon==2?"3W":"R")+"  "+p.ammo;
+                Label(x+130,45,123,25,p.hp<=0?"×":ammo,14,Cream,true,TextAnchor.MiddleRight);
+                if(p.boost>0)Panel(x+3,77,261*Mathf.Clamp01(p.boost/(DifficultyIndex==0?10:8-DifficultyIndex)),3,Gold);
+                if(slots[i].pad!=null&&!slots[i].Connected)Label(x+112,22,24,22,"!",16,Coral,true);
             }
-            Panel(22,124,250,35,Ink);Label(35,124,230,35,"SCORE  "+Score.ToString("000000"),17,Gold,true);
-            Panel(510,124,250,35,Ink);Label(522,124,226,35,"TEMPS  "+Clock(SimulationTime),17,Gold,true);
-            Panel(992,124,266,35,Ink);Label(1007,124,240,35,"RÉSERVES  "+Reserves+"   •   "+Wave+"/"+CurrentMission.waves.Length,14,Cream,true);
-            if(announcementTimer>0)
+            Label(22,88,230,28,Score.ToString("00000000"),20,Gold,true);
+            Label(520,88,240,28,Clock(SimulationTime),17,Cream,true,TextAnchor.MiddleCenter);
+            Panel(1206,94,7,7,Cream);Panel(1203,103,13,8,Cream);
+            Label(1223,87,48,29,"×"+Reserves,18,Cream,true);
+            if(JoinedCount>1)for(int i=0;i<4;i++)
             {
-                Panel(335,170,610,45,new Color(.08f,.16f,.2f,.9f));Label(345,170,590,45,announcement,25,Gold,true,TextAnchor.MiddleCenter);
-            }
-            Panel(0,674,1280,46,new Color(.06f,.13f,.17f,.95f));
-            Label(22,677,1240,36,"Q / A, D : bouger   W / Z / ↑ : viser haut   ESPACE : saut   J : tir   K : spécial   •   MANETTE : stick · A · X / RT · Y   •   ÉCHAP : pause",13,Cream);
-            foreach(var p in players)if(p!=null&&p.hp>0)
-            {
-                int i=Array.IndexOf(players,p);var v=gameCamera.WorldToScreenPoint(p.position+Vector2.up*2.25f);
+                var p=players[i];if(p==null||p.hp<=0)continue;
+                var v=gameCamera.WorldToScreenPoint(p.position+Vector2.up*2.25f);
                 float scale=Mathf.Min(Screen.width/1280f,Screen.height/720f),ox=(Screen.width-1280*scale)*.5f,oy=(Screen.height-720*scale)*.5f;
-                Label((v.x-ox)/scale-25,(Screen.height-v.y-oy)/scale-12,50,23,"J"+(i+1),15,PlayerColors[i],true,TextAnchor.MiddleCenter);
+                Label((v.x-ox)/scale-14,(Screen.height-v.y-oy)/scale-9,28,18,(i+1).ToString(),12,PlayerColors[i],true,TextAnchor.MiddleCenter);
             }
         }
         void Overlay(string title,string subtitle,Action action,string button)
@@ -475,7 +471,12 @@ namespace Paname
             Panel(-2000,-2000,5280,4720,new Color(.06f,.12f,.16f,.88f));
             Label(90,223,1100,76,title,45,Cream,true,TextAnchor.MiddleCenter);Label(90,310,1100,45,subtitle,20,Gold,true,TextAnchor.MiddleCenter);
             if(Button(440,393,400,58,button,Coral,true))action();
-            if(phase==Phase.Paused&&Button(440,467,400,46,"RETOUR À LA SÉLECTION",C("34515C")))ReturnToLobby();
+            if(phase==Phase.Paused)
+            {
+                if(Button(440,467,400,46,"RETOUR À LA SÉLECTION",C("34515C")))ReturnToLobby();
+                Label(220,538,840,70,"Q / A, D : bouger   •   W / Z / ↑ : viser haut   •   ESPACE : sauter\nJ : tirer   •   K : spécial   •   ÉCHAP : reprendre\nMANETTE : stick   •   A / ✕   •   X / RT   •   Y / RB",14,Cream,false,TextAnchor.MiddleCenter);
+                Label(220,622,840,24,DifficultyNames[DifficultyIndex]+"   •   "+Wave+" / "+CurrentMission.waves.Length+" ASSAUTS   •   "+Reserves+" RENFORTS",12,Gold,true,TextAnchor.MiddleCenter);
+            }
         }
         void OnDestroy()
         {

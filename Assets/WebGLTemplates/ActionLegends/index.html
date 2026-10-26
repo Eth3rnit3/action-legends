@@ -76,6 +76,8 @@
   </div>
 </main>
 <script type="module" src="net.js"></script>
+<script src="nostr-tools.js"></script>
+<script src="scores.js"></script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
@@ -126,8 +128,9 @@ function startGame(mode){
     .then(value=>{instance=value;window.ALNet?.attach(value);document.getElementById('cover').hidden=true;document.getElementById('cover').style.display='none';canvas.focus();}).catch(failure);
   document.body.appendChild(script);
 }
-$('local').addEventListener('click',()=>startGame('local'));
-$('local-instead').addEventListener('click',()=>{history.replaceState(null,'',location.pathname+location.search);startGame('local');});
+// The pseudo also signs the scores a local team publishes to the leaderboard.
+$('local').addEventListener('click',()=>{playerName();startGame('local');});
+$('local-instead').addEventListener('click',()=>{playerName();history.replaceState(null,'',location.pathname+location.search);startGame('local');});
 $('host').addEventListener('click',()=>startGame('host'));
 $('join').addEventListener('click',()=>startGame(store.hostCode()===invitedCode?'host':'guest'));
 $('copy').addEventListener('click',async()=>{

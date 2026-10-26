@@ -16,7 +16,7 @@ namespace Paname
         float codeMessageUntil,codeClosedAt=-1;
         // The browser can deliver the Enter that validated a code to the Input System a frame
         // later: the lobby ignores its keys briefly so that Enter does not also deploy the team.
-        bool LobbyKeysBlocked=>codeEntry||Time.unscaledTime<codeClosedAt+.35f;
+        bool LobbyKeysBlocked=>codeEntry||boardOpen||Time.unscaledTime<codeClosedAt+.35f;
         void CloseCodeEntry(){codeEntry=false;codeClosedAt=Time.unscaledTime;}
         public bool IsUnlocked(int index)=>index==0||PlayerPrefs.GetInt(UnlockKey+missions[index].id,0)==1;
         public int UnlockedCount{get{int n=0;for(int i=0;i<MissionCount;i++)if(IsUnlocked(i))n++;return n;}}
@@ -29,7 +29,8 @@ namespace Paname
         }
         void WinMission()
         {
-            phase=Phase.Won;Announce("MISSION ACCOMPLIE !");Speak(winVoice);Unlock(missionIndex+1);
+            // A replay checked for the leaderboard must not unlock missions for the viewer.
+            phase=Phase.Won;Announce("MISSION ACCOMPLIE !");Speak(winVoice);if(!headless)Unlock(missionIndex+1);
         }
         // The team keeps its heroes and score; online, the host's restart message carries both to the guests.
         public void NextMission()
@@ -55,7 +56,7 @@ namespace Paname
         void DrawCodeButton()
         {
             if(Online&&!IsHost)return;
-            if(Button(740,117,153,27,"CODE MISSION",C("2A414E"))){codeEntry=true;codeText="";}
+            if(Button(740,98,153,25,"CODE MISSION",C("2A414E"))){codeEntry=true;codeText="";}
             if(Time.unscaledTime<codeMessageUntil&&!codeEntry)Label(913,184,315,20,codeMessage,12,codeMessage=="CODE INCONNU"?Coral:Gold,true,TextAnchor.MiddleCenter);
         }
         void DrawCodeEntry()

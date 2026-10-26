@@ -135,6 +135,7 @@ namespace Paname
             if(OnlineRound())return;
             ResetActors();Score=carriedScore;carriedScore=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
             for(int i=0;i<4;i++)if(slots[i].joined)SpawnPlayer(i,2+i*1.3f);
+            StartReplay();
             phase=Phase.Playing;Announce(CurrentMission.intro);Sound(startClip);if(musicOut){musicOut.Stop();musicOut.clip=musicClip;}
         }
         public void ReturnToLobby(){if(OnlineReturn())return;phase=Phase.Lobby;cameraX=CurrentMission.cameraMin;BuildLobbyActors();}
@@ -145,6 +146,7 @@ namespace Paname
         }
         void Update()
         {
+            TickVerifier();
             if(OnlineUpdate())return;
             if(Keyboard.current!=null && Keyboard.current.escapeKey.wasPressedThisFrame)
             {
@@ -166,13 +168,7 @@ namespace Paname
                 }
             }
             else if(phase==Phase.Won&&NextMissionDefinition!=null&&ContinuePressed())NextMission();
-            else if(phase==Phase.Playing)
-            {
-                for(int i=0;i<4;i++)frameInputs[i]=slots[i].joined?LocalControls.Read(slots[i],i):default;
-                // Bounded substeps keep collisions stable on slower machines.
-                float remaining=Mathf.Min(Time.deltaTime,.25f);
-                while(remaining>0){float dt=Mathf.Min(remaining,1f/60);TickSimulation(dt,frameInputs);for(int i=0;i<4;i++){frameInputs[i].jump=false;frameInputs[i].special=false;}remaining-=dt;}
-            }
+            else if(phase==Phase.Playing)LocalStep();
             UpdateCamera(Time.unscaledDeltaTime);UpdateSoundtrack(Time.unscaledDeltaTime);
         }
         void CheckControllers()
@@ -197,7 +193,7 @@ namespace Paname
                     if(index<0&&slots[0].pad==null)index=0;
                     if(index<0)continue;
                     slots[index].joined=true;slots[index].pad=pad;Sound(coinClip);
-                    if(players[index]==null){if(phase==Phase.Lobby)BuildLobbyActors();else SpawnPlayer(index,LeaderX()-1);}
+                    if(players[index]==null){if(phase==Phase.Lobby)BuildLobbyActors();else{SpawnPlayer(index,LeaderX()-1);ReplayBroken("UN JOUEUR A REJOINT EN COURS DE MISSION");}}
                 }
             }
             for(int i=0;i<4;i++)if(slots[i].Connected && slots[i].pad.startButton.wasPressedThisFrame)
@@ -459,6 +455,7 @@ namespace Paname
             if(phase==Phase.Paused)Overlay("ON SOUFFLE UN PEU.","PAUSE",()=>phase=Phase.Playing,"REPRENDRE");
             if(phase==Phase.Won)Overlay(CurrentMission.winTitle,"TEMPS "+Clock(SimulationTime)+"  ·  "+Score.ToString("N0")+" POINTS",NextMissionDefinition!=null?NextMission:(Action)ReturnToLobby,NextMissionDefinition!=null?"MISSION SUIVANTE  »":"CHOISIR LES HÉROS");
             if(phase==Phase.Lost)Overlay("ÇA SE JOUE À UN POIL.","PLUS DE RENFORTS  ·  "+Score.ToString("N0")+" POINTS",BeginRound,"REJOUER");
+            DrawPublishRow();
         }
         readonly Dictionary<ulong,GUIStyle> labelStyles=new Dictionary<ulong,GUIStyle>();
         GUIStyle Style(int size,Color color,bool bold=false,TextAnchor align=TextAnchor.MiddleLeft)

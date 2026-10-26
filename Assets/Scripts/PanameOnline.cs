@@ -296,7 +296,7 @@ namespace Paname
         {
             if(frame.left!=0)for(int i=0;i<4;i++)if((frame.left&(1<<i))!=0)DropPlayer(i);
             for(int i=0;i<4;i++){int f=frame.flags[i];frameInputs[i]=new PlayerCommand{move=frame.moves[i]/100f,fire=(f&1)!=0,aimUp=(f&2)!=0,jump=(f&4)!=0,special=(f&8)!=0};}
-            TickSimulation(NetStep,frameInputs);NetTick++;
+            RecordTick(frame.left,frame.moves,frame.flags);TickSimulation(NetStep,frameInputs);EndReplayTick();NetTick++;
             if(NetTick%HashInterval!=0)return;
             lastHash=StateHash();
             if(IsHost){hostHashes[NetTick]=lastHash;hostHashes.Remove(NetTick-HashInterval*20);}

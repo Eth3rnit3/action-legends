@@ -28,8 +28,9 @@ namespace Paname
         void DrawLobby()
         {
             // While the code panel is open, the lobby underneath stays visible but ignores clicks.
-            GUI.enabled=!codeEntry;DrawLobbyPage();GUI.enabled=true;
+            GUI.enabled=!codeEntry&&!boardOpen;DrawLobbyPage();GUI.enabled=true;
             if(codeEntry)DrawCodeEntry();
+            else if(boardOpen)DrawBoard();
         }
         void DrawLobbyPage()
         {
@@ -38,7 +39,7 @@ namespace Paname
             Panel(-2000,190,5280,520,new Color(.025f,.06f,.085f,.48f));
             if(menuLogo)GUI.DrawTexture(new Rect(30,9,690,170),menuLogo,ScaleMode.ScaleToFit,true);
             else Label(45,35,780,120,"ACTION LEGENDS",57,Cream,true);
-            DrawDifficulty();DrawSoundOptions();DrawCodeButton();
+            DrawDifficulty();DrawSoundOptions();DrawCodeButton();DrawBoardButton();
             IllustratedPanel(new Rect(913,27,315,155),Color.white);
             Panel(935,51,270,105,C("07192A"));
             Label(938,53,265,18,"MISSION "+(MissionIndex+1).ToString("00"),13,Gold,true);

@@ -60,8 +60,8 @@ namespace Paname
         }
         void DrawSoundOptions()
         {
-            if(Button(740,45,153,27,musicEnabled?"MUSIQUE : OUI":"MUSIQUE : NON",C("2A414E")))musicEnabled=!musicEnabled;
-            if(Button(740,81,153,27,voiceEnabled?"VOIX : OUI":"VOIX : NON",C("2A414E"))){voiceEnabled=!voiceEnabled;if(!voiceEnabled)voiceOut.Stop();}
+            if(Button(740,40,153,25,musicEnabled?"MUSIQUE : OUI":"MUSIQUE : NON",C("2A414E")))musicEnabled=!musicEnabled;
+            if(Button(740,69,153,25,voiceEnabled?"VOIX : OUI":"VOIX : NON",C("2A414E"))){voiceEnabled=!voiceEnabled;if(!voiceEnabled)voiceOut.Stop();}
         }
     }
 }

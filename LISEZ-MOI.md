@@ -1,6 +1,6 @@
 # Action Legends — guide de jeu
 
-Prototype Unity 2D — version 0.6.0 : quatre héros sélectionnables et coopération locale sur un même écran. Trois missions qui s’enchaînent : Paris, Marseille, puis Tokyo.
+Prototype Unity 2D — version 0.7.0 : quatre héros sélectionnables et coopération locale sur un même écran. Trois missions qui s’enchaînent : Paris, Marseille, puis Tokyo.
 
 ## Jouer
 
@@ -42,6 +42,10 @@ Tokyo de nuit : neuf assauts de Shibuya à la tour de Tokyo en passant par Akiha
 ## Campagne et codes
 
 Les missions s’enchaînent. Au départ, seule Panique à Paname est ouverte. Une mission gagnée débloque la suivante dans ce navigateur, et l’écran de victoire affiche son code ; **MISSION SUIVANTE** (ou Entrée / Start) la lance aussitôt avec les mêmes héros et le score acquis. Au menu, **CODE MISSION** permet de saisir un code pour rejoindre directement une mission, par exemple sur un autre ordinateur. Les flèches du menu ne parcourent que les missions débloquées. En ligne, seul l’hôte choisit la mission et saisit les codes.
+
+## Classement mondial
+
+À la fin d’une mission, **PUBLIER MON SCORE** envoie le score et le replay de la partie sur des relais Nostr publics, sous le pseudo de la page d’accueil. **CLASSEMENT**, au menu, montre le top 10 de chaque mission et difficulté ; chaque score est rejoué dans le navigateur avant d’être affiché. Depuis la version 0.7.0, le jeu local avance par pas fixes de 1/60 s comme le jeu en ligne. Détails et limites dans [docs/CLASSEMENT.md](docs/CLASSEMENT.md).
 
 ## État de cette version
 

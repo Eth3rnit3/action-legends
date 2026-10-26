@@ -17,7 +17,7 @@ public static class VerifyMissions
             Check(g.CurrentMission.id=="panique-a-paname"&&g.CurrentMission.title=="Panique à Paname","Panique à Paname est une mission du catalogue",checks);
             var added=JsonUtility.FromJson<MissionDefinition>(JsonUtility.ToJson(original[0]));added.id="test-mission";added.title="Mission de vérification";added.length=40;added.exitX=37;added.cameraMax=34;
             added.waves=new[]{new MissionWave{atX=12,baseEnemies=1,enemiesPerPlayer=0,maxAlive=1,spawnInterval=.2f,enemyPattern=new[]{0}}};added.Validate();
-            missionsField.SetValue(g,new[]{original[0],added});g.phase=PanameGame.Phase.Lobby;g.SelectMission(1);
+            missionsField.SetValue(g,new[]{original[0],added});g.phase=PanameGame.Phase.Lobby;PlayerPrefs.SetInt("action-legends.unlocked.test-mission",1);g.SelectMission(1);
             Check(g.MissionCount==2&&g.CurrentMission.id=="test-mission","Une mission supplémentaire devient sélectionnable",checks);
             for(int i=0;i<4;i++)g.slots[i].joined=i==0;g.BeginRound();var commands=new PlayerCommand[4];commands[0]=new PlayerCommand{move=1,fire=true};
             // The test mission ends with the boss like any other: shoot it down once it appears.
@@ -31,7 +31,7 @@ public static class VerifyMissions
         }
         finally
         {
-            missionsField.SetValue(g,original);indexField.SetValue(g,0);g.phase=PanameGame.Phase.Lobby;g.SelectMission(0);g.ReturnToLobby();Time.timeScale=scale;
+            PlayerPrefs.DeleteKey("action-legends.unlocked.test-mission");missionsField.SetValue(g,original);indexField.SetValue(g,0);g.phase=PanameGame.Phase.Lobby;g.SelectMission(0);g.ReturnToLobby();Time.timeScale=scale;
         }
     }
 }

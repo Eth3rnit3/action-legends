@@ -365,7 +365,8 @@ namespace Paname
                 Vector2 muzzle=e.position+new Vector2(e.type.muzzle.x*e.facing,e.type.muzzle.y),aim=new Vector2(e.facing,0);
                 if(e.Role==EnemyRole.Shotgun)
                 {
-                    for(int j=-1;j<=1;j++){var pellet=Shoot(ShotLook.Bullet,muzzle,(Vector2)(Quaternion.Euler(0,0,j*7*e.facing)*aim)*(13+DifficultyIndex),1);if(pellet!=null)pellet.life=.45f;}
+                    // The shotgun is held above chest height: the spread fans downward so every pellet can reach a standing hero.
+                    for(int j=0;j<3;j++){var pellet=Shoot(ShotLook.Bullet,muzzle,(Vector2)(Quaternion.Euler(0,0,-(3+j*5)*e.facing)*aim)*(13+DifficultyIndex),1);if(pellet!=null)pellet.life=.45f;}
                     shake=Mathf.Max(shake,.08f);
                 }
                 else Shoot(ShotLook.Bullet,muzzle,aim*(e.Role==EnemyRole.Smg?12+DifficultyIndex*1.4f:11+DifficultyIndex*1.5f),1);

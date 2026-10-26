@@ -1,6 +1,6 @@
 # Action Legends — guide de jeu
 
-Prototype Unity 2D — version 0.5.1 : quatre héros sélectionnables et coopération locale sur un même écran. Première mission : Panique à Paname, Paris en 2026.
+Prototype Unity 2D — version 0.6.0 : quatre héros sélectionnables et coopération locale sur un même écran. Trois missions qui s’enchaînent : Paris, Marseille, puis Tokyo.
 
 ## Jouer
 
@@ -33,7 +33,15 @@ La fréquence des bonus, les munitions et la durée du turbo dépendent de la di
 
 ## Deuxième mission : Mistral Gagnant
 
-Marseille en 2026 : dix assauts du Vieux-Port à la Canebière en passant par le Panier, puis l'hélicoptère d'une chaîne d'info en continu au pied de Notre-Dame-de-la-Garde. Musique arcade sur La Coupo Santo. Choisir la mission avec les flèches du menu. Détails dans [docs/MISSION_MARSEILLE.md](docs/MISSION_MARSEILLE.md).
+Marseille en 2026 : dix assauts du Vieux-Port à la Canebière en passant par le Panier, puis l'hélicoptère d'une chaîne d'info en continu au pied de Notre-Dame-de-la-Garde. Musique arcade sur La Coupo Santo. Détails dans [docs/MISSION_MARSEILLE.md](docs/MISSION_MARSEILLE.md).
+
+## Troisième mission : Tokyo Néon
+
+Tokyo de nuit : neuf assauts de Shibuya à la tour de Tokyo en passant par Akihabara. Tous les ennemis sont armés — pistolet, mitraillette, fusil à pompe. Ils s’arrêtent pour viser, puis tirent à hauteur de poitrine : sauter au bon moment évite la balle, passer derrière eux aussi. Le boss, le Mécha Shogun, marche vers l’équipe et alterne rafale de gatling, piétinement qui lance deux ondes de choc à sauter, et salve de missiles. Musique arcade sur Sakura Sakura. Détails dans [docs/MISSION_TOKYO.md](docs/MISSION_TOKYO.md).
+
+## Campagne et codes
+
+Les missions s’enchaînent. Au départ, seule Panique à Paname est ouverte. Une mission gagnée débloque la suivante dans ce navigateur, et l’écran de victoire affiche son code ; **MISSION SUIVANTE** (ou Entrée / Start) la lance aussitôt avec les mêmes héros et le score acquis. Au menu, **CODE MISSION** permet de saisir un code pour rejoindre directement une mission, par exemple sur un autre ordinateur. Les flèches du menu ne parcourent que les missions débloquées. En ligne, seul l’hôte choisit la mission et saisit les codes.
 
 ## État de cette version
 

@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "order": 3,
+  "id": "tokyo-neon",
+  "code": "SAKURA",
+  "title": "Tokyo Néon",
+  "location": "Tokyo, 2026",
+  "intro": "TOKYO BRILLE : ILS SONT ARMÉS, SAUTEZ !",
+  "exitLabel": "TOUR DE TOKYO",
+  "winTitle": "ARIGATO, LES LÉGENDES !",
+  "backgrounds": [
+    "Art/tokyo/shibuya",
+    "Art/tokyo/akihabara",
+    "Art/tokyo/minato"
+  ],
+  "ground": "Art/tokyo/sol",
+  "music": "Audio/Music/sakura-arcade",
+  "bossMusic": "Audio/Music/sakura-boss",
+  "enemySheet": "Art/tokyo/enemies",
+  "enemies": [
+    {
+      "role": "pistol",
+      "row": 0,
+      "muzzle": {
+        "x": 1.33,
+        "y": 1.43
+      }
+    },
+    {
+      "role": "smg",
+      "row": 1,
+      "muzzle": {
+        "x": 1.18,
+        "y": 1.39
+      }
+    },
+    {
+      "role": "shotgun",
+      "row": 2,
+      "muzzle": {
+        "x": 1.52,
+        "y": 1.61
+      }
+    }
+  ],
+  "length": 330,
+  "exitX": 327,
+  "cameraMin": 7,
+  "cameraMax": 324,
+  "waves": [
+    {
+      "atX": 14,
+      "baseEnemies": 10,
+      "enemiesPerPlayer": 4,
+      "maxAlive": 12,
+      "spawnInterval": 0.34,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "atX": 46,
+      "baseEnemies": 10,
+      "enemiesPerPlayer": 4,
+      "maxAlive": 12,
+      "spawnInterval": 0.33,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "atX": 78,
+      "baseEnemies": 12,
+      "enemiesPerPlayer": 4,
+      "maxAlive": 13,
+      "spawnInterval": 0.32,
+      "enemyPattern": [
+        0,
+        1,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 110,
+      "baseEnemies": 13,
+      "enemiesPerPlayer": 4,
+      "maxAlive": 13,
+      "spawnInterval": 0.31,
+      "enemyPattern": [
+        0,
+        1,
+        0,
+        2,
+        1
+      ]
+    },
+    {
+      "atX": 142,
+      "baseEnemies": 15,
+      "enemiesPerPlayer": 4,
+      "maxAlive": 14,
+      "spawnInterval": 0.3,
+      "enemyPattern": [
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 174,
+      "baseEnemies": 15,
+      "enemiesPerPlayer": 4,
+      "maxAlive": 14,
+      "spawnInterval": 0.29,
+      "enemyPattern": [
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 206,
+      "baseEnemies": 17,
+      "enemiesPerPlayer": 4,
+      "maxAlive": 15,
+      "spawnInterval": 0.28,
+      "enemyPattern": [
+        2,
+        1,
+        0,
+        1,
+        2,
+        0
+      ]
+    },
+    {
+      "atX": 238,
+      "baseEnemies": 18,
+      "enemiesPerPlayer": 4,
+      "maxAlive": 15,
+      "spawnInterval": 0.27,
+      "enemyPattern": [
+        2,
+        1,
+        0,
+        1,
+        2,
+        0
+      ]
+    },
+    {
+      "atX": 270,
+      "baseEnemies": 20,
+      "enemiesPerPlayer": 4,
+      "maxAlive": 16,
+      "spawnInterval": 0.26,
+      "enemyPattern": [
+        2,
+        1,
+        2,
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "boss": {
+    "enabled": true,
+    "kind": "mecha",
+    "name": "MÉCHA SHOGUN",
+    "sprite": "Art/tokyo/mecha-shogun",
+    "intro": "ALERTE : LE MÉCHA SHOGUN SE RÉVEILLE !",
+    "rage": "LE SHOGUN PASSE EN SURCHAUFFE !",
+    "defeat": "SHOGUN HORS SERVICE !",
+    "health": 1.3
+  }
+}

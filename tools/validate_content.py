@@ -3,12 +3,29 @@
 import json
 import math
 import re
+import struct
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 IMAGES = (".png", ".jpg", ".jpeg")
 SOUNDS = (".wav", ".ogg", ".mp3")
+ROLES = ("rusher", "thrower", "shield", "pistol", "smg", "shotgun")
+ARMED = ("pistol", "smg", "shotgun")
+BOSS_KINDS = ("helicopter", "mecha")
+
+
+def sheet_rows(resources, path):
+    """Rows of four square frames in an enemy sheet, read from the PNG header; None if unknown."""
+    file = resources / (path + ".png")
+    try:
+        header = file.read_bytes()[:24]
+    except OSError:
+        return None
+    if header[:8] != b"\x89PNG\r\n\x1a\n":
+        return None
+    width, height = struct.unpack(">II", header[16:24])
+    return max(1, round(height / (width / 4)))
 
 
 def validate_mission(data, resources):
@@ -60,12 +77,39 @@ def validate_mission(data, resources):
     resource("ground", data.get("ground"), "Art/", IMAGES)
     resource("music", data.get("music"), "Audio/", SOUNDS)
     resource("bossMusic", data.get("bossMusic"), "Audio/", SOUNDS)
+    code = data.get("code")
+    if code is not None and (not isinstance(code, str) or not re.fullmatch(r"[A-Z0-9]{4,10}", code)):
+        errors.append("code must be 4 to 10 uppercase letters or digits")
+    sheet = data.get("enemySheet")
+    resource("enemy sheet", sheet, "Art/", IMAGES)
+    rows = sheet_rows(resources, sheet) if isinstance(sheet, str) and sheet.strip() else 3
+    enemies = data.get("enemies")
+    roster = 3
+    if enemies is not None:
+        if not isinstance(enemies, list) or not 1 <= len(enemies) <= 6:
+            errors.append("enemies must contain one to six enemy types")
+        else:
+            roster = len(enemies)
+            for i, enemy in enumerate(enemies):
+                if not isinstance(enemy, dict) or enemy.get("role") not in ROLES:
+                    errors.append(f"enemy {i}: role must be one of {', '.join(ROLES)}")
+                    continue
+                row = enemy.get("row", 0)
+                if type(row) is not int or row < 0 or rows is not None and row >= rows:
+                    errors.append(f"enemy {i}: row must exist in the enemy sheet")
+                if enemy["role"] in ARMED:
+                    muzzle = enemy.get("muzzle")
+                    if not isinstance(muzzle, dict) or not all(
+                            not isinstance(muzzle.get(k), bool) and isinstance(muzzle.get(k), (int, float)) and 0 < muzzle.get(k) < 3 for k in "xy"):
+                        errors.append(f"enemy {i}: armed enemies need a muzzle with x and y between 0 and 3")
     boss = data.get("boss", {})
     if not isinstance(boss, dict):
         errors.append("boss must be an object")
     else:
         if not isinstance(boss.get("enabled", True), bool):
             errors.append("boss.enabled must be true or false")
+        if boss.get("kind", "helicopter") not in BOSS_KINDS:
+            errors.append(f"boss.kind must be one of {', '.join(BOSS_KINDS)}")
         for key, limit in {"name": 30, "intro": 80, "rage": 80, "defeat": 80}.items():
             value = boss.get(key)
             if value is not None and (not isinstance(value, str) or len(value) > limit):
@@ -96,8 +140,8 @@ def validate_mission(data, resources):
         if isinstance(interval, bool) or not isinstance(interval, (int, float)) or not math.isfinite(interval) or not .1 <= interval <= 10:
             errors.append(f"wave {i}: spawnInterval must be between .1 and 10")
         pattern = wave.get("enemyPattern")
-        if not isinstance(pattern, list) or not 1 <= len(pattern) <= 30 or any(type(v) is not int or v not in (0, 1, 2) for v in pattern):
-            errors.append(f"wave {i}: enemyPattern must use 0, 1 and 2")
+        if not isinstance(pattern, list) or not 1 <= len(pattern) <= 30 or any(type(v) is not int or not 0 <= v < roster for v in pattern):
+            errors.append(f"wave {i}: enemyPattern must use enemy types 0 to {roster - 1}")
     return errors
 
 
@@ -106,6 +150,7 @@ def main():
     files = sorted((resources / "Levels").glob("*.json"))
     failures = []
     ids = set()
+    codes = set()
     if not files:
         failures.append("No missions found")
     for file in files:
@@ -116,6 +161,10 @@ def main():
                 if data["id"] in ids:
                     errors.append("Duplicate mission id")
                 ids.add(data["id"])
+                if data.get("code") in codes:
+                    errors.append("Duplicate mission code")
+                if data.get("code"):
+                    codes.add(data["code"])
                 if file.stem != data["id"]:
                     errors.append("Filename must match mission id")
             failures.extend(f"{file.name}: {error}" for error in errors)

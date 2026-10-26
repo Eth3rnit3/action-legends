@@ -60,6 +60,35 @@ class MissionValidationTests(unittest.TestCase):
                 data = copy.deepcopy(self.data)
                 data["boss"] = boss
                 self.assertTrue(validate_mission(data, self.resources))
+    def test_mission_code_format(self):
+        self.data["code"] = "SAKURA"
+        self.assertEqual(validate_mission(self.data, self.resources), [])
+        for code in ("abc1", "ABC", "TOO-LONG-CODE", 1234):
+            with self.subTest(code=code):
+                data = copy.deepcopy(self.data)
+                data["code"] = code
+                self.assertTrue(validate_mission(data, self.resources))
+    def test_enemy_roster(self):
+        self.data["enemies"] = [{"role": "rusher", "row": 0}, {"role": "pistol", "row": 1, "muzzle": {"x": 1.2, "y": 1.3}}]
+        for wave in self.data["waves"]:
+            wave["enemyPattern"] = [0, 1]
+        self.assertEqual(validate_mission(self.data, self.resources), [])
+        for enemies in ([{"role": "ninja", "row": 0}], [{"role": "pistol", "row": 0}], [{"role": "rusher", "row": 3}], []):
+            with self.subTest(enemies=enemies):
+                data = copy.deepcopy(self.data)
+                data["enemies"] = enemies
+                for wave in data["waves"]:
+                    wave["enemyPattern"] = [0]
+                self.assertTrue(validate_mission(data, self.resources))
+    def test_pattern_cannot_exceed_roster(self):
+        self.data["enemies"] = [{"role": "rusher", "row": 0}]
+        self.data["waves"][0]["enemyPattern"] = [1]
+        self.assertTrue(validate_mission(self.data, self.resources))
+    def test_boss_kind(self):
+        self.data["boss"] = {"kind": "mecha"}
+        self.assertEqual(validate_mission(self.data, self.resources), [])
+        self.data["boss"] = {"kind": "dragon"}
+        self.assertTrue(validate_mission(self.data, self.resources))
 
 if __name__ == "__main__":
     unittest.main()

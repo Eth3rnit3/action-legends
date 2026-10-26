@@ -31,12 +31,21 @@ namespace Paname
         public int MissionCount=>missions?.Length??0;
         public int MissionIndex=>missionIndex;
         public void PauseFromBrowser(){if(!Online&&phase==Phase.Playing)phase=Phase.Paused;}
+        // The lobby arrows only stop on missions this browser has unlocked.
         public void SelectMission(int direction)
         {
             if(HostOnly(()=>SelectMission(direction))||phase!=Phase.Lobby||missions==null)return;
-            missionIndex=(missionIndex+direction+missions.Length)%missions.Length;
+            int index=missionIndex;
+            for(int i=0;i<missions.Length;i++){index=Mod(index+direction,missions.Length);if(IsUnlocked(index))break;}
+            if(index!=missionIndex)LoadMission(index);
+        }
+        // Also used outside the lobby, when a won mission chains into the next one.
+        void LoadMission(int index)
+        {
+            missionIndex=Mod(index,missions.Length);
             if(world){world.gameObject.SetActive(false);Destroy(world.gameObject);}
             world=new GameObject("Décor de mission").transform;world.SetParent(transform,false);Street(world,CurrentMission.backgrounds,CurrentMission.length,CurrentMission.ground);
+            enemySheet=Resources.Load<Texture2D>(CurrentMission.enemySheet);
             cameraX=CurrentMission.cameraMin;LoadMissionMusic();BuildLobbyActors();
         }
         public int Score {get;private set;}
@@ -72,7 +81,8 @@ namespace Paname
         }
         sealed class Enemy
         {
-            public Vector2 position; public int hp,kind,facing=-1; public float attackTimer,attackPose,walk,flash,stagger,knockback;
+            public Vector2 position; public int hp,kind,facing=-1,burst; public float attackTimer,attackPose,walk,flash,stagger,knockback,windup,burstTimer;
+            public MissionEnemy type; public EnemyRole Role=>type.kind;
             public Transform root,leftLeg,rightLeg; public SpriteRenderer illustrated;
         }
         enum ShotLook { Tracer, Molotov, Bullet }
@@ -86,7 +96,7 @@ namespace Paname
         {
             Application.targetFrameRate=60;
             flashProperties=new MaterialPropertyBlock();
-            missions=LevelCatalog.LoadAll();cameraX=CurrentMission.cameraMin;
+            missions=LevelCatalog.LoadAll();cameraX=CurrentMission.cameraMin;enemySheet=Resources.Load<Texture2D>(CurrentMission.enemySheet);
             font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             if(!gameCamera) {var go=new GameObject("Main Camera");gameCamera=go.AddComponent<Camera>();go.tag="MainCamera";}
             gameCamera.orthographic=true; gameCamera.orthographicSize=ViewHalfHeight; gameCamera.backgroundColor=C("C6DFD9"); gameCamera.transform.position=new Vector3(cameraX,3.6f,-10);
@@ -96,7 +106,7 @@ namespace Paname
             projectileRoot=new GameObject("Projectiles • pool").transform;projectileRoot.SetParent(transform,false);
             effects=new ArcadeEffects(transform);
             for(int row=0;row<4;row++)for(int frame=0;frame<4;frame++)Frame(false,row,frame);
-            for(int row=0;row<3;row++)for(int frame=0;frame<4;frame++)Frame(true,row,frame);
+            foreach(var mission in missions){var sheet=Resources.Load<Texture2D>(mission.enemySheet);foreach(var enemy in mission.enemies)for(int frame=0;frame<4;frame++)EnemyFrame(sheet,enemy.row,frame);}
             for(int row=0;row<4;row++)for(int frame=0;frame<6;frame++)ArcadeEffects.Frame(row,frame);
             LoadSoundtrack();BuildLobbyActors();
         }
@@ -123,7 +133,7 @@ namespace Paname
         public void BeginRound()
         {
             if(OnlineRound())return;
-            ResetActors();Score=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
+            ResetActors();Score=carriedScore;carriedScore=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
             for(int i=0;i<4;i++)if(slots[i].joined)SpawnPlayer(i,2+i*1.3f);
             phase=Phase.Playing;Announce(CurrentMission.intro);Sound(startClip);if(musicOut){musicOut.Stop();musicOut.clip=musicClip;}
         }
@@ -145,7 +155,7 @@ namespace Paname
             if(phase==Phase.Lobby)
             {
                 var k=Keyboard.current;
-                if(k!=null){if(k.qKey.wasPressedThisFrame||k.aKey.wasPressedThisFrame)ChangeHero(0,-1);if(k.eKey.wasPressedThisFrame||k.dKey.wasPressedThisFrame)ChangeHero(0,1);if(k.leftArrowKey.wasPressedThisFrame)ChangeHero(0,-1);if(k.rightArrowKey.wasPressedThisFrame)ChangeHero(0,1);if(k.enterKey.wasPressedThisFrame)BeginRound();}
+                if(k!=null&&!LobbyKeysBlocked){if(k.qKey.wasPressedThisFrame||k.aKey.wasPressedThisFrame)ChangeHero(0,-1);if(k.eKey.wasPressedThisFrame||k.dKey.wasPressedThisFrame)ChangeHero(0,1);if(k.leftArrowKey.wasPressedThisFrame)ChangeHero(0,-1);if(k.rightArrowKey.wasPressedThisFrame)ChangeHero(0,1);if(k.enterKey.wasPressedThisFrame)BeginRound();}
                 for(int i=0;i<4;i++)if(slots[i].joined&&slots[i].Connected)
                 {
                     if(i==0&&slots[i].pad.leftShoulder.wasPressedThisFrame)SelectMission(-1);
@@ -155,6 +165,7 @@ namespace Paname
                     if(slots[i].pad.startButton.wasPressedThisFrame){BeginRound();break;}
                 }
             }
+            else if(phase==Phase.Won&&NextMissionDefinition!=null&&ContinuePressed())NextMission();
             else if(phase==Phase.Playing)
             {
                 for(int i=0;i<4;i++)frameInputs[i]=slots[i].joined?LocalControls.Read(slots[i],i):default;
@@ -288,7 +299,8 @@ namespace Paname
             if(pending>0&&spawnTimer<=0&&enemies.Count<Mathf.Min(42,Mathf.CeilToInt(wave.maxAlive*CountFactors[DifficultyIndex])))
             {
                 float x=Mathf.Clamp(LeaderX()+(pending%5==0?-6.5f:9+(pending%3)*1.3f),.5f,CurrentMission.length);
-                SpawnEnemy(x,DifficultyIndex>0&&pending%4==0?1:wave.enemyPattern[pending%wave.enemyPattern.Length]);pending--;spawnTimer=wave.spawnInterval*AttackFactors[DifficultyIndex];
+                // From Arcade up, every fourth enemy is the mission's type 1.
+                SpawnEnemy(x,DifficultyIndex>0&&pending%4==0&&CurrentMission.enemies.Length>1?1:wave.enemyPattern[pending%wave.enemyPattern.Length]);pending--;spawnTimer=wave.spawnInterval*AttackFactors[DifficultyIndex];
             }
             if(pending==0)
             {
@@ -296,10 +308,14 @@ namespace Paname
                 Announce(Wave==CurrentMission.waves.Length?"PASSAGE LIBRE  »  "+CurrentMission.exitLabel+" !":"CONTINUEZ !  »");Score+=500;
             }
         }
+        // Per role: health, walking speed, distance kept from the target, firing range, aim time and cooldown.
+        static readonly float[] RoleHealth={2,3,6,3,4,7},RoleSpeed={5.8f,3.6f,3.3f,4.6f,3.8f,3f},RoleDistance={.6f,5,.6f,6,7.5f,3.2f};
+        static readonly float[] RoleRange={0,10,0,11,12,6},RoleAim={0,0,0,.42f,.5f,.55f},RoleCooldown={0,1.65f,0,1.7f,2.5f,2.3f};
         void SpawnEnemy(float x,int kind)
         {
-            var e=new Enemy{position=new Vector2(x,0),kind=kind,hp=Mathf.CeilToInt((kind==2?6:kind==1?3:2)*HealthFactors[DifficultyIndex]),attackTimer=.7f};
-            e.root=Actor(actors,0,Coral,true,kind);e.illustrated=e.root.Find("Illustration")?.GetComponent<SpriteRenderer>();e.root.position=e.position;e.leftLeg=e.root.Find("Jambe arrière");e.rightLeg=e.root.Find("Jambe avant");enemies.Add(e);
+            var type=CurrentMission.enemies[kind];int role=(int)type.kind;
+            var e=new Enemy{position=new Vector2(x,0),kind=kind,type=type,hp=Mathf.CeilToInt(RoleHealth[role]*HealthFactors[DifficultyIndex]),attackTimer=type.Armed?1:.7f};
+            e.root=Actor(actors,0,Coral,true,type.row,enemySheet);e.illustrated=e.root.Find("Illustration")?.GetComponent<SpriteRenderer>();e.root.position=e.position;e.leftLeg=e.root.Find("Jambe arrière");e.rightLeg=e.root.Find("Jambe avant");enemies.Add(e);
             effects.Play(3,e.position+Vector2.up*.12f,.6f,.3f);
         }
         void UpdateEnemies(float dt)
@@ -313,23 +329,52 @@ namespace Paname
                 if(target==null)continue;
                 e.flash=Mathf.Max(0,e.flash-dt);e.stagger=Mathf.Max(0,e.stagger-dt);
                 e.position.x=Mathf.Clamp(e.position.x+e.knockback*dt,.2f,CurrentMission.length+1);e.knockback=Mathf.Lerp(e.knockback,0,Mathf.Min(1,dt*14));
-                e.facing=target.position.x>=e.position.x?1:-1;e.attackTimer-=dt;e.attackPose=Mathf.Max(0,e.attackPose-dt);
-                float desired=e.kind==1?5:.6f;
-                // An enemy holds its strike or throw pose briefly instead of running through it.
-                bool walking=best>desired&&e.stagger<=0&&e.attackPose<=0;
-                if(walking){e.position.x+=e.facing*(e.kind==0?5.8f:e.kind==1?3.6f:3.3f)*SpeedFactors[DifficultyIndex]*dt;e.walk+=dt*11;}
-                if(e.kind==1&&best<10&&e.attackTimer<=0&&e.stagger<=0)
+                int role=(int)e.Role;bool shooting=e.windup>0||e.burst>0;
+                // A gunman keeps the direction it aimed in until its shots are fired, so players can get behind it.
+                if(!shooting)e.facing=target.position.x>=e.position.x?1:-1;
+                e.attackTimer-=dt;e.attackPose=Mathf.Max(0,e.attackPose-dt);
+                // An enemy holds its strike, throw or aim pose briefly instead of running through it.
+                bool walking=best>RoleDistance[role]&&e.stagger<=0&&e.attackPose<=0&&!shooting;
+                if(walking){e.position.x+=e.facing*RoleSpeed[role]*SpeedFactors[DifficultyIndex]*dt;e.walk+=dt*11;}
+                if(e.type.Armed&&e.stagger<=0)TickGunman(e,best,dt);
+                if(e.Role==EnemyRole.Thrower&&best<RoleRange[role]&&e.attackTimer<=0&&e.stagger<=0)
                 {
                     var hand=e.position+new Vector2(e.facing*MolotovRelease.x,MolotovRelease.y);
                     Shoot(ShotLook.Molotov,hand,(target.position+Vector2.up-hand).normalized*(8+DifficultyIndex*2),1);
-                    e.attackTimer=1.65f*AttackFactors[DifficultyIndex];e.attackPose=AttackPoseTime;
+                    e.attackTimer=RoleCooldown[role]*AttackFactors[DifficultyIndex];e.attackPose=AttackPoseTime;
                 }
-                if(best<.9f&&target.position.y<1.35f&&e.attackTimer<=0&&e.stagger<=0){Damage(target,1);e.attackTimer=AttackFactors[DifficultyIndex];e.attackPose=AttackPoseTime;}
+                if(!e.type.Armed&&best<.9f&&target.position.y<1.35f&&e.attackTimer<=0&&e.stagger<=0){Damage(target,1);e.attackTimer=AttackFactors[DifficultyIndex];e.attackPose=AttackPoseTime;}
                 e.root.position=e.position;e.root.localScale=new Vector3(e.facing,1,1);
-                if(e.illustrated){int frame=e.attackPose>0?3:walking?1+((int)(e.walk*.7f)%2):0;e.illustrated.sprite=Frame(true,e.kind,frame);ArcadeEffects.HitFlash(e.illustrated,e.flash>0?1:0,flashProperties);e.illustrated.transform.localRotation=Quaternion.Euler(0,0,e.stagger>0?-7:0);}
+                if(e.illustrated){int frame=e.attackPose>0||e.windup>0||e.burst>0?3:walking?1+((int)(e.walk*.7f)%2):0;e.illustrated.sprite=EnemyFrame(enemySheet,e.type.row,frame);ArcadeEffects.HitFlash(e.illustrated,e.flash>0?1:0,flashProperties);e.illustrated.transform.localRotation=Quaternion.Euler(0,0,e.stagger>0?-7:0);}
                 if(e.leftLeg)e.leftLeg.localRotation=Quaternion.Euler(0,0,Mathf.Sin(e.walk)*18);
                 if(e.rightLeg)e.rightLeg.localRotation=Quaternion.Euler(0,0,-Mathf.Sin(e.walk)*18);
             }
+        }
+        // Gunmen aim, freeze in their shooting frame, then fire level at chest height: jumping dodges it.
+        void TickGunman(Enemy e,float best,float dt)
+        {
+            if(e.windup>0)
+            {
+                e.windup-=dt;
+                if(e.windup<=0){e.burst=e.Role==EnemyRole.Smg?3:1;e.burstTimer=0;}
+                return;
+            }
+            if(e.burst>0)
+            {
+                e.burstTimer-=dt;if(e.burstTimer>0)return;
+                Vector2 muzzle=e.position+new Vector2(e.type.muzzle.x*e.facing,e.type.muzzle.y),aim=new Vector2(e.facing,0);
+                if(e.Role==EnemyRole.Shotgun)
+                {
+                    for(int j=-1;j<=1;j++){var pellet=Shoot(ShotLook.Bullet,muzzle,(Vector2)(Quaternion.Euler(0,0,j*7*e.facing)*aim)*(13+DifficultyIndex),1);if(pellet!=null)pellet.life=.45f;}
+                    shake=Mathf.Max(shake,.08f);
+                }
+                else Shoot(ShotLook.Bullet,muzzle,aim*(e.Role==EnemyRole.Smg?12+DifficultyIndex*1.4f:11+DifficultyIndex*1.5f),1);
+                effects.Muzzle(muzzle,aim,e.Role==EnemyRole.Shotgun);Sound(e.Role==EnemyRole.Smg?machineGunClip:pistolClip);
+                e.burst--;e.burstTimer=.11f;e.attackPose=.25f;
+                if(e.burst==0)e.attackTimer=RoleCooldown[(int)e.Role]*AttackFactors[DifficultyIndex];
+                return;
+            }
+            if(best<RoleRange[(int)e.Role]&&e.attackTimer<=0)e.windup=RoleAim[(int)e.Role]*(1-DifficultyIndex*.08f);
         }
         void Damage(Player p,int amount)
         {
@@ -340,13 +385,13 @@ namespace Paname
         static readonly Vector2 MolotovRelease=new Vector2(-.62f,1.9f);
         const float AttackPoseTime=.3f;
         // Projectiles only fly and collide; callers add the matching muzzle flash.
-        void Shoot(ShotLook look,Vector2 pos,Vector2 velocity,int damage,bool heavy=false)
+        Shot Shoot(ShotLook look,Vector2 pos,Vector2 velocity,int damage,bool heavy=false)
         {
             Shot s=null;
             foreach(var cached in shotPool)if(!cached.active&&cached.look==look){s=cached;break;}
             if(s==null)
             {
-                if(shotPool.Count>=240)return;
+                if(shotPool.Count>=240)return null;
                 s=new Shot{look=look};
                 var g=new GameObject(look==ShotLook.Tracer?"Traceur":look==ShotLook.Molotov?"Cocktail Molotov":"Balle de mitrailleuse");g.transform.SetParent(projectileRoot,false);s.root=g.transform;
                 if(look==ShotLook.Molotov){Shape(s.root,"Bouteille",0,0,.18f,.23f,Coral,60,true);Box(s.root,"Mèche",0,.13f,.025f,.07f,Gold,61);}
@@ -356,7 +401,7 @@ namespace Paname
             }
             s.active=true;s.root.gameObject.SetActive(true);s.position=pos;s.velocity=velocity;s.damage=damage;s.life=1.25f;s.explosive=heavy&&!s.Hostile;s.root.position=pos;
             s.root.localRotation=Quaternion.Euler(0,0,Mathf.Atan2(velocity.y,velocity.x)*Mathf.Rad2Deg);s.root.localScale=Vector3.one*(heavy||look==ShotLook.Molotov?1.5f:1);
-            shots.Add(s);
+            shots.Add(s);return s;
         }
         // Swept segment collision avoids fast bullets passing through actors at low frame rates.
         static float SegmentDistance(Vector2 a,Vector2 b,Vector2 p)
@@ -371,7 +416,7 @@ namespace Paname
                     foreach(var p in players)if(p!=null&&p.hp>0&&SegmentDistance(before,s.position,p.position+Vector2.up)<.53f){Damage(p,s.damage);hit=true;break;}
                 }
                 else if(HitBossOrBomb(before,s.position,s.damage))hit=true;
-                else for(int e=0;e<enemies.Count;e++)if(SegmentDistance(before,s.position,enemies[e].position+Vector2.up)<(enemies[e].kind==2?.68f:.5f)){
+                else for(int e=0;e<enemies.Count;e++)if(SegmentDistance(before,s.position,enemies[e].position+Vector2.up)<(enemies[e].type.Heavy?.68f:.5f)){
                     if(s.explosive){Vector2 blast=enemies[e].position+Vector2.up;for(int k=enemies.Count-1;k>=0;k--)if(Vector2.Distance(enemies[k].position+Vector2.up,blast)<2.5f)HitEnemy(k,s.damage,s.velocity.x>=0?1:-1,true);}
                     else HitEnemy(e,s.damage,s.velocity.x>=0?1:-1,false);
                     hit=true;break;
@@ -381,15 +426,15 @@ namespace Paname
         }
         void HitEnemy(int index,int damage,int direction=1,bool explosive=false)
         {
-            var e=enemies[index];e.hp-=damage;e.flash=.065f;e.stagger=.11f;e.knockback=direction*(e.kind==2?1.2f:3.5f);
-            effects.Impact(e.position+Vector2.up*1.1f,direction,e.kind==2,explosive);
+            var e=enemies[index];e.hp-=damage;e.flash=.065f;e.stagger=.11f;e.knockback=direction*(e.type.Heavy?1.2f:3.5f);
+            effects.Impact(e.position+Vector2.up*1.1f,direction,e.type.Heavy,explosive);
             if(e.illustrated)ArcadeEffects.HitFlash(e.illustrated,1,flashProperties);
             Sound(explosive?explosionClips:impactClips);shake=Mathf.Max(shake,explosive?.3f:.055f);
             if(e.hp<=0)
             {
-                RecordKill(e.position);if(e.kind==2)Score+=50;
+                RecordKill(e.position);if(e.type.Heavy)Score+=50;
                 effects.Play(3,e.position+Vector2.up*.65f,1.5f,.5f,1,new Vector2(direction*.5f,.6f));
-                if(e.kind==2)effects.Play(1,e.position+Vector2.up*.8f,1.5f,.22f);
+                if(e.type.Heavy)effects.Play(1,e.position+Vector2.up*.8f,1.5f,.22f);
                 if(e.illustrated)effects.Defeat(e.illustrated,direction);
                 e.root.gameObject.SetActive(false);Destroy(e.root.gameObject);enemies.RemoveAt(index);
             }
@@ -411,7 +456,7 @@ namespace Paname
             if(phase==Phase.Lobby){DrawLobby();return;}
             DrawHUD();DrawBossHUD();DrawOnlineBanner();
             if(phase==Phase.Paused)Overlay("ON SOUFFLE UN PEU.","PAUSE",()=>phase=Phase.Playing,"REPRENDRE");
-            if(phase==Phase.Won)Overlay(CurrentMission.winTitle,"TEMPS "+Clock(SimulationTime)+"  ·  "+Score.ToString("N0")+" POINTS",ReturnToLobby,"CHOISIR LES HÉROS");
+            if(phase==Phase.Won)Overlay(CurrentMission.winTitle,"TEMPS "+Clock(SimulationTime)+"  ·  "+Score.ToString("N0")+" POINTS",NextMissionDefinition!=null?NextMission:(Action)ReturnToLobby,NextMissionDefinition!=null?"MISSION SUIVANTE  »":"CHOISIR LES HÉROS");
             if(phase==Phase.Lost)Overlay("ÇA SE JOUE À UN POIL.","PLUS DE RENFORTS  ·  "+Score.ToString("N0")+" POINTS",BeginRound,"REJOUER");
         }
         readonly Dictionary<ulong,GUIStyle> labelStyles=new Dictionary<ulong,GUIStyle>();
@@ -485,6 +530,13 @@ namespace Paname
             Label(90,223,1100,76,title,45,Cream,true,TextAnchor.MiddleCenter);Label(90,310,1100,45,subtitle,20,Gold,true,TextAnchor.MiddleCenter);
             if(Online&&!IsHost)Label(440,393,400,58,"L'HÔTE CHOISIT LA SUITE...",18,Gold,true,TextAnchor.MiddleCenter);
             else if(Button(440,393,400,58,button,Coral,true))action();
+            if(phase==Phase.Won&&NextMissionDefinition!=null)
+            {
+                var next=NextMissionDefinition;
+                Label(90,355,1100,30,"PROCHAINE MISSION : "+next.title.ToUpperInvariant()+(string.IsNullOrEmpty(next.code)?"":"  ·  CODE "+next.code),16,Cream,true,TextAnchor.MiddleCenter);
+                if((!Online||IsHost)&&Button(440,467,400,46,"RETOUR À LA SÉLECTION",C("34515C")))ReturnToLobby();
+            }
+            else if(phase==Phase.Won&&MissionCount>1)Label(90,355,1100,30,"CAMPAGNE TERMINÉE : BRAVO, LES LÉGENDES !",16,Cream,true,TextAnchor.MiddleCenter);
             if(Online&&IsHost&&phase==Phase.Lost&&Button(440,467,400,46,"RETOUR À LA SÉLECTION",C("34515C")))ReturnToLobby();
             if(phase==Phase.Paused)
             {

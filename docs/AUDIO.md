@@ -18,6 +18,12 @@ La mission de Marseille utilise `Music/coupo-santo-arcade.wav` (6/8, 174 noires 
 python3 tools/audio/coupo_santo.py
 ```
 
+La mission de Tokyo utilise `Music/sakura-arcade.wav` (4/4, 150 noires par minute) et `Music/sakura-boss.wav` (176 noires par minute), deux arrangements de **Sakura Sakura**, chanson traditionnelle japonaise de l’époque d’Edo, dans le domaine public. Seule la mélodie, dans le mode miyako-bushi sur la, est reprise ; les accords, la basse et la batterie sont écrits pour le projet. La première reprise confie le thème à un piano électrique pincé qui évoque le koto, une tom grave répond à chaque mesure comme un taiko. La version du boss abaisse le si en si bémol pour une couleur plus sombre, proche du mode in-sen.
+
+```bash
+python3 tools/audio/sakura.py
+```
+
 ## Voix
 
 Huit annonces, trois prises chacune (`Voices/<annonce>-a|b|c.wav`) ; le jeu en tire une au hasard. Elles sont générées avec Gemini TTS (prises a et b : `gemini-2.5-pro-preview-tts`, voix Fenrir et Orus ; prise c : `gemini-3.1-flash-tts-preview`, voix Fenrir), puis compressées et réduites en 12 bits avec un court écho. Le résultat change à chaque génération : il faut réécouter chaque prise avant de la garder.

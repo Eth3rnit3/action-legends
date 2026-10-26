@@ -16,19 +16,32 @@ namespace Paname
             float scroll=Mathf.Clamp((RouteWidth*scale-2*halfWidth-2)/Mathf.Max(1,cameraMax-cameraMin),0,.5f);
             routeRoot.localPosition=new Vector3(cameraMin-halfWidth-1+(1-scroll)*(cameraX-cameraMin),0,0);
         }
-        static Texture2D heroesTexture,enemiesTexture;
-        static readonly Sprite[,,] frames=new Sprite[2,4,4];
+        static Texture2D heroesTexture;
+        static readonly Sprite[,] heroFrames=new Sprite[4,4];
+        // Enemy sheets differ between missions, so their frames are cached per texture.
+        static readonly System.Collections.Generic.Dictionary<(Texture2D,int,int),Sprite> enemyFrames=new System.Collections.Generic.Dictionary<(Texture2D,int,int),Sprite>();
         public static Texture2D HeroesTexture => heroesTexture ? heroesTexture : (heroesTexture=Resources.Load<Texture2D>("Art/heroes"));
         public static Sprite Frame(bool enemy,int row,int frame)
         {
-            int group=enemy?1:0; row=Mathf.Clamp(row,0,enemy?2:3); frame=Mathf.Clamp(frame,0,3);
-            if(frames[group,row,frame])return frames[group,row,frame];
-            Texture2D t=enemy?(enemiesTexture?enemiesTexture:(enemiesTexture=Resources.Load<Texture2D>("Art/enemies"))):HeroesTexture;
-            if(!t)return null;
-            int rows=enemy?3:4;float w=t.width/4f,h=t.height/(float)rows;
+            if(enemy)return EnemyFrame(Resources.Load<Texture2D>("Art/enemies"),row,frame);
+            row=Mathf.Clamp(row,0,3);frame=Mathf.Clamp(frame,0,3);
+            if(heroFrames[row,frame])return heroFrames[row,frame];
+            var t=HeroesTexture;if(!t)return null;
+            return heroFrames[row,frame]=Cut(t,4,row,frame);
+        }
+        public static Sprite EnemyFrame(Texture2D sheet,int row,int frame)
+        {
+            if(!sheet)return null;
+            int rows=MissionDefinition.SheetRows(sheet);row=Mathf.Clamp(row,0,rows-1);frame=Mathf.Clamp(frame,0,3);
+            var key=(sheet,row,frame);
+            if(enemyFrames.TryGetValue(key,out var sprite)&&sprite)return sprite;
+            return enemyFrames[key]=Cut(sheet,rows,row,frame);
+        }
+        static Sprite Cut(Texture2D t,int rows,int row,int frame)
+        {
+            float w=t.width/4f,h=t.height/(float)rows;
             float left=w*.065f,right=w*.025f;
-            var sprite=Sprite.Create(t,new Rect(frame*w+left,t.height-(row+1)*h,w-left-right,h),new Vector2((w*.4f-left)/(w-left-right),.045f),h*.9f/2.05f,0,SpriteMeshType.FullRect);
-            frames[group,row,frame]=sprite;return sprite;
+            return Sprite.Create(t,new Rect(frame*w+left,t.height-(row+1)*h,w-left-right,h),new Vector2((w*.4f-left)/(w-left-right),.045f),h*.9f/2.05f,0,SpriteMeshType.FullRect);
         }
         public static readonly Color Ink = C("203441"), Cream = C("F6E8CC"), Teal = C("277D80"), Coral = C("F87854"), Gold = C("F4C65D");
         public static Color C(string s) { ColorUtility.TryParseHtmlString("#" + s, out var c); return c; }
@@ -202,10 +215,10 @@ namespace Paname
             // Tricolour flag above the café.
             Shape(root,"Drapeau bleu",5.5f,4.3f,.22f,.7f,C("476C9B"),-10); Shape(root,"Drapeau blanc",5.72f,4.3f,.22f,.7f,Cream,-10); Shape(root,"Drapeau rouge",5.94f,4.3f,.22f,.7f,Coral,-10);
         }
-        public static Transform Actor(Transform parent,int hero,Color accent,bool enemy=false,int kind=0)
+        public static Transform Actor(Transform parent,int hero,Color accent,bool enemy=false,int kind=0,Texture2D enemySheet=null)
         {
-            var r=new GameObject(enemy?"Pilleur cagoulé":"Héros").transform; r.SetParent(parent,false);
-            var illustration=Frame(enemy,enemy?kind:hero,0);
+            var r=new GameObject(enemy?"Ennemi":"Héros").transform; r.SetParent(parent,false);
+            var illustration=enemy&&enemySheet?EnemyFrame(enemySheet,kind,0):Frame(enemy,enemy?kind:hero,0);
             if(illustration)
             {
                 Shape(r,"Ombre",0,.035f,1.2f,.17f,new Color(.06f,.1f,.15f,.28f),10,true);

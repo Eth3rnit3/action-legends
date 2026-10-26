@@ -10,7 +10,8 @@ Dupliquer ce fichier dans le même dossier. Lui donner un nom unique en minuscul
 |---|---|
 | `schemaVersion` | Garder `1`. |
 | `id` | Identifiant unique, identique au nom du fichier sans `.json`. |
-| `order` | Facultatif. Position dans le menu, de `0` à `999`, `1` par défaut. À égalité, les missions sont classées par `id`. |
+| `order` | Facultatif. Position dans la campagne, de `0` à `999`, `1` par défaut. À égalité, les missions sont classées par `id`. Les missions s’enchaînent dans cet ordre. |
+| `code` | Facultatif. Code de la mission, 4 à 10 lettres majuscules ou chiffres, unique. Il est révélé quand la mission précédente est gagnée et permet de la rejoindre depuis le menu. Sans code, la mission ne s’ouvre qu’en gagnant la précédente. La première mission est toujours ouverte. |
 | `title` | Nom affiché dans le menu. |
 | `location` | Ville, lieu ou époque affichés dans la fiche de mission. |
 | `intro`, `exitLabel`, `winTitle` | Messages de début, de sortie et de victoire. |
@@ -20,6 +21,7 @@ Dupliquer ce fichier dans le même dossier. Lui donner un nom unique en minuscul
 | `waves` | Vagues triées par position `atX`. |
 | `ground` | Facultatif. Image dont le bas sert de chaussée au premier plan. Par défaut : `Art/paris`. |
 | `music`, `bossMusic` | Facultatifs. Musique de la mission et musique du combat final, chemins Resources sans extension. Par défaut : `Audio/Music/marseillaise-arcade` et `Audio/Music/marseillaise-boss`. |
+| `enemySheet`, `enemies` | Facultatifs. Planche et types d’ennemis de la mission, détaillés plus bas. Par défaut : les trois pilleurs de Panique à Paname. |
 | `boss` | Facultatif. Réglages du boss final, détaillés plus bas. Sans ce champ, la mission se termine par l’hélicoptère de Panique à Paname. |
 
 Exemple de vague :
@@ -37,7 +39,31 @@ Exemple de vague :
 
 Le total de la vague vaut `baseEnemies + nombre de joueurs × enemiesPerPlayer`. `maxAlive` limite le nombre d’ennemis présents simultanément ; `spawnInterval` est l’intervalle entre les apparitions.
 
-Les types disponibles sont `0` : fonceur, `1` : lanceur et `2` : costaud au bouclier. Leur ordre suit `enemyPattern`. Ajouter un nouveau type d’ennemi exige une modification du moteur.
+Les nombres de `enemyPattern` désignent les types d’ennemis de la mission, dans l’ordre de `enemies`. Par défaut, `0` : fonceur, `1` : lanceur et `2` : costaud au bouclier. À partir de la difficulté Arcade, un ennemi sur quatre est le type `1`.
+
+### Types d’ennemis
+
+```json
+"enemySheet": "Art/tokyo/enemies",
+"enemies": [
+  {"role": "pistol", "row": 0, "muzzle": {"x": 1.33, "y": 1.43}},
+  {"role": "smg", "row": 1, "muzzle": {"x": 1.18, "y": 1.39}},
+  {"role": "shotgun", "row": 2, "muzzle": {"x": 1.52, "y": 1.61}}
+]
+```
+
+`enemySheet` est une planche transparente de quatre images carrées par ligne, tournées vers la droite : attente, deux foulées de course, attaque. Les pieds reposent à 4,5 % du bas de chaque case et le milieu des jambes à 40 % de sa largeur ; `tools/art/pack_sheet.py` replace une planche générée selon ces règles. Chaque entrée de `enemies` (six au plus) choisit une ligne de la planche et un comportement :
+
+| `role` | Comportement |
+|---|---|
+| `rusher` | Fonce au contact et frappe. |
+| `thrower` | Garde ses distances et lance des cocktails Molotov. |
+| `shield` | Lent et résistant, frappe au contact, recule peu sous les tirs. |
+| `pistol` | Tireur rapide : vise, puis tire une balle. |
+| `smg` | Reste à distance : vise, puis tire une rafale de trois balles. |
+| `shotgun` | Lent et résistant : s’approche, vise, puis tire trois plombs de courte portée. |
+
+Les ennemis armés tirent à l’horizontale depuis `muzzle`, le bout du canon dans l’image d’attaque, mesuré en unités depuis les pieds (environ 2 unités pour la hauteur d’un personnage). `pack_sheet.py` affiche ces valeurs.
 
 Exemple de boss, chaque champ est facultatif :
 
@@ -56,12 +82,15 @@ Exemple de boss, chaque champ est facultatif :
 | Champ | Utilisation |
 |---|---|
 | `enabled` | `false` retire le boss : la mission est gagnée quand toutes les vagues sont vaincues et que `exitX` est atteint. |
+| `kind` | `helicopter` par défaut, ou `mecha` pour le robot au sol de Tokyo. |
 | `name` | Nom affiché au-dessus de la barre de vie, 30 caractères au plus. |
 | `sprite` | Image du boss. |
 | `intro`, `rage`, `defeat` | Annonces à l’arrivée du boss, à mi-vie et à sa chute. |
 | `health` | Multiplicateur de points de vie, de `0.25` à `4`. |
 
-Le boss garde le comportement de l’hélicoptère : vol, rafales, bombes et rotor animé. Une autre image doit donc reprendre sa mise en page : vue de profil tournée vers la gauche, environ trois fois plus large que haute, sans pales de rotor principal. Les bombes restent celles de l’hélicoptère. Un boss au comportement différent exige une modification du moteur.
+L’hélicoptère vole, mitraille et largue des bombes, avec un rotor animé. Une autre image doit reprendre sa mise en page : vue de profil tournée vers la gauche, environ trois fois plus large que haute, sans pales de rotor principal.
+
+Le mécha marche vers les héros et alterne gatling en balayage, piétinement avec deux ondes de choc et salve de missiles. Son image est une planche de six cases, trois par ligne, tournée vers la gauche : attente, deux pas, jambe levée, gatling pointée, lance-missiles ouverts ; `pack_sheet.py mecha` la met en place. La position du canon et des lance-missiles est celle du Mécha Shogun. Un boss au comportement différent exige une modification du moteur.
 
 ## 2. Ajouter les décors
 
@@ -75,6 +104,6 @@ Pour `ground`, le moteur répète les 20 % inférieurs de l’image le long du p
 
 ## 3. Vérifier et proposer
 
-Exécuter les commandes Python du README. Dans Unity, tester la mission, ses vagues, sa sortie et les raccords de décor avec un puis plusieurs joueurs. Utiliser les flèches du menu ou les touches gauche/droite pour changer de mission ; avec la première manette, utiliser les boutons supérieurs gauche/droite.
+Exécuter les commandes Python du README. Dans Unity, tester la mission, ses vagues, sa sortie et les raccords de décor avec un puis plusieurs joueurs. Pour l’ouvrir sans jouer les précédentes, saisir son code avec **CODE MISSION** ; les flèches du menu, ou les boutons supérieurs gauche/droite de la première manette, passent ensuite d’une mission débloquée à l’autre.
 
 Proposer le JSON, les images et leurs fichiers `.meta` dans une pull request avec des captures. Une fois la proposition fusionnée, la compilation web suivante inclut automatiquement la mission.

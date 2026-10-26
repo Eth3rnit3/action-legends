@@ -25,7 +25,7 @@ namespace Paname
         const float NetStep=1f/60;
         const int HashInterval=60;
         [Serializable] sealed class NetConfig {public string mode,code,name,self;}
-        [Serializable] sealed class NetLobby {public string build;public int mission,difficulty;public bool[] joined=new bool[4];public int[] heroes=new int[4];public string[] peers=new string[4],names=new string[4];}
+        [Serializable] sealed class NetLobby {public string build;public int mission,difficulty,score;public bool[] joined=new bool[4];public int[] heroes=new int[4];public string[] peers=new string[4],names=new string[4];}
         struct NetInput {public int move,flags,jumps,specials,usedJumps,usedSpecials;}
         sealed class NetFrame {public int left;public readonly int[] moves=new int[4],flags=new int[4];}
         public bool Online {get;private set;}
@@ -122,7 +122,7 @@ namespace Paname
         }
         string LobbyJson()
         {
-            var lobby=new NetLobby{build=BuildId,mission=missionIndex,difficulty=DifficultyIndex};
+            var lobby=new NetLobby{build=BuildId,mission=missionIndex,difficulty=DifficultyIndex,score=carriedScore};
             for(int i=0;i<4;i++){lobby.joined[i]=slots[i].joined;lobby.heroes[i]=slots[i].hero;lobby.peers[i]=slotPeers[i]??"";lobby.names[i]=playerNames[i]??"";}
             return JsonUtility.ToJson(lobby);
         }
@@ -225,7 +225,10 @@ namespace Paname
             if(lobby==null||lobby.joined==null||lobby.joined.Length<4)return;
             netBypass=true;netStatus="";
             if(phase!=Phase.Lobby&&!start)ReturnToLobby();
-            if(lobby.mission!=missionIndex&&phase==Phase.Lobby)SelectMission(lobby.mission-missionIndex);
+            // Guests follow the host's mission even when they have not unlocked it, and even from the
+            // victory screen when the host chains into the next mission.
+            if(lobby.mission!=missionIndex&&(phase==Phase.Lobby||start))LoadMission(lobby.mission);
+            if(start)carriedScore=lobby.score;
             SelectedDifficulty=(Difficulty)Mathf.Clamp(lobby.difficulty,0,DifficultyNames.Length-1);
             LocalSlotIndex=-1;
             for(int i=0;i<4;i++)
@@ -273,6 +276,7 @@ namespace Paname
             if(phase==Phase.Lobby)OnlineLobbyInput();
             else if(phase==Phase.Playing){if(IsHost)HostStep(local);else GuestStep(local);}
             else if(IsHost&&(phase==Phase.Won||phase==Phase.Lost)&&Keyboard.current!=null&&Keyboard.current.escapeKey.wasPressedThisFrame)ReturnToLobby();
+            else if(IsHost&&phase==Phase.Won&&NextMissionDefinition!=null&&ContinuePressed())NextMission();
             if(phase!=reportedPhase)ReportStatus();
             UpdateCamera(Time.unscaledDeltaTime);UpdateSoundtrack(Time.unscaledDeltaTime);
             return true;
@@ -280,10 +284,10 @@ namespace Paname
         void OnlineLobbyInput()
         {
             var k=Keyboard.current;var pad=netLocal.pad;int direction=0;
-            if(k!=null){if(k.qKey.wasPressedThisFrame||k.aKey.wasPressedThisFrame||k.leftArrowKey.wasPressedThisFrame)direction=-1;if(k.eKey.wasPressedThisFrame||k.dKey.wasPressedThisFrame||k.rightArrowKey.wasPressedThisFrame)direction=1;}
+            if(k!=null&&!LobbyKeysBlocked){if(k.qKey.wasPressedThisFrame||k.aKey.wasPressedThisFrame||k.leftArrowKey.wasPressedThisFrame)direction=-1;if(k.eKey.wasPressedThisFrame||k.dKey.wasPressedThisFrame||k.rightArrowKey.wasPressedThisFrame)direction=1;}
             if(pad!=null){if(pad.dpad.left.wasPressedThisFrame)direction=-1;if(pad.dpad.right.wasPressedThisFrame)direction=1;}
             if(direction!=0&&LocalSlotIndex>=0)OnlineHero(Mod(slots[LocalSlotIndex].hero+direction,HeroNames.Length));
-            if(!IsHost)return;
+            if(!IsHost||LobbyKeysBlocked)return;
             if((k!=null&&k.enterKey.wasPressedThisFrame)||(pad!=null&&pad.startButton.wasPressedThisFrame))BeginRound();
             if(pad!=null&&pad.leftShoulder.wasPressedThisFrame)SelectMission(-1);
             if(pad!=null&&pad.rightShoulder.wasPressedThisFrame)SelectMission(1);

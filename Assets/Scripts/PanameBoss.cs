@@ -26,7 +26,7 @@ namespace Paname
         float ArenaHalfWidth=>SimHalfWidth;
         void ResetBoss()
         {
-            bossBombs.Clear();bossRoot=null;bossRotor=null;bossSight=null;bossRenderer=null;
+            bossBombs.Clear();ResetMecha();bossRoot=null;bossRotor=null;bossSight=null;bossRenderer=null;
             bossStarted=false;bossDefeated=false;bossEnraged=false;bossHealth=0;bossTime=0;bossDeathClock=0;bossBarrel=0;
         }
         void SpawnBoss()
@@ -37,20 +37,21 @@ namespace Paname
             bossHealth=bossMaxHealth;bossTimer=.8f;bossAttack=0;bossVolley=0;bossTime=0;
             foreach(var e in enemies){e.root.gameObject.SetActive(false);Destroy(e.root.gameObject);}enemies.Clear();pending=0;Wave=CurrentMission.waves.Length;
             bossRoot=new GameObject("Boss • "+boss.name).transform;bossRoot.SetParent(actors,false);
+            // The missile is cut from fixed coordinates of the helicopter, whatever image the mission uses.
+            var helicopter=Resources.Load<Texture2D>("Art/macron-helicopter");
+            if(!bossBombSprite&&helicopter)bossBombSprite=CreateBossBombSprite(helicopter);
+            bossSight=Shape(actors,"Visée de la mitrailleuse",0,.06f,1,.055f,Coral,42);
+            bossSight.gameObject.SetActive(false);
+            Announce(boss.intro);Speak(bossVoice);shake=.25f;
+            if(boss.Mecha){SpawnMecha();return;}
             var texture=Resources.Load<Texture2D>(boss.sprite);
             if(texture)
             {
                 bossRenderer=bossRoot.gameObject.AddComponent<SpriteRenderer>();
                 bossRenderer.sprite=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),new Vector2(.5f,.5f),texture.width/8.8f,0,SpriteMeshType.FullRect);bossRenderer.sortingOrder=35;
             }
-            // The missile is cut from fixed coordinates of the helicopter, whatever image the mission uses.
-            var helicopter=Resources.Load<Texture2D>("Art/macron-helicopter");
-            if(!bossBombSprite&&helicopter)bossBombSprite=CreateBossBombSprite(helicopter);
             bossRotor=Shape(bossRoot,"Rotor animé",-1,1.35f,6.5f,.055f,C("B8C8C9"),36);
             Shape(bossRoot,"Rotor ombre",-1,1.28f,5.6f,.04f,new Color(.08f,.14f,.19f,.6f),36);
-            bossSight=Shape(actors,"Visée de la mitrailleuse",0,.06f,1,.055f,Coral,42);
-            bossSight.gameObject.SetActive(false);
-            Announce(boss.intro);Speak(bossVoice);shake=.25f;
         }
         Player BossTarget()
         {
@@ -66,7 +67,7 @@ namespace Paname
             if(!CurrentMission.boss.enabled)
             {
                 // Without a boss the mission ends once every wave is cleared and the exit is reached.
-                if(phase==Phase.Playing&&Wave>=CurrentMission.waves.Length&&LeaderX()>=CurrentMission.exitX){phase=Phase.Won;Announce("MISSION ACCOMPLIE !");Speak(winVoice);}
+                if(phase==Phase.Playing&&Wave>=CurrentMission.waves.Length&&LeaderX()>=CurrentMission.exitX)WinMission();
                 return;
             }
             if(!bossStarted&&LeaderX()>=CurrentMission.exitX-18)SpawnBoss();
@@ -76,14 +77,18 @@ namespace Paname
                 bossDeathClock-=dt;bossExplosionTimer-=dt;
                 if(bossRoot&&bossRoot.gameObject.activeSelf)
                 {
-                    bossRoot.position+=(Vector3)(Vector2.down*dt*.8f);bossRoot.Rotate(0,0,dt*12);
-                    if(bossExplosionTimer<=0){effects.Play(1,(Vector2)bossRoot.position+new Vector2(Mathf.Sin(bossDeathClock*25)*2,Mathf.Cos(bossDeathClock*19)*.6f),2.2f,.4f);bossExplosionTimer=.16f;shake=.25f;}
+                    bool mecha=CurrentMission.boss.Mecha;
+                    // The helicopter spins down; the mecha sags on its knees and tips over.
+                    bossRoot.position+=(Vector3)(Vector2.down*dt*(mecha?.35f:.8f));bossRoot.Rotate(0,0,dt*(mecha?7*bossRoot.localScale.x:12));
+                    Vector2 core=(Vector2)bossRoot.position+(mecha?Vector2.up*3:Vector2.zero);
+                    if(bossExplosionTimer<=0){effects.Play(1,core+new Vector2(Mathf.Sin(bossDeathClock*25)*2,Mathf.Cos(bossDeathClock*19)*(mecha?1.8f:.6f)),2.2f,.4f);bossExplosionTimer=.16f;shake=.25f;}
                     if(bossDeathClock<.45f)bossRoot.gameObject.SetActive(false);
                 }
-                if(bossDeathClock<=0){phase=Phase.Won;Announce("MISSION ACCOMPLIE !");Speak(winVoice);}
+                if(bossDeathClock<=0)WinMission();
                 return;
             }
             bossTime+=dt;bossFlash=Mathf.Max(0,bossFlash-dt);
+            if(CurrentMission.boss.Mecha){TickMecha(dt);return;}
             float movementTime=bossTime*(1.2f+DifficultyIndex*.16f);
             // The phase stays continuous when the boss enters its faster second phase.
             if(bossEnraged)movementTime+=bossRageTime*.35f;
@@ -144,7 +149,7 @@ namespace Paname
             }
             sprite.OverrideGeometry(vertices,triangles);return sprite;
         }
-        Vector2 BossBombRack()=>bossPosition+new Vector2(-.5f*(bossRoot?bossRoot.localScale.x:1),-.68f);
+        Vector2 BossBombRack()=>CurrentMission.boss.Mecha?MechaPoint(MechaPods):bossPosition+new Vector2(-.5f*(bossRoot?bossRoot.localScale.x:1),-.68f);
         void DropBossBomb(float x)
         {
             var root=new GameObject("Bombe du boss").transform;root.SetParent(actors,false);
@@ -176,7 +181,8 @@ namespace Paname
                 bomb.flight+=dt;
                 float t=Mathf.Clamp01(bomb.flight/(.95f-DifficultyIndex*.08f));
                 Vector2 before=bomb.position,end=new Vector2(bomb.marker.position.x,.25f);
-                bomb.position=Vector2.Lerp(bomb.origin,end,t)+Vector2.up*(Mathf.Sin(t*Mathf.PI)*.3f);
+                // Mecha missiles climb out of the shoulder pods before diving on their mark.
+                bomb.position=Vector2.Lerp(bomb.origin,end,t)+Vector2.up*(Mathf.Sin(t*Mathf.PI)*(CurrentMission.boss.Mecha?4.5f:.3f));
                 Vector2 heading=bomb.position-before;
                 if(heading.sqrMagnitude>.000001f)bomb.root.rotation=Quaternion.Euler(0,0,Mathf.Atan2(heading.y,heading.x)*Mathf.Rad2Deg+180);
                 bomb.root.position=bomb.position;
@@ -192,6 +198,7 @@ namespace Paname
                 Vector2 axis=bomb.root.TransformVector(Vector2.left).normalized*.5f;
                 if(SegmentDistance(from,to,bomb.position)<.35f||SegmentDistance(from,to,bomb.position+axis)<.28f||SegmentDistance(from,to,bomb.position-axis)<.28f){RemoveBossBomb(i,false);return true;}
             }
+            if(CurrentMission.boss.Mecha)return HitMecha(from,to,damage);
             // A capsule from the nose to the engine excludes the rotor and most of the tail.
             float facing=bossRoot.localScale.x;
             for(int i=0;i<5;i++)if(SegmentDistance(from,to,bossPosition+new Vector2((-3.1f+i*.9f)*facing,-.05f))<.95f)
@@ -207,6 +214,7 @@ namespace Paname
             bossDefeated=true;bossDeathClock=2.5f;bossExplosionTimer=0;Score+=10000;
             if(bossSight)bossSight.gameObject.SetActive(false);
             for(int i=bossBombs.Count-1;i>=0;i--)RemoveBossBomb(i,false);
+            if(CurrentMission.boss.Mecha)ResetMecha();
             foreach(var shot in shots)if(shot.Hostile)shot.life=0;
             Announce(CurrentMission.boss.defeat);Sound(bossDownClip);
         }

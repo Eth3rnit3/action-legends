@@ -27,12 +27,18 @@ namespace Paname
         }
         void DrawLobby()
         {
+            // While the code panel is open, the lobby underneath stays visible but ignores clicks.
+            GUI.enabled=!codeEntry;DrawLobbyPage();GUI.enabled=true;
+            if(codeEntry)DrawCodeEntry();
+        }
+        void DrawLobbyPage()
+        {
             LoadMenuArt();
             Panel(-2000,-2000,5280,4720,new Color(.025f,.055f,.085f,.65f));
             Panel(-2000,190,5280,520,new Color(.025f,.06f,.085f,.48f));
             if(menuLogo)GUI.DrawTexture(new Rect(30,9,690,170),menuLogo,ScaleMode.ScaleToFit,true);
             else Label(45,35,780,120,"ACTION LEGENDS",57,Cream,true);
-            DrawDifficulty();DrawSoundOptions();
+            DrawDifficulty();DrawSoundOptions();DrawCodeButton();
             IllustratedPanel(new Rect(913,27,315,155),Color.white);
             Panel(935,51,270,105,C("07192A"));
             Label(938,53,265,18,"MISSION "+(MissionIndex+1).ToString("00"),13,Gold,true);
@@ -40,9 +46,10 @@ namespace Paname
             Label(938,109,265,18,CurrentMission.location.ToUpperInvariant(),12,C("B2C7BD"),true);
             if(MissionCount>1)
             {
-                if(Button(936,142,26,24,"<",C("304C56")))SelectMission(-1);
-                Label(969,142,204,24,(MissionIndex+1)+" / "+MissionCount+" MISSIONS",11,Gold,true,TextAnchor.MiddleCenter);
-                if(Button(1179,142,26,24,">",C("304C56")))SelectMission(1);
+                bool browse=UnlockedCount>1;
+                if(browse&&Button(936,142,26,24,"<",C("304C56")))SelectMission(-1);
+                Label(969,142,204,24,UnlockedCount+" / "+MissionCount+" MISSIONS DÉBLOQUÉES",11,Gold,true,TextAnchor.MiddleCenter);
+                if(browse&&Button(1179,142,26,24,">",C("304C56")))SelectMission(1);
             }
             int selectedSlot=Online?Mathf.Max(0,LocalSlotIndex):menuPlayer;
             if(!Online&&!slots[selectedSlot].joined){menuPlayer=0;selectedSlot=0;}

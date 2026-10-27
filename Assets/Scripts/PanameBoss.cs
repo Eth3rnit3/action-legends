@@ -227,7 +227,9 @@ namespace Paname
         void DrawBossHUD()
         {
             if(!BossActive)return;
-            Label(370,622,510,20,BossEntry.name,12,Gold,true);
+            // A dark plate under the name and the bar: the street's bright paving shows through otherwise.
+            Panel(362,614,556,48,new Color(.035f,.09f,.14f,.72f));
+            Label(371,621,510,22,BossEntry.name,14,new Color(0,0,0,.85f),true);Label(370,620,510,22,BossEntry.name,14,Gold,true);
             if(bossEnraged)Label(887,622,24,20,"!",16,Coral,true,TextAnchor.MiddleRight);
             Panel(370,646,540,10,new Color(.035f,.09f,.14f,.85f));
             Panel(372,648,536*(bossHealth/(float)bossMaxHealth),6,Coral);

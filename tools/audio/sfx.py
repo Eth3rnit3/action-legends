@@ -107,6 +107,12 @@ SOUNDS = {
     'menu-select': lambda: gen('square', 1760, 1760, .07, duty=.25, arp=(2, .035)),
     'menu-start': lambda: np.concatenate([gen('square', f, f * 1.01, .09, duty=.5, sustain=.05) for f in (523, 659, 784, 1047)]),
     'roquette-depart': lambda: layer((1, gen('noise', 300, 3000, .5, attack=.05, curve=.8, lp=7000)), (.4, gen('saw', 80, 200, .5))),
+    # Close combat (lot 1a): kept last so the noise of the sounds above stays the same.
+    'couteau': lambda: layer((1, gen('noise', 2500, 7000, .13, attack=.01, sustain=.01, punch=.4, curve=.7, hp=1800, crush=(22050, 8))),
+                             (.45, gen('square', 3100, 2600, .1, duty=.12, vib=(45, .04), punch=.2, crush=(22050, 8)))),
+    'grenade-lancer': lambda: np.concatenate([gen('square', 2600, 2200, .025, duty=.3, punch=.5),
+                                              layer((1, gen('noise', 500, 1900, .26, attack=.04, curve=.9, lp=3500, crush=(16000, 8))),
+                                                    (.3, gen('tri', 260, 420, .22)))]),
 }
 
 if __name__ == '__main__':

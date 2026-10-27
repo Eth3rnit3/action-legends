@@ -250,6 +250,7 @@ namespace Paname
         public EnemyAwareness awareness=new EnemyAwareness();
         public EnemyPanic panic=new EnemyPanic();
         public EnemyGrenade grenade=new EnemyGrenade();
+        public EnemyTerrain terrain=new EnemyTerrain();
         public string[] cries;
         public static readonly string[] Behaviors={"melee","thrower","gunman"};
         [NonSerialized] public EnemyBehavior kind;
@@ -276,7 +277,7 @@ namespace Paname
             var w=awareness;Content.Range(w.sight,0,30,label+".awareness.sight");Content.Range(w.hearing,0,30,label+".awareness.hearing");Content.Range(w.surprise,0,5,label+".awareness.surprise");Content.Range(w.alarm,0,30,label+".awareness.alarm");
             var f=panic;Content.Range(f.health,0,1,label+".panic.health");Content.Range(f.radius,0,30,label+".panic.radius");Content.Range(f.time,.2f,10,label+".panic.time");Content.Range(f.speed,.2f,4,label+".panic.speed");
             if(f.allies<0||f.allies>20)throw new ArgumentException(label+" : panic.allies entre 0 et 20");
-            grenade.Validate(label+".grenade");
+            grenade.Validate(label+".grenade");terrain.Validate(label+".terrain");
             // A cry is a sound, or a voice line recorded in takes (path-a, path-b...).
             if(cries!=null){if(cries.Length>8)throw new ArgumentException(label+" : huit cris au plus");foreach(var c in cries){Content.Path(c,"Audio/",label+".cries");if(!Resources.Load<AudioClip>(c)&&!Resources.Load<AudioClip>(c+"-a"))throw new ArgumentException(label+" : cri manquant "+c);}}
             cryClips=null;
@@ -315,7 +316,7 @@ namespace Paname
         public static void Path(string path,string prefix,string label){if(string.IsNullOrEmpty(path)||!path.StartsWith(prefix,StringComparison.Ordinal)||path.Contains("..")||path.Contains(":")||path.Contains("\\"))throw new ArgumentException("Chemin invalide pour "+label);}
         public static void Require<T>(string path,string label) where T:UnityEngine.Object{if(!Resources.Load<T>(path))throw new ArgumentException(label+" manquant : "+path);}
     }
-    // Weapons, heroes, enemies, bosses, hostages, carriers, rules and difficulties shared by every mission, one JSON per entry under Resources/Content/<kind>/.
+    // Weapons, heroes, enemies, bosses, hostages, carriers, props, rules and difficulties shared by every mission, one JSON per entry under Resources/Content/<kind>/.
     // An entry may name a parent with "extends": the parent is read first, then the entry's own fields replace its values.
     public static class ContentLibrary
     {
@@ -328,6 +329,7 @@ namespace Paname
         static readonly Dictionary<string,WeaponDefinition> weapons=new Dictionary<string,WeaponDefinition>();
         static readonly Dictionary<string,HostageDefinition> hostages=new Dictionary<string,HostageDefinition>();
         static readonly Dictionary<string,CarrierDefinition> carriers=new Dictionary<string,CarrierDefinition>();
+        static readonly Dictionary<string,PropDefinition> props=new Dictionary<string,PropDefinition>();
         static readonly Dictionary<string,string> sources=new Dictionary<string,string>();
         static bool loaded;
         public const int MaxHeroes=99;
@@ -339,6 +341,7 @@ namespace Paname
         public static BossDefinition Boss(string id){Load();if(id!=null&&bosses.TryGetValue(id,out var b))return b;throw new ArgumentException("Boss inconnu : "+id);}
         public static GameRules Rules(string id){Load();if(id!=null&&rules.TryGetValue(id,out var r))return r;throw new ArgumentException("Règles inconnues : "+id);}
         public static CarrierDefinition Carrier(string id){Load();if(id!=null&&carriers.TryGetValue(id,out var c))return c;throw new ArgumentException("Véhicule de dépôt inconnu : "+id);}
+        public static PropDefinition Prop(string id){Load();if(id!=null&&props.TryGetValue(id,out var p))return p;throw new ArgumentException("Décor destructible inconnu : "+id);}
         public static HostageDefinition Hostage(string id){Load();if(id!=null&&hostages.TryGetValue(id,out var h))return h;throw new ArgumentException("Otage inconnu : "+id);}
         public static WeaponDefinition Weapon(string id){Load();return FindWeapon(id)??throw new ArgumentException("Arme inconnue : "+id);}
         // While loading too: heroes, rules and missions resolve their weapons through it.
@@ -348,8 +351,8 @@ namespace Paname
         public static void Load()
         {
             if(loaded)return;
-            sources.Clear();enemies.Clear();bosses.Clear();rules.Clear();weapons.Clear();hostages.Clear();carriers.Clear();
-            var weaponTexts=Read("weapons");var heroTexts=Read("heroes");var enemyTexts=Read("enemies");var bossTexts=Read("bosses");var ruleTexts=Read("rules");var difficultyTexts=Read("difficulties");var hostageTexts=Read("hostages");var carrierTexts=Read("carriers");
+            sources.Clear();enemies.Clear();bosses.Clear();rules.Clear();weapons.Clear();hostages.Clear();carriers.Clear();props.Clear();
+            var weaponTexts=Read("weapons");var heroTexts=Read("heroes");var enemyTexts=Read("enemies");var bossTexts=Read("bosses");var ruleTexts=Read("rules");var difficultyTexts=Read("difficulties");var hostageTexts=Read("hostages");var carrierTexts=Read("carriers");var propTexts=Read("props");
             // Weapons first: heroes and rules name them.
             foreach(var text in weaponTexts){var weapon=Parse<WeaponDefinition>("weapons",text);weapon.Validate();weapons[weapon.id]=weapon;}
             var list=new List<HeroDefinition>();var ids=new HashSet<string>();
@@ -361,6 +364,7 @@ namespace Paname
             foreach(var text in bossTexts){var boss=Parse<BossDefinition>("bosses",text);boss.Validate();bosses[boss.id]=boss;}
             foreach(var text in hostageTexts){var hostage=Parse<HostageDefinition>("hostages",text);hostage.Validate();hostages[hostage.id]=hostage;}
             foreach(var text in carrierTexts){var carrier=Parse<CarrierDefinition>("carriers",text);carrier.Validate();carriers[carrier.id]=carrier;}
+            foreach(var text in propTexts){var prop=Parse<PropDefinition>("props",text);prop.Validate();props[prop.id]=prop;}
             foreach(var text in ruleTexts){var set=Parse<GameRules>("rules",text);set.Validate();rules[set.id]=set;}
             if(!rules.ContainsKey("default"))throw new ArgumentException("Resources/Content/rules/default.json est requis");
             var levels=new List<DifficultyDefinition>();
@@ -396,6 +400,7 @@ namespace Paname
         public static GameRules AddRules(string json){Load();var r=Parse<GameRules>("rules",json);r.Validate();rules[r.id]=r;sources["rules/"+r.id]=json;return r;}
         public static WeaponDefinition AddWeapon(string json){Load();var w=Parse<WeaponDefinition>("weapons",json);w.Validate();weapons[w.id]=w;sources["weapons/"+w.id]=json;return w;}
         public static CarrierDefinition AddCarrier(string json){Load();var c=Parse<CarrierDefinition>("carriers",json);c.Validate();carriers[c.id]=c;sources["carriers/"+c.id]=json;return c;}
+        public static PropDefinition AddProp(string json){Load();var p=Parse<PropDefinition>("props",json);p.Validate();props[p.id]=p;sources["props/"+p.id]=json;return p;}
         public static HostageDefinition AddHostage(string json){Load();var h=Parse<HostageDefinition>("hostages",json);h.Validate();hostages[h.id]=h;sources["hostages/"+h.id]=json;return h;}
         // For tests: adds a hero written as JSON (it may extend a shipped one), in its place by order; Reload() forgets it.
         public static HeroDefinition AddHero(string json)

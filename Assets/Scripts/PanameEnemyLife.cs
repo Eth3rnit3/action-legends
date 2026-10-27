@@ -44,7 +44,7 @@ namespace Paname
             }
             // In a panic it runs away from the nearest hero; a screen that is held keeps it in view, and brings it back.
             var f=type.panic;int away=target.position.x>=e.position.x?-1:1;e.facing=away;
-            if(!e.perched){e.position.x=Mathf.Clamp(e.position.x+away*type.speed*SpeedFactor*f.speed*dt,.2f,CurrentMission.length+1);e.walk+=dt*type.strideRate*f.speed;}
+            if(!e.perched){e.position.x=Mathf.Clamp(Advance(e.position.x,e.position.y,away*type.speed*SpeedFactor*f.speed*dt,ForEnemies),.2f,CurrentMission.length+1);e.walk+=dt*type.strideRate*f.speed;}
             bool held=screenLocked||BossActive;float centre=BossActive?bossArenaX:lockX;
             // Compared with a little slack: one held on the edge must stay held despite rounding.
             if(held&&Mathf.Abs(lastX-centre)<=SimHalfWidth-.5f)e.position.x=Mathf.Clamp(e.position.x,centre-SimHalfWidth+.6f,centre+SimHalfWidth-.6f);
@@ -130,7 +130,7 @@ namespace Paname
             if(e.chute&&falling)e.chute.localRotation=Quaternion.Euler(0,0,Mathf.Sin(Time.unscaledTime*2.3f+e.goal.x)*chute.sway*20);
             if(e.chute&&!falling){LeaveChute(e);}
             var c=e.illustrated.color;if(c.a!=e.fade){c.a=e.fade;e.illustrated.color=c;}
-            var shadow=e.root.GetChild(0);bool grounded=e.position.y<.05f;if(shadow.gameObject.activeSelf!=grounded)shadow.gameObject.SetActive(grounded);
+            var shadow=e.root.GetChild(0);bool grounded=e.position.y-FloorAt(e.position.x,e.position.y,ForEnemies,e.dropFrom)<.05f;if(shadow.gameObject.activeSelf!=grounded)shadow.gameObject.SetActive(grounded);
         }
         // On landing the parachute folds and lies on the street for a moment.
         void LeaveChute(Enemy e)

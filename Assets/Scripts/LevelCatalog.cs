@@ -37,10 +37,32 @@ namespace Paname
         }
     }
     [Serializable] public sealed class MissionLane {public float left,right,y;public bool Set=>right>left;}
-    // Reserved for later work: terrain, props and vehicles must stay empty until the engine reads them (see docs/ADDING_A_LEVEL.md).
-    // Encounters (lot 2b) are read: see EncounterSpawn and MissionEncounter below.
-    [Serializable] public sealed class MapTerrain {public string type;public float x,width,height,toHeight;}
-    [Serializable] public sealed class MapProp {public string id;public float x,y;public int wave=-1;}
+    // Relief along the street, from x to x + width (PanameTerrain.cs). platform: a thin ledge height above the street, jumped onto
+    // from below, dropped through with down + jump; block: a solid box from the street up to height; slope: solid ground rising
+    // (or falling) from height at x to toHeight at x + width, stairs or a ramp; pit: the street gives way, down to height below it,
+    // and a lethal pit costs a hero damage and puts him back on its edge. It is drawn by sprite, the cell's bottom at drawY above
+    // the street and its sides on x and x + width, drawHeight tall (else as tall as the cell's proportions make it), mirrored with
+    // flip, in front of the actors with front: a platform must show what holds it.
+    [Serializable] public sealed class MapTerrain
+    {
+        public string type;public float x,width,height,toHeight,drawY,drawHeight;public bool lethal,flip,front;public int damage=1;
+        public SpriteCell sprite=new SpriteCell();
+        public static readonly string[] Types={"platform","block","slope","pit"};
+        public const int Platform=0,Block=1,Slope=2,Pit=3;
+        [NonSerialized] public int kind;
+        public float Right=>x+width;
+        public bool Drawn=>!string.IsNullOrEmpty(sprite?.texture);
+        // The top of a block or slope, the ledge of a platform, at a point of its span.
+        public float TopAt(float at)=>kind==Slope?Mathf.Lerp(height,toHeight,(at-x)/width):height;
+    }
+    // A prop of the library (Content/props) standing at x, its foot at y (the street, or the top of a block, slope or platform
+    // there). wave: the locked wave it is the objective of: that wave ends when it breaks, not before. reward / weapon replace
+    // its own rewards, flip mirrors it.
+    [Serializable] public sealed class MapProp
+    {
+        public string id,reward,weapon;public float x,y;public int wave=-1;public bool flip;
+        [NonSerialized] public PropDefinition definition;[NonSerialized] public int bonus=-1;[NonSerialized] public WeaponDefinition gun;
+    }
     // A hostage of the library tied at x (y above the street); reward / weapon replace his own table of rewards; with a
     // wave, he only appears when that wave starts, inside its locked screen.
     [Serializable] public sealed class MapHostage
@@ -133,6 +155,7 @@ namespace Paname
                 h.definition=ContentLibrary.Hostage(h.id);
                 if(!(h.x>=1&&h.x<=length-1&&h.y>=0&&h.y<=10))throw new ArgumentException(label+" : x dans la mission, y entre 0 et 10");
                 if(h.wave<-1||h.wave>=waves.Length)throw new ArgumentException(label+" : wave de -1 au nombre de vagues");
+                if(!OnSurface(h.x,h.y))throw new ArgumentException(label+" : y à 0 (la rue) ou sur le dessus d'un relief à cet endroit");
                 // A wave's hostage must stand inside the screen that the wave locks.
                 if(h.wave>=0&&!(h.x>=waves[h.wave].atX-14&&h.x<=waves[h.wave].atX+2))throw new ArgumentException(label+" : un otage de vague se place entre atX - 14 et atX + 2 ("+waves[h.wave].atX+")");
                 foreach(var w in h.definition.rewards)if(HostageDefinition.BonusIndex(ruleSet,w.bonus,w.weapon)<0)throw new ArgumentException(label+" : la récompense "+(w.bonus??w.weapon)+" n'est pas un bonus des règles "+ruleSet.id);
@@ -209,6 +232,68 @@ namespace Paname
                 }
             }
         }
+        // The boss arenas stay flat: the bosses' moves read the heroes' height above the street.
+        bool InArena(float left,float right,out string arena)
+        {
+            arena=null;
+            if(boss.enabled&&right>exitX-30){arena="l'arène du boss (à partir de exitX - 30)";return true;}
+            foreach(var c in encounters)if(c.HasBoss&&right>c.atX-12.5f&&left<c.atX+15){arena="l'arène du boss de mi-parcours à "+c.atX+" (atX - 12,5 à atX + 15)";return true;}
+            return false;
+        }
+        void ValidateTerrain()
+        {
+            var list=map.terrain??new MapTerrain[0];map.terrain=list;
+            if(list.Length>60)throw new ArgumentException("map.terrain : 60 reliefs au plus");
+            for(int i=0;i<list.Length;i++)
+            {
+                var t=list[i];string label="map.terrain["+i+"]";if(t==null)throw new ArgumentException(label+" : relief vide");
+                t.sprite??=new SpriteCell();t.kind=Array.IndexOf(MapTerrain.Types,t.type);
+                if(t.kind<0)throw new ArgumentException(label+" : type parmi platform, block, slope, pit");
+                if(!(t.x>=1&&t.Right<=length-1&&t.width>=.5f&&t.width<=60))throw new ArgumentException(label+" : x et x + width dans la mission, width de 0,5 à 60");
+                if(t.kind==MapTerrain.Platform&&!(t.height>=.4f&&t.height<=6))throw new ArgumentException(label+" : une plateforme a une height de 0,4 à 6");
+                if(t.kind==MapTerrain.Block&&!(t.height>=.2f&&t.height<=4))throw new ArgumentException(label+" : un bloc a une height de 0,2 à 4");
+                if(t.kind==MapTerrain.Slope&&!(t.height>=0&&t.height<=4&&t.toHeight>=0&&t.toHeight<=4&&Mathf.Abs(t.toHeight-t.height)<=t.width))throw new ArgumentException(label+" : une pente va de height à toHeight (0 à 4), pas plus raide qu'une unité par unité");
+                if(t.kind==MapTerrain.Pit&&!(t.height>=.3f&&t.height<=8&&t.width<=8&&t.damage>=0&&t.damage<=10))throw new ArgumentException(label+" : un trou a une height (profondeur) de 0,3 à 8, une width de 8 au plus, damage de 0 à 10");
+                if(t.kind!=MapTerrain.Pit&&t.lethal)throw new ArgumentException(label+" : lethal ne sert qu'aux trous");
+                if(InArena(t.x,t.Right,out var arena))throw new ArgumentException(label+" : pas de relief dans "+arena);
+                // What stands there must be seen: platforms, blocks and slopes are drawn.
+                if(t.kind!=MapTerrain.Pit&&!t.Drawn)throw new ArgumentException(label+" : un relief est dessiné (sprite), sinon on ne le voit pas");
+                if(t.Drawn){t.sprite.Validate(label+".sprite");if(!(t.drawY>=-8&&t.drawY<=6&&t.drawHeight>=0&&t.drawHeight<=12))throw new ArgumentException(label+" : drawY de -8 à 6, drawHeight de 0 à 12");}
+                // Solid ground does not overlap: a pit beside a block, a block between two slopes.
+                if(t.kind!=MapTerrain.Platform)for(int j=0;j<i;j++){var o=list[j];if(o.kind!=MapTerrain.Platform&&t.x<o.Right-.001f&&o.x<t.Right-.001f)throw new ArgumentException(label+" : chevauche map.terrain["+j+"] (seules les plateformes se superposent)");}
+            }
+        }
+        // The tops of the terrain at x: where a hostage (ledges too) or a prop (solid ground only) may stand.
+        bool OnSurface(float x,float y,bool ledges=true)
+        {
+            if(Mathf.Abs(y)<.01f){foreach(var t in map.terrain??new MapTerrain[0])if(t.kind!=MapTerrain.Platform&&x>t.x&&x<t.Right)return false;return true;}
+            foreach(var t in map.terrain??new MapTerrain[0])if(t.kind!=MapTerrain.Pit&&(ledges||t.kind!=MapTerrain.Platform)&&x>=t.x&&x<=t.Right&&Mathf.Abs(t.TopAt(x)-y)<.05f)return true;
+            return false;
+        }
+        void ValidateProps()
+        {
+            var list=map.props??new MapProp[0];map.props=list;
+            if(list.Length>60)throw new ArgumentException("map.props : 60 décors destructibles au plus");
+            for(int i=0;i<list.Length;i++)
+            {
+                var p=list[i];string label="map.props["+i+"]";if(p==null)throw new ArgumentException(label+" : décor vide");
+                label+=" "+p.id+" à x "+p.x;p.definition=ContentLibrary.Prop(p.id);var d=p.definition;float half=d.box.width*.5f;
+                if(!(p.x-half>=1&&p.x+half<=length-1&&p.y>=0&&p.y<=6))throw new ArgumentException(label+" : dans la mission, y de 0 à 6");
+                if(!OnSurface(p.x,p.y,false))throw new ArgumentException(label+" : y à 0 (la rue) ou sur le dessus d'un bloc ou d'une pente à cet endroit");
+                if(InArena(p.x-half,p.x+half,out var arena))throw new ArgumentException(label+" : pas de décor destructible dans "+arena);
+                if(p.wave<-1||p.wave>=waves.Length)throw new ArgumentException(label+" : wave de -1 au nombre de vagues");
+                // An objective stands in the screen its wave holds, and the wave holds it.
+                if(p.wave>=0&&(!waves[p.wave].@lock||!(p.x>=waves[p.wave].atX-14&&p.x<=waves[p.wave].atX+2)))throw new ArgumentException(label+" : l'objectif d'une vague bloquée se place entre atX - 14 et atX + 2 ("+waves[p.wave].atX+")");
+                if(d.rewards!=null)foreach(var w in d.rewards)if(HostageDefinition.BonusIndex(ruleSet,w.bonus,w.weapon)<0)throw new ArgumentException(label+" : la récompense "+(w.bonus??w.weapon)+" n'est pas un bonus des règles "+ruleSet.id);
+                p.bonus=-1;p.gun=null;
+                if(!string.IsNullOrEmpty(p.reward)||!string.IsNullOrEmpty(p.weapon))
+                {
+                    HostageDefinition.CheckReward(p.reward,p.weapon,label);
+                    p.bonus=HostageDefinition.BonusIndex(ruleSet,p.reward,p.weapon);if(p.bonus<0)throw new ArgumentException(label+" : récompense inconnue des règles "+ruleSet.id);
+                    if(!string.IsNullOrEmpty(p.weapon))p.gun=ContentLibrary.FindWeapon(p.weapon);
+                }
+            }
+        }
         public void Validate()
         {
             if(schemaVersion!=Schema)throw new ArgumentException("schemaVersion doit être "+Schema);
@@ -226,7 +311,7 @@ namespace Paname
             Content.Path(map.ground,"Art/","map.ground");Content.Require<Texture2D>(map.ground,"Sol");
             if(!(map.horizon>=0&&map.horizon<=.6f&&map.groundBand>=.02f&&map.groundBand<=1&&map.groundTop>=-6&&map.groundTop<=3&&map.groundFade>=0&&map.groundFade<=1))
                 throw new ArgumentException("map : horizon de 0 à 0.6, groundBand de 0.02 à 1, groundTop de -6 à 3, groundFade de 0 à 1");
-            Reserved(map.terrain,"map.terrain");Reserved(map.props,"map.props");Reserved(map.vehicles,"map.vehicles");
+            Reserved(map.vehicles,"map.vehicles");
             map.decor??=new MapDecor[0];if(map.decor.Length>120)throw new ArgumentException("map.decor : 120 éléments au plus");
             for(int i=0;i<map.decor.Length;i++)
             {
@@ -247,7 +332,7 @@ namespace Paname
             }
             ruleSet=ContentLibrary.Rules(string.IsNullOrEmpty(rules)?"default":rules);
             GameRules.Table(weapons,"weapons",false);weaponTable=weapons!=null&&weapons.Length>0?weapons:ruleSet.weapons;
-            ValidateHostages();ValidateEncounters();
+            ValidateEncounters();ValidateTerrain();ValidateHostages();ValidateProps();
             extraEnemy??=new MissionExtraEnemy();
             if(extraEnemy.enemy<-1||extraEnemy.enemy>=enemies.Length||extraEnemy.every<1||extraEnemy.every>30||extraEnemy.fromDifficulty<0||extraEnemy.fromDifficulty>3)throw new ArgumentException("extraEnemy : enemy de -1 à la taille du roster, every de 1 à 30, fromDifficulty de 0 à 3");
             boss??=new MissionBoss();

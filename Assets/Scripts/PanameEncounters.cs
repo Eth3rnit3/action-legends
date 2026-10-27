@@ -142,12 +142,22 @@ namespace Paname
             }
             // Walks to its place.
             float d=e.goal.x-e.position.x;
-            if(Mathf.Abs(d)>.08f&&e.goal.y<.05f){e.facing=d>0?1:-1;e.position.x=Mathf.MoveTowards(e.position.x,e.goal.x,type.speed*SpeedFactor*dt);e.walk+=dt*type.strideRate;return type.run;}
+            if(Mathf.Abs(d)>.08f&&e.goal.y<.05f)
+            {
+                e.facing=d>0?1:-1;e.walk+=dt*type.strideRate;
+                if(!relief){e.position.x=Mathf.MoveTowards(e.position.x,e.goal.x,type.speed*SpeedFactor*dt);return type.run;}
+                // Over the relief it climbs and falls on its way.
+                bool stood=EnemyStands(e);float from=e.position.x,want=Mathf.MoveTowards(from,e.goal.x,type.speed*SpeedFactor*dt)-from;
+                e.position.x=Advance(from,e.position.y,want,ForEnemies);if(e.position.x!=from+want)Leap(e);
+                Settle(ref e.position,ref e.vertical,26,dt,ForEnemies,float.MaxValue,stood&&e.vertical<=0);return type.run;
+            }
             FinishEntry(e);return e.mode==EnemyUnaware?type.unaware:type.idle;
         }
         void FinishEntry(Enemy e)
         {
-            e.position=e.goal;e.fade=1;e.perched=e.goal.y>.05f;
+            // On the relief, one sent to the street stands on whatever floor is there; one placed up high stays on the prop below it.
+            if(!relief)e.position=e.goal;else{e.position=new Vector2(e.goal.x,e.goal.y>.05f?e.goal.y:FloorAt(e.goal.x,Mathf.Max(e.position.y,0),ForEnemies));e.vertical=0;}
+            e.fade=1;e.perched=e.goal.y>.05f;e.standOn=e.perched?PropUnder(e.goal):null;
             e.mode=e.unaware?EnemyUnaware:EnemyActive;
             // Off guard, it looks the way its spawn says; otherwise towards the team.
             if(e.unaware)e.facing=e.rest;else{Player near=null;float best=float.MaxValue;foreach(var p in players)if(p!=null&&p.hp>0&&Mathf.Abs(p.position.x-e.position.x)<best){best=Mathf.Abs(p.position.x-e.position.x);near=p;}if(near!=null)e.facing=near.position.x>=e.position.x?1:-1;}

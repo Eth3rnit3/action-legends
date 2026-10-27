@@ -35,7 +35,10 @@ ATTACKS = ("gun", "bombs", "stomp", "charge", "troops")
 # Lot 2b: kinds of wounds (deaths), enemy states read with their fallbacks, and the entries of encounters.
 WOUNDS = ("bullet", "explosion", "fire", "knife")
 ENTRIES = ("none", "walk", "door", "window", "parachute", "drop", "truck")
-RESERVED_MAP = ("terrain", "props", "vehicles")
+RESERVED_MAP = ("vehicles",)
+# Lot 3a: kinds of relief (MapTerrain.Types) and who a prop stops (PropDefinition.Blocks).
+TERRAIN_TYPES = ("platform", "block", "slope", "pit")
+PROP_BLOCKS = ("none", "heroes", "all")
 HOSTAGE_RELEASES = ("shot", "touch", "both")
 HOSTAGE_STATES = ("tied", "thanks", "give", "run")
 # Words that belong to one mission's content and must never be written in the engine's code.
@@ -615,6 +618,61 @@ def validate_hostage(data, resources, weapons=None):
     return errors
 
 
+def validate_prop(data, resources, weapons=None):
+    """PropDefinition.Validate: destructible scenery, its box, what it stops, ledge, explosion, debris, rewards and images."""
+    errors = Errors()
+    label = f"prop {data.get('id')}"
+    weapons = weapon_library(resources) if weapons is None else weapons
+    errors.text(data, "name", 24, label)
+    blocks = data.get("blocks", "heroes")
+    if blocks not in PROP_BLOCKS:
+        errors.append(f"{label}.blocks: one of {', '.join(PROP_BLOCKS)}")
+    errors.per_difficulty(data, "health", 1, 5000, label, True)
+    errors.number(data, "damagedAt", 0, 1, label, .5)
+    box = obj(data, "box")
+    errors.number(box, "width", .3, 12, label + ".box", 1)
+    height = errors.number(box, "height", .2, 6, label + ".box", 1)
+    platform = errors.number(data, "platform", 0, 4, label, 0)
+    errors.number(data, "platformWidth", 0, 12, label, 0)
+    if blocks in ("heroes", "all") and platform and height is not None and platform < height:
+        errors.append(f"{label}: platform above the top of the box (box.height) of a prop that blocks")
+    errors.number(data, "score", 0, 10000, label, 0, True)
+    if not isinstance(data.get("cover", False), bool):
+        errors.append(f"{label}.cover: true or false")
+    explosion = obj(data, "explosion")
+    if errors.number(explosion, "radius", 0, 8, label + ".explosion", 0):
+        errors.number(explosion, "damage", 0, 500, label + ".explosion", 0, True)
+        errors.number(explosion, "heroDamage", 0, 10, label + ".explosion", 0, True)
+    debris = obj(data, "debris")
+    if debris.get("texture") or debris.get("count", 0):
+        dl = label + ".debris"
+        errors.resource(debris.get("texture"), "Art/", IMAGES, resources, dl + ".texture")
+        columns = errors.number(debris, "columns", 1, 32, dl, 1, True)
+        rows = errors.number(debris, "rows", 1, 32, dl, 1, True)
+        errors.number(debris, "count", 1, 24, dl, 0, True)
+        cells = debris.get("cells", [])
+        if not isinstance(cells, list) or any(type(c) is not int or not 0 <= c < (columns or 1) * (rows or 1) for c in cells):
+            errors.append(f"{dl}.cells: cells of the grid")
+        errors.number(debris, "size", .05, 3, dl, .45)
+        errors.number(debris, "speed", 0, 30, dl, 5)
+    rewards = data.get("rewards", [])
+    if not isinstance(rewards, list) or len(rewards) > 16:
+        errors.append(f"{label}.rewards: at most sixteen rewards")
+        rewards = []
+    for i, reward in enumerate(rewards):
+        rl = f"{label}.rewards[{i}]"
+        if not isinstance(reward, dict):
+            errors.append(f"{rl}: object required")
+            continue
+        errors.number(reward, "weight", 1, 100, rl, 1, True)
+        check_reward(reward.get("bonus"), reward.get("weapon"), weapons, rl, errors)
+    for key in ("sound", "breakSound"):
+        if data.get(key) not in (None, ""):
+            errors.resource(data.get(key), "Audio/", SOUNDS, resources, f"{label}.{key}")
+    validate_animations(data.get("animations"), resources, label, ("intact",), errors)
+    return errors
+
+
 def validate_enemy(data, resources):
     errors = Errors()
     label = f"enemy {data.get('id')}"
@@ -648,6 +706,11 @@ def validate_enemy(data, resources):
             errors.number(grenade, key, low, high, gl, default)
         errors.number(grenade, "damage", 1, 10, gl, 1, True)
         errors.number(grenade, "bounces", 0, 3, gl, 0, True)
+    terrain = obj(data, "terrain")
+    errors.number(terrain, "climb", 0, 4, label + ".terrain", 1.7)
+    errors.number(terrain, "leap", 1, 30, label + ".terrain", 10)
+    if not isinstance(terrain.get("follow", False), bool):
+        errors.append(f"{label}.terrain.follow: true or false")
     cries = data.get("cries", [])
     if not isinstance(cries, list) or len(cries) > 8:
         errors.append(f"{label}.cries: a list of at most eight sounds")
@@ -920,8 +983,8 @@ def validate_difficulty(data, resources):
 
 # Weapons first: heroes and rules name them.
 VALIDATORS = {"weapons": validate_weapon, "heroes": validate_hero, "enemies": validate_enemy, "bosses": validate_boss, "rules": validate_rules,
-              "difficulties": validate_difficulty, "hostages": validate_hostage, "carriers": validate_carrier}
-NEEDS_WEAPONS = ("heroes", "rules", "hostages")
+              "difficulties": validate_difficulty, "hostages": validate_hostage, "carriers": validate_carrier, "props": validate_prop}
+NEEDS_WEAPONS = ("heroes", "rules", "hostages", "props")
 
 
 def load_library(resources, extra=None, kinds=None):
@@ -1034,6 +1097,7 @@ def validate_mission(data, resources, library=None):
         if game_map.get(key) not in (None, []):
             errors.append(f"map.{key} is reserved for a later batch: leave the list empty")
     validate_decor(game_map.get("decor", []), data.get("length", 80), resources, errors)
+    terrain = validate_terrain(game_map.get("terrain", []), data, resources, errors)
     rules = data.get("rules", "default")
     if rules not in library["rules"]:
         errors.append(f"rules: unknown rules {rules} (Content/rules/{rules}.json)")
@@ -1097,7 +1161,8 @@ def validate_mission(data, resources, library=None):
             errors.append(f"wave {i}: enemyPattern must use enemy types 0 to {roster - 1}")
         if not isinstance(wave.get("lock", True), bool):
             errors.append(f"wave {i}: lock must be true or false")
-    validate_map_hostages(game_map.get("hostages"), waves, length, library.get("rules", {}).get(rules), library, errors)
+    validate_map_hostages(game_map.get("hostages"), waves, length, library.get("rules", {}).get(rules), library, errors, terrain)
+    validate_map_props(game_map.get("props", []), waves, data, terrain, library.get("rules", {}).get(rules), library, errors)
     validate_encounters(data.get("encounters"), waves, data, length, exit_x, library.get("rules", {}).get(rules), library, errors)
     return errors
 
@@ -1230,7 +1295,148 @@ def validate_encounters(encounters, waves, data, length, exit_x, rules, library,
         errors.append("encounters: three mid-mission bosses at most")
 
 
-def validate_map_hostages(hostages, waves, length, rules, library, errors):
+def arena(data, left, right):
+    """MissionDefinition.InArena: the boss arenas stay flat (the end boss from exitX - 30, mid-mission bosses atX - 12.5 to atX + 15)."""
+    boss = data.get("boss", {}) if isinstance(data.get("boss", {}), dict) else {}
+    exit_x = data.get("exitX", 77)
+    if boss.get("enabled", True) and isinstance(exit_x, (int, float)) and right > exit_x - 30:
+        return "the boss arena (from exitX - 30)"
+    for c in data.get("encounters") or []:
+        if isinstance(c, dict) and isinstance(c.get("boss"), dict) and c["boss"].get("id"):
+            at = c.get("atX", 0)
+            if isinstance(at, (int, float)) and right > at - 12.5 and left < at + 15:
+                return f"the mid-mission boss arena at {at} (atX - 12.5 to atX + 15)"
+    return None
+
+
+def validate_terrain(terrain, data, resources, errors):
+    """MissionDefinition.ValidateTerrain: platforms, blocks, slopes and pits inside the mission, drawn, outside the boss arenas,
+    solid pieces side by side. Returns the valid pieces, for what stands on them."""
+    if terrain in (None, []):
+        return []
+    if not isinstance(terrain, list) or len(terrain) > 60:
+        errors.append("map.terrain: a list of at most 60 pieces")
+        return []
+    length = data.get("length", 80) if isinstance(data.get("length", 80), (int, float)) else 80
+    pieces = []
+    for i, t in enumerate(terrain):
+        label = f"map.terrain[{i}]"
+        if not isinstance(t, dict):
+            errors.append(f"{label}: object required")
+            continue
+        kind = t.get("type")
+        if kind not in TERRAIN_TYPES:
+            errors.append(f"{label}.type: one of {', '.join(TERRAIN_TYPES)}")
+            continue
+        x = errors.number(t, "x", 1, length - 1, label)
+        width = errors.number(t, "width", .5, 60, label)
+        if x is None or width is None:
+            continue
+        if x + width > length - 1:
+            errors.append(f"{label}: x + width inside the mission")
+        height = t.get("height", 0)
+        to = t.get("toHeight", 0)
+        if kind == "platform":
+            height = errors.number(t, "height", .4, 6, label)
+        elif kind == "block":
+            height = errors.number(t, "height", .2, 4, label)
+        elif kind == "slope":
+            height = errors.number(t, "height", 0, 4, label)
+            to = errors.number(t, "toHeight", 0, 4, label)
+            if height is not None and to is not None and abs(to - height) > width:
+                errors.append(f"{label}: a slope rises at most one unit per unit")
+        else:
+            height = errors.number(t, "height", .3, 8, label)
+            errors.number(t, "width", .5, 8, label)
+            errors.number(t, "damage", 0, 10, label, 1, True)
+        if height is None:
+            continue
+        for key in ("lethal", "flip", "front"):
+            if not isinstance(t.get(key, False), bool):
+                errors.append(f"{label}.{key}: true or false")
+        if t.get("lethal") and kind != "pit":
+            errors.append(f"{label}.lethal: only for pits")
+        where = arena(data, x, x + width)
+        if where:
+            errors.append(f"{label}: no relief in {where}")
+        sprite = t.get("sprite")
+        drawn = isinstance(sprite, dict) and bool(sprite.get("texture"))
+        if kind != "pit" and not drawn:
+            errors.append(f"{label}: a piece of relief is drawn (sprite), or nobody sees it")
+        if drawn:
+            validate_cell(sprite, resources, label + ".sprite", errors)
+            errors.number(t, "drawY", -8, 6, label, 0)
+            errors.number(t, "drawHeight", 0, 12, label, 0)
+        if kind != "platform":
+            for j, other in pieces:
+                if other["type"] != "platform" and x < other["x"] + other["width"] - .001 and other["x"] < x + width - .001:
+                    errors.append(f"{label}: overlaps map.terrain[{j}] (only platforms overlap)")
+        pieces.append((i, {"type": kind, "x": x, "width": width, "height": height, "toHeight": to if kind == "slope" else height}))
+    return [p for _, p in pieces]
+
+
+def top_at(piece, x):
+    if piece["type"] == "slope":
+        return piece["height"] + (piece["toHeight"] - piece["height"]) * (x - piece["x"]) / piece["width"]
+    return piece["height"]
+
+
+def on_surface(terrain, x, y, ledges=True):
+    """MissionDefinition.OnSurface: the street where no solid piece stands, or the top of a piece (a ledge too for hostages)."""
+    if abs(y) < .01:
+        return not any(t["type"] != "platform" and t["x"] < x < t["x"] + t["width"] for t in terrain)
+    return any(t["type"] != "pit" and (ledges or t["type"] != "platform") and t["x"] <= x <= t["x"] + t["width"] and abs(top_at(t, x) - y) < .05
+               for t in terrain)
+
+
+def validate_map_props(props, waves, data, terrain, rules, library, errors):
+    """MissionDefinition.ValidateProps: props of the library on the street or on solid relief, outside the boss arenas; an
+    objective inside the screen its locked wave holds; rewards the mission's rules know."""
+    if props in (None, []):
+        return
+    if not isinstance(props, list) or len(props) > 60:
+        errors.append("map.props: a list of at most 60 props")
+        return
+    length = data.get("length", 80) if isinstance(data.get("length", 80), (int, float)) else 80
+    for i, place in enumerate(props):
+        label = f"map.props[{i}]"
+        if not isinstance(place, dict):
+            errors.append(f"{label}: object required")
+            continue
+        kind = library["props"].get(place.get("id"))
+        if kind is None:
+            errors.append(f"{label}.id: unknown prop {place.get('id')} (Content/props/<id>.json)")
+            continue
+        half = obj(kind, "box").get("width", 1) * .5
+        x = errors.number(place, "x", 1 + half, length - 1 - half, label)
+        y = errors.number(place, "y", 0, 6, label, 0)
+        if x is None or y is None:
+            continue
+        if not on_surface(terrain, x, y, False):
+            errors.append(f"{label}: y on the street (0) or on top of a block or slope there")
+        where = arena(data, x - half, x + half)
+        if where:
+            errors.append(f"{label}: no prop in {where}")
+        if not isinstance(place.get("flip", False), bool):
+            errors.append(f"{label}.flip: true or false")
+        wave = errors.number(place, "wave", -1, len(waves) - 1, label, -1, True)
+        if wave is not None and wave >= 0 and isinstance(waves[wave], dict):
+            at = waves[wave].get("atX", 0)
+            if not waves[wave].get("lock", True) or isinstance(at, (int, float)) and not at - 14 <= x <= at + 2:
+                errors.append(f"{label}: a locked wave's objective stands between atX - 14 and atX + 2 ({at})")
+        if rules is None:
+            continue
+        for reward in kind.get("rewards") or []:
+            if isinstance(reward, dict) and reward_bonus(rules, reward.get("bonus"), reward.get("weapon")) is None:
+                errors.append(f"{label}: reward {reward.get('bonus') or reward.get('weapon')} of {place.get('id')} is not a bonus of rules {rules.get('id')}")
+        bonus, weapon = place.get("reward"), place.get("weapon")
+        if bonus or weapon:
+            check_reward(bonus, weapon, library["weapons"], label, errors)
+            if reward_bonus(rules, bonus, weapon) is None:
+                errors.append(f"{label}: reward {bonus or weapon} is not a bonus of rules {rules.get('id')}")
+
+
+def validate_map_hostages(hostages, waves, length, rules, library, errors, terrain=()):
     """MissionDefinition.ValidateHostages: placements, their wave's locked screen and rewards the mission's rules know."""
     if hostages in (None, []):
         return
@@ -1246,7 +1452,9 @@ def validate_map_hostages(hostages, waves, length, rules, library, errors):
         if kind is None:
             errors.append(f"{label}.id: unknown hostage {place.get('id')} (Content/hostages/<id>.json)")
         x = errors.number(place, "x", 1, (length or 500) - 1, label)
-        errors.number(place, "y", 0, 10, label)
+        y = errors.number(place, "y", 0, 10, label, 0)
+        if x is not None and y is not None and not on_surface(terrain, x, y):
+            errors.append(f"{label}: y on the street (0) or on top of a piece of relief there")
         wave = errors.number(place, "wave", -1, len(waves) - 1, label, -1, True)
         if wave is not None and wave >= 0 and x is not None and isinstance(waves[wave], dict):
             at = waves[wave].get("atX", 0)

@@ -21,7 +21,7 @@ namespace Paname
         {
             if(pickups.Count>=20)return;
             var bonus=Rules.bonuses[kind];var gun=bonus.kind==0?preset??bonus.gun??DrawWeapon():null;
-            var root=new GameObject("Bonus • "+(gun!=null?gun.id:bonus.id)).transform;root.SetParent(actors,false);position.y=.65f;root.position=position;
+            var root=new GameObject("Bonus • "+(gun!=null?gun.id:bonus.id)).transform;root.SetParent(actors,false);position.y=FloorAt(position.x,position.y,ForAll)+.65f;root.position=position;
             // A weapon crate shows the weapon it holds unless the bonus draws its own icon.
             var icon=gun!=null&&string.IsNullOrEmpty(bonus.icon?.texture)?gun.crate:bonus.icon;
             var r=root.gameObject.AddComponent<SpriteRenderer>();r.sprite=icon.Sprite;r.sortingOrder=48;root.localScale=Vector3.one*bonus.scale;
@@ -57,7 +57,10 @@ namespace Paname
             {var cycle=Rules.supplies;SpawnPickup(new Vector2(nextSupply*SupplySpacing+FirstSupplyX,0),cycle[nextSupply%cycle.Length]);nextSupply++;}
             for(int i=pickups.Count-1;i>=0;i--)
             {
-                var item=pickups[i];item.age+=dt;item.root.position=item.position+Vector2.up*(Mathf.Sin(SimulationTime*5+i)*.11f);
+                var item=pickups[i];item.age+=dt;
+                // It stays on the relief under it, and falls when the prop it lay on breaks.
+                if(relief){float rest=FloorAt(item.position.x,item.position.y-.65f,ForAll)+.65f;if(rest<item.position.y)item.position.y=Mathf.Max(rest,item.position.y-dt*6);}
+                item.root.position=item.position+Vector2.up*(Mathf.Sin(SimulationTime*5+i)*.11f);
                 int owner=-1;for(int j=0;j<4;j++)if(players[j]!=null&&players[j].hp>0&&Vector2.Distance(players[j].position+Vector2.up*.65f,item.position)<1.05f){owner=j;break;}
                 if(owner>=0||item.age>30)
                 {

@@ -10,7 +10,7 @@ namespace Paname
         sealed class Effect
         {
             public GameObject go;public SpriteRenderer renderer;public Vector2 velocity;
-            public int row;public float age,duration,size,rotation,spin,fps,gravity;public bool active,casing,lie,burn;public Sprite[] frames;
+            public int row;public float age,duration,size,rotation,spin,fps,gravity,floor;public bool active,casing,lie,burn;public Sprite[] frames;
         }
         readonly List<Effect> pool=new List<Effect>();
         readonly Transform parent;
@@ -97,6 +97,14 @@ namespace Paname
             e.go.name="Impact dessiné";e.go.transform.position=at;e.go.transform.localScale=Vector3.one*size;e.go.transform.localRotation=Quaternion.identity;
             e.renderer.sprite=frames[0];e.renderer.sharedMaterial=NormalMaterial;e.renderer.color=Color.white;e.renderer.sortingOrder=layer;
         }
+        // A piece of a broken prop, flung and spinning; it settles on the floor height where the prop stood and fades.
+        public void Piece(Sprite sprite,Vector2 at,Vector2 velocity,float spin,float size,float duration,float floor)
+        {
+            if(!sprite)return;var e=Acquire();if(e==null)return;
+            e.row=-5;e.age=0;e.duration=duration;e.velocity=velocity;e.casing=false;e.spin=spin;e.rotation=0;e.frames=null;e.floor=floor;e.gravity=20;
+            e.go.name="Débris";e.go.transform.position=at;e.go.transform.localScale=Vector3.one*size;e.go.transform.localRotation=Quaternion.identity;
+            e.renderer.sprite=sprite;e.renderer.sharedMaterial=NormalMaterial;e.renderer.color=Color.white;e.renderer.sortingOrder=45;
+        }
         public void Casing(Vector2 position,int direction)
         {
             Debris(position,new Vector2(-direction*(1.2f+(float)rng.NextDouble()),2+(float)rng.NextDouble()*2),Gold,.055f,.62f);
@@ -129,6 +137,13 @@ namespace Paname
                     e.velocity+=Vector2.down*13*dt;e.rotation+=e.spin*dt;e.go.transform.localRotation=Quaternion.Euler(0,0,e.rotation);
                     if(e.row==-2){var c=e.renderer.color;c.a=1-Mathf.Pow(e.age/e.duration,2);e.renderer.color=c;if(e.frames!=null)e.renderer.sprite=e.frames[Mathf.Min(e.frames.Length-1,(int)(e.age*(e.fps>0?e.fps:e.frames.Length/e.duration)))];}
                     if(e.casing&&e.go.transform.position.y<.015f){var p=e.go.transform.position;p.y=.015f;e.go.transform.position=p;e.velocity=new Vector2(e.velocity.x*.6f,Mathf.Abs(e.velocity.y)*.3f);e.spin*=.5f;}
+                }
+                else if(e.row==-5)
+                {
+                    e.velocity+=Vector2.down*e.gravity*dt;var p=e.go.transform.position;
+                    if(p.y<=e.floor+e.size*.2f&&e.velocity.y<=0){p.y=e.floor+e.size*.2f;e.go.transform.position=p;e.velocity=new Vector2(e.velocity.x*.4f,Mathf.Abs(e.velocity.y)*.25f);e.spin*=.4f;}
+                    e.rotation+=e.spin*dt;e.go.transform.localRotation=Quaternion.Euler(0,0,e.rotation);
+                    float t=e.age/e.duration;e.renderer.color=new Color(1,1,1,t<.7f?1:1-(t-.7f)/.3f);
                 }
                 else if(e.row==-4)
                 {

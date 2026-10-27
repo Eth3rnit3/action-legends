@@ -96,7 +96,7 @@ namespace Paname
                 else
                 {
                     // Off the screen, the hostage is gone: a locked wave's screen holds the heroes, not him.
-                    h.position.x+=h.facing*t.run.speed*dt;h.position.y=Mathf.Max(0,h.position.y-dt*6);
+                    h.position.x+=h.facing*t.run.speed*dt;h.position.y=Mathf.Max(relief?FloorAt(h.position.x,h.position.y,ForEnemies):0,h.position.y-dt*6);
                     if(Mathf.Abs(h.position.x-cameraX)>SimHalfWidth+2){h.root.gameObject.SetActive(false);Destroy(h.root.gameObject);hostages.RemoveAt(i);continue;}
                 }
                 ShowHostage(h,dt);

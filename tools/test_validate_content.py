@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from validate_content import (ROOT, find_proper_nouns, find_unused_art, load_library, merge, validate_boss, validate_enemy, validate_hero,
                               validate_mission, validate_rules, validate_weapon, validate_difficulty,
-                              validate_hostage, validate_carrier)
+                              validate_hostage, validate_carrier, validate_prop)
 
 RESOURCES = ROOT / "Assets/Resources"
 LIBRARY, LIBRARY_ERRORS = load_library(RESOURCES)
@@ -130,11 +130,68 @@ class MissionValidationTests(unittest.TestCase):
                 self.assertTrue(self.rejected(lambda d: d.update(extraEnemy=extra)))
 
     def test_reserved_slots_must_stay_empty(self):
-        for key in ("terrain", "props", "vehicles"):
+        for key in ("vehicles",):
             with self.subTest(key=key):
                 self.assertTrue(self.rejected(lambda d: d["map"].update({key: [{"id": "x", "x": 10}]})))
                 self.assertFalse(self.rejected(lambda d: d["map"].pop(key)))
         self.assertFalse(self.rejected(lambda d: d.pop("encounters")))
+
+    # Lot 3a: a test prop drawn on an existing sheet, added to the library like ContentLibrary.AddProp.
+    TEST_PROP = {"id": "test-crate", "name": "CAISSE", "health": [10, 12, 14, 16], "box": {"width": 1.2, "height": 1.2},
+                 "rewards": [{"bonus": "grenades"}], "animations": {"sheet": {"texture": "Art/weapon-crates", "columns": 3, "rows": 2, "cellHeight": 1.4},
+                                                                    "states": [{"name": "intact", "cells": [0]}, {"name": "destroyed", "cells": [1]}]}}
+
+    def test_terrain(self):
+        cell = {"texture": "Art/weapon-crates", "columns": 3, "rows": 2, "cell": 0}
+        good = [{"type": "platform", "x": 70, "width": 5, "height": 1.8, "sprite": cell},
+                {"type": "slope", "x": 80, "width": 3, "height": 0, "toHeight": 1.5, "sprite": cell},
+                {"type": "block", "x": 83, "width": 4, "height": 1.5, "sprite": cell},
+                {"type": "slope", "x": 87, "width": 3, "height": 1.5, "toHeight": 0, "sprite": cell, "flip": True},
+                {"type": "pit", "x": 92, "width": 3, "height": 4, "lethal": True, "damage": 2}]
+        self.assertFalse(self.rejected(lambda d: d["map"].update(terrain=copy.deepcopy(good))))
+        changes = (
+            lambda t: t.append({"type": "wall", "x": 100, "width": 2, "height": 1, "sprite": cell}),
+            lambda t: t.append({"type": "platform", "x": 100, "width": 4, "height": 1.8}),          # nothing drawn
+            lambda t: t.append({"type": "platform", "x": 100, "width": 4, "height": 9, "sprite": cell}),
+            lambda t: t.append({"type": "block", "x": 84, "width": 2, "height": 1, "sprite": cell}),  # overlaps the block
+            lambda t: t.append({"type": "slope", "x": 100, "width": 1, "height": 0, "toHeight": 3, "sprite": cell}),  # too steep
+            lambda t: t.append({"type": "block", "x": 100, "width": 2, "height": 1, "lethal": True, "sprite": cell}),
+            lambda t: t.append({"type": "pit", "x": 100, "width": 12, "height": 2}),
+            lambda t: t.append({"type": "block", "x": 460, "width": 2, "height": 1, "sprite": cell}),  # in the end boss arena
+            lambda t: t.append({"type": "block", "x": 214, "width": 2, "height": 1, "sprite": cell}),  # in the armoured van's arena
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                terrain = copy.deepcopy(good)
+                change(terrain)
+                self.assertTrue(self.rejected(lambda d: d["map"].update(terrain=terrain)))
+        # A hostage stands on the street or on the relief, never inside a block or in the air.
+        self.data["map"]["terrain"] = good
+        self.data["map"]["hostages"] = []
+        for place, ok in (({"x": 85, "y": 1.5}, True), ({"x": 72, "y": 1.8}, True), ({"x": 85, "y": 0}, False), ({"x": 75, "y": 2}, False),
+                          ({"x": 81.5, "y": .75}, True)):
+            with self.subTest(place=place):
+                self.assertEqual(self.rejected(lambda d: d["map"]["hostages"].append(dict(place, id="civilian"))), not ok)
+
+    def test_map_props(self):
+        library, errors = load_library(RESOURCES, {"props": [self.TEST_PROP]})
+        self.assertEqual(errors, [])
+        cell = {"texture": "Art/weapon-crates", "columns": 3, "rows": 2, "cell": 0}
+        self.data["map"]["terrain"] = [{"type": "block", "x": 40, "width": 4, "height": 1.5, "sprite": cell},
+                                       {"type": "platform", "x": 30, "width": 5, "height": 1.8, "sprite": cell}]
+
+        def rejected(place):
+            data = copy.deepcopy(self.data)
+            data["map"]["props"] = [dict({"id": "test-crate"}, **place)]
+            return bool(validate_mission(data, RESOURCES, library))
+        self.assertFalse(rejected({"x": 20}))
+        self.assertFalse(rejected({"x": 42, "y": 1.5}))
+        self.assertFalse(rejected({"x": 50, "wave": 1}))       # wave 1 locks the screen around atX 52
+        self.assertFalse(rejected({"x": 20, "reward": "health"}))
+        for place in ({"x": 20, "id": "nothing"}, {"x": 42}, {"x": 32, "y": 1.8}, {"x": 20, "y": 1}, {"x": 90, "wave": 1}, {"x": 20, "wave": 99},
+                      {"x": 470}, {"x": 216}, {"x": 20, "reward": "jackpot"}, {"x": 20, "weapon": "rifle"}):
+            with self.subTest(place=place):
+                self.assertTrue(rejected(place))
 
     def test_encounters(self):
         encounters = self.data["encounters"]
@@ -638,6 +695,33 @@ class LibraryValidationTests(unittest.TestCase):
                 self.assertTrue(validate_carrier(data, RESOURCES))
         library, errors = load_library(RESOURCES, {"carriers": [{"id": "test-van", "extends": "black-minivan", "speed": 14}]})
         self.assertEqual(errors, [])
+
+    def test_props(self):
+        base = MissionValidationTests.TEST_PROP
+        self.assertEqual(validate_prop(base, RESOURCES), [])
+        barrel = dict(base, explosion={"radius": 3, "damage": 40, "heroDamage": 1}, blocks="all", cover=True, platform=1.5,
+                      debris={"texture": "Art/weapon-crates", "columns": 3, "rows": 2, "cells": [0, 1], "count": 6})
+        self.assertEqual(validate_prop(barrel, RESOURCES), [])
+        changes = (lambda d: d.update(health=[1, 2, 3]), lambda d: d.update(blocks="ghosts"), lambda d: d.update(box={"width": 0, "height": 1}),
+                   lambda d: d.update(platform=.5, blocks="heroes"),  # a ledge inside a box that blocks
+                   lambda d: d.update(explosion={"radius": 3, "heroDamage": 50}), lambda d: d.update(debris={"texture": "Art/nothing", "count": 3}),
+                   lambda d: d.update(rewards=[{"weapon": "rifle"}]), lambda d: d["animations"].update(states=[{"name": "destroyed", "cells": [1]}]),
+                   lambda d: d.update(sound="Audio/none"))
+        for change in changes:
+            with self.subTest(change=change):
+                data = copy.deepcopy(base)
+                change(data)
+                self.assertTrue(validate_prop(data, RESOURCES))
+        library, errors = load_library(RESOURCES, {"props": [base, {"id": "test-barrel", "extends": "test-crate", "explosion": {"radius": 2.5, "damage": 30}}]})
+        self.assertEqual(errors, [])
+        self.assertEqual(library["props"]["test-barrel"]["box"]["width"], 1.2)
+
+    def test_enemy_terrain(self):
+        base = content("enemies", "looter-rusher")
+        self.assertEqual(validate_enemy(dict(base, terrain={"climb": 1.5, "leap": 9, "follow": True}), RESOURCES), [])
+        for terrain in ({"climb": 9}, {"leap": 0}, {"follow": 1}):
+            with self.subTest(terrain=terrain):
+                self.assertTrue(validate_enemy(dict(base, terrain=terrain), RESOURCES))
 
     def test_difficulties(self):
         shipped = sorted(LIBRARY["difficulties"].values(), key=lambda d: (d.get("order", 0), d["id"]))

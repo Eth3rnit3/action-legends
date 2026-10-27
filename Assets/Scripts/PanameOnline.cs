@@ -320,6 +320,9 @@ namespace Paname
             // Charges and salvos of the specials, only while there are some: games without them keep their hashes.
             if(rushes.Count>0){Mix(rushes.Count);foreach(var r in rushes){MixF(r.position.x);Mix(r.struck.Count);}}
             foreach(var p in players)if(p!=null&&(p.dash>0||p.salvo>0)){MixF(p.dash);Mix(p.salvo);}
+            // The props and the enemies' height over the relief, only where there are some: flat missions keep their hashes.
+            foreach(var b in breakables)Mix(b.hp);
+            if(relief)foreach(var e in enemies)MixF(e.position.y);
             return h;
         }
         void ReportStatus()

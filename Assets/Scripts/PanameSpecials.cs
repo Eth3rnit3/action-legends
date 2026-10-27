@@ -13,7 +13,7 @@ namespace Paname
         {
             public Player owner;public HeroSpecial spec;public Vector2 position;public int facing,animState=-1;public float delay,age,walk,trail;
             public bool started,follows,bossHit;public Transform root;public SpriteRenderer renderer;
-            public readonly List<Enemy> struck=new List<Enemy>();
+            public readonly List<Enemy> struck=new List<Enemy>();public readonly List<Breakable> smashed=new List<Breakable>();
         }
         readonly List<Rush> rushes=new List<Rush>();
         public int RushCount=>rushes.Count;
@@ -30,7 +30,7 @@ namespace Paname
                 effects.Play(1,p.position+new Vector2(p.facing*.7f,1),2.8f,.25f,p.facing);
                 effects.Play(3,p.position+Vector2.up*.3f,1.8f,.4f);
                 for(int e=enemies.Count-1;e>=0;e--)if(Vector2.Distance(p.position,enemies[e].position)<s.radius)HitEnemy(e,s.damage,p.facing,Wounds.Explosion);
-                BlastFreesHostages(p.position+Vector2.up,s.radius);
+                BlastFreesHostages(p.position+Vector2.up,s.radius);BlastProps(p.position+Vector2.up,s.radius,s.damage,p.facing);
                 if(BossActive&&Vector2.Distance(p.position+Vector2.up,bossPosition)<s.radius+s.bossReach)DamageBoss(s.bossDamage);
                 p.invulnerable=s.invulnerable;if(s.leap>0)p.vertical=s.leap;
             }
@@ -111,6 +111,8 @@ namespace Paname
             }
             if(!r.bossHit&&s.bossDamage>0&&BossActive&&BossWithin(centre,Mathf.Max(reach,half))){r.bossHit=true;DamageBoss(s.bossDamage);if(s.impact.Drawn)effects.Flipbook(s.impact.All,centre,s.impact.size,s.impact.Duration);}
             BlastFreesHostages(centre,reach);
+            // Props in its way, each once.
+            foreach(var b in breakables)if(b.hp>0&&!r.smashed.Contains(b)&&PropHittable(b)&&Mathf.Abs(b.position.x-centre.x)<reach+b.type.box.width*.5f&&centre.y+half>b.position.y&&centre.y-half<b.position.y+b.type.box.height){r.smashed.Add(b);HitProp(b,s.damage,r.facing,s.woundKind==Wounds.Explosion);}
         }
         // Drawn only: puffs of the trail left behind the charge.
         void Trail(Rush r,float dt)

@@ -29,7 +29,9 @@ namespace Paname
         {
             // Health first: the hero back on his feet counts as the leading hero, as he always did.
             p.hp=MaxPlayerHealth;float x=inPlace?Mathf.Clamp(p.position.x,rear,BossActive?bossArenaX+ArenaHalfWidth-1:screenLocked?lockX+SimHalfWidth-1:CurrentMission.length-1):Mathf.Clamp(LeaderX()-1,1,CurrentMission.length-1);
-            p.position=new Vector2(x,0);p.vertical=0;p.invulnerable=Level.respawn.invulnerable;p.root.gameObject.SetActive(true);Disarm(p);
+            // Out of a lethal pit's span, on top of what stands there.
+            var pit=PitAt(x);if(pit!=null&&pit.lethal)x=pit.x-.7f;
+            p.position=new Vector2(x,SolidAt(x,ForHeroes));p.vertical=0;p.dropFrom=float.MaxValue;p.invulnerable=Level.respawn.invulnerable;p.root.gameObject.SetActive(true);Disarm(p);
             if(Rules.grenades.refillOnRespawn)p.grenades=Mathf.Max(p.grenades,Rules.grenades.start[DifficultyIndex]);
         }
         void OutOfLives()

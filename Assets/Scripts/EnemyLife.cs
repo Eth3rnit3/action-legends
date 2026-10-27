@@ -18,6 +18,14 @@ namespace Paname
     // Panic: below health (a fraction of its health; 0 never) or once allies (0 never) of its side have fallen within radius,
     // the enemy runs away from the heroes for time seconds at speed times its own speed, once; then it comes back if returns.
     [Serializable] public sealed class EnemyPanic {public float health,radius=6,time=2,speed=1.3f;public int allies;public bool returns=true;}
+    // How an enemy gets about the relief (lot 3a): it leaps onto a step, a block or a prop up to climb units higher than its feet
+    // (upward speed leap); with follow it also jumps up onto a ledge where its target stands, and down from one, instead of
+    // waiting below.
+    [Serializable] public sealed class EnemyTerrain
+    {
+        public float climb=1.7f,leap=10;public bool follow;
+        public void Validate(string label){Content.Range(climb,0,4,label+".climb");Content.Range(leap,1,30,label+".leap");}
+    }
     // A lobbed grenade (the rules' grenade physics and look): thrown at a hero between minRange and range, every cooldown seconds,
     // first after first seconds; throwY is the upward speed, the forward speed is chosen to land on the hero (at most maxX).
     // It goes off at its bounces-th landing, on touching a hero or when fuse runs out, and hurts heroes within radius.

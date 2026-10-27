@@ -20,7 +20,11 @@ namespace Paname
         float bossTime,bossTimer,bossShotTimer,bossFlash,bossArenaX,bossDeathClock,bossExplosionTimer,bossRageTime,bossStateTime;
         const int BossIdle=0,BossAim=1,BossFire=2,BossWindup=3,BossRecover=4;
         bool bossStarted,bossDefeated,bossEnraged;
-        BossDefinition Boss=>CurrentMission.boss.definition;
+        // The boss being fought: the mission's at the end, or an encounter's mid-mission boss (midBoss), whose defeat lets the team move on.
+        MissionBoss bossEntry;bool midBoss;
+        MissionBoss BossEntry=>bossEntry??CurrentMission.boss;
+        BossDefinition Boss=>BossEntry.definition;
+        public bool MidBossActive=>midBoss&&bossStarted;
         float BossAttackPace=>bossEnraged?Boss.ragePace:1;
         public bool BossActive=>bossStarted&&!bossDefeated;
         public bool BossDefeated=>bossDefeated;
@@ -30,18 +34,21 @@ namespace Paname
         {
             bossBombs.Clear();ResetShockwaves();bossRoot=null;bossRotor=null;bossSight=null;bossRenderer=null;
             bossStarted=false;bossDefeated=false;bossEnraged=false;bossHealth=0;bossTime=0;bossDeathClock=0;bossBarrel=0;bossPhase=BossIdle;bossState=-1;bossStateTime=0;
+            bossEntry=null;midBoss=false;bossTroops=0;bossTroop=0;
         }
-        void SpawnBoss()
+        void SpawnBoss()=>SpawnBoss(null);
+        // mid: an encounter's boss; the street keeps its enemies and the waves wait for its defeat.
+        void SpawnBoss(MissionBoss mid)
         {
-            bossStarted=true;screenLocked=false;bossArenaX=cameraX;
+            bossEntry=mid;midBoss=mid!=null;bossStarted=true;screenLocked=false;encounterLock=false;bossArenaX=cameraX;
             var boss=Boss;var set=boss.animations;
-            bossMaxHealth=Mathf.RoundToInt(boss.health[DifficultyIndex]*(1+boss.healthPerExtraPlayer*(JoinedCount-1))*CurrentMission.boss.health);
-            bossHealth=bossMaxHealth;bossTimer=boss.firstAttack;bossAttack=0;bossPhase=BossIdle;bossVolley=0;bossTime=0;
-            foreach(var e in enemies){e.root.gameObject.SetActive(false);Destroy(e.root.gameObject);}enemies.Clear();pending=0;Wave=CurrentMission.waves.Length;
-            bossRoot=new GameObject("Boss • "+CurrentMission.boss.name).transform;bossRoot.SetParent(actors,false);
+            bossMaxHealth=Mathf.RoundToInt(boss.health[DifficultyIndex]*(1+boss.healthPerExtraPlayer*(JoinedCount-1))*BossEntry.health);
+            bossHealth=bossMaxHealth;bossTimer=boss.firstAttack;bossAttack=0;bossPhase=BossIdle;bossVolley=0;bossTime=0;bossTroop=0;
+            if(!midBoss){foreach(var e in enemies){e.root.gameObject.SetActive(false);Destroy(e.root.gameObject);}enemies.Clear();pending=0;Wave=CurrentMission.waves.Length;arrivals.Clear();}
+            bossRoot=new GameObject("Boss • "+BossEntry.name).transform;bossRoot.SetParent(actors,false);
             bossSight=Shape(actors,"Visée de la mitrailleuse",0,.06f,1,.055f,Coral,42);
             bossSight.gameObject.SetActive(false);
-            Announce(CurrentMission.boss.intro);Speak(bossVoice);shake=.25f;
+            Announce(BossEntry.intro);Speak(midBoss?miniBossVoice:bossVoice);shake=.25f;
             bossCell=set.states[boss.idle].cells[0];
             bossRenderer=bossRoot.gameObject.AddComponent<SpriteRenderer>();bossRenderer.sprite=set.Sprite(bossCell);bossRenderer.sortingOrder=set.layer;
             if(boss.flash&&ArcadeEffects.ActorMaterial)bossRenderer.sharedMaterial=ArcadeEffects.ActorMaterial;
@@ -68,14 +75,17 @@ namespace Paname
         Vector2 BossPoint(string anchor){var local=Boss.animations.Points(anchor)[bossCell];return bossPosition+new Vector2(local.x*(bossRoot?bossRoot.localScale.x:1),local.y);}
         void TickBoss(float dt)
         {
-            if(!CurrentMission.boss.enabled)
+            if(!bossStarted)
             {
-                // Without a boss the mission ends once every wave is cleared and the exit is reached.
-                if(phase==Phase.Playing&&Wave>=CurrentMission.waves.Length&&LeaderX()>=CurrentMission.exitX)WinMission();
-                return;
+                if(!CurrentMission.boss.enabled)
+                {
+                    // Without a boss the mission ends once every wave is cleared and the exit is reached.
+                    if(phase==Phase.Playing&&Wave>=CurrentMission.waves.Length&&LeaderX()>=CurrentMission.exitX)WinMission();
+                    return;
+                }
+                if(LeaderX()>=CurrentMission.exitX-18)SpawnBoss();
+                if(!bossStarted)return;
             }
-            if(!bossStarted&&LeaderX()>=CurrentMission.exitX-18)SpawnBoss();
-            if(!bossStarted)return;
             var boss=Boss;
             if(bossDefeated)
             {
@@ -89,7 +99,7 @@ namespace Paname
                     if(bossExplosionTimer<=0){effects.Play(1,core+new Vector2(Mathf.Sin(bossDeathClock*25)*d.spreadX,Mathf.Cos(bossDeathClock*19)*d.spreadY),2.2f,.4f);bossExplosionTimer=.16f;shake=.25f;}
                     if(bossDeathClock<.45f)bossRoot.gameObject.SetActive(false);
                 }
-                if(bossDeathClock<=0)WinMission();
+                if(bossDeathClock<=0){if(midBoss)EndMidBoss();else WinMission();}
                 return;
             }
             bossTime+=dt;bossFlash=Mathf.Max(0,bossFlash-dt);
@@ -187,19 +197,28 @@ namespace Paname
         {
             if(!BossActive)return;
             bossHealth=Mathf.Max(0,bossHealth-amount);bossFlash=.065f;
-            if(!bossEnraged&&bossHealth>0&&bossHealth<=bossMaxHealth/2){bossEnraged=true;bossRageTime=0;bossTimer=Mathf.Min(bossTimer,Boss.rageDelay);Announce(CurrentMission.boss.rage);}
+            if(!bossEnraged&&bossHealth>0&&bossHealth<=bossMaxHealth/2){bossEnraged=true;bossRageTime=0;bossTimer=Mathf.Min(bossTimer,Boss.rageDelay);Announce(BossEntry.rage);}
             if(bossHealth>0)return;
-            bossDefeated=true;bossDeathClock=2.5f;bossExplosionTimer=0;Score+=10000;
+            bossDefeated=true;bossDeathClock=2.5f;bossExplosionTimer=0;Score+=Boss.score;
+            // A boss with a "wreck" state shows it as it goes down.
+            int wreck=Boss.animations.Find("wreck");if(wreck>=0&&bossRenderer){bossCell=Boss.animations.states[wreck].cells[0];bossRenderer.sprite=Boss.animations.Sprite(bossCell);}
             if(bossSight)bossSight.gameObject.SetActive(false);
             for(int i=bossBombs.Count-1;i>=0;i--)RemoveBossBomb(i,false);
             ResetShockwaves();
             foreach(var shot in shots)if(shot.Hostile)shot.life=0;
-            Announce(CurrentMission.boss.defeat);Sound(bossDownClip);
+            Announce(BossEntry.defeat);Sound(bossDownClip);
+        }
+        // A mid-mission boss is gone: the street scrolls again, its troops run away.
+        void EndMidBoss()
+        {
+            if(bossRoot)Destroy(bossRoot.gameObject);if(bossSight)Destroy(bossSight.gameObject);
+            ResetBoss();goFromX=cameraX;Announce("CONTINUEZ !  »");
+            foreach(var e in enemies)if(e.group==-2)Flee(e,true);
         }
         void DrawBossHUD()
         {
             if(!BossActive)return;
-            Label(370,622,510,20,CurrentMission.boss.name,12,Gold,true);
+            Label(370,622,510,20,BossEntry.name,12,Gold,true);
             if(bossEnraged)Label(887,622,24,20,"!",16,Coral,true,TextAnchor.MiddleRight);
             Panel(370,646,540,10,new Color(.035f,.09f,.14f,.85f));
             Panel(372,648,536*(bossHealth/(float)bossMaxHealth),6,Coral);

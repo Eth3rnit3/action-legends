@@ -84,6 +84,11 @@ namespace Paname
         public WeaponChance[] weapons;
         public SpriteCell go=new SpriteCell();
         public TallyRules tally=new TallyRules();
+        // How defeated enemies fall, one motion per kind of wound (a kind without one keeps the engine's short tumble),
+        // and the staging of encounters (surprise sign, parachutes, doorways).
+        public DeathMotion[] deaths;
+        public StageRules stage=new StageRules();
+        [NonSerialized] public DeathMotion[] motions;
         public void Validate()
         {
             string label="Règles "+id;
@@ -121,6 +126,9 @@ namespace Paname
             Content.PerDifficulty(firstSupply,5,500,label+".firstSupply");Content.PerDifficulty(supplySpacing,10,500,label+".supplySpacing");Content.PerDifficulty(killsPerDrop,1,500,label+".killsPerDrop");
             Table(weapons,label+".weapons",Array.Exists(bonuses,b=>b.Draws));
             go.Validate(label+".go");
+            motions=new DeathMotion[Wounds.Names.Length];
+            if(deaths!=null)for(int i=0;i<deaths.Length;i++){var d=deaths[i];if(d==null)throw new ArgumentException(label+".deaths : entrée vide");d.Validate(label+".deaths["+i+"]");if(motions[d.kind]!=null)throw new ArgumentException(label+".deaths : "+d.damage+" deux fois");motions[d.kind]=d;}
+            stage.Validate(label+".stage");
             Content.PerDifficulty(tally.hostage,0,100000,label+".tally.hostage");Content.PerDifficulty(tally.perSecond,0,10000,label+".tally.perSecond");tally.icon.Validate(label+".tally.icon");
         }
         // Also checks a mission's own table; required when some weapon crate draws from it.

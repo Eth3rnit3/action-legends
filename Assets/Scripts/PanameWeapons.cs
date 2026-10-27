@@ -72,13 +72,13 @@ namespace Paname
             beamTargets.Clear();beamDepths.Clear();
             foreach(var e in enemies)
             {
-                Vector2 centre=e.position+Vector2.up;float depth=Vector2.Dot(centre-muzzle,aim);
+                if(!Shootable(e))continue;Vector2 centre=e.position+Vector2.up;float depth=Vector2.Dot(centre-muzzle,aim);
                 if(depth<-e.type.hitRadius||SegmentDistance(muzzle,end,centre)>=e.type.hitRadius+pr.radius)continue;
                 int at=beamDepths.Count;while(at>0&&beamDepths[at-1]>depth)at--;beamDepths.Insert(at,depth);beamTargets.Insert(at,e);
             }
             int hits=pr.pierce<0?beamTargets.Count:Mathf.Min(beamTargets.Count,pr.pierce+1);
             if(pr.pierce>=0&&hits==pr.pierce+1)length=Mathf.Min(length,beamDepths[hits-1]+.4f);
-            for(int i=0;i<hits;i++){int index=enemies.IndexOf(beamTargets[i]);if(index>=0)HitEnemy(index,w.damage,direction);}
+            for(int i=0;i<hits;i++){int index=enemies.IndexOf(beamTargets[i]);if(index>=0)HitEnemy(index,w.damage,direction,w.wound);}
             HitBossOrBomb(muzzle,muzzle+aim*length,w.damage);BeamFreesHostages(muzzle,muzzle+aim*length,p);
             var s=Shoot(ShotLook.Sprite,muzzle+aim*(length*.5f),Vector2.zero,w.damage,false,true);Load(s,w,p);
             if(s!=null){s.heading=aim;s.length=length;s.root.localScale=new Vector3(length,pr.size,1);s.root.localRotation=Quaternion.Euler(0,0,Mathf.Atan2(aim.y,aim.x)*Mathf.Rad2Deg);}
@@ -120,7 +120,7 @@ namespace Paname
         void Blast(Vector2 at,float radius,int damage,int bossDamage,int direction,bool shown)
         {
             if(shown){effects.Play(2,at,radius*1.1f,.44f);Sound(explosionClips);shake=Mathf.Max(shake,.3f);}
-            for(int k=enemies.Count-1;k>=0;k--)if(Vector2.Distance(enemies[k].position+Vector2.up,at)<radius)HitEnemy(k,damage,direction,true);
+            for(int k=enemies.Count-1;k>=0;k--)if(Vector2.Distance(enemies[k].position+Vector2.up,at)<radius)HitEnemy(k,damage,direction,Wounds.Explosion);
             if(bossDamage>0&&BossActive&&BossWithin(at,radius))DamageBoss(bossDamage);
             BlastFreesHostages(at,radius);
         }

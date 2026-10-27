@@ -1,0 +1,245 @@
+{
+  "id": "speedboat",
+  "behavior": "flyer",
+  "name": "HORS-BORD DES CAÏDS",
+  "intro": "UN HORS-BORD ACCOSTE LE QUAI !",
+  "rage": "LES CAÏDS METTENT LES GAZ !",
+  "defeat": "HORS-BORD COULÉ !",
+  "health": [
+    110,
+    180,
+    240,
+    300
+  ],
+  "healthPerExtraPlayer": 0.5,
+  "ragePace": 0.8,
+  "rageDelay": 0.4,
+  "firstAttack": 1.6,
+  "smokeSize": 0.9,
+  "score": 5000,
+  "flash": true,
+  "shadow": {
+    "x": 0,
+    "y": 0
+  },
+  "rotor": {
+    "x": 0,
+    "y": 0,
+    "width": 0,
+    "height": 0,
+    "speed": 0
+  },
+  "flight": {
+    "speed": [
+      0.38,
+      0.42,
+      0.46,
+      0.5
+    ],
+    "rageCatchUp": 0.3,
+    "sweep": 5.5,
+    "sweepMargin": 3,
+    "altitude": 0.6,
+    "bob": 0.1,
+    "bobRate": 3
+  },
+  "hitbox": {
+    "x": -1.8,
+    "y": 1.2,
+    "stepX": 1.2,
+    "stepY": 0.1,
+    "radius": 1.0,
+    "count": 4
+  },
+  "death": {
+    "fall": 0.5,
+    "spin": -4,
+    "spreadX": 1.8,
+    "spreadY": 0.8,
+    "core": {
+      "x": 0,
+      "y": 1.1
+    },
+    "spinWithFacing": true
+  },
+  "missile": {
+    "texture": "Art/grenades",
+    "x": 0,
+    "y": 0.5,
+    "width": 0.5,
+    "height": 0.5,
+    "size": 0.9,
+    "hitRadius": 0.3,
+    "tipRadius": 0,
+    "hitLength": 0,
+    "layer": 46
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/bosses/speedboat",
+      "columns": 3,
+      "rows": 2,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.02734375
+      },
+      "cellHeight": 4.6545455
+    },
+    "layer": 20,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0,
+          1
+        ],
+        "fps": 4
+      },
+      {
+        "name": "fire",
+        "cells": [
+          2
+        ]
+      },
+      {
+        "name": "throw",
+        "cells": [
+          3
+        ]
+      },
+      {
+        "name": "board",
+        "cells": [
+          4
+        ]
+      },
+      {
+        "name": "wreck",
+        "cells": [
+          5
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "gun",
+        "x": -0.45,
+        "y": 2.42
+      },
+      {
+        "name": "rack",
+        "x": 1.03,
+        "y": 2.64
+      },
+      {
+        "name": "door",
+        "x": 1.09,
+        "y": 1.18
+      },
+      {
+        "name": "smoke",
+        "x": 1.9,
+        "y": 1.2
+      }
+    ]
+  },
+  "attacks": [
+    {
+      "type": "gun",
+      "announce": "RAFALE DEPUIS LE PORT !",
+      "aimState": "fire",
+      "state": "fire",
+      "aimTime": [
+        0.75,
+        0.65,
+        0.55,
+        0.45
+      ],
+      "duration": 1.3,
+      "interval": [
+        0.15,
+        0.13,
+        0.11,
+        0.09
+      ],
+      "speed": [
+        12,
+        14,
+        16,
+        18
+      ],
+      "sweep": 1.6,
+      "sweepRate": 4,
+      "aimHeight": 0.9,
+      "sightWidth": 4,
+      "muzzles": [
+        "gun"
+      ],
+      "sound": "Audio/Sfx/tir-D-pistolet-sec",
+      "damage": 1,
+      "cooldown": 1.2
+    },
+    {
+      "type": "bombs",
+      "announce": "GRENADES : ÉCARTEZ-VOUS !",
+      "state": "throw",
+      "count": [
+        2,
+        2,
+        3,
+        3
+      ],
+      "rageExtra": 1,
+      "spacing": 2.4,
+      "duration": 0.9,
+      "launch": 0.3,
+      "delay": [
+        0.3,
+        0.28,
+        0.26,
+        0.24
+      ],
+      "stagger": 0.12,
+      "flight": [
+        1.05,
+        0.95,
+        0.9,
+        0.85
+      ],
+      "arc": 3.5,
+      "blastRadius": 1.4,
+      "blastHeight": 1.2,
+      "damage": 1,
+      "marker": 2.2,
+      "rack": "rack",
+      "sound": "Audio/Sfx/grenade-lancer",
+      "cooldown": 1.3
+    },
+    {
+      "type": "troops",
+      "announce": "À L'ABORDAGE !",
+      "state": "board",
+      "enemies": [
+        "looter-rusher",
+        "looter-thrower"
+      ],
+      "count": [
+        2,
+        2,
+        3,
+        3
+      ],
+      "interval": [
+        0.6,
+        0.55,
+        0.5,
+        0.45
+      ],
+      "duration": 1.6,
+      "door": "door",
+      "spread": 2.5,
+      "maxAlive": 4,
+      "cooldown": 1.2
+    }
+  ]
+}

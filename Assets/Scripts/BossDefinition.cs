@@ -4,17 +4,22 @@ namespace Paname
 {
     // One move of a boss, chosen in turn from its list. "gun" aims, then sweeps bullets from its muzzles;
     // "bombs" drops missiles on the heroes from its rack, at once or after a launch pose; "stomp" raises
-    // a foot and sends a shockwave each way. Values in arrays are per difficulty.
+    // a foot and sends a shockwave each way; "charge" revs up (aimState) then rushes across the arena (state), hurting heroes
+    // in its way below clearance (a jump clears it); "troops" lets enemies out of its door anchor, count of them, one every
+    // interval. Values in arrays are per difficulty.
     [Serializable] public sealed class BossAttack
     {
-        public string type,announce,state,aimState,recoverState,sound,rack,foot;
-        public string[] muzzles;
+        public string type,announce,state,aimState,recoverState,sound,rack,foot,door;
+        public string[] muzzles,enemies;
+        public float clearance,reach=1.5f,spread=3;
+        public int maxAlive=4;
+        [NonSerialized] public EnemyDefinition[] troops;
         public float[] aimTime,interval,speed,delay,flight;
         public int[] count;
         public float duration,launch,sweep,sweepRate,aimHeight,sightWidth,spacing,stagger,arc,blastRadius,blastHeight,marker,windup,repeatWindup,recover,waveReach,waveHeight,shake,cooldown,rageCooldown=-1;
         public int rageExtra,repeat,rageRepeat,damage;
         public bool smoke;
-        public static readonly string[] Types={"gun","bombs","stomp"};
+        public static readonly string[] Types={"gun","bombs","stomp","charge","troops"};
         [NonSerialized] public int kind;
         [NonSerialized] public AudioClip clip;
     }
@@ -43,6 +48,8 @@ namespace Paname
         public string id,extends,behavior,name,intro,rage,defeat;
         public float[] health;
         public float healthPerExtraPlayer,ragePace,rageDelay,firstAttack,smokeSize;
+        // Points for destroying it.
+        public int score=10000;
         // flash: the art turns white when hit; shadow: width and height of a ground shadow (0 for none).
         public bool flash;
         public Vector2 shadow;
@@ -65,9 +72,10 @@ namespace Paname
             Content.Text(name,30,label+".name");Content.Text(intro,80,label+".intro");Content.Text(rage,80,label+".rage");Content.Text(defeat,80,label+".defeat");
             Content.PerDifficulty(health,10,100000,label+".health");Content.Range(healthPerExtraPlayer,0,5,label+".healthPerExtraPlayer");
             Content.Range(ragePace,.1f,2,label+".ragePace");Content.Range(rageDelay,0,10,label+".rageDelay");Content.Range(firstAttack,0,10,label+".firstAttack");Content.Range(smokeSize,0,5,label+".smokeSize");
+            if(score<0||score>100000)throw new ArgumentException(label+" : score entre 0 et 100000");
             if(!(shadow.x>=0&&shadow.x<=20&&shadow.y>=0&&shadow.y<=5))throw new ArgumentException(label+" : shadow invalide");
             animations.Validate(label,walker?new[]{"idle","walk"}:new[]{"idle"});idle=animations.Find("idle");move=animations.Find("walk",idle);Anchor("smoke",label);
-            if(walker){var w=walk;Content.PerDifficulty(w.speed,.1f,30,label+".walk.speed");Content.Range(w.stopDistance,0,20,label+".walk.stopDistance");Content.Range(w.margin,0,10,label+".walk.margin");Content.Range(w.stepLength,.1f,10,label+".walk.stepLength");Content.Range(w.stepShake,0,1,label+".walk.stepShake");Content.Range(w.entry,0,10,label+".walk.entry");Anchor(w.foot,label+".walk");}
+            if(walker){var w=walk;Content.PerDifficulty(w.speed,.1f,30,label+".walk.speed");Content.Range(w.stopDistance,0,20,label+".walk.stopDistance");Content.Range(w.margin,0,10,label+".walk.margin");Content.Range(w.stepLength,.1f,10,label+".walk.stepLength");Content.Range(w.stepShake,0,1,label+".walk.stepShake");Content.Range(w.entry,-8,10,label+".walk.entry");Anchor(w.foot,label+".walk");}
             else
             {
                 var f=flight;Content.PerDifficulty(f.speed,.05f,20,label+".flight.speed");Content.Range(f.rageCatchUp,0,5,label+".flight.rageCatchUp");Content.Range(f.sweep,0,20,label+".flight.sweep");
@@ -81,7 +89,7 @@ namespace Paname
             bool bombs=false;
             foreach(var a in attacks)
             {
-                if(a==null||(a.kind=Array.IndexOf(BossAttack.Types,a.type))<0)throw new ArgumentException(label+" : attaque gun, bombs ou stomp");
+                if(a==null||(a.kind=Array.IndexOf(BossAttack.Types,a.type))<0)throw new ArgumentException(label+" : attaque gun, bombs, stomp, charge ou troops");
                 string l=label+" : attaque "+a.type;Content.Text(a.announce,80,l+".announce");
                 Content.Range(a.cooldown,0,20,l+".cooldown");if(a.rageCooldown!=-1)Content.Range(a.rageCooldown,0,20,l+".rageCooldown");
                 foreach(var state in new[]{a.state,a.aimState,a.recoverState})if(!string.IsNullOrEmpty(state)&&animations.Find(state)<0)throw new ArgumentException(l+" : état "+state+" absent des animations");
@@ -101,6 +109,20 @@ namespace Paname
                     Content.Range(a.duration,0,20,l+".duration");Content.Range(a.launch,0,20,l+".launch");Content.Range(a.spacing,0,10,l+".spacing");Content.Range(a.stagger,0,5,l+".stagger");Content.Range(a.arc,-20,20,l+".arc");
                     Content.Range(a.blastRadius,.1f,10,l+".blastRadius");Content.Range(a.blastHeight,0,10,l+".blastHeight");Content.Range(a.marker,0,20,l+".marker");Anchor(a.rack,l);
                     if(a.damage<1||a.damage>10)throw new ArgumentException(l+" : damage entre 1 et 10");
+                }
+                else if(a.kind==3)
+                {
+                    if(!walker)throw new ArgumentException(l+" : charge est une attaque d'un boss au sol (walker)");
+                    Content.Range(a.windup,0,10,l+".windup");Content.Range(a.recover,0,10,l+".recover");Content.PerDifficulty(a.speed,1,60,l+".speed");
+                    Content.Range(a.clearance,0,6,l+".clearance");Content.Range(a.reach,.2f,8,l+".reach");Content.Range(a.shake,0,1,l+".shake");
+                    if(a.damage<1||a.damage>10)throw new ArgumentException(l+" : damage entre 1 et 10");
+                }
+                else if(a.kind==4)
+                {
+                    if(a.enemies==null||a.enemies.Length<1||a.enemies.Length>6)throw new ArgumentException(l+" : un à six enemies");
+                    a.troops=Array.ConvertAll(a.enemies,ContentLibrary.FindEnemy);if(Array.IndexOf(a.troops,null)>=0)throw new ArgumentException(l+" : ennemi inconnu dans enemies");
+                    Content.PerDifficulty(a.count,1,8,l+".count");Content.PerDifficulty(a.interval,.05f,5,l+".interval");Content.Range(a.duration,0,20,l+".duration");Content.Range(a.spread,0,10,l+".spread");
+                    if(a.maxAlive<1||a.maxAlive>12)throw new ArgumentException(l+" : maxAlive entre 1 et 12");Anchor(a.door,l);
                 }
                 else
                 {

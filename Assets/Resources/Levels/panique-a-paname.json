@@ -53,7 +53,7 @@
         "id": "civilian",
         "x": 238,
         "y": 0,
-        "wave": 6,
+        "wave": 5,
         "weapon": "heavy-machinegun"
       },
       {
@@ -66,7 +66,7 @@
         "id": "baker",
         "x": 352,
         "y": 0,
-        "wave": 9,
+        "wave": 7,
         "reward": "weapon"
       },
       {
@@ -97,60 +97,52 @@
   "waves": [
     {
       "atX": 14,
-      "baseEnemies": 14,
-      "enemiesPerPlayer": 5,
-      "maxAlive": 22,
-      "spawnInterval": 0.17,
+      "baseEnemies": 6,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 12,
+      "spawnInterval": 0.3,
       "enemyPattern": [
         0,
         0,
         1,
         0,
-        2,
-        0,
-        1
+        2
       ]
     },
     {
       "atX": 52,
-      "baseEnemies": 14,
-      "enemiesPerPlayer": 5,
-      "maxAlive": 22,
-      "spawnInterval": 0.17,
+      "baseEnemies": 7,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 12,
+      "spawnInterval": 0.3,
       "enemyPattern": [
-        0,
         0,
         1,
         0,
         2,
-        0,
-        1
+        0
       ]
     },
     {
-      "atX": 90,
-      "baseEnemies": 14,
-      "enemiesPerPlayer": 5,
-      "maxAlive": 22,
-      "spawnInterval": 0.17,
+      "atX": 100,
+      "baseEnemies": 6,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 12,
+      "spawnInterval": 0.3,
       "enemyPattern": [
         0,
         0,
         1,
-        0,
-        2,
-        0,
-        1
+        2
       ]
     },
     {
       "atX": 128,
-      "baseEnemies": 17,
-      "enemiesPerPlayer": 5,
-      "maxAlive": 22,
-      "spawnInterval": 0.17,
+      "baseEnemies": 8,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 13,
+      "spawnInterval": 0.28,
       "enemyPattern": [
-        0,
         0,
         1,
         0,
@@ -160,61 +152,26 @@
       ]
     },
     {
-      "atX": 166,
-      "baseEnemies": 17,
-      "enemiesPerPlayer": 5,
-      "maxAlive": 23,
-      "spawnInterval": 0.14,
+      "atX": 180,
+      "baseEnemies": 8,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 13,
+      "spawnInterval": 0.28,
       "enemyPattern": [
         0,
         0,
         1,
         0,
-        2,
-        0,
-        1
-      ]
-    },
-    {
-      "atX": 204,
-      "baseEnemies": 17,
-      "enemiesPerPlayer": 5,
-      "maxAlive": 23,
-      "spawnInterval": 0.14,
-      "enemyPattern": [
-        0,
-        0,
-        1,
-        0,
-        2,
-        0,
-        1
+        2
       ]
     },
     {
       "atX": 242,
-      "baseEnemies": 20,
-      "enemiesPerPlayer": 5,
-      "maxAlive": 23,
-      "spawnInterval": 0.14,
+      "baseEnemies": 8,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 13,
+      "spawnInterval": 0.26,
       "enemyPattern": [
-        0,
-        0,
-        1,
-        0,
-        2,
-        0,
-        1
-      ]
-    },
-    {
-      "atX": 280,
-      "baseEnemies": 20,
-      "enemiesPerPlayer": 5,
-      "maxAlive": 23,
-      "spawnInterval": 0.14,
-      "enemyPattern": [
-        0,
         0,
         1,
         0,
@@ -225,15 +182,14 @@
     },
     {
       "atX": 318,
-      "baseEnemies": 20,
-      "enemiesPerPlayer": 5,
-      "maxAlive": 24,
-      "spawnInterval": 0.14,
+      "baseEnemies": 8,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 14,
+      "spawnInterval": 0.26,
       "enemyPattern": [
         0,
         0,
         1,
-        0,
         2,
         0,
         1
@@ -241,12 +197,25 @@
     },
     {
       "atX": 356,
-      "baseEnemies": 23,
-      "enemiesPerPlayer": 5,
-      "maxAlive": 24,
-      "spawnInterval": 0.14,
+      "baseEnemies": 8,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 14,
+      "spawnInterval": 0.25,
       "enemyPattern": [
         0,
+        1,
+        0,
+        2,
+        1
+      ]
+    },
+    {
+      "atX": 410,
+      "baseEnemies": 9,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 15,
+      "spawnInterval": 0.24,
+      "enemyPattern": [
         0,
         1,
         0,
@@ -256,39 +225,543 @@
       ]
     },
     {
-      "atX": 394,
-      "baseEnemies": 23,
-      "enemiesPerPlayer": 5,
-      "maxAlive": 24,
-      "spawnInterval": 0.14,
+      "atX": 440,
+      "baseEnemies": 10,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 16,
+      "spawnInterval": 0.22,
       "enemyPattern": [
         0,
+        1,
+        2,
         0,
         1,
         0,
-        2,
-        0,
-        1
-      ]
-    },
-    {
-      "atX": 432,
-      "baseEnemies": 23,
-      "enemiesPerPlayer": 5,
-      "maxAlive": 24,
-      "spawnInterval": 0.14,
-      "enemyPattern": [
-        0,
-        0,
-        1,
-        0,
-        2,
-        0,
-        1
+        2
       ]
     }
   ],
-  "encounters": [],
+  "encounters": [
+    {
+      "atX": 14,
+      "wave": 0,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "looter-thrower",
+          "entry": "door",
+          "x": 12,
+          "delay": 0,
+          "fromX": 13,
+          "fromY": 0,
+          "y": 0
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "walk",
+          "x": 10,
+          "delay": 1.2,
+          "side": "right"
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "walk",
+          "x": 12,
+          "delay": 1.6,
+          "side": "right"
+        }
+      ]
+    },
+    {
+      "atX": 52,
+      "wave": 1,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "looter-thrower",
+          "entry": "window",
+          "x": 45,
+          "delay": 0,
+          "fromX": 45,
+          "fromY": 2.0,
+          "y": 2.0
+        },
+        {
+          "enemy": "looter-shield",
+          "entry": "door",
+          "x": 50,
+          "delay": 1,
+          "fromX": 51,
+          "fromY": 0,
+          "y": 0
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "door",
+          "x": 48,
+          "delay": 2.2,
+          "fromX": 51,
+          "fromY": 0,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "atX": 70,
+      "wave": -1,
+      "spawns": [
+        {
+          "enemy": "looter-rusher",
+          "entry": "none",
+          "x": 85,
+          "delay": 0,
+          "unaware": true,
+          "facing": -1
+        },
+        {
+          "enemy": "looter-thrower",
+          "entry": "none",
+          "x": 87,
+          "delay": 0,
+          "unaware": true,
+          "facing": 1
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "none",
+          "x": 89,
+          "delay": 0,
+          "unaware": true,
+          "facing": 1
+        }
+      ]
+    },
+    {
+      "atX": 100,
+      "wave": 2,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "looter-rusher",
+          "entry": "truck",
+          "x": 96,
+          "delay": 0
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "truck",
+          "x": 98,
+          "delay": 0
+        },
+        {
+          "enemy": "looter-thrower",
+          "entry": "truck",
+          "x": 95,
+          "delay": 0
+        }
+      ],
+      "truck": {
+        "id": "rusty-van",
+        "side": "right",
+        "x": 97
+      }
+    },
+    {
+      "atX": 128,
+      "wave": 3,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "looter-thrower",
+          "entry": "window",
+          "x": 119,
+          "delay": 0,
+          "fromX": 119,
+          "fromY": 2.0,
+          "y": 2.0
+        },
+        {
+          "enemy": "looter-thrower",
+          "entry": "window",
+          "x": 126,
+          "delay": 1.5,
+          "fromX": 126,
+          "fromY": 2.0,
+          "y": 2.0
+        },
+        {
+          "enemy": "looter-shield",
+          "entry": "door",
+          "x": 124,
+          "delay": 0.8,
+          "fromX": 125,
+          "fromY": 0,
+          "y": 0
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "window",
+          "x": 121,
+          "delay": 3,
+          "fromX": 119,
+          "fromY": 2.6,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "atX": 150,
+      "wave": -1,
+      "spawns": [
+        {
+          "enemy": "looter-rusher",
+          "entry": "drop",
+          "x": 156,
+          "delay": 0
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "drop",
+          "x": 160,
+          "delay": 0.4
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "walk",
+          "x": 148,
+          "delay": 0.8,
+          "side": "left"
+        },
+        {
+          "enemy": "looter-thrower",
+          "entry": "door",
+          "x": 158,
+          "delay": 1.2,
+          "fromX": 159,
+          "fromY": 0,
+          "y": 0
+        }
+      ],
+      "lock": true,
+      "announce": "EMBUSCADE !"
+    },
+    {
+      "atX": 180,
+      "wave": 4,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "looter-rusher",
+          "entry": "truck",
+          "x": 176,
+          "delay": 0
+        },
+        {
+          "enemy": "looter-shield",
+          "entry": "truck",
+          "x": 178,
+          "delay": 0
+        },
+        {
+          "enemy": "looter-thrower",
+          "entry": "truck",
+          "x": 175,
+          "delay": 0
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "truck",
+          "x": 177,
+          "delay": 0
+        }
+      ],
+      "truck": {
+        "id": "rusty-van",
+        "side": "right",
+        "x": 178
+      }
+    },
+    {
+      "atX": 215,
+      "wave": -1,
+      "spawns": [],
+      "boss": {
+        "id": "armored-van",
+        "health": 1
+      }
+    },
+    {
+      "atX": 242,
+      "wave": 5,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "looter-shield",
+          "entry": "door",
+          "x": 240,
+          "delay": 0,
+          "fromX": 241,
+          "fromY": 0,
+          "y": 0
+        },
+        {
+          "enemy": "looter-thrower",
+          "entry": "window",
+          "x": 234,
+          "delay": 0.6,
+          "fromX": 234,
+          "fromY": 2.0,
+          "y": 2.0
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "drop",
+          "x": 236,
+          "delay": 1.6
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "drop",
+          "x": 238,
+          "delay": 2
+        }
+      ]
+    },
+    {
+      "atX": 268,
+      "wave": -1,
+      "spawns": [
+        {
+          "enemy": "looter-thrower",
+          "entry": "none",
+          "x": 283,
+          "delay": 0,
+          "unaware": true,
+          "facing": -1
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "none",
+          "x": 285,
+          "delay": 0,
+          "unaware": true,
+          "facing": 1
+        },
+        {
+          "enemy": "looter-shield",
+          "entry": "none",
+          "x": 287,
+          "delay": 0,
+          "unaware": true,
+          "facing": -1
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "none",
+          "x": 289,
+          "delay": 0,
+          "unaware": true,
+          "facing": 1
+        }
+      ]
+    },
+    {
+      "atX": 318,
+      "wave": 6,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "looter-rusher",
+          "entry": "truck",
+          "x": 314,
+          "delay": 0
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "truck",
+          "x": 316,
+          "delay": 0
+        },
+        {
+          "enemy": "looter-thrower",
+          "entry": "truck",
+          "x": 313,
+          "delay": 0
+        }
+      ],
+      "truck": {
+        "id": "rusty-van",
+        "side": "left",
+        "x": 315
+      }
+    },
+    {
+      "atX": 356,
+      "wave": 7,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "looter-thrower",
+          "entry": "window",
+          "x": 350,
+          "delay": 0,
+          "fromX": 350,
+          "fromY": 2.0,
+          "y": 2.0
+        },
+        {
+          "enemy": "looter-thrower",
+          "entry": "window",
+          "x": 357,
+          "delay": 1.2,
+          "fromX": 357,
+          "fromY": 2.0,
+          "y": 2.0
+        },
+        {
+          "enemy": "looter-shield",
+          "entry": "door",
+          "x": 354,
+          "delay": 0.5,
+          "fromX": 355,
+          "fromY": 0,
+          "y": 0
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "window",
+          "x": 352,
+          "delay": 2.5,
+          "fromX": 350,
+          "fromY": 2.6,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "atX": 380,
+      "wave": -1,
+      "spawns": [
+        {
+          "enemy": "looter-rusher",
+          "entry": "none",
+          "x": 396,
+          "delay": 0,
+          "unaware": true,
+          "facing": -1
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "none",
+          "x": 398,
+          "delay": 0,
+          "unaware": true,
+          "facing": -1
+        },
+        {
+          "enemy": "looter-thrower",
+          "entry": "none",
+          "x": 400,
+          "delay": 0,
+          "unaware": true,
+          "facing": 1
+        }
+      ]
+    },
+    {
+      "atX": 410,
+      "wave": 8,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "looter-shield",
+          "entry": "truck",
+          "x": 406,
+          "delay": 0
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "truck",
+          "x": 408,
+          "delay": 0
+        },
+        {
+          "enemy": "looter-thrower",
+          "entry": "truck",
+          "x": 405,
+          "delay": 0
+        }
+      ],
+      "truck": {
+        "id": "rusty-van",
+        "side": "right",
+        "x": 407
+      }
+    },
+    {
+      "atX": 410,
+      "wave": 8,
+      "on": "clear",
+      "spawns": [
+        {
+          "enemy": "looter-rusher",
+          "entry": "walk",
+          "x": 398,
+          "delay": 0,
+          "side": "left"
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "walk",
+          "x": 400,
+          "delay": 0.5,
+          "side": "left"
+        }
+      ],
+      "lock": true,
+      "announce": "DANS LE DOS !"
+    },
+    {
+      "atX": 440,
+      "wave": 9,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "looter-shield",
+          "entry": "door",
+          "x": 438,
+          "delay": 0,
+          "fromX": 439,
+          "fromY": 0,
+          "y": 0
+        },
+        {
+          "enemy": "looter-thrower",
+          "entry": "window",
+          "x": 431,
+          "delay": 0.6,
+          "fromX": 431,
+          "fromY": 2.0,
+          "y": 2.0
+        },
+        {
+          "enemy": "looter-thrower",
+          "entry": "window",
+          "x": 441,
+          "delay": 1.4,
+          "fromX": 441,
+          "fromY": 2.0,
+          "y": 2.0
+        },
+        {
+          "enemy": "looter-rusher",
+          "entry": "drop",
+          "x": 434,
+          "delay": 2.2
+        }
+      ]
+    }
+  ],
   "boss": {
     "enabled": true,
     "id": "macron-helicopter",

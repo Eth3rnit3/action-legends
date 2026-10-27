@@ -315,7 +315,8 @@ namespace Paname
             Mix(Score);Mix(Wave);Mix(Reserves);Mix(kills);Mix(enemies.Count);Mix(shots.Count);Mix(bossHealth);Mix((int)phase);
             foreach(var p in players)if(p!=null){MixF(p.position.x);MixF(p.position.y);Mix(p.hp);Mix(p.weapon.hash);Mix(p.ammo);Mix(p.grenades);Mix(p.rescued);if(Level.livesPerPlayer)Mix(p.lives);}
             Mix(thrown.Count);Mix(HostagesFreed);if(Level.continues.enabled){Mix(Continues);MixF(continueClock);}foreach(var o in hostages){Mix(o.state);MixF(o.position.x);}
-            foreach(var e in enemies){MixF(e.position.x);Mix(e.hp);}
+            foreach(var e in enemies){MixF(e.position.x);Mix(e.hp);Mix(e.mode);}
+            Mix(arrivals.Count);foreach(var c in carriers)MixF(c.x);
             return h;
         }
         void ReportStatus()

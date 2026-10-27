@@ -54,7 +54,7 @@
         "id": "office-worker",
         "x": 202,
         "y": 0,
-        "wave": 6,
+        "wave": 5,
         "weapon": "laser"
       },
       {
@@ -67,7 +67,7 @@
         "id": "civilian",
         "x": 266,
         "y": 0,
-        "wave": 8,
+        "wave": 7,
         "reward": "grenades"
       }
     ],
@@ -92,10 +92,10 @@
   "waves": [
     {
       "atX": 14,
-      "baseEnemies": 10,
-      "enemiesPerPlayer": 4,
-      "maxAlive": 12,
-      "spawnInterval": 0.34,
+      "baseEnemies": 5,
+      "enemiesPerPlayer": 2,
+      "maxAlive": 9,
+      "spawnInterval": 0.4,
       "enemyPattern": [
         0,
         0,
@@ -105,10 +105,10 @@
     },
     {
       "atX": 46,
-      "baseEnemies": 10,
-      "enemiesPerPlayer": 4,
-      "maxAlive": 12,
-      "spawnInterval": 0.33,
+      "baseEnemies": 6,
+      "enemiesPerPlayer": 2,
+      "maxAlive": 9,
+      "spawnInterval": 0.4,
       "enemyPattern": [
         0,
         0,
@@ -118,10 +118,10 @@
     },
     {
       "atX": 78,
-      "baseEnemies": 12,
-      "enemiesPerPlayer": 4,
-      "maxAlive": 13,
-      "spawnInterval": 0.32,
+      "baseEnemies": 6,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 10,
+      "spawnInterval": 0.38,
       "enemyPattern": [
         0,
         1,
@@ -132,10 +132,10 @@
     },
     {
       "atX": 110,
-      "baseEnemies": 13,
-      "enemiesPerPlayer": 4,
-      "maxAlive": 13,
-      "spawnInterval": 0.31,
+      "baseEnemies": 7,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 10,
+      "spawnInterval": 0.36,
       "enemyPattern": [
         0,
         1,
@@ -146,24 +146,10 @@
     },
     {
       "atX": 142,
-      "baseEnemies": 15,
-      "enemiesPerPlayer": 4,
-      "maxAlive": 14,
-      "spawnInterval": 0.3,
-      "enemyPattern": [
-        1,
-        0,
-        2,
-        0,
-        1
-      ]
-    },
-    {
-      "atX": 174,
-      "baseEnemies": 15,
-      "enemiesPerPlayer": 4,
-      "maxAlive": 14,
-      "spawnInterval": 0.29,
+      "baseEnemies": 8,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 11,
+      "spawnInterval": 0.34,
       "enemyPattern": [
         1,
         0,
@@ -174,10 +160,10 @@
     },
     {
       "atX": 206,
-      "baseEnemies": 17,
-      "enemiesPerPlayer": 4,
-      "maxAlive": 15,
-      "spawnInterval": 0.28,
+      "baseEnemies": 8,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 12,
+      "spawnInterval": 0.32,
       "enemyPattern": [
         2,
         1,
@@ -189,10 +175,10 @@
     },
     {
       "atX": 238,
-      "baseEnemies": 18,
-      "enemiesPerPlayer": 4,
-      "maxAlive": 15,
-      "spawnInterval": 0.27,
+      "baseEnemies": 9,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 12,
+      "spawnInterval": 0.3,
       "enemyPattern": [
         2,
         1,
@@ -204,10 +190,10 @@
     },
     {
       "atX": 270,
-      "baseEnemies": 20,
-      "enemiesPerPlayer": 4,
-      "maxAlive": 16,
-      "spawnInterval": 0.26,
+      "baseEnemies": 10,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 13,
+      "spawnInterval": 0.28,
       "enemyPattern": [
         2,
         1,
@@ -218,7 +204,348 @@
       ]
     }
   ],
-  "encounters": [],
+  "encounters": [
+    {
+      "atX": 14,
+      "wave": 0,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "gunman-pistol",
+          "entry": "door",
+          "x": 11,
+          "delay": 0,
+          "fromX": 12,
+          "fromY": 0,
+          "y": 0,
+          "opening": "shutter"
+        },
+        {
+          "enemy": "gunman-pistol",
+          "entry": "walk",
+          "x": 9,
+          "delay": 1.2,
+          "side": "right"
+        }
+      ]
+    },
+    {
+      "atX": 46,
+      "wave": 1,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "gunman-smg",
+          "entry": "window",
+          "x": 40,
+          "delay": 0,
+          "fromX": 40,
+          "fromY": 2.0,
+          "y": 2.0
+        },
+        {
+          "enemy": "gunman-shotgun",
+          "entry": "door",
+          "x": 45,
+          "delay": 1,
+          "fromX": 46,
+          "fromY": 0,
+          "y": 0,
+          "opening": "shutter"
+        },
+        {
+          "enemy": "gunman-pistol",
+          "entry": "door",
+          "x": 43,
+          "delay": 2,
+          "fromX": 41,
+          "fromY": 0,
+          "y": 0,
+          "opening": "manhole"
+        }
+      ]
+    },
+    {
+      "atX": 60,
+      "wave": -1,
+      "spawns": [
+        {
+          "enemy": "gunman-pistol",
+          "entry": "none",
+          "x": 75,
+          "delay": 0,
+          "unaware": true,
+          "facing": -1
+        },
+        {
+          "enemy": "gunman-smg",
+          "entry": "none",
+          "x": 77,
+          "delay": 0,
+          "unaware": true,
+          "facing": 1
+        },
+        {
+          "enemy": "gunman-shotgun",
+          "entry": "none",
+          "x": 79,
+          "delay": 0,
+          "unaware": true,
+          "facing": -1
+        }
+      ]
+    },
+    {
+      "atX": 78,
+      "wave": 2,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "gunman-pistol",
+          "entry": "truck",
+          "x": 74,
+          "delay": 0
+        },
+        {
+          "enemy": "gunman-smg",
+          "entry": "truck",
+          "x": 76,
+          "delay": 0
+        },
+        {
+          "enemy": "gunman-pistol",
+          "entry": "truck",
+          "x": 73,
+          "delay": 0
+        }
+      ],
+      "truck": {
+        "id": "black-minivan",
+        "side": "right",
+        "x": 75
+      }
+    },
+    {
+      "atX": 110,
+      "wave": 3,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "gunman-pistol",
+          "entry": "parachute",
+          "x": 101,
+          "delay": 0.3,
+          "y": 0
+        },
+        {
+          "enemy": "gunman-smg",
+          "entry": "parachute",
+          "x": 105,
+          "delay": 0.8,
+          "y": 0
+        },
+        {
+          "enemy": "gunman-pistol",
+          "entry": "parachute",
+          "x": 108,
+          "delay": 1.3,
+          "y": 0
+        },
+        {
+          "enemy": "gunman-smg",
+          "entry": "window",
+          "x": 103,
+          "delay": 0.5,
+          "fromX": 103,
+          "fromY": 2.0,
+          "y": 2.0
+        }
+      ]
+    },
+    {
+      "atX": 142,
+      "wave": 4,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "gunman-shotgun",
+          "entry": "door",
+          "x": 140,
+          "delay": 0,
+          "fromX": 141,
+          "fromY": 0,
+          "y": 0,
+          "opening": "shutter"
+        },
+        {
+          "enemy": "gunman-pistol",
+          "entry": "door",
+          "x": 136,
+          "delay": 0.8,
+          "fromX": 135,
+          "fromY": 0,
+          "y": 0,
+          "opening": "manhole"
+        },
+        {
+          "enemy": "gunman-smg",
+          "entry": "window",
+          "x": 138,
+          "delay": 1.6,
+          "fromX": 133,
+          "fromY": 2.8,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "atX": 176,
+      "wave": -1,
+      "spawns": [],
+      "boss": {
+        "id": "combat-drone",
+        "health": 1
+      }
+    },
+    {
+      "atX": 206,
+      "wave": 5,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "gunman-shotgun",
+          "entry": "truck",
+          "x": 202,
+          "delay": 0
+        },
+        {
+          "enemy": "gunman-pistol",
+          "entry": "truck",
+          "x": 204,
+          "delay": 0
+        },
+        {
+          "enemy": "gunman-smg",
+          "entry": "truck",
+          "x": 201,
+          "delay": 0
+        }
+      ],
+      "truck": {
+        "id": "black-minivan",
+        "side": "right",
+        "x": 203
+      }
+    },
+    {
+      "atX": 220,
+      "wave": -1,
+      "spawns": [
+        {
+          "enemy": "gunman-smg",
+          "entry": "none",
+          "x": 235,
+          "delay": 0,
+          "unaware": true,
+          "facing": -1
+        },
+        {
+          "enemy": "gunman-pistol",
+          "entry": "none",
+          "x": 237,
+          "delay": 0,
+          "unaware": true,
+          "facing": 1
+        },
+        {
+          "enemy": "gunman-pistol",
+          "entry": "none",
+          "x": 239,
+          "delay": 0,
+          "unaware": true,
+          "facing": -1
+        }
+      ]
+    },
+    {
+      "atX": 238,
+      "wave": 6,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "gunman-pistol",
+          "entry": "parachute",
+          "x": 229,
+          "delay": 0.3,
+          "y": 0
+        },
+        {
+          "enemy": "gunman-smg",
+          "entry": "parachute",
+          "x": 233,
+          "delay": 0.9,
+          "y": 0
+        },
+        {
+          "enemy": "gunman-shotgun",
+          "entry": "parachute",
+          "x": 236,
+          "delay": 1.5,
+          "y": 0
+        },
+        {
+          "enemy": "gunman-smg",
+          "entry": "window",
+          "x": 231,
+          "delay": 0.3,
+          "fromX": 231,
+          "fromY": 2.0,
+          "y": 2.0
+        }
+      ]
+    },
+    {
+      "atX": 270,
+      "wave": 7,
+      "on": "start",
+      "spawns": [
+        {
+          "enemy": "gunman-shotgun",
+          "entry": "door",
+          "x": 268,
+          "delay": 0,
+          "fromX": 269,
+          "fromY": 0,
+          "y": 0,
+          "opening": "shutter"
+        },
+        {
+          "enemy": "gunman-smg",
+          "entry": "window",
+          "x": 261,
+          "delay": 0.4,
+          "fromX": 261,
+          "fromY": 2.0,
+          "y": 2.0
+        },
+        {
+          "enemy": "gunman-smg",
+          "entry": "window",
+          "x": 271,
+          "delay": 1,
+          "fromX": 271,
+          "fromY": 2.0,
+          "y": 2.0
+        },
+        {
+          "enemy": "gunman-pistol",
+          "entry": "drop",
+          "x": 265,
+          "delay": 1.8
+        }
+      ]
+    }
+  ],
   "boss": {
     "enabled": true,
     "id": "mecha-shogun",

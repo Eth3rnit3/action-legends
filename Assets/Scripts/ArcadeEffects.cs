@@ -10,7 +10,7 @@ namespace Paname
         sealed class Effect
         {
             public GameObject go;public SpriteRenderer renderer;public Vector2 velocity;
-            public int row;public float age,duration,size,rotation,spin,fps;public bool active,casing;public Sprite[] frames;
+            public int row;public float age,duration,size,rotation,spin,fps,gravity;public bool active,casing,lie,burn;public Sprite[] frames;
         }
         readonly List<Effect> pool=new List<Effect>();
         readonly Transform parent;
@@ -80,6 +80,15 @@ namespace Paname
             e.go.name="Réaction de défaite";e.go.transform.position=source.transform.position;e.go.transform.localScale=source.transform.lossyScale;e.go.transform.localRotation=Quaternion.identity;
             e.renderer.sprite=e.frames!=null?e.frames[0]:source.sprite;e.renderer.sharedMaterial=NormalMaterial;e.renderer.color=Color.white;e.renderer.sortingOrder=44;
         }
+        // A death of lot 2b: launched (x away from the hit), spinning, falling under gravity; lie: it lands and stays on the
+        // street; burn: it flickers with fire. Its frames play at fps, or spread over the first half of its time.
+        public void Fall(SpriteRenderer source,int direction,Sprite[] frames,float fps,Vector2 launch,float spin,float duration,float gravity,bool lie,bool burn)
+        {
+            var e=Acquire();if(e==null)return;e.row=-3;e.age=0;e.duration=duration;e.velocity=new Vector2(direction*launch.x,launch.y);e.casing=false;e.spin=-direction*spin;e.rotation=0;
+            e.gravity=gravity;e.lie=lie;e.burn=burn;e.frames=frames!=null&&frames.Length>0?frames:null;e.fps=fps;
+            e.go.name="Chute de l'ennemi";e.go.transform.position=source.transform.position;e.go.transform.localScale=source.transform.lossyScale;e.go.transform.localRotation=Quaternion.identity;
+            e.renderer.sprite=e.frames!=null?e.frames[0]:source.sprite;e.renderer.sharedMaterial=NormalMaterial;e.renderer.color=Color.white;e.renderer.sortingOrder=44;
+        }
         public void Casing(Vector2 position,int direction)
         {
             Debris(position,new Vector2(-direction*(1.2f+(float)rng.NextDouble()),2+(float)rng.NextDouble()*2),Gold,.055f,.62f);
@@ -97,7 +106,17 @@ namespace Paname
                 if(!e.active)continue;e.age+=dt;
                 if(e.age>=e.duration){e.active=false;e.go.SetActive(false);continue;}
                 e.go.transform.position+=(Vector3)e.velocity*dt;
-                if(e.casing||e.row==-2)
+                if(e.row==-3)
+                {
+                    e.velocity+=Vector2.down*e.gravity*dt;e.rotation+=e.spin*dt;var p=e.go.transform.position;
+                    // Landed: it lies flat where it fell.
+                    if(e.lie&&p.y<=0&&e.velocity.y<=0){p.y=0;e.go.transform.position=p;e.velocity=Vector2.zero;e.spin=0;e.rotation=0;}
+                    e.go.transform.localRotation=Quaternion.Euler(0,0,e.rotation);
+                    if(e.frames!=null)e.renderer.sprite=e.frames[Mathf.Min(e.frames.Length-1,(int)(e.age*(e.fps>0?e.fps:e.frames.Length/(e.duration*.5f))))];
+                    float t=e.age/e.duration;var c=e.burn&&t<.6f?Color.Lerp(Color.white,new Color(1,.55f,.25f),.5f+.5f*Mathf.Sin(e.age*40)):Color.white;
+                    c.a=t<.7f?1:Mathf.Repeat(e.age,.12f)<.06f?.2f:1-(t-.7f)/.3f;e.renderer.color=c;
+                }
+                else if(e.casing||e.row==-2)
                 {
                     e.velocity+=Vector2.down*13*dt;e.rotation+=e.spin*dt;e.go.transform.localRotation=Quaternion.Euler(0,0,e.rotation);
                     if(e.row==-2){var c=e.renderer.color;c.a=1-Mathf.Pow(e.age/e.duration,2);e.renderer.color=c;if(e.frames!=null)e.renderer.sprite=e.frames[Mathf.Min(e.frames.Length-1,(int)(e.age*(e.fps>0?e.fps:e.frames.Length/e.duration)))];}

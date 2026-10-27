@@ -28,7 +28,7 @@ public static class VerifyCampaignTokyo
         var players=(PanameGame.Player[])Get(g,"players");var commands=new PlayerCommand[4];
         var shots=(IList)Get(g,"shots");var enemies=(IList)Get(g,"enemies");var bombs=(IList)Get(g,"bossBombs");var waves=(IList)Get(g,"shockwaves");
         Check(g.MissionCount==3&&missions[2].id=="tokyo-neon","Le catalogue contient Paris, Marseille et Tokyo",checks);
-        Check(missions[0].enemies.Length==3&&missions[0].enemies[2]=="looter-shield"&&missions[0].roster[2].animations.sheet.texture=="Art/enemies","Paris garde ses pilleurs",checks);
+        Check(missions[0].enemies.Length==3&&missions[0].enemies[2]=="looter-shield"&&missions[0].roster[2].animations.sheet.texture=="Art/enemies/looter-shield","Paris garde ses pilleurs (planche de chaque pillard, lot 2b)",checks);
         Check(missions[2].enemies.Length==3&&missions[2].roster[0].Armed&&missions[2].roster[1].Armed&&missions[2].roster[2].Armed,"Les trois ennemis de Tokyo sont armés",checks);
         g.ReturnToLobby();Call(g,"LoadMission",0);
         Check(!g.IsUnlocked(1)&&!g.IsUnlocked(2)&&g.UnlockedCount==1,"Seule la première mission est ouverte au départ",checks);
@@ -55,8 +55,10 @@ public static class VerifyCampaignTokyo
         g.BeginRound();p=players[0];max=p.hp;bool captured=false;var seenRoles=new HashSet<string>();
         // It stops for a second every four: since lot 1a the knife clears a gunman it runs into, and a hero that never
         // stops mostly outruns the aim (two hits per run before, none after); standing still it is in the line of fire.
-        for(int n=0;n<60*240&&!g.BossActive&&g.phase==PanameGame.Phase.Playing;n++)
+        // The mid-mission drone (lot 2b, VerifyLot2b) is shot down at once: this run is about the gunmen and the final boss.
+        for(int n=0;n<60*240&&!(g.BossActive&&!g.MidBossActive)&&g.phase==PanameGame.Phase.Playing;n++)
         {
+            if(g.MidBossActive&&g.BossHealth>0)Call(g,"DamageBoss",100000);
             commands[0]=new PlayerCommand{move=n%240<180?1:0,fire=true,jump=n%50==0};
             g.TickSimulation(1f/60,commands);
             if(p.hp<max){hits+=max-p.hp;p.hp=max;}
@@ -67,7 +69,7 @@ public static class VerifyCampaignTokyo
         Check(seenRoles.Count==3,"Pistolet, mitraillette et fusil à pompe apparaissent",checks);
         Check(aiming>0,"Les tireurs visent avant de tirer",checks);
         Check(hostile>0&&hits>0,"Les ennemis tirent des balles qui touchent le joueur ("+hits+" touches)",checks);
-        Check(g.BossActive&&g.Wave==missions[2].waves.Length,"Le boss arrive après les neuf vagues",checks);
+        Check(g.BossActive&&!g.MidBossActive&&g.Wave==missions[2].waves.Length,"Le boss arrive après les "+missions[2].waves.Length+" vagues",checks);
         }
         // A failure here must not leave Tokyo's waves unlocked for the tests that run next.
         finally{foreach(var wave in missions[2].waves)wave.@lock=true;}

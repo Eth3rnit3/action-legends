@@ -5,11 +5,13 @@ namespace Paname
 {
     public sealed partial class PanameGame
     {
-        AudioSource musicOut,voiceOut;
+        // cryOut: enemies' cries and shouts, which never cut the announcer.
+        AudioSource musicOut,voiceOut,cryOut;
         AudioClip musicClip,bossMusicClip;
         // Three announcer takes per line; one is drawn at random each time it is spoken.
         AudioClip[] bossVoice,winVoice,impactClips,explosionClips;
-        AudioClip bossGunClip,playerHitClip,bossDownClip,pickupClip,coinClip,selectClip,startClip;
+        AudioClip[] miniBossVoice;
+        AudioClip doorClip,chuteClip,bossGunClip,playerHitClip,bossDownClip,pickupClip,coinClip,selectClip,startClip;
         // Cosmetic only: the simulation itself has no randomness, which keeps online peers in sync.
         readonly System.Random audioRandom=new System.Random();
         bool musicEnabled=true,voiceEnabled=true;
@@ -20,9 +22,9 @@ namespace Paname
         void LoadSoundtrack()
         {
             musicOut=gameObject.AddComponent<AudioSource>();musicOut.loop=true;musicOut.volume=.22f;
-            voiceOut=gameObject.AddComponent<AudioSource>();voiceOut.volume=.95f;
+            voiceOut=gameObject.AddComponent<AudioSource>();voiceOut.volume=.95f;cryOut=gameObject.AddComponent<AudioSource>();cryOut.volume=.55f;
             LoadMissionMusic();
-            bossVoice=Takes("boss-alert");winVoice=Takes("victory");
+            bossVoice=Takes("boss-alert");miniBossVoice=Takes("miniboss-alert");doorClip=Sfx("porte");chuteClip=Sfx("parachute");winVoice=Takes("victory");
             bossGunClip=Sfx("tir-C-blaster-cps1");
             impactClips=new[]{Sfx("impact-A-metal"),Sfx("impact-B-tchak"),Sfx("impact-C-ping")};
             explosionClips=new[]{Sfx("explosion-A-grosse"),Sfx("explosion-B-courte"),Sfx("explosion-C-bombe-neo")};

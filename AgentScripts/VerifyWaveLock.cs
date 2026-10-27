@@ -56,7 +56,7 @@ public static class VerifyWaveLock
         for(int t=0;t<60*30&&g.Wave==0;t++)
         {
             players[0].invulnerable=1;
-            for(int e=enemies.Count-1;e>=0;e--)Call(g,"HitEnemy",e,999,1,false);
+            for(int e=enemies.Count-1;e>=0;e--)Call(g,"HitEnemy",e,999,1,0);
             g.TickSimulation(1f/60,commands);
         }
         Check(g.Wave==1&&!(bool)Get(g,"screenLocked"),"La vague se termine à la chute du dernier ennemi",checks);

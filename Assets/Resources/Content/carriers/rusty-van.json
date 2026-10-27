@@ -1,0 +1,46 @@
+{
+  "id": "rusty-van",
+  "speed": 10,
+  "brake": 4,
+  "interval": 0.45,
+  "wait": 0.9,
+  "length": 4.4,
+  "sound": "Audio/Sfx/camion-frein",
+  "animations": {
+    "sheet": {
+      "texture": "Art/carriers",
+      "columns": 3,
+      "rows": 2,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.02734375
+      },
+      "cellHeight": 4.6545455
+    },
+    "layer": 26,
+    "states": [
+      {
+        "name": "drive",
+        "cells": [
+          0,
+          1
+        ],
+        "perStride": 1.2
+      },
+      {
+        "name": "open",
+        "cells": [
+          2
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "door",
+        "cell": 2,
+        "x": -0.25,
+        "y": 0.45
+      }
+    ]
+  }
+}

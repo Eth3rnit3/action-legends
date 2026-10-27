@@ -9,7 +9,7 @@ namespace Paname
     {
         sealed class Shockwave {public float x,direction,speed,reach,height;public int damage;public Transform root;}
         readonly List<Shockwave> shockwaves=new List<Shockwave>();
-        int bossStomps;
+        int bossStomps,bossTroops,bossTroop,bossCharge;
         float bossStride,shockwaveDust;
         void ResetShockwaves()
         {
@@ -33,7 +33,9 @@ namespace Paname
             if(Mathf.Abs(gap)>w.stopDistance)
             {
                 float before=bossStride,step=Mathf.Sign(gap)*w.speed[DifficultyIndex]/BossAttackPace*dt;
-                bossPosition.x=Mathf.Clamp(bossPosition.x+step,bossArenaX-ArenaHalfWidth+w.margin,bossArenaX+ArenaHalfWidth-w.margin);bossStride+=Mathf.Abs(step);
+                // One that starts beyond the edge (a negative entry) drives in; then it stays within the arena.
+                float low=bossArenaX-ArenaHalfWidth+w.margin,high=bossArenaX+ArenaHalfWidth-w.margin;
+                bossPosition.x=Mathf.Clamp(bossPosition.x+step,Mathf.Min(low,bossPosition.x),Mathf.Max(high,bossPosition.x));bossStride+=Mathf.Abs(step);
                 if((int)(before/w.stepLength)!=(int)(bossStride/w.stepLength)){shake=Mathf.Max(shake,w.stepShake);effects.Play(3,BossPoint(w.foot),1.4f,.4f);}
                 SetBossState(Boss.move);
             }
@@ -79,6 +81,8 @@ namespace Paname
                 }
                 if(bossTimer<=0)EndBossAttack(a);
             }
+            else if(a.kind==3)TickCharge(a,pace,dt);
+            else if(a.kind==4)TickTroops(a,dt,target);
             else if(bossPhase==BossWindup)
             {
                 SetBossState(a.state);
@@ -113,6 +117,8 @@ namespace Paname
             // Without a pose, the bombs fall at once and the boss carries on.
             else if(a.kind==1&&a.duration<=0){DropBossBombs(a,target);EndBossAttack(a);}
             else if(a.kind==1){bossPhase=BossFire;bossTimer=a.duration*pace;bossShotTimer=a.launch*pace;}
+            else if(a.kind==3){bossPhase=BossWindup;bossTimer=a.windup*pace;bossCharge=target.position.x<bossPosition.x?-1:1;bossRoot.localScale=new Vector3(-bossCharge,1,1);}
+            else if(a.kind==4){bossPhase=BossFire;bossTimer=a.duration*pace;bossShotTimer=0;bossTroops=a.count[DifficultyIndex];}
             else{bossPhase=BossWindup;bossTimer=a.windup*pace;bossStomps=bossEnraged?a.rageRepeat:a.repeat;}
             Announce(a.announce);
         }
@@ -122,6 +128,43 @@ namespace Paname
         {
             int count=a.count[DifficultyIndex]+(bossEnraged?a.rageExtra:0);
             for(int i=0;i<count;i++)LaunchBossBomb(Mathf.Clamp(target.position.x+(i-(count-1)*.5f)*a.spacing,bossArenaX-ArenaHalfWidth+1,bossArenaX+ArenaHalfWidth-1),a);
+        }
+        // Revs up facing a hero, then rushes to the far side of the arena; heroes in its way on the ground are hit, a jump over it clears it.
+        void TickCharge(BossAttack a,float pace,float dt)
+        {
+            if(bossPhase==BossWindup)
+            {
+                SetBossState(a.aimState);
+                if(bossTimer<=0){bossPhase=BossFire;Sound(BossClip(a));}
+                return;
+            }
+            if(bossPhase==BossFire)
+            {
+                SetBossState(a.state);float edge=bossArenaX+bossCharge*(ArenaHalfWidth-Boss.walk.margin),step=bossCharge*a.speed[DifficultyIndex]*dt;
+                bossPosition.x+=step;bossStride+=Mathf.Abs(step);if((int)(bossStride/.8f)!=(int)((bossStride-Mathf.Abs(step))/.8f))effects.Play(3,bossPosition+new Vector2(-bossCharge*a.reach,.2f),1.2f,.4f);
+                foreach(var p in players)if(p!=null&&p.hp>0&&p.position.y<a.clearance&&Mathf.Abs(p.position.x-bossPosition.x)<a.reach)Damage(p,a.damage);
+                if((bossPosition.x-edge)*bossCharge>=0){bossPosition.x=edge;bossPhase=BossRecover;bossTimer=a.recover*pace;shake=Mathf.Max(shake,a.shake);}
+                return;
+            }
+            SetBossState(a.recoverState);
+            if(bossTimer<=0)EndBossAttack(a);
+        }
+        // Lets its troops out of its door one by one; they hop down and run a few steps towards the team.
+        void TickTroops(BossAttack a,float dt,Player target)
+        {
+            SetBossState(a.state);bossShotTimer-=dt;
+            if(bossTroops>0&&bossShotTimer<=0)
+            {
+                int alive=0;foreach(var e in enemies)if(e.group==-2)alive++;
+                if(alive<a.maxAlive)
+                {
+                    var door=BossPoint(a.door);float side=target.position.x>=door.x?1:-1;
+                    var s=new EncounterSpawn{definition=a.troops[bossTroop++%a.troops.Length],kind=-1,x=Mathf.Clamp(door.x+side*a.spread,bossArenaX-ArenaHalfWidth+1,bossArenaX+ArenaHalfWidth-1)};
+                    Arrive(s,-2,door);
+                }
+                bossTroops--;bossShotTimer=a.interval[DifficultyIndex]*BossAttackPace;
+            }
+            if(bossTimer<=0)EndBossAttack(a);
         }
         AudioClip BossClip(BossAttack a)=>string.IsNullOrEmpty(a.sound)?null:a.clip?a.clip:(a.clip=Resources.Load<AudioClip>(a.sound));
         void TickShockwaves(float dt)

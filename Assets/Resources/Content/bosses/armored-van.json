@@ -1,0 +1,218 @@
+{
+  "id": "armored-van",
+  "behavior": "walker",
+  "name": "FOURGON BLINDÉ",
+  "intro": "UN FOURGON BLINDÉ BLOQUE LA RUE !",
+  "rage": "LE FOURGON PASSE EN FORCE !",
+  "defeat": "FOURGON EN MIETTES !",
+  "health": [
+    120,
+    200,
+    260,
+    320
+  ],
+  "healthPerExtraPlayer": 0.5,
+  "ragePace": 0.8,
+  "rageDelay": 0.4,
+  "firstAttack": 2.2,
+  "smokeSize": 0.9,
+  "score": 5000,
+  "flash": true,
+  "shadow": {
+    "x": 4.2,
+    "y": 0.35
+  },
+  "walk": {
+    "speed": [
+      2.2,
+      2.5,
+      2.8,
+      3.1
+    ],
+    "stopDistance": 6,
+    "margin": 2.4,
+    "stepLength": 1.2,
+    "stepShake": 0.03,
+    "entry": -3,
+    "foot": "foot"
+  },
+  "hitbox": {
+    "x": -1.3,
+    "y": 1.4,
+    "stepX": 1.3,
+    "stepY": 0,
+    "radius": 1.2,
+    "count": 3
+  },
+  "death": {
+    "fall": 0,
+    "spin": 0,
+    "spreadX": 1.8,
+    "spreadY": 1.2,
+    "core": {
+      "x": 0,
+      "y": 1.4
+    },
+    "spinWithFacing": false
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/bosses/armored-van",
+      "columns": 3,
+      "rows": 2,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.02734375
+      },
+      "cellHeight": 4.6545455
+    },
+    "layer": 32,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "walk",
+        "cells": [
+          0,
+          1
+        ],
+        "perStride": 1
+      },
+      {
+        "name": "fire",
+        "cells": [
+          2
+        ]
+      },
+      {
+        "name": "rev",
+        "cells": [
+          3
+        ]
+      },
+      {
+        "name": "doors",
+        "cells": [
+          4
+        ]
+      },
+      {
+        "name": "wreck",
+        "cells": [
+          5
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "gun",
+        "x": -1.05,
+        "y": 2.48
+      },
+      {
+        "name": "door",
+        "x": 1.0,
+        "y": 0.9
+      },
+      {
+        "name": "foot",
+        "x": -0.5,
+        "y": 0.1
+      },
+      {
+        "name": "smoke",
+        "x": -1.5,
+        "y": 1.4
+      }
+    ]
+  },
+  "attacks": [
+    {
+      "type": "gun",
+      "announce": "TOURELLE : À COUVERT !",
+      "aimState": "fire",
+      "state": "fire",
+      "aimTime": [
+        0.8,
+        0.7,
+        0.6,
+        0.5
+      ],
+      "duration": 1.4,
+      "interval": [
+        0.17,
+        0.15,
+        0.13,
+        0.11
+      ],
+      "speed": [
+        12,
+        14,
+        16,
+        18
+      ],
+      "sweep": 1.6,
+      "sweepRate": 4,
+      "aimHeight": 0.9,
+      "sightWidth": 4,
+      "muzzles": [
+        "gun"
+      ],
+      "sound": "Audio/Sfx/tir-H-lourde",
+      "damage": 1,
+      "cooldown": 1.4
+    },
+    {
+      "type": "charge",
+      "announce": "IL FONCE : SAUTEZ PAR-DESSUS !",
+      "aimState": "rev",
+      "state": "walk",
+      "recoverState": "idle",
+      "windup": 0.9,
+      "speed": [
+        10,
+        12,
+        14,
+        16
+      ],
+      "damage": 2,
+      "clearance": 1.5,
+      "reach": 1.8,
+      "recover": 0.7,
+      "shake": 0.35,
+      "sound": "Audio/Sfx/camion-frein",
+      "cooldown": 1.3
+    },
+    {
+      "type": "troops",
+      "announce": "RENFORTS À L'ARRIÈRE !",
+      "state": "doors",
+      "enemies": [
+        "looter-rusher",
+        "looter-rusher",
+        "looter-thrower"
+      ],
+      "count": [
+        2,
+        2,
+        3,
+        3
+      ],
+      "interval": [
+        0.55,
+        0.5,
+        0.45,
+        0.4
+      ],
+      "duration": 1.8,
+      "door": "door",
+      "spread": 3,
+      "maxAlive": 4,
+      "cooldown": 1.2
+    }
+  ]
+}

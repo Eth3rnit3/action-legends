@@ -31,6 +31,10 @@ namespace Paname
     [Serializable] public sealed class WeaponDefinition
     {
         public string id,extends,letter,name,announce,voice,sound,flash="light";
+        // The wound it gives (bullet, explosion, fire, knife), which decides how enemies fall; by default fire for a flame,
+        // explosion when it explodes, bullet otherwise.
+        public string damageType;
+        [NonSerialized] public int wound;
         public int damage;
         public int[] ammo;
         public float fireRate;
@@ -82,6 +86,7 @@ namespace Paname
             var e=explosion;Content.Range(e.radius,0,10,label+".explosion.radius");
             if(e.damage<0||e.damage>500||e.bossDamage<0||e.bossDamage>1000)throw new ArgumentException(label+" : explosion.damage de 0 à 500, explosion.bossDamage de 0 à 1000");
             Content.Range(recoil.shake,0,1,label+".recoil.shake");Content.Range(recoil.push,0,20,label+".recoil.push");
+            wound=string.IsNullOrEmpty(damageType)?(p.kind==1?Wounds.Fire:e.radius>0?Wounds.Explosion:Wounds.Bullet):Wounds.Parse(damageType,label+".damageType");
             // Mixed into the online state hash: the same on every browser, unlike string.GetHashCode.
             hash=-2128831035;foreach(char c in id)hash=unchecked((hash^c)*16777619);
         }

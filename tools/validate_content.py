@@ -27,7 +27,10 @@ WEAPON_FLASHES = ("none", "light", "heavy")
 LEGACY_HERO_WEAPON = ("fireRate", "damage", "recoilShake")
 ENEMY_BEHAVIORS = ("melee", "thrower", "gunman")
 BOSS_BEHAVIORS = ("flyer", "walker")
-ATTACKS = ("gun", "bombs", "stomp")
+ATTACKS = ("gun", "bombs", "stomp", "charge", "troops")
+# Lot 2b: kinds of wounds (deaths), enemy states read with their fallbacks, and the entries of encounters.
+WOUNDS = ("bullet", "explosion", "fire", "knife")
+ENTRIES = ("none", "walk", "door", "window", "parachute", "drop", "truck")
 RESERVED_MAP = ("terrain", "props", "vehicles")
 HOSTAGE_RELEASES = ("shot", "touch", "both")
 HOSTAGE_STATES = ("tied", "thanks", "give", "run")
@@ -404,6 +407,72 @@ def validate_rules(data, resources, weapons=None):
     errors.per_difficulty(tally, "hostage", 0, 100000, label + ".tally", True)
     errors.per_difficulty(tally, "perSecond", 0, 10000, label + ".tally", True)
     validate_cell(tally.get("icon"), resources, label + ".tally.icon", errors)
+    deaths = data.get("deaths", [])
+    seen = set()
+    if not isinstance(deaths, list):
+        errors.append(f"{label}.deaths: list required")
+        deaths = []
+    for i, death in enumerate(deaths):
+        dl = f"{label}.deaths[{i}]"
+        if not isinstance(death, dict) or death.get("damage") not in WOUNDS:
+            errors.append(f"{dl}.damage: one of {', '.join(WOUNDS)}")
+            continue
+        if death["damage"] in seen:
+            errors.append(f"{dl}: {death['damage']} twice")
+        seen.add(death["damage"])
+        launch = obj(death, "launch")
+        errors.number(launch, "x", -20, 20, dl + ".launch")
+        errors.number(launch, "y", -5, 30, dl + ".launch")
+        errors.number(death, "spin", -1440, 1440, dl)
+        errors.number(death, "time", .1, 5, dl, 1)
+        errors.number(death, "gravity", 0, 100, dl, 18)
+        for key in ("lie", "burn"):
+            if not isinstance(death.get(key, False), bool):
+                errors.append(f"{dl}.{key}: true or false")
+    stage, sl = obj(data, "stage"), label + ".stage"
+    if "alert" in stage:
+        validate_cell(stage["alert"], resources, sl + ".alert", errors)
+    errors.number(stage, "alertSize", .1, 5, sl, .9)
+    if stage.get("alertSound"):
+        errors.resource(stage["alertSound"], "Audio/", SOUNDS, resources, sl + ".alertSound")
+    for key in ("alertVoice", "panicVoice"):
+        if stage.get(key):
+            errors.resource(stage[key] + "-a" if isinstance(stage[key], str) else stage[key], "Audio/", SOUNDS, resources, f"{sl}.{key}")
+    chute = obj(stage, "parachute")
+    for key in ("open", "folding", "landed"):
+        if key in chute:
+            validate_cell(chute[key], resources, f"{sl}.parachute.{key}", errors)
+    for key, low, high, default in (("size", .2, 10, 2.4), ("speed", .3, 20, 2.4), ("sway", 0, 2, .3), ("height", 0, 6, 2.1)):
+        errors.number(chute, key, low, high, sl + ".parachute", default)
+    openings = stage.get("openings", [])
+    if not isinstance(openings, list) or len(openings) > 16:
+        errors.append(f"{sl}.openings: at most sixteen")
+        openings = []
+    ids = []
+    for i, opening in enumerate(openings):
+        ol = f"{sl}.openings[{i}]"
+        if not isinstance(opening, dict) or not isinstance(opening.get("id"), str) or not opening["id"].strip() or opening["id"] in ids:
+            errors.append(f"{ol}: unique id required")
+            continue
+        ids.append(opening["id"])
+        validate_cell(opening.get("sprite"), resources, ol + ".sprite", errors)
+        errors.number(opening, "height", .2, 10, ol, 2.6)
+        errors.number(opening, "time", 0, 5, ol, .7)
+    return errors
+
+
+def validate_carrier(data, resources):
+    """CarrierDefinition.Validate: a vehicle that brings an encounter's enemies (states drive and open, a door anchor on open)."""
+    errors = Errors()
+    label = f"carrier {data.get('id')}"
+    for key, low, high, default in (("speed", 1, 40, 9), ("brake", 0, 20, 4), ("interval", .05, 5, .45), ("wait", 0, 10, .8), ("length", .5, 20, 4)):
+        errors.number(data, key, low, high, label, default)
+    if data.get("sound"):
+        errors.resource(data["sound"], "Audio/", SOUNDS, resources, label + ".sound")
+    info = validate_animations(data.get("animations"), resources, label, ("drive", "open"), errors)
+    cell = first_cell(info, "open")
+    if cell is not None and not has_anchor(info, "door", cell):
+        errors.append(f"{label}: a door anchor is required on the open cell")
     return errors
 
 
@@ -480,6 +549,32 @@ def validate_enemy(data, resources):
         errors.append(f"{label}.armored: true or false")
     info = validate_animations(data.get("animations"), resources, label, ("idle", "run", "attack"), errors)
     pose = first_cell(info, "attack")
+    # Lot 2b, all optional: awareness, panic, a lobbed grenade and cries.
+    for key, low, high in (("sight", 0, 30), ("hearing", 0, 30), ("surprise", 0, 5), ("alarm", 0, 30)):
+        errors.number(obj(data, "awareness"), key, low, high, label + ".awareness", {"sight": 8, "hearing": 2.5, "surprise": .6, "alarm": 5}[key])
+    panic = obj(data, "panic")
+    for key, low, high, default in (("health", 0, 1, 0), ("radius", 0, 30, 6), ("time", .2, 10, 2), ("speed", .2, 4, 1.3)):
+        errors.number(panic, key, low, high, label + ".panic", default)
+    errors.number(panic, "allies", 0, 20, label + ".panic", 0, True)
+    if not isinstance(panic.get("returns", True), bool):
+        errors.append(f"{label}.panic.returns: true or false")
+    grenade = obj(data, "grenade")
+    if grenade.get("range", 0):
+        gl = label + ".grenade"
+        reach = errors.number(grenade, "range", 1, 30, gl)
+        errors.number(grenade, "minRange", 0, reach or 30, gl, 3)
+        for key, low, high, default in (("cooldown", .3, 30, 4), ("first", 0, 30, 1.5), ("throwY", 1, 30, 8), ("maxX", 1, 30, 9), ("radius", .3, 6, 1.6),
+                                        ("fuse", .2, 10, 2.5), ("pose", 0, 2, .4)):
+            errors.number(grenade, key, low, high, gl, default)
+        errors.number(grenade, "damage", 1, 10, gl, 1, True)
+        errors.number(grenade, "bounces", 0, 3, gl, 0, True)
+    cries = data.get("cries", [])
+    if not isinstance(cries, list) or len(cries) > 8:
+        errors.append(f"{label}.cries: a list of at most eight sounds")
+    else:
+        for cry in cries:
+            if not isinstance(cry, str) or not cry.startswith("Audio/") or not any((resources / (cry + suffix + ext)).is_file() for suffix in ("", "-a") for ext in SOUNDS):
+                errors.append(f"{label}.cries: missing sound {cry}")
     if behavior in ("melee", "thrower"):
         melee = obj(data, "melee")
         errors.number(melee, "reach", .1, 5, label + ".melee")
@@ -516,7 +611,7 @@ def validate_enemy(data, resources):
     return errors
 
 
-def validate_boss(data, resources):
+def validate_boss(data, resources, enemies=None):
     errors = Errors()
     label = f"boss {data.get('id')}"
     behavior = data.get("behavior")
@@ -525,6 +620,7 @@ def validate_boss(data, resources):
     for key, limit in (("name", 30), ("intro", 80), ("rage", 80), ("defeat", 80)):
         errors.text(data, key, limit, label)
     errors.per_difficulty(data, "health", 10, 100000, label)
+    errors.number(data, "score", 0, 100000, label, 10000, True)
     for key, low, high in (("healthPerExtraPlayer", 0, 5), ("ragePace", .1, 2), ("rageDelay", 0, 10), ("firstAttack", 0, 10), ("smokeSize", 0, 5)):
         errors.number(data, key, low, high, label)
     if not isinstance(data.get("flash", False), bool):
@@ -544,7 +640,7 @@ def validate_boss(data, resources):
     if walker:
         walk, wl = obj(data, "walk"), label + ".walk"
         errors.per_difficulty(walk, "speed", .1, 30, wl)
-        for key, low, high in (("stopDistance", 0, 20), ("margin", 0, 10), ("stepLength", .1, 10), ("stepShake", 0, 1), ("entry", 0, 10)):
+        for key, low, high in (("stopDistance", 0, 20), ("margin", 0, 10), ("stepLength", .1, 10), ("stepShake", 0, 1), ("entry", -8, 10)):
             errors.number(walk, key, low, high, wl)
         anchor(walk.get("foot"), wl)
     else:
@@ -608,6 +704,28 @@ def validate_boss(data, resources):
                 errors.number(attack, key, low, high, al)
             anchor(attack.get("rack"), al)
             errors.number(attack, "damage", 1, 10, al, 0, True)
+        elif kind == "charge":
+            if not walker:
+                errors.append(f"{al}: charge is a move of a boss on the ground (walker)")
+            for key, low, high in (("windup", 0, 10), ("recover", 0, 10), ("clearance", 0, 6), ("shake", 0, 1)):
+                errors.number(attack, key, low, high, al)
+            errors.number(attack, "reach", .2, 8, al, 1.5)
+            errors.per_difficulty(attack, "speed", 1, 60, al)
+            errors.number(attack, "damage", 1, 10, al, 0, True)
+        elif kind == "troops":
+            troops = attack.get("enemies")
+            if not isinstance(troops, list) or not 1 <= len(troops) <= 6:
+                errors.append(f"{al}.enemies: one to six library enemy ids")
+            elif enemies is not None:
+                for enemy in troops:
+                    if enemy not in enemies:
+                        errors.append(f"{al}.enemies: unknown enemy {enemy}")
+            errors.per_difficulty(attack, "count", 1, 8, al, True)
+            errors.per_difficulty(attack, "interval", .05, 5, al)
+            errors.number(attack, "duration", 0, 20, al)
+            errors.number(attack, "spread", 0, 10, al, 3)
+            errors.number(attack, "maxAlive", 1, 12, al, 4, True)
+            anchor(attack.get("door"), al)
         else:
             for key, low, high in (("windup", 0, 10), ("repeatWindup", 0, 10), ("recover", 0, 10), ("waveReach", .05, 5), ("waveHeight", 0, 5), ("shake", 0, 1)):
                 errors.number(attack, key, low, high, al)
@@ -673,7 +791,7 @@ def validate_difficulty(data, resources):
 
 # Weapons first: heroes and rules name them.
 VALIDATORS = {"weapons": validate_weapon, "heroes": validate_hero, "enemies": validate_enemy, "bosses": validate_boss, "rules": validate_rules,
-              "difficulties": validate_difficulty, "hostages": validate_hostage}
+              "difficulties": validate_difficulty, "hostages": validate_hostage, "carriers": validate_carrier}
 NEEDS_WEAPONS = ("heroes", "rules", "hostages")
 
 
@@ -715,7 +833,8 @@ def load_library(resources, extra=None, kinds=None):
             except ValueError as exc:
                 errors.append(f"Content/{kind}/{entry_id}: {exc}")
                 continue
-            found = validate(data, resources, library["weapons"]) if kind in NEEDS_WEAPONS else validate(data, resources)
+            found = validate(data, resources, library["weapons"]) if kind in NEEDS_WEAPONS else \
+                validate(data, resources, library["enemies"]) if kind == "bosses" else validate(data, resources)
             errors.extend(f"Content/{kind}/{entry_id}: {e}" for e in found)
             library[kind][entry_id] = data
     if kinds is not None:
@@ -777,8 +896,6 @@ def validate_mission(data, resources, library=None):
     for key in RESERVED_MAP:
         if game_map.get(key) not in (None, []):
             errors.append(f"map.{key} is reserved for a later batch: leave the list empty")
-    if data.get("encounters") not in (None, []):
-        errors.append("encounters is reserved for a later batch: leave the list empty")
     rules = data.get("rules", "default")
     if rules not in library["rules"]:
         errors.append(f"rules: unknown rules {rules} (Content/rules/{rules}.json)")
@@ -829,7 +946,7 @@ def validate_mission(data, resources, library=None):
             errors.append(f"wave {i}: atX must increase and precede exitX")
         else:
             previous = x
-        for key, lower, upper in (("baseEnemies", 1, 100), ("enemiesPerPlayer", 0, 20), ("maxAlive", 1, 30)):
+        for key, lower, upper in (("baseEnemies", 0, 100), ("enemiesPerPlayer", 0, 20), ("maxAlive", 1, 30)):
             value = wave.get(key)
             if type(value) is not int or not lower <= value <= upper:
                 errors.append(f"wave {i}: {key} must be an integer between {lower} and {upper}")
@@ -842,7 +959,115 @@ def validate_mission(data, resources, library=None):
         if not isinstance(wave.get("lock", True), bool):
             errors.append(f"wave {i}: lock must be true or false")
     validate_map_hostages(game_map.get("hostages"), waves, length, library.get("rules", {}).get(rules), library, errors)
+    validate_encounters(data.get("encounters"), waves, data, length, exit_x, library.get("rules", {}).get(rules), library, errors)
     return errors
+
+
+def validate_encounters(encounters, waves, data, length, exit_x, rules, library, errors):
+    """MissionDefinition.ValidateEncounters: triggers, entries seen from the team's screen, trucks, mid-mission bosses."""
+    if encounters in (None, []):
+        return
+    if not isinstance(encounters, list) or len(encounters) > 30:
+        errors.append("encounters: a list of at most 30 encounters")
+        return
+    length, exit_x = length or 500, exit_x or 500
+    openings = [o.get("id") for o in (obj(rules or {}, "stage").get("openings") or []) if isinstance(o, dict)]
+    bosses = 0
+    for i, c in enumerate(encounters):
+        label = f"encounters[{i}]"
+        if not isinstance(c, dict):
+            errors.append(f"{label}: object required")
+            continue
+        wave = errors.number(c, "wave", -1, len(waves) - 1, label, -1, True)
+        if c.get("on", "start") not in ("start", "clear"):
+            errors.append(f"{label}.on: start or clear")
+        errors.text(c, "announce", 40, label, required=False)
+        if not isinstance(c.get("lock", False), bool):
+            errors.append(f"{label}.lock: true or false")
+        if wave is None:
+            continue
+        if wave >= 0 and isinstance(waves[wave], dict):
+            at = waves[wave].get("atX", 0)
+        else:
+            at = errors.number(c, "atX", 1, exit_x - 1.0001, label)
+            if at is None:
+                continue
+        spawns = c.get("spawns", [])
+        truck = obj(c, "truck")
+        boss = obj(c, "boss")
+        if boss.get("id"):
+            if wave >= 0 or spawns or c.get("lock") or truck.get("id"):
+                errors.append(f"{label}: a mid-mission boss starts on its own at atX (no wave, spawns, lock or truck)")
+            if at > exit_x - 30:
+                errors.append(f"{label}: a mid-mission boss stands at least 30 units before the exit")
+            bosses += 1
+            if boss["id"] not in library["bosses"]:
+                errors.append(f"{label}.boss.id: unknown boss {boss['id']}")
+            for key, limit in {"name": 30, "intro": 80, "rage": 80, "defeat": 80}.items():
+                errors.text(boss, key, limit, label + ".boss", required=False)
+            errors.number(boss, "health", .25, 4, label + ".boss", 1)
+            for w in waves:
+                if isinstance(w, dict) and isinstance(w.get("atX"), (int, float)) and w["atX"] - 10 < at < w["atX"] + 5:
+                    errors.append(f"{label}: a mid-mission boss stands outside a wave's screen (atX - 10 to atX + 5, {w['atX']})")
+            continue
+        if not isinstance(spawns, list) or not 1 <= len(spawns) <= 16:
+            errors.append(f"{label}.spawns: one to sixteen")
+            continue
+        low, high = (at - 15, at + 2.5) if wave >= 0 else (at - 7, at + 12)
+        if truck.get("id"):
+            if truck["id"] not in library.get("carriers", {}):
+                errors.append(f"{label}.truck.id: unknown carrier {truck['id']} (Content/carriers/<id>.json)")
+            if truck.get("side", "right") not in ("left", "right"):
+                errors.append(f"{label}.truck.side: left or right")
+            x = errors.number(truck, "x", 0, length, label + ".truck")
+            if x is not None and not low <= x <= high:
+                errors.append(f"{label}.truck.x: inside the encounter's screen ({low} to {high})")
+        for j, s in enumerate(spawns):
+            sl = f"{label}.spawns[{j}]"
+            if not isinstance(s, dict):
+                errors.append(f"{sl}: object required")
+                continue
+            kind = library["enemies"].get(s.get("enemy"))
+            if kind is None:
+                errors.append(f"{sl}.enemy: unknown enemy {s.get('enemy')}")
+            entry = s.get("entry", "walk")
+            if entry not in ENTRIES:
+                errors.append(f"{sl}.entry: one of {', '.join(ENTRIES)}")
+                continue
+            x = errors.number(s, "x", 1, length - 1, sl)
+            y = errors.number(s, "y", 0, 8, sl)
+            errors.number(s, "delay", 0, 30, sl)
+            errors.number(s, "facing", -1, 1, sl, 0, True)
+            if not isinstance(s.get("unaware", False), bool):
+                errors.append(f"{sl}.unaware: true or false")
+            if s.get("side") not in (None, "", "left", "right"):
+                errors.append(f"{sl}.side: left or right")
+            if y and kind is not None and kind.get("behavior") == "melee" and not obj(kind, "grenade").get("range"):
+                errors.append(f"{sl}: a close-combat enemy stays in the street (y 0)")
+            if x is None:
+                continue
+            if entry == "none":
+                if wave >= 0 or c.get("lock") or not at + 14 <= x <= at + 40:
+                    errors.append(f"{sl}: entry none only serves an encounter started at atX, without lock, between atX + 14 and atX + 40 (off screen)")
+            elif not low <= x <= high:
+                errors.append(f"{sl}: inside the encounter's screen ({low} to {high})")
+            if entry in ("walk", "truck") and y:
+                errors.append(f"{sl}: walk and truck arrive in the street (y 0)")
+            if entry == "truck" and not truck.get("id"):
+                errors.append(f"{sl}: entry truck needs the encounter's truck")
+            if entry in ("door", "window"):
+                fx = errors.number(s, "fromX", 0, length, sl)
+                fy = errors.number(s, "fromY", 0, 8, sl)
+                if fx is not None and not low <= fx <= high:
+                    errors.append(f"{sl}.fromX: inside the encounter's screen ({low} to {high})")
+                if y and fy is not None and abs(y - fy) > .01:
+                    errors.append(f"{sl}: from a door or a window it comes down to the street (y 0) or stays (y = fromY)")
+                if s.get("opening") and s["opening"] != "none" and s["opening"] not in openings:
+                    errors.append(f"{sl}.opening: {s['opening']} is not in the rules' stage.openings")
+            elif s.get("opening"):
+                errors.append(f"{sl}.opening: only for the door and window entries")
+    if bosses > 3:
+        errors.append("encounters: three mid-mission bosses at most")
 
 
 def validate_map_hostages(hostages, waves, length, rules, library, errors):

@@ -33,8 +33,11 @@ public static class VerifyPrototype
             // Run the complete level with scripted commands; invulnerability isolates progression from balancing.
             var enemiesField=typeof(PanameGame).GetField("enemies",BindingFlags.Instance|BindingFlags.NonPublic);
             var playersField=typeof(PanameGame).GetField("players",BindingFlags.Instance|BindingFlags.NonPublic);
-            for(int n=0;n<60*400 && g.phase==PanameGame.Phase.Playing && !g.BossActive;n++)
+            // A mid-mission boss (lot 2b) is fought on the way: the run goes on until the final boss.
+            for(int n=0;n<60*400 && g.phase==PanameGame.Phase.Playing && !(g.BossActive&&!g.MidBossActive);n++)
             {
+                // The mid-mission boss is VerifyLot2b's: shot down at once here.
+                if(g.MidBossActive&&g.BossHealth>0)typeof(PanameGame).GetMethod("DamageBoss",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(g,new object[]{100000});
                 var foes=(IList)enemiesField.GetValue(g);var players=(Array)playersField.GetValue(g);
                 for(int i=0;i<4;i++)
                 {

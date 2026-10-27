@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from validate_content import (ROOT, find_proper_nouns, load_library, merge, validate_boss, validate_enemy, validate_hero,
                               validate_mission, validate_rules, validate_weapon, validate_difficulty,
-                              validate_hostage)
+                              validate_hostage, validate_carrier)
 
 RESOURCES = ROOT / "Assets/Resources"
 LIBRARY, LIBRARY_ERRORS = load_library(RESOURCES)
@@ -127,8 +127,43 @@ class MissionValidationTests(unittest.TestCase):
             with self.subTest(key=key):
                 self.assertTrue(self.rejected(lambda d: d["map"].update({key: [{"id": "x", "x": 10}]})))
                 self.assertFalse(self.rejected(lambda d: d["map"].pop(key)))
-        self.assertTrue(self.rejected(lambda d: d.update(encounters=[{"atX": 20}])))
         self.assertFalse(self.rejected(lambda d: d.pop("encounters")))
+
+    def test_encounters(self):
+        encounters = self.data["encounters"]
+        self.assertTrue(any("boss" in c for c in encounters))
+        self.assertTrue({"walk", "door", "window", "drop", "truck", "none"} <= {s["entry"] for c in encounters for s in c.get("spawns", [])})
+        wave = lambda *spawns, **kw: dict({"wave": 1, "spawns": list(spawns)}, **kw)
+        good = {"enemy": "looter-rusher", "entry": "walk", "x": 50}
+        self.assertFalse(self.rejected(lambda d: d["encounters"].append(wave(good))))
+        changes = (
+            lambda d: d["encounters"].append(wave(dict(good, enemy="nobody"))),
+            lambda d: d["encounters"].append(wave(dict(good, entry="teleport"))),
+            # Wave 1 holds the screen around atX 52: a place far from it is off screen.
+            lambda d: d["encounters"].append(wave(dict(good, x=90))),
+            lambda d: d["encounters"].append(wave(dict(good, entry="none"))),
+            lambda d: d["encounters"].append({"atX": 60, "spawns": [dict(good, entry="none", x=65)]}),
+            lambda d: d["encounters"].append({"atX": 60, "lock": True, "spawns": [dict(good, entry="none", x=80)]}),
+            lambda d: d["encounters"].append(wave(dict(good, entry="truck"))),
+            lambda d: d["encounters"].append(wave(dict(good, entry="truck"), truck={"id": "flying-carpet", "x": 50})),
+            lambda d: d["encounters"].append(wave({"enemy": "looter-thrower", "entry": "window", "x": 48, "y": 2, "fromX": 48, "fromY": 2.6})),
+            lambda d: d["encounters"].append(wave({"enemy": "looter-rusher", "entry": "window", "x": 48, "y": 2.6, "fromX": 48, "fromY": 2.6})),
+            lambda d: d["encounters"].append(wave({"enemy": "looter-thrower", "entry": "door", "x": 48, "fromX": 48, "opening": "trapdoor"})),
+            lambda d: d["encounters"].append(wave(dict(good, opening="door"))),
+            lambda d: d["encounters"].append(wave(dict(good), on="later")),
+            lambda d: d["encounters"].append(dict(wave(good), wave=40)),
+            lambda d: d["encounters"].append(wave()),
+            lambda d: d["encounters"].append({"atX": 470, "boss": {"id": "armored-van"}}),
+            lambda d: d["encounters"].append({"atX": 300, "boss": {"id": "armored-van"}, "spawns": [good]}),
+            lambda d: d["encounters"].append({"atX": 50, "boss": {"id": "armored-van"}}),
+            lambda d: d["encounters"].append({"atX": 300, "boss": {"id": "nobody"}}),
+            lambda d: d["encounters"].append({"atX": 300, "boss": {"id": "speedboat", "health": 9}}),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                self.assertTrue(self.rejected(change))
+        self.assertFalse(self.rejected(lambda d: d["encounters"].append({"atX": 300, "boss": {"id": "speedboat", "name": "BARQUE"}})))
+        self.assertFalse(self.rejected(lambda d: d["waves"][0].update(baseEnemies=0)))
 
     def test_hostage_placements(self):
         self.assertTrue(6 <= len(self.data["map"]["hostages"]) <= 10)
@@ -156,7 +191,8 @@ class LibraryValidationTests(unittest.TestCase):
         self.assertEqual(LIBRARY_ERRORS, [])
         self.assertEqual(sorted(LIBRARY["heroes"]), ["arnold", "chuck-norris", "jean-claude", "sylvester"])
         self.assertEqual(len(LIBRARY["enemies"]), 6)
-        self.assertEqual(sorted(LIBRARY["bosses"]), ["le-direct", "macron-helicopter", "mecha-shogun"])
+        self.assertEqual(sorted(LIBRARY["bosses"]), ["armored-van", "combat-drone", "le-direct", "macron-helicopter", "mecha-shogun", "speedboat"])
+        self.assertEqual(sorted(LIBRARY["carriers"]), ["black-minivan", "rusty-van"])
         self.assertEqual(sorted(LIBRARY["rules"]), ["default", "pow"])
         self.assertEqual(sorted(LIBRARY["hostages"]), ["baker", "boules-player", "civilian", "office-worker"])
 
@@ -179,14 +215,19 @@ class LibraryValidationTests(unittest.TestCase):
                                            {"name": "attack", "cells": [11]}, {"name": "hurt", "cells": [8]}, {"name": "death", "cells": [11, 8], "fps": 6, "loop": False}]}}
         library, errors = load_library(RESOURCES, {"enemies": [enemy]})
         self.assertEqual(errors, [])
-        self.assertEqual(library["enemies"]["test-brute"]["animations"]["sheet"]["texture"], "Art/enemies")
+        self.assertEqual(library["enemies"]["test-brute"]["animations"]["sheet"]["texture"], "Art/enemies/looter-shield")
 
     def test_enemy_animation_and_anchor_rules(self):
         base = content("enemies", "gunman-smg")
         self.assertEqual(validate_enemy(base, RESOURCES), [])
         changes = (
             lambda d: d["animations"].update(states=[s for s in d["animations"]["states"] if s["name"] != "attack"]),
-            lambda d: d["animations"]["states"][0].update(cells=[12]),
+            lambda d: d["animations"]["states"][0].update(cells=[16]),
+            lambda d: d.update(panic={"health": 2}),
+            lambda d: d.update(awareness={"sight": -1}),
+            lambda d: d.update(grenade={"range": 50}),
+            lambda d: d.update(grenade={"range": 10, "damage": 0}),
+            lambda d: d.update(cries=["Audio/Voices/nobody"]),
             lambda d: d["animations"].update(anchors=[]),
             lambda d: d["animations"]["anchors"][0].update(cell=0),
             lambda d: d["animations"]["sheet"].update(texture="Art/none"),
@@ -376,6 +417,58 @@ class LibraryValidationTests(unittest.TestCase):
         walker = content("bosses", "mecha-shogun")
         walker["animations"]["states"] = [s for s in walker["animations"]["states"] if s["name"] != "walk"]
         self.assertTrue(validate_boss(walker, RESOURCES))
+
+    def test_mid_bosses_and_new_moves(self):
+        enemies = LIBRARY["enemies"]
+        for boss_id in ("armored-van", "speedboat", "combat-drone"):
+            self.assertEqual(validate_boss(content("bosses", boss_id), RESOURCES, enemies), [])
+        van = content("bosses", "armored-van")
+        moves = {a["type"]: i for i, a in enumerate(van["attacks"])}
+        changes = (
+            lambda d: d.update(behavior="flyer", flight=content("bosses", "speedboat")["flight"]),
+            lambda d: d["attacks"][moves["troops"]].update(enemies=["nobody"]),
+            lambda d: d["attacks"][moves["troops"]].update(count=[1, 2]),
+            lambda d: d["attacks"][moves["troops"]].update(door="nowhere"),
+            lambda d: d["attacks"][moves["charge"]].update(clearance=9),
+            lambda d: d["walk"].update(entry=-9),
+            lambda d: d.update(score=-1),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                data = copy.deepcopy(van)
+                change(data)
+                self.assertTrue(validate_boss(data, RESOURCES, enemies))
+
+    def test_deaths_and_staging_rules(self):
+        base = content("rules", "default")
+        self.assertEqual(validate_rules(base, RESOURCES), [])
+        self.assertEqual({d["damage"] for d in base["deaths"]}, {"bullet", "explosion", "fire", "knife"})
+        changes = (
+            lambda d: d["deaths"].append({"damage": "poison"}),
+            lambda d: d["deaths"].append(dict(d["deaths"][0])),
+            lambda d: d["deaths"][0].update(time=0),
+            lambda d: d["stage"]["openings"].append(dict(d["stage"]["openings"][0])),
+            lambda d: d["stage"]["openings"][0]["sprite"].update(texture="Art/none"),
+            lambda d: d["stage"].update(alertVoice="Audio/Voices/nobody"),
+            lambda d: d["stage"]["parachute"].update(speed=0),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                data = copy.deepcopy(base)
+                change(data)
+                self.assertTrue(validate_rules(data, RESOURCES))
+
+    def test_carriers(self):
+        base = content("carriers", "rusty-van")
+        self.assertEqual(validate_carrier(base, RESOURCES), [])
+        for change in (lambda d: d["animations"].update(states=d["animations"]["states"][:1]), lambda d: d["animations"].update(anchors=[]),
+                       lambda d: d.update(speed=0)):
+            with self.subTest(change=change):
+                data = copy.deepcopy(base)
+                change(data)
+                self.assertTrue(validate_carrier(data, RESOURCES))
+        library, errors = load_library(RESOURCES, {"carriers": [{"id": "test-van", "extends": "black-minivan", "speed": 14}]})
+        self.assertEqual(errors, [])
 
     def test_difficulties(self):
         shipped = sorted(LIBRARY["difficulties"].values(), key=lambda d: (d.get("order", 0), d["id"]))

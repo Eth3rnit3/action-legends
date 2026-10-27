@@ -232,7 +232,8 @@ public static class VerifyLot1b
     {
         var verifier=PanameGame.CreateVerifier(missions);
         var all=new HashSet<string>();
-        foreach(var run in new[]{(m:0,d:1,h:2),(m:2,d:0,h:1),(m:1,d:3,h:3)})
+        // Marseille at DIFFICILE with three heroes: since lot 2b, three bots at LÉGENDE fall there before any crate.
+        foreach(var run in new[]{(m:0,d:1,h:2),(m:2,d:0,h:1),(m:1,d:2,h:3)})
         {
             Start(run.m,run.d,run.h);var moves=new int[4];var flags=new int[4];var used=new Dictionary<string,int>();
             for(int t=0;t<60*60*10&&g.phase==PanameGame.Phase.Playing;t++)

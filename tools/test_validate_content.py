@@ -91,6 +91,13 @@ class MissionValidationTests(unittest.TestCase):
             with self.subTest(boss=boss):
                 self.assertTrue(self.rejected(lambda d: d.update(boss=boss)))
 
+    def test_mission_logo_is_an_optional_image(self):
+        self.data["logo"] = "Art/saint-remy/mission-logo"
+        self.assertEqual(self.errors(), [])
+        for logo in ("Art/does-not-exist", "Audio/Music/marseillaise-arcade", "Art/../logo", "", 3):
+            with self.subTest(logo=logo):
+                self.assertTrue(self.rejected(lambda d: d.update(logo=logo)))
+
     def test_mission_code_format(self):
         self.data["code"] = "SAKURA"
         self.assertEqual(self.errors(), [])

@@ -85,6 +85,13 @@ public static class VerifySaintRemy
               "Arlésien, Arlésienne et Arlésien au fouet, le taureau en mini-boss, Nostradamus en boss final, la Farandole 8 bits (parcours et boss)",checks);
         Check(m.waves.Length==9&&m.encounters.Length>=14&&m.map.hostages.Length>=8&&Array.TrueForAll(m.map.hostages,h=>h.id=="peintre"||h.id=="civilian")&&m.map.decor.Length>=30,
               "Neuf vagues, "+m.encounters.Length+" rencontres, "+m.map.hostages.Length+" otages (le peintre local), "+m.map.decor.Length+" accessoires posés dans la rue",checks);
+        // The optional mission logo (0.8.0): only Saint-Remy has one; the lobby card falls back to the title elsewhere.
+        g.ReturnToLobby();Call(g,"LoadMission",sr);var logo=(Texture2D)Get(g,"missionLogo");
+        Call(g,"LoadMission",0);var none=(Texture2D)Get(g,"missionLogo");
+        Check(m.logo=="Art/saint-remy/mission-logo"&&logo&&logo.width>2*logo.height&&!none&&string.IsNullOrEmpty(original[0].logo),"Saint-Rémy affiche son logo dans la carte de mission du menu ; Paris garde son titre ("+m.logo+", "+(logo?logo.width+"×"+logo.height:"pas d'image")+")",checks);
+        var bad=Resources.Load<TextAsset>("Levels/"+Id).text.Replace("\"logo\": \"Art/saint-remy/mission-logo\"","\"logo\": \"Art/saint-remy/absent\"");
+        bool refused=false;try{MissionDefinition.Parse(bad);}catch(ArgumentException){refused=true;}
+        Check(refused,"Un logo de mission introuvable est refusé à la validation",checks);
     }
 
     static Transform Route()=>(Transform)typeof(PanameArt).GetField("routeRoot",BindingFlags.NonPublic|BindingFlags.Static).GetValue(null);

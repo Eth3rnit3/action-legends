@@ -4,7 +4,7 @@ namespace Paname
 {
     public sealed partial class PanameGame
     {
-        Texture2D menuLogo,menuCard;
+        Texture2D menuLogo,menuCard,missionLogo;
         int menuPlayer;
         void LoadMenuArt()
         {
@@ -43,8 +43,17 @@ namespace Paname
             IllustratedPanel(new Rect(913,27,315,155),Color.white);
             Panel(935,51,270,105,C("07192A"));
             Label(938,53,265,18,"MISSION "+(MissionIndex+1).ToString("00"),13,Gold,true);
-            Label(938,77,265,27,CurrentMission.title.ToUpperInvariant(),20,Cream,true);
-            Label(938,109,265,18,CurrentMission.location.ToUpperInvariant(),12,C("B2C7BD"),true);
+            // A mission logo takes the title's place; the location moves down under it.
+            if(missionLogo)
+            {
+                GUI.DrawTexture(new Rect(938,71,265,50),missionLogo,ScaleMode.ScaleToFit,true);
+                Label(938,121,265,18,CurrentMission.location.ToUpperInvariant(),11,C("B2C7BD"),true,TextAnchor.MiddleCenter);
+            }
+            else
+            {
+                Label(938,77,265,27,CurrentMission.title.ToUpperInvariant(),20,Cream,true);
+                Label(938,109,265,18,CurrentMission.location.ToUpperInvariant(),12,C("B2C7BD"),true);
+            }
             if(MissionCount>1)
             {
                 bool browse=UnlockedCount>1;

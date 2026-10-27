@@ -86,6 +86,8 @@ namespace Paname
         public const int Schema=2;
         public int schemaVersion,order=1;
         public string id,title,location,intro,exitLabel,winTitle,code,music,bossMusic;
+        // Optional: an image drawn in the lobby's mission card in place of the title.
+        public string logo;
         public MissionMap map=new MissionMap();
         // Library enemy ids; waves refer to them by their position in this list.
         public string[] enemies;
@@ -208,6 +210,7 @@ namespace Paname
             if(!(length>=30&&length<=500&&exitX>10&&exitX<=length&&cameraMin>=0&&cameraMax>cameraMin&&cameraMax<=length))throw new ArgumentException("Limites de mission invalides");
             if(!string.IsNullOrEmpty(code)&&(code.Length<4||code.Length>10||!System.Text.RegularExpressions.Regex.IsMatch(code,"^[A-Z0-9]+$")))throw new ArgumentException("code : 4 à 10 lettres majuscules ou chiffres");
             Content.Path(music,"Audio/","music");Content.Require<AudioClip>(music,"Musique");
+            if(!string.IsNullOrEmpty(logo)){Content.Path(logo,"Art/","logo");Content.Require<Texture2D>(logo,"Logo");}
             map??=new MissionMap();
             if(map.backgrounds==null||map.backgrounds.Length<1||map.backgrounds.Length>8)throw new ArgumentException("map.backgrounds : une à huit images sont requises");
             foreach(var path in map.backgrounds){Content.Path(path,"Art/","map.backgrounds");Content.Require<Texture2D>(path,"Image");}

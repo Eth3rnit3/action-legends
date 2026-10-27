@@ -36,6 +36,7 @@ namespace Paname
             if(world){world.gameObject.SetActive(false);Destroy(world.gameObject);}
             world=new GameObject("Décor de mission").transform;world.SetParent(transform,false);Street(world,CurrentMission.map,CurrentMission.length);
             cameraX=CurrentMission.cameraMin;LoadMissionMusic();BuildLobbyActors();
+            missionLogo=string.IsNullOrEmpty(CurrentMission.logo)?null:Resources.Load<Texture2D>(CurrentMission.logo);
         }
         public int Score {get;private set;}
         public int Wave {get;private set;}

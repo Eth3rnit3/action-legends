@@ -10,6 +10,7 @@
   "winTitle": "LA PROPHÉTIE EST DÉJOUÉE !",
   "music": "Audio/Music/saint-remy/farandole-8bit",
   "bossMusic": "Audio/Music/saint-remy/farandole-8bit-boss",
+  "logo": "Art/saint-remy/mission-logo",
   "map": {
     "backgrounds": [
       "Art/saint-remy/centre-ville",

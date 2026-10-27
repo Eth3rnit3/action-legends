@@ -913,6 +913,8 @@ def validate_mission(data, resources, library=None):
     if code is not None and (not isinstance(code, str) or not re.fullmatch(r"[A-Z0-9]{4,10}", code)):
         errors.append("code must be 4 to 10 uppercase letters or digits")
     errors.resource(data.get("music"), "Audio/", SOUNDS, resources, "music")
+    if data.get("logo") is not None:
+        errors.resource(data.get("logo"), "Art/", IMAGES, resources, "logo")
     game_map = data.get("map")
     if not isinstance(game_map, dict):
         errors.append("map must be an object")

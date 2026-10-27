@@ -21,6 +21,9 @@ Assets/Resources/
 
 - Chaque fichier de `Content/` porte un `id` égal à son nom sans `.json`, en minuscules séparées par des tirets (`gunman-smg`). Les missions y font référence par cet identifiant : un ennemi ou un boss d’une mission peut servir dans une autre.
 - Les chemins d’images et de sons sont des chemins Resources sans extension : `Assets/Resources/Art/ma-mission/quais.png` s’écrit `Art/ma-mission/quais`.
+- **Tout ce qui est sous `Assets/Resources` part dans l’export web**, chargé ou non. Planches sources, images intermédiaires et variantes non retenues vont dans `Assets/ArtSources/<mission>/` (avec leur `.meta`) ; `tools/validate_content.py` refuse une image de `Resources/Art` qu’aucun JSON ni script ne nomme.
+- **Réglages d’import d’une nouvelle image** (inspecteur Unity, ou `.meta` copié d’une image équivalente avec un nouveau `guid`) : *Read/Write* et *Generate Mip Maps* décochés (le jeu ne lit pas les pixels et n’affiche pas ses images en réduction lointaine), filtre *Bilinear*, *Max Size* 4096 pour garder la taille native, *Compression* *Normal Quality* sans *Crunch* : DXT5 pour une image transparente, DXT1 pour un panorama, soit quatre à six fois moins que l’image brute. La compression par blocs exige une largeur et une hauteur **multiples de 4** ; sinon Unity garde l’image non compressée. Compléter alors la marge transparente (ou dupliquer la dernière colonne d’un panorama) avant l’import ; une planche garde des cases de taille entière. *Crunch* a été essayé et refusé à la 0.8.0 : il bave les motifs fins des personnages (camouflage, jean).
+- **Musiques** : WAV en qualité 0,6 (l’export web les encode en AAC, environ 150 kb/s), *Preload Audio Data* décoché ; bruitages et voix gardent les réglages par défaut.
 - Une entrée de la bibliothèque peut en **étendre** une autre avec `"extends": "<id>"` : le parent est lu d’abord, puis les champs de l’entrée remplacent les siens. Les objets se fusionnent champ par champ, les listes et les valeurs sont remplacées en entier. `le-direct.json` (l’hélicoptère de Marseille) ne contient ainsi que ses textes et sa nouvelle image :
 
 ```json
@@ -190,7 +193,7 @@ Héros, ennemis et boss ont tous un bloc `animations` : une planche, des états 
 
 ```json
 "animations": {
-  "sheet": {"texture": "Art/tokyo/enemies", "columns": 4, "rows": 3, "cropLeft": 0.065, "cropRight": 0.025,
+  "sheet": {"texture": "Art/enemies/gunman-pistol", "columns": 4, "rows": 4, "cropLeft": 0.065, "cropRight": 0.025,
             "pivot": {"x": 0.4, "y": 0.045}, "cellHeight": 2.2777777},
   "layer": 30,
   "states": [
@@ -244,9 +247,9 @@ Un état qui n’est pas dans ce tableau est accepté et ignoré : une planche p
 | Boss | `smoke` | D’où sort la fumée sous la moitié de ses PV. |
 | Boss | ceux de ses attaques | `muzzles`, `rack`, `foot`, `walk.foot` (section 4). |
 
-Les neuf ennemis livrés ont chacun leur planche, `Art/enemies/<id>.png` (4 × 4 cases) : la première ligne reprend au pixel près leurs quatre anciennes cases (pour les Arlésiens, leur ligne de `Art/saint-remy/enemies.png`), les trois suivantes ajoutent inattentif, sursaut, touché ou lancer, fuite et les morts (`docs/ART_LOT2B.md`, `docs/MISSION_SAINT_REMY.md`) ; `pack_sheet.py hero tools/art/enemies/<id>.json` la refait. Les planches des Arlésiens ont des cases de 512 px : `pivot` (0,4 ; 0,0527344), `cellHeight` 2,88 (3,2 pour l’Arlésien au fouet, dessiné plus petit).
+Les neuf ennemis livrés ont chacun leur planche, `Art/enemies/<id>.png` (4 × 4 cases) : la première ligne reprend au pixel près leurs quatre anciennes cases (pour les Arlésiens, leur ligne de `Assets/ArtSources/saint-remy/enemies.png`), les trois suivantes ajoutent inattentif, sursaut, touché ou lancer, fuite et les morts (`docs/ART_LOT2B.md`, `docs/MISSION_SAINT_REMY.md`) ; `pack_sheet.py hero tools/art/enemies/<id>.json` la refait. Les planches des Arlésiens ont des cases de 512 px : `pivot` (0,4 ; 0,0527344), `cellHeight` 2,88 (3,2 pour l’Arlésien au fouet, dessiné plus petit).
 
-`tools/art/pack_sheet.py` recale une planche générée (pieds sur une même ligne, jambes sur le pivot) et affiche les bouts de canon. Pour un héros, `pack_sheet.py hero tools/art/heroes/<héros>.json` assemble ses planches générées en une seule (une taille commune fixée par une image de référence de chaque planche), mesure les `muzzle` (vers l’avant, le haut, le bas ou en diagonale selon la case) et la `hand`, et imprime les ancrages JSON ; voir `docs/ART_LOT1A.md`. `tools/art/measure_muzzles.py` mesure ceux de l’ancienne planche `Art/heroes.png`.
+`tools/art/pack_sheet.py` recale une planche générée (pieds sur une même ligne, jambes sur le pivot) et affiche les bouts de canon. Pour un héros, `pack_sheet.py hero tools/art/heroes/<héros>.json` assemble ses planches générées en une seule (une taille commune fixée par une image de référence de chaque planche), mesure les `muzzle` (vers l’avant, le haut, le bas ou en diagonale selon la case) et la `hand`, et imprime les ancrages JSON ; voir `docs/ART_LOT1A.md`. `tools/art/measure_muzzles.py` mesure ceux de l’ancienne planche `Assets/ArtSources/heroes.png`.
 
 ## 3. Les ennemis
 

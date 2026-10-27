@@ -18,4 +18,6 @@ Ne pas ajouter `Library`, `Temp`, `Logs`, `UserSettings`, `WebBuild`, licences U
 
 Conserver le style arcade et des silhouettes lisibles. Les décors s’enchaînent horizontalement avec une ligne de sol cohérente. Le moteur gère le défilement en parallaxe et adapte sa couverture au cadrage.
 
+Tout fichier placé sous `Assets/Resources` est embarqué dans l’export web, qu’il serve ou non : les sources, planches intermédiaires et variantes vont dans `Assets/ArtSources/`, et le validateur refuse une image de `Resources/Art` qu’aucun contenu ne nomme. Les images s’importent compressées (DXT, sans Crunch, sans mipmaps, *Read/Write* décoché, taille native) avec des dimensions multiples de 4 ; voir [le guide des niveaux](docs/ADDING_A_LEVEL.md), section 0.
+
 N’ajouter que des contenus que vous avez le droit de partager. Le code contribué est distribué sous [licence MIT](LICENSE) ; les illustrations et l’audio contribués rejoignent les ressources du jeu, distribuées selon la section Licence du README.

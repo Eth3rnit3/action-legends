@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "order": 2,
   "id": "mistral-gagnant",
   "code": "PASTIS",
@@ -8,14 +8,30 @@
   "intro": "CAP SUR LA BONNE MÈRE !",
   "exitLabel": "NOTRE-DAME-DE-LA-GARDE",
   "winTitle": "MARSEILLE VOUS FAIT LA BISE.",
-  "backgrounds": [
-    "Art/marseille/vieux-port",
-    "Art/marseille/panier",
-    "Art/marseille/canebiere"
-  ],
-  "ground": "Art/marseille/sol",
   "music": "Audio/Music/coupo-santo-arcade",
   "bossMusic": "Audio/Music/coupo-santo-boss",
+  "map": {
+    "backgrounds": [
+      "Art/marseille/vieux-port",
+      "Art/marseille/panier",
+      "Art/marseille/canebiere"
+    ],
+    "ground": "Art/marseille/sol",
+    "terrain": [],
+    "props": [],
+    "hostages": [],
+    "vehicles": []
+  },
+  "enemies": [
+    "looter-rusher",
+    "looter-thrower",
+    "looter-shield"
+  ],
+  "extraEnemy": {
+    "enemy": 1,
+    "every": 4,
+    "fromDifficulty": 1
+  },
   "length": 360,
   "exitX": 357,
   "cameraMin": 7,
@@ -182,13 +198,10 @@
       ]
     }
   ],
+  "encounters": [],
   "boss": {
     "enabled": true,
-    "name": "LE DIRECT",
-    "sprite": "Art/marseille/news-helicopter",
-    "intro": "ÉDITION SPÉCIALE : L'HÉLICO DU DIRECT !",
-    "rage": "LE DIRECT S'EMBALLE !",
-    "defeat": "FIN DE L'ANTENNE !",
+    "id": "le-direct",
     "health": 1.2
   }
 }

@@ -10,7 +10,7 @@ namespace Paname
         sealed class Effect
         {
             public GameObject go;public SpriteRenderer renderer;public Vector2 velocity;
-            public int row;public float age,duration,size,rotation,spin;public bool active,casing;
+            public int row;public float age,duration,size,rotation,spin,fps;public bool active,casing;public Sprite[] frames;
         }
         readonly List<Effect> pool=new List<Effect>();
         readonly Transform parent;
@@ -55,7 +55,7 @@ namespace Paname
         public void Play(int row,Vector2 position,float size,float duration,int direction=1,Vector2 velocity=default,float angle=0)
         {
             var sprite=Frame(row,0);if(!sprite)return;var e=Acquire();if(e==null)return;
-            e.row=row;e.age=0;e.duration=duration;e.size=size;e.velocity=velocity;e.casing=false;e.spin=0;e.rotation=0;
+            e.row=row;e.age=0;e.duration=duration;e.size=size;e.velocity=velocity;e.casing=false;e.spin=0;e.rotation=0;e.frames=null;
             e.go.name=row==0?"Flamme de bouche":row==1?"Impact":row==2?"Explosion":"Fumée";
             e.go.transform.position=position;e.go.transform.localScale=new Vector3(size*direction,size,1);e.go.transform.localRotation=Quaternion.Euler(0,0,angle);
             e.renderer.sprite=sprite;e.renderer.sharedMaterial=FxMaterial?FxMaterial:NormalMaterial;e.renderer.color=Color.white;e.renderer.sortingOrder=row==3?43:75;
@@ -73,11 +73,12 @@ namespace Paname
             Play(3,at,.65f,.38f,1,new Vector2(direction*.5f,.7f));
             for(int i=0;i<(metal?6:3);i++)Debris(at,new Vector2(direction*(1+(float)rng.NextDouble()*3),1+(float)rng.NextDouble()*4),metal?Gold:PanameArt.C("9BA8AC"),.04f,.35f);
         }
-        public void Defeat(SpriteRenderer source,int direction)
+        // The defeated sprite tumbles away; an enemy with a death animation plays it on the way.
+        public void Defeat(SpriteRenderer source,int direction,Sprite[] frames=null,float fps=0)
         {
-            var e=Acquire();if(e==null)return;e.row=-2;e.age=0;e.duration=.34f;e.velocity=new Vector2(direction*3.2f,3.8f);e.casing=false;e.spin=-direction*210;e.rotation=0;
+            var e=Acquire();if(e==null)return;e.row=-2;e.age=0;e.duration=.34f;e.velocity=new Vector2(direction*3.2f,3.8f);e.casing=false;e.spin=-direction*210;e.rotation=0;e.frames=frames!=null&&frames.Length>0?frames:null;e.fps=fps;
             e.go.name="Réaction de défaite";e.go.transform.position=source.transform.position;e.go.transform.localScale=source.transform.lossyScale;e.go.transform.localRotation=Quaternion.identity;
-            e.renderer.sprite=source.sprite;e.renderer.sharedMaterial=NormalMaterial;e.renderer.color=Color.white;e.renderer.sortingOrder=44;
+            e.renderer.sprite=e.frames!=null?e.frames[0]:source.sprite;e.renderer.sharedMaterial=NormalMaterial;e.renderer.color=Color.white;e.renderer.sortingOrder=44;
         }
         public void Casing(Vector2 position,int direction)
         {
@@ -85,7 +86,7 @@ namespace Paname
         }
         void Debris(Vector2 at,Vector2 velocity,Color color,float size,float life)
         {
-            var e=Acquire();if(e==null)return;e.row=-1;e.age=0;e.duration=life;e.size=size;e.velocity=velocity;e.casing=true;e.rotation=0;e.spin=(float)rng.NextDouble()*900+500;
+            var e=Acquire();if(e==null)return;e.frames=null;e.row=-1;e.age=0;e.duration=life;e.size=size;e.velocity=velocity;e.casing=true;e.rotation=0;e.spin=(float)rng.NextDouble()*900+500;
             e.go.name="Douille ou éclat";e.go.transform.position=at;e.go.transform.localScale=new Vector3(size*2,size,1);e.go.transform.localRotation=Quaternion.identity;
             e.renderer.sprite=Square;e.renderer.sharedMaterial=NormalMaterial;e.renderer.color=color;e.renderer.sortingOrder=66;
         }
@@ -99,7 +100,7 @@ namespace Paname
                 if(e.casing||e.row==-2)
                 {
                     e.velocity+=Vector2.down*13*dt;e.rotation+=e.spin*dt;e.go.transform.localRotation=Quaternion.Euler(0,0,e.rotation);
-                    if(e.row==-2){var c=e.renderer.color;c.a=1-Mathf.Pow(e.age/e.duration,2);e.renderer.color=c;}
+                    if(e.row==-2){var c=e.renderer.color;c.a=1-Mathf.Pow(e.age/e.duration,2);e.renderer.color=c;if(e.frames!=null)e.renderer.sprite=e.frames[Mathf.Min(e.frames.Length-1,(int)(e.age*(e.fps>0?e.fps:e.frames.Length/e.duration)))];}
                     if(e.casing&&e.go.transform.position.y<.015f){var p=e.go.transform.position;p.y=.015f;e.go.transform.position=p;e.velocity=new Vector2(e.velocity.x*.6f,Mathf.Abs(e.velocity.y)*.3f);e.spin*=.5f;}
                 }
                 else

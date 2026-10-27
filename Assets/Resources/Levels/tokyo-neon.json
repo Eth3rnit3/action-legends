@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "order": 3,
   "id": "tokyo-neon",
   "code": "SAKURA",
@@ -8,41 +8,30 @@
   "intro": "TOKYO BRILLE : ILS SONT ARMÉS, SAUTEZ !",
   "exitLabel": "TOUR DE TOKYO",
   "winTitle": "ARIGATO, LES LÉGENDES !",
-  "backgrounds": [
-    "Art/tokyo/shibuya",
-    "Art/tokyo/akihabara",
-    "Art/tokyo/minato"
-  ],
-  "ground": "Art/tokyo/sol",
   "music": "Audio/Music/sakura-arcade",
   "bossMusic": "Audio/Music/sakura-boss",
-  "enemySheet": "Art/tokyo/enemies",
+  "map": {
+    "backgrounds": [
+      "Art/tokyo/shibuya",
+      "Art/tokyo/akihabara",
+      "Art/tokyo/minato"
+    ],
+    "ground": "Art/tokyo/sol",
+    "terrain": [],
+    "props": [],
+    "hostages": [],
+    "vehicles": []
+  },
   "enemies": [
-    {
-      "role": "pistol",
-      "row": 0,
-      "muzzle": {
-        "x": 1.33,
-        "y": 1.43
-      }
-    },
-    {
-      "role": "smg",
-      "row": 1,
-      "muzzle": {
-        "x": 1.18,
-        "y": 1.39
-      }
-    },
-    {
-      "role": "shotgun",
-      "row": 2,
-      "muzzle": {
-        "x": 1.52,
-        "y": 1.61
-      }
-    }
+    "gunman-pistol",
+    "gunman-smg",
+    "gunman-shotgun"
   ],
+  "extraEnemy": {
+    "enemy": 1,
+    "every": 4,
+    "fromDifficulty": 1
+  },
   "length": 330,
   "exitX": 327,
   "cameraMin": 7,
@@ -176,14 +165,10 @@
       ]
     }
   ],
+  "encounters": [],
   "boss": {
     "enabled": true,
-    "kind": "mecha",
-    "name": "MÉCHA SHOGUN",
-    "sprite": "Art/tokyo/mecha-shogun",
-    "intro": "ALERTE : LE MÉCHA SHOGUN SE RÉVEILLE !",
-    "rage": "LE SHOGUN PASSE EN SURCHAUFFE !",
-    "defeat": "SHOGUN HORS SERVICE !",
+    "id": "mecha-shogun",
     "health": 1.3
   }
 }

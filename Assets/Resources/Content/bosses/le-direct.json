@@ -1,0 +1,13 @@
+{
+  "id": "le-direct",
+  "extends": "macron-helicopter",
+  "name": "LE DIRECT",
+  "intro": "ÉDITION SPÉCIALE : L'HÉLICO DU DIRECT !",
+  "rage": "LE DIRECT S'EMBALLE !",
+  "defeat": "FIN DE L'ANTENNE !",
+  "animations": {
+    "sheet": {
+      "texture": "Art/marseille/news-helicopter"
+    }
+  }
+}

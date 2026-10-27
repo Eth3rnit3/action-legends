@@ -1,0 +1,78 @@
+{
+  "id": "looter-thrower",
+  "behavior": "thrower",
+  "health": 3,
+  "speed": 3.6,
+  "keepDistance": 5,
+  "hitRadius": 0.5,
+  "knockback": 3.5,
+  "bonusScore": 0,
+  "armored": false,
+  "firstAttack": 0.7,
+  "attackPose": 0.3,
+  "strideRate": 11,
+  "melee": {
+    "reach": 0.9,
+    "height": 1.35,
+    "cooldown": 1,
+    "damage": 1
+  },
+  "throw": {
+    "range": 10,
+    "cooldown": 1.65,
+    "aimHeight": 1,
+    "speed": [
+      8,
+      10,
+      12,
+      14
+    ],
+    "damage": 1,
+    "projectile": "molotov"
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/enemies",
+      "columns": 4,
+      "rows": 3,
+      "cropLeft": 0.065,
+      "cropRight": 0.025,
+      "pivot": {
+        "x": 0.4,
+        "y": 0.045
+      },
+      "cellHeight": 2.2777777
+    },
+    "layer": 30,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          4
+        ]
+      },
+      {
+        "name": "run",
+        "cells": [
+          5,
+          6
+        ],
+        "perStride": 0.7
+      },
+      {
+        "name": "attack",
+        "cells": [
+          7
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "hand",
+        "cell": 7,
+        "x": -0.62,
+        "y": 1.9
+      }
+    ]
+  }
+}

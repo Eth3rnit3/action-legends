@@ -64,14 +64,14 @@ namespace Paname
         }
         void FirePlayer(Player p)
         {
-            int mode=p.weapon;float speed=mode==3?24:36;int damage=mode==3?10:mode==1?5:p.hero==1?5:p.hero==3?4:3;
+            var hero=p.Definition;int mode=p.weapon;float speed=mode==3?24:36;int damage=mode==3?10:mode==1?5:hero.damage;
             Vector2 aim=AimDirection(p),side=new Vector2(-aim.y,aim.x),muzzle=MuzzlePoint(p);
             if(mode==2)for(int k=-1;k<=1;k++)Shoot(ShotLook.Tracer,muzzle,aim*speed+side*k*3.3f,4);
             else Shoot(ShotLook.Tracer,muzzle,aim*speed,damage,mode==3);
             effects.Muzzle(muzzle,aim,mode==3);
-            p.fireTimer=mode==1?.055f:mode==3?.19f:Rate[p.hero];p.recoil=.045f;
+            p.fireTimer=mode==1?.055f:mode==3?.19f:hero.fireRate;p.recoil=.045f;
             if(mode>0&&--p.ammo<=0){p.weapon=0;p.ammo=0;}
-            effects.Casing(muzzle+new Vector2(-p.facing*.62f,.04f),p.facing);shake=Mathf.Max(shake,p.hero==1?.07f:.025f);Sound(FireClip(mode));
+            effects.Casing(muzzle+new Vector2(-p.facing*.62f,.04f),p.facing);shake=Mathf.Max(shake,hero.recoilShake);Sound(FireClip(mode));
         }
         static Vector2 AimDirection(Player p)=>p.aimUp?(p.moving?new Vector2(p.facing,1).normalized:Vector2.up):new Vector2(p.facing,0);
         static string Clock(float time){int minutes=(int)time/60;return minutes.ToString("00")+":"+(time%60).ToString("00.0");}

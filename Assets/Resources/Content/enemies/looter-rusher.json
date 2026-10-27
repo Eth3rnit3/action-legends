@@ -1,0 +1,58 @@
+{
+  "id": "looter-rusher",
+  "behavior": "melee",
+  "health": 2,
+  "speed": 5.8,
+  "keepDistance": 0.6,
+  "hitRadius": 0.5,
+  "knockback": 3.5,
+  "bonusScore": 0,
+  "armored": false,
+  "firstAttack": 0.7,
+  "attackPose": 0.3,
+  "strideRate": 11,
+  "melee": {
+    "reach": 0.9,
+    "height": 1.35,
+    "cooldown": 1,
+    "damage": 1
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/enemies",
+      "columns": 4,
+      "rows": 3,
+      "cropLeft": 0.065,
+      "cropRight": 0.025,
+      "pivot": {
+        "x": 0.4,
+        "y": 0.045
+      },
+      "cellHeight": 2.2777777
+    },
+    "layer": 30,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "run",
+        "cells": [
+          1,
+          2
+        ],
+        "perStride": 0.7
+      },
+      {
+        "name": "attack",
+        "cells": [
+          3
+        ]
+      }
+    ],
+    "anchors": []
+  }
+}

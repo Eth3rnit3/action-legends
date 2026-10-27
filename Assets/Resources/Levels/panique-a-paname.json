@@ -1,17 +1,36 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "panique-a-paname",
   "title": "Panique à Paname",
   "location": "Paris, 2026",
   "intro": "DIRECTION BASTILLE !",
   "exitLabel": "BASTILLE",
   "winTitle": "PARIS VOUS DIT MERCI.",
-  "backgrounds": [
-    "Art/route-01",
-    "Art/route-02",
-    "Art/canal-panorama",
-    "Art/bastille-panorama"
+  "music": "Audio/Music/marseillaise-arcade",
+  "bossMusic": "Audio/Music/marseillaise-boss",
+  "map": {
+    "backgrounds": [
+      "Art/route-01",
+      "Art/route-02",
+      "Art/canal-panorama",
+      "Art/bastille-panorama"
+    ],
+    "ground": "Art/paris",
+    "terrain": [],
+    "props": [],
+    "hostages": [],
+    "vehicles": []
+  },
+  "enemies": [
+    "looter-rusher",
+    "looter-thrower",
+    "looter-shield"
   ],
+  "extraEnemy": {
+    "enemy": 1,
+    "every": 4,
+    "fromDifficulty": 1
+  },
   "length": 480,
   "exitX": 477,
   "cameraMin": 7,
@@ -209,5 +228,11 @@
         1
       ]
     }
-  ]
+  ],
+  "encounters": [],
+  "boss": {
+    "enabled": true,
+    "id": "macron-helicopter",
+    "health": 1
+  }
 }

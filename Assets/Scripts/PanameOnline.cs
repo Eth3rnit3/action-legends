@@ -104,15 +104,15 @@ namespace Paname
                 HostSendLobby();
             }
             else if(slot<=0)return;
-            else if(type=='P'&&phase==Phase.Lobby&&int.TryParse(body,out int hero)){slots[slot].hero=Mod(hero,HeroNames.Length);BuildLobbyActors();HostSendLobby();}
+            else if(type=='P'&&phase==Phase.Lobby&&int.TryParse(body,out int hero)){slots[slot].hero=Mod(hero,HeroCount);BuildLobbyActors();HostSendLobby();}
             else if(type=='I')ParseInput(body,ref netInputs[slot]);
             else if(type=='H')CheckHash(body);
         }
         int FreeHero(int slot)
         {
-            for(int hero=0;hero<HeroNames.Length;hero++)
+            for(int hero=0;hero<HeroCount;hero++)
             {bool taken=false;for(int i=0;i<4;i++)if(i!=slot&&slots[i].joined&&slots[i].hero==hero)taken=true;if(!taken)return hero;}
-            return Mod(slot,HeroNames.Length);
+            return Mod(slot,HeroCount);
         }
         static void ParseInput(string body,ref NetInput input)
         {
@@ -233,7 +233,7 @@ namespace Paname
             LocalSlotIndex=-1;
             for(int i=0;i<4;i++)
             {
-                slots[i].joined=lobby.joined[i];slots[i].pad=null;slots[i].hero=Mod(lobby.heroes[i],HeroNames.Length);
+                slots[i].joined=lobby.joined[i];slots[i].pad=null;slots[i].hero=Mod(lobby.heroes[i],HeroCount);
                 slotPeers[i]=lobby.peers[i];playerNames[i]=lobby.names[i];
                 if(lobby.joined[i]&&lobby.peers[i]==netSelf)LocalSlotIndex=i;
             }
@@ -286,7 +286,7 @@ namespace Paname
             var k=Keyboard.current;var pad=netLocal.pad;int direction=0;
             if(k!=null&&!LobbyKeysBlocked){if(k.qKey.wasPressedThisFrame||k.aKey.wasPressedThisFrame||k.leftArrowKey.wasPressedThisFrame)direction=-1;if(k.eKey.wasPressedThisFrame||k.dKey.wasPressedThisFrame||k.rightArrowKey.wasPressedThisFrame)direction=1;}
             if(pad!=null){if(pad.dpad.left.wasPressedThisFrame)direction=-1;if(pad.dpad.right.wasPressedThisFrame)direction=1;}
-            if(direction!=0&&LocalSlotIndex>=0)OnlineHero(Mod(slots[LocalSlotIndex].hero+direction,HeroNames.Length));
+            if(direction!=0&&LocalSlotIndex>=0)OnlineHero(Mod(slots[LocalSlotIndex].hero+direction,HeroCount));
             if(!IsHost||LobbyKeysBlocked)return;
             if((k!=null&&k.enterKey.wasPressedThisFrame)||(pad!=null&&pad.startButton.wasPressedThisFrame))BeginRound();
             if(pad!=null&&pad.leftShoulder.wasPressedThisFrame)SelectMission(-1);

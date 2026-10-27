@@ -1,0 +1,82 @@
+{
+  "id": "gunman-pistol",
+  "behavior": "gunman",
+  "health": 3,
+  "speed": 4.6,
+  "keepDistance": 6,
+  "hitRadius": 0.5,
+  "knockback": 3.5,
+  "bonusScore": 0,
+  "armored": false,
+  "firstAttack": 1,
+  "attackPose": 0.3,
+  "strideRate": 11,
+  "gun": {
+    "range": 11,
+    "aimTime": 0.42,
+    "cooldown": 1.7,
+    "burst": 1,
+    "burstInterval": 0.11,
+    "pellets": 1,
+    "spread": 0,
+    "spreadStep": 0,
+    "speed": [
+      11,
+      12.5,
+      14,
+      15.5
+    ],
+    "life": 1.25,
+    "pose": 0.25,
+    "shake": 0,
+    "damage": 1,
+    "projectile": "bullet",
+    "sound": "Audio/Sfx/tir-D-pistolet-sec",
+    "heavyFlash": false
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/tokyo/enemies",
+      "columns": 4,
+      "rows": 3,
+      "cropLeft": 0.065,
+      "cropRight": 0.025,
+      "pivot": {
+        "x": 0.4,
+        "y": 0.045
+      },
+      "cellHeight": 2.2777777
+    },
+    "layer": 30,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "run",
+        "cells": [
+          1,
+          2
+        ],
+        "perStride": 0.7
+      },
+      {
+        "name": "attack",
+        "cells": [
+          3
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "muzzle",
+        "cell": 3,
+        "x": 1.33,
+        "y": 1.43
+      }
+    ]
+  }
+}

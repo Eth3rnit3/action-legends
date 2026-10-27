@@ -14,7 +14,7 @@ public static class VerifyUpgrade
         try
         {
             Check(Resources.Load<Texture2D>("Art/action-legends-logo")&&Resources.Load<Texture2D>("Art/menu-card"),"Logo et cadres du menu chargés",checks);
-            Check(PanameArt.RouteSegments==g.CurrentMission.backgrounds.Length,"Tous les décors de la mission chargés",checks);
+            Check(PanameArt.RouteSegments==g.CurrentMission.map.backgrounds.Length,"Tous les décors de la mission chargés",checks);
             var master=new Texture2D(2,2,TextureFormat.RGBA32,false);ImageConversion.LoadImage(master,System.IO.File.ReadAllBytes("Assets/ArtSources/route-master.png"));var original=master.GetPixels32();bool exact=true;int offset=0;
             for(int n=1;n<=3;n++)
             {
@@ -23,7 +23,7 @@ public static class VerifyUpgrade
                 offset+=part.width;
             }
             Check(exact&&offset==master.width,"Découpes de décor identiques pixel par pixel à la fresque",checks);UnityEngine.Object.DestroyImmediate(master);
-            var route=g.transform.Find("Décor de mission/Panorama • trois quartiers continus");
+            var route=g.transform.Find("Décor de mission/Panorama");
             var views=route.GetComponentsInChildren<SpriteRenderer>();
             bool joins=true,covered=true;var mission=g.CurrentMission;int last=views.Length-1;
             foreach(float half in new[]{8f,10f,12.5f,14f})for(float x=mission.cameraMin;x<=mission.cameraMax;x+=.5f)

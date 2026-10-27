@@ -118,9 +118,9 @@ namespace Paname
             int index=Array.FindIndex(missions,m=>m.id==record.mission);
             if(index<0||record.difficulty<0||record.difficulty>3)return false;
             int joined=0;
-            for(int i=0;i<4;i++){slots[i].joined=record.heroes[i]>=0;slots[i].pad=null;if(slots[i].joined){slots[i].hero=Mathf.Clamp(record.heroes[i],0,3);joined++;}}
+            for(int i=0;i<4;i++){slots[i].joined=record.heroes[i]>=0;slots[i].pad=null;if(slots[i].joined){slots[i].hero=Mathf.Clamp(record.heroes[i],0,HeroCount-1);joined++;}}
             if(joined==0||!ParseRuns(record.runs,record.heroes))return false;
-            SelectedDifficulty=(Difficulty)record.difficulty;missionIndex=index;enemySheet=Resources.Load<Texture2D>(CurrentMission.enemySheet);
+            SelectedDifficulty=(Difficulty)record.difficulty;missionIndex=index;
             carriedScore=0;phase=Phase.Lobby;BeginRound();
             verifying=record;verifyRun=0;verifyLeft=verifyRuns.Count>0?verifyRuns[0].count:0;verifyTicks=0;return true;
         }

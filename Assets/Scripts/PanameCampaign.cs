@@ -9,7 +9,6 @@ namespace Paname
     public sealed partial class PanameGame
     {
         const string UnlockKey="action-legends.unlocked.";
-        Texture2D enemySheet;
         int carriedScore;
         bool codeEntry;
         string codeText="",codeMessage="";

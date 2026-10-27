@@ -1,0 +1,89 @@
+{
+  "id": "sylvester",
+  "order": 3,
+  "name": "SYLVESTER",
+  "shortName": "SYLVESTER",
+  "role": "LE COMMANDO",
+  "specialName": "Salve explosive",
+  "speed": 10.7,
+  "fireRate": 0.1,
+  "damage": 4,
+  "jump": 11,
+  "recoilShake": 0.025,
+  "strideRate": 13,
+  "bob": 0.045,
+  "special": {
+    "type": "volley",
+    "cooldown": 5,
+    "cooldownPerDifficulty": 1,
+    "shots": 7,
+    "speed": 19,
+    "spread": 2,
+    "damage": 5,
+    "explosive": true
+  },
+  "portraitCell": 12,
+  "animations": {
+    "sheet": {
+      "texture": "Art/heroes",
+      "columns": 4,
+      "rows": 4,
+      "cropLeft": 0.065,
+      "cropRight": 0.025,
+      "pivot": {
+        "x": 0.4,
+        "y": 0.045
+      },
+      "cellHeight": 2.2777777
+    },
+    "layer": 30,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          12
+        ]
+      },
+      {
+        "name": "run",
+        "cells": [
+          13,
+          14
+        ],
+        "perStride": 0.7
+      },
+      {
+        "name": "jump",
+        "cells": [
+          15
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "muzzle",
+        "cell": 12,
+        "x": 1.21,
+        "y": 1.4
+      },
+      {
+        "name": "muzzle",
+        "cell": 13,
+        "x": 1.36,
+        "y": 1.37
+      },
+      {
+        "name": "muzzle",
+        "cell": 14,
+        "x": 1.36,
+        "y": 1.33
+      },
+      {
+        "name": "muzzle",
+        "cell": 15,
+        "x": 1.28,
+        "y": 1.37
+      }
+    ]
+  }
+}

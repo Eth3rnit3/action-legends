@@ -1,6 +1,6 @@
-"""Locate the gun barrel tip in every hero frame of Art/heroes.png and print the offsets,
-in world units from the actor's feet, that PanameGame.HeroMuzzles expects.
-The unit conversion mirrors PanameArt.Frame (cell crop, pivot and pixels per unit).
+"""Locate the gun barrel tip in every hero frame of Art/heroes.png and print the "muzzle" anchors,
+in world units from the actor's feet, to paste in the "animations" of Resources/Content/heroes/*.json.
+The unit conversion mirrors the heroes' sheet settings (cell crop, pivot and cellHeight 2.2777777).
 usage: measure_muzzles.py [--preview OUT.png]   (needs Pillow)"""
 import sys
 from pathlib import Path
@@ -33,16 +33,14 @@ def main():
     draw = ImageDraw.Draw(preview)
     lines = []
     for row in range(rows):
-        values = []
         for col in range(COLUMNS):
             cell = sheet.crop((round(col * w), round(row * h), round((col + 1) * w), round((row + 1) * h)))
             px, py = barrel_tip(cell)
             x, y = to_world(px, py, w, h)
-            values.append(f'new Vector2({x:.2f}f,{y:.2f}f)')
+            lines.append(f'{{"name": "muzzle", "cell": {row * COLUMNS + col}, "x": {x:.2f}, "y": {y:.2f}}}')
             cx, cy = col * w + px, row * h + py
             draw.ellipse((cx - 6, cy - 6, cx + 6, cy + 6), outline=(255, 0, 255, 255), width=3)
-        lines.append('{' + ','.join(values) + '}')
-    print('static readonly Vector2[,] HeroMuzzles={\n    ' + ',\n    '.join(lines) + '};')
+    print(',\n'.join(lines))
     if '--preview' in sys.argv:
         preview.save(sys.argv[sys.argv.index('--preview') + 1])
 

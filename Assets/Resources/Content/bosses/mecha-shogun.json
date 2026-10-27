@@ -1,0 +1,296 @@
+{
+  "id": "mecha-shogun",
+  "behavior": "walker",
+  "name": "MÉCHA SHOGUN",
+  "intro": "ALERTE : LE MÉCHA SHOGUN SE RÉVEILLE !",
+  "rage": "LE SHOGUN PASSE EN SURCHAUFFE !",
+  "defeat": "SHOGUN HORS SERVICE !",
+  "health": [
+    300,
+    560,
+    800,
+    1100
+  ],
+  "healthPerExtraPlayer": 0.65,
+  "ragePace": 0.72,
+  "rageDelay": 0.35,
+  "firstAttack": 1.2,
+  "smokeSize": 0.9,
+  "flash": true,
+  "shadow": {
+    "x": 4.6,
+    "y": 0.35
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/tokyo/mecha-shogun",
+      "columns": 3,
+      "rows": 2,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.025
+      },
+      "cellHeight": 6.6
+    },
+    "layer": 28,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "walk",
+        "cells": [
+          1,
+          2
+        ],
+        "perStride": 1
+      },
+      {
+        "name": "stomp",
+        "cells": [
+          3
+        ]
+      },
+      {
+        "name": "gatling",
+        "cells": [
+          4
+        ]
+      },
+      {
+        "name": "missiles",
+        "cells": [
+          5
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "gatling",
+        "x": -3.3,
+        "y": 3.53
+      },
+      {
+        "name": "pods",
+        "x": 0.5,
+        "y": 5.1
+      },
+      {
+        "name": "foot",
+        "x": -1.9,
+        "y": 0.2
+      },
+      {
+        "name": "smoke",
+        "x": 0.6,
+        "y": 4.2
+      }
+    ]
+  },
+  "walk": {
+    "speed": [
+      2.1,
+      2.3999999,
+      2.6999998,
+      3
+    ],
+    "stopDistance": 4,
+    "margin": 2.6,
+    "stepLength": 1.3,
+    "stepShake": 0.12,
+    "entry": 2.5,
+    "foot": "foot"
+  },
+  "hitbox": {
+    "x": -0.2,
+    "y": 0.9,
+    "stepX": 0,
+    "stepY": 1.05,
+    "radius": 1.25,
+    "count": 5
+  },
+  "death": {
+    "fall": 0.35,
+    "spin": 7,
+    "spreadX": 2,
+    "spreadY": 1.8,
+    "core": {
+      "x": 0,
+      "y": 3
+    },
+    "spinWithFacing": true
+  },
+  "missile": {
+    "texture": "Art/macron-helicopter",
+    "x": 0.323,
+    "y": 0.291,
+    "width": 0.244,
+    "height": 0.115,
+    "size": 1.5128,
+    "hitRadius": 0.35,
+    "tipRadius": 0.28,
+    "hitLength": 0.5,
+    "layer": 46,
+    "outline": [
+      {
+        "x": 0,
+        "y": 0.48
+      },
+      {
+        "x": 0.08,
+        "y": 0.75
+      },
+      {
+        "x": 0.19,
+        "y": 0.89
+      },
+      {
+        "x": 0.76,
+        "y": 0.89
+      },
+      {
+        "x": 0.88,
+        "y": 0.99
+      },
+      {
+        "x": 0.99,
+        "y": 0.99
+      },
+      {
+        "x": 0.99,
+        "y": 0.72
+      },
+      {
+        "x": 0.93,
+        "y": 0.49
+      },
+      {
+        "x": 0.99,
+        "y": 0.26
+      },
+      {
+        "x": 0.99,
+        "y": 0.03
+      },
+      {
+        "x": 0.88,
+        "y": 0.03
+      },
+      {
+        "x": 0.77,
+        "y": 0.12
+      },
+      {
+        "x": 0.18,
+        "y": 0.1
+      },
+      {
+        "x": 0.07,
+        "y": 0.28
+      }
+    ]
+  },
+  "attacks": [
+    {
+      "type": "gun",
+      "announce": "GATLING EN BALAYAGE : BOUGEZ !",
+      "aimState": "gatling",
+      "state": "gatling",
+      "aimTime": [
+        0.75,
+        0.65999997,
+        0.57,
+        0.48
+      ],
+      "duration": 1.6,
+      "interval": [
+        0.14,
+        0.118,
+        0.096,
+        0.074
+      ],
+      "speed": [
+        13,
+        17.8,
+        19.6,
+        21.4
+      ],
+      "sweep": 1.8,
+      "sweepRate": 4.2,
+      "aimHeight": 0.9,
+      "sightWidth": 4.8,
+      "muzzles": [
+        "gatling"
+      ],
+      "sound": "Audio/Sfx/tir-C-blaster-cps1",
+      "damage": 1,
+      "cooldown": 1.5,
+      "rageCooldown": 0.9
+    },
+    {
+      "type": "stomp",
+      "announce": "ONDE DE CHOC : SAUTEZ !",
+      "state": "stomp",
+      "recoverState": "idle",
+      "windup": 0.65,
+      "repeat": 1,
+      "rageRepeat": 2,
+      "repeatWindup": 0.4,
+      "recover": 0.45,
+      "speed": [
+        8.5,
+        9.5,
+        10.5,
+        11.5
+      ],
+      "waveReach": 0.55,
+      "waveHeight": 0.6,
+      "damage": 1,
+      "shake": 0.45,
+      "foot": "foot",
+      "cooldown": 1.5,
+      "rageCooldown": 0.9
+    },
+    {
+      "type": "bombs",
+      "announce": "MISSILES : ESQUIVEZ OU DÉTRUISEZ-LES !",
+      "count": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "rageExtra": 1,
+      "spacing": 2.6,
+      "duration": 1.1,
+      "launch": 0.3,
+      "delay": [
+        0.55,
+        0.51,
+        0.47000003,
+        0.43
+      ],
+      "stagger": 0.1,
+      "flight": [
+        0.95,
+        0.87,
+        0.78999996,
+        0.71
+      ],
+      "arc": 4.5,
+      "blastRadius": 1.45,
+      "blastHeight": 1,
+      "damage": 1,
+      "marker": 2.8,
+      "rack": "pods",
+      "cooldown": 1.5,
+      "state": "missiles",
+      "sound": "Audio/Sfx/roquette-depart",
+      "smoke": true,
+      "rageCooldown": 0.9
+    }
+  ]
+}

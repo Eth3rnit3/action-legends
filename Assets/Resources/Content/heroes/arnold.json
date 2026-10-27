@@ -1,0 +1,89 @@
+{
+  "id": "arnold",
+  "order": 1,
+  "name": "ARNOLD",
+  "shortName": "ARNOLD",
+  "role": "LE COLOSSE",
+  "specialName": "Rafale lourde",
+  "speed": 9.8,
+  "fireRate": 0.065,
+  "damage": 5,
+  "jump": 11,
+  "recoilShake": 0.07,
+  "strideRate": 13,
+  "bob": 0.045,
+  "special": {
+    "type": "volley",
+    "cooldown": 5,
+    "cooldownPerDifficulty": 1,
+    "shots": 7,
+    "speed": 26,
+    "spread": 0.8,
+    "damage": 4,
+    "explosive": true
+  },
+  "portraitCell": 4,
+  "animations": {
+    "sheet": {
+      "texture": "Art/heroes",
+      "columns": 4,
+      "rows": 4,
+      "cropLeft": 0.065,
+      "cropRight": 0.025,
+      "pivot": {
+        "x": 0.4,
+        "y": 0.045
+      },
+      "cellHeight": 2.2777777
+    },
+    "layer": 30,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          4
+        ]
+      },
+      {
+        "name": "run",
+        "cells": [
+          5,
+          6
+        ],
+        "perStride": 0.7
+      },
+      {
+        "name": "jump",
+        "cells": [
+          7
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "muzzle",
+        "cell": 4,
+        "x": 1.36,
+        "y": 1.31
+      },
+      {
+        "name": "muzzle",
+        "cell": 5,
+        "x": 1.36,
+        "y": 1.24
+      },
+      {
+        "name": "muzzle",
+        "cell": 6,
+        "x": 1.36,
+        "y": 1.14
+      },
+      {
+        "name": "muzzle",
+        "cell": 7,
+        "x": 1.32,
+        "y": 1.46
+      }
+    ]
+  }
+}

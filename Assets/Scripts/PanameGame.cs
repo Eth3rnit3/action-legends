@@ -8,20 +8,10 @@ namespace Paname
 {
     public sealed partial class PanameGame : MonoBehaviour
     {
-        public static readonly string[] HeroNames={"CHUCK NORRIS","ARNOLD","JEAN-CLAUDE","SYLVESTER"};
-        public static readonly string[] HeroRoles={"LE RANGER","LE COLOSSE","LE VOLTIGEUR","LE COMMANDO"};
-        public static readonly string[] HeroSpecials={"Coup circulaire","Rafale lourde","Double coup sauté","Salve explosive"};
+        // Heroes come from Resources/Content/heroes; replays and online play store their position in this list.
+        public static HeroDefinition[] Heroes=>ContentLibrary.Heroes;
+        public static int HeroCount=>Heroes.Length;
         public static readonly Color[] PlayerColors={C("F5BD56"),C("59CCBA"),C("F98A72"),C("A7AFF5")};
-        static readonly float[] Speed={10.5f,9.8f,11.5f,10.7f}, Rate={.095f,.065f,.085f,.10f};
-        // Barrel tip of each hero (row) in each frame (idle, stride A, stride B, jump), from the feet, facing right.
-        // Measured on Art/heroes.png by tools/art/measure_muzzles.py: rerun it whenever that sheet changes.
-        static readonly Vector2[,] HeroMuzzles={
-            {new Vector2(1.25f,1.32f),new Vector2(1.30f,1.29f),new Vector2(1.36f,1.21f),new Vector2(1.29f,1.41f)},
-            {new Vector2(1.36f,1.31f),new Vector2(1.36f,1.24f),new Vector2(1.36f,1.14f),new Vector2(1.32f,1.46f)},
-            {new Vector2(1.28f,1.39f),new Vector2(1.28f,1.28f),new Vector2(1.36f,1.28f),new Vector2(1.30f,1.51f)},
-            {new Vector2(1.21f,1.40f),new Vector2(1.36f,1.37f),new Vector2(1.36f,1.33f),new Vector2(1.28f,1.37f)}};
-        // Barrel tip of the procedural fallback actor drawn by PanameArt.Actor.
-        static readonly Vector2 FallbackMuzzle=new Vector2(1.15f,1.17f);
         public readonly LocalSlot[] slots={new LocalSlot{joined=true},new LocalSlot{hero=1},new LocalSlot{hero=2},new LocalSlot{hero=3}};
         public enum Phase { Lobby, Playing, Paused, Won, Lost }
         public Phase phase=Phase.Lobby;
@@ -44,8 +34,7 @@ namespace Paname
         {
             missionIndex=Mod(index,missions.Length);
             if(world){world.gameObject.SetActive(false);Destroy(world.gameObject);}
-            world=new GameObject("Décor de mission").transform;world.SetParent(transform,false);Street(world,CurrentMission.backgrounds,CurrentMission.length,CurrentMission.ground);
-            enemySheet=Resources.Load<Texture2D>(CurrentMission.enemySheet);
+            world=new GameObject("Décor de mission").transform;world.SetParent(transform,false);Street(world,CurrentMission.map,CurrentMission.length);
             cameraX=CurrentMission.cameraMin;LoadMissionMusic();BuildLobbyActors();
         }
         public int Score {get;private set;}
@@ -78,14 +67,15 @@ namespace Paname
         public sealed class Player
         {
             public Vector2 position; public float vertical,fireTimer,specialTimer,invulnerable,downTimer,walk,recoil,flash,dust;
-            public int weapon,ammo; public float boost;
-            public int hp=6,hero,facing=1; public bool moving,aimUp; public Transform root,leftLeg,rightLeg; public SpriteRenderer illustrated; public SpriteRenderer[] renderers;
+            public int weapon,ammo,animState=-1; public float boost,animTime;
+            public int hp=6,hero,facing=1; public bool moving,aimUp; public Transform root; public SpriteRenderer illustrated; public SpriteRenderer[] renderers;
+            public HeroDefinition Definition=>Heroes[hero];
         }
         sealed class Enemy
         {
-            public Vector2 position; public int hp,kind,facing=-1,burst; public float attackTimer,attackPose,walk,flash,stagger,knockback,windup,burstTimer;
-            public MissionEnemy type; public EnemyRole Role=>type.kind;
-            public Transform root,leftLeg,rightLeg; public SpriteRenderer illustrated;
+            public Vector2 position; public int hp,kind,facing=-1,burst,animState=-1; public float attackTimer,attackPose,walk,flash,stagger,knockback,windup,burstTimer,animTime;
+            public EnemyDefinition type; public string Role=>type.id;
+            public Transform root; public SpriteRenderer illustrated;
         }
         enum ShotLook { Tracer, Molotov, Bullet }
         sealed class Shot
@@ -98,17 +88,17 @@ namespace Paname
         {
             Application.targetFrameRate=60;
             flashProperties=new MaterialPropertyBlock();
-            missions=LevelCatalog.LoadAll();cameraX=CurrentMission.cameraMin;enemySheet=Resources.Load<Texture2D>(CurrentMission.enemySheet);
+            missions=LevelCatalog.LoadAll();cameraX=CurrentMission.cameraMin;
             font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             if(!gameCamera) {var go=new GameObject("Main Camera");gameCamera=go.AddComponent<Camera>();go.tag="MainCamera";}
             gameCamera.orthographic=true; gameCamera.orthographicSize=ViewHalfHeight; gameCamera.backgroundColor=C("C6DFD9"); gameCamera.transform.position=new Vector3(cameraX,3.6f,-10);
-            world=new GameObject("Décor de mission").transform; world.SetParent(transform,false); Street(world,CurrentMission.backgrounds,CurrentMission.length,CurrentMission.ground);
+            world=new GameObject("Décor de mission").transform; world.SetParent(transform,false); Street(world,CurrentMission.map,CurrentMission.length);
             actors=new GameObject("Acteurs et effets").transform;actors.SetParent(transform,false);
             audioOut=gameObject.AddComponent<AudioSource>();audioOut.volume=.2f;
             projectileRoot=new GameObject("Projectiles • pool").transform;projectileRoot.SetParent(transform,false);
             effects=new ArcadeEffects(transform);
-            for(int row=0;row<4;row++)for(int frame=0;frame<4;frame++)Frame(false,row,frame);
-            foreach(var mission in missions){var sheet=Resources.Load<Texture2D>(mission.enemySheet);foreach(var enemy in mission.enemies)for(int frame=0;frame<4;frame++)EnemyFrame(sheet,enemy.row,frame);}
+            foreach(var hero in Heroes)hero.animations.Prewarm();
+            foreach(var mission in missions)foreach(var enemy in mission.roster)enemy.animations.Prewarm();
             for(int row=0;row<4;row++)for(int frame=0;frame<6;frame++)ArcadeEffects.Frame(row,frame);
             LoadSoundtrack();BuildLobbyActors();
         }
@@ -126,10 +116,9 @@ namespace Paname
         }
         void SpawnPlayer(int i,float x)
         {
-            var p=new Player{position=new Vector2(x,0),hero=slots[i].hero,hp=MaxPlayerHealth,invulnerable=2};
-            p.root=Actor(actors,p.hero,PlayerColors[i]);p.root.name="J"+(i+1)+" • "+HeroNames[p.hero];
-            p.illustrated=p.root.Find("Illustration")?.GetComponent<SpriteRenderer>();
-            p.leftLeg=p.root.Find("Jambe arrière");p.rightLeg=p.root.Find("Jambe avant");
+            var p=new Player{position=new Vector2(x,0),hero=Mod(slots[i].hero,HeroCount),hp=MaxPlayerHealth,invulnerable=2};var hero=p.Definition;
+            p.root=Actor(actors,hero.animations,hero.animations.states[hero.idle].cells[0],PlayerColors[i],true);p.root.name="J"+(i+1)+" • "+hero.name;
+            p.illustrated=p.root.Find("Illustration").GetComponent<SpriteRenderer>();
             p.renderers=p.root.GetComponentsInChildren<SpriteRenderer>();players[i]=p;SyncPlayer(i);
         }
         public void BeginRound()
@@ -144,7 +133,7 @@ namespace Paname
         public void SelectHero(int playerSlot,int hero)
         {
             if(OnlineHero(hero)||phase!=Phase.Lobby||playerSlot<0||playerSlot>=4||!slots[playerSlot].joined)return;
-            slots[playerSlot].hero=Mathf.Clamp(hero,0,3);BuildLobbyActors();Sound(selectClip);
+            slots[playerSlot].hero=Mathf.Clamp(hero,0,HeroCount-1);BuildLobbyActors();Sound(selectClip);
         }
         void Update()
         {
@@ -205,7 +194,7 @@ namespace Paname
         }
         void ChangeHero(int slot,int direction)
         {
-            slots[slot].hero=(slots[slot].hero+direction+4)%4;BuildLobbyActors();
+            slots[slot].hero=Mod(slots[slot].hero+direction,HeroCount);BuildLobbyActors();
         }
         public Vector2 GetPlayerPosition(int slot)=>players[slot]?.position??Vector2.zero;
         public int GetPlayerHealth(int slot)=>players[slot]?.hp??0;
@@ -229,10 +218,11 @@ namespace Paname
                 }
                 PlayerCommand input=i<commands.Length?commands[i]:default;
                 float move=Mathf.Clamp(input.move,-1,1);p.moving=Mathf.Abs(move)>.1f;if(Mathf.Abs(move)>.1f)p.facing=move>0?1:-1;
-                p.position.x+=move*Speed[p.hero]*(p.boost>0?1.35f:1)*dt;p.walk+=Mathf.Abs(move)*dt*13;
+                var hero=p.Definition;p.position.x+=move*hero.speed*(p.boost>0?1.35f:1)*dt;p.walk+=Mathf.Abs(move)*dt*hero.strideRate;
                 p.position.x=Mathf.Clamp(p.position.x,rear,BossActive?bossArenaX+ArenaHalfWidth-1:screenLocked?lockX+SimHalfWidth-1:CurrentMission.length);p.aimUp=input.aimUp;
-                if(input.jump&&p.position.y<=.001f)p.vertical=p.hero==2?12.8f:11;
+                if(input.jump&&p.position.y<=.001f)p.vertical=hero.jump;
                 p.vertical-=29*dt;p.position.y+=p.vertical*dt;if(p.position.y<0){p.position.y=0;p.vertical=0;}
+                AnimateHero(p,dt);
                 if(input.fire&&p.fireTimer<=0)FirePlayer(p);
                 if(input.special&&p.specialTimer<=0)Special(p);
                 if(p.moving&&p.position.y<.03f&&p.dust<=0){effects.Play(3,p.position+new Vector2(-p.facing*.28f,.1f),.42f,.3f,1,new Vector2(-p.facing*.18f,.2f));p.dust=.19f;}
@@ -244,43 +234,40 @@ namespace Paname
         }
         void Special(Player p)
         {
-            p.specialTimer=5+DifficultyIndex;shake=.35f;Sound(explosionClips);
-            if(p.hero==0||p.hero==2)
+            var s=p.Definition.special;p.specialTimer=s.cooldown+DifficultyIndex*s.cooldownPerDifficulty;shake=.35f;Sound(explosionClips);
+            if(p.Definition.blast)
             {
                 effects.Play(1,p.position+new Vector2(p.facing*.7f,1),2.8f,.25f,p.facing);
                 effects.Play(3,p.position+Vector2.up*.3f,1.8f,.4f);
-                float radius=p.hero==0?4:3.2f;
-                for(int e=enemies.Count-1;e>=0;e--)if(Vector2.Distance(p.position,enemies[e].position)<radius)HitEnemy(e,8,p.facing);
-                if(BossActive&&Vector2.Distance(p.position+Vector2.up,bossPosition)<radius+1)DamageBoss(24);
-                p.invulnerable=1;if(p.hero==2)p.vertical=12.8f;
+                for(int e=enemies.Count-1;e>=0;e--)if(Vector2.Distance(p.position,enemies[e].position)<s.radius)HitEnemy(e,s.damage,p.facing);
+                if(BossActive&&Vector2.Distance(p.position+Vector2.up,bossPosition)<s.radius+s.bossReach)DamageBoss(s.bossDamage);
+                p.invulnerable=s.invulnerable;if(s.leap>0)p.vertical=s.leap;
             }
             else
             {
                 Vector2 aim=AimDirection(p),side=new Vector2(-aim.y,aim.x),muzzle=MuzzlePoint(p);
-                for(int j=-3;j<=3;j++)Shoot(ShotLook.Tracer,muzzle,aim*(p.hero==1?26:19)+side*j*(p.hero==1?.8f:2),p.hero==1?4:5,true);
+                for(int j=0;j<s.shots;j++)Shoot(ShotLook.Tracer,muzzle,aim*s.speed+side*(j-(s.shots-1)*.5f)*s.spread,s.damage,s.explosive);
                 effects.Muzzle(muzzle,aim,true);
             }
         }
-        static int HeroFrame(Player p)=>p.position.y>.1f?3:p.moving?1+((int)(p.walk*.7f)%2):0;
-        static float StrideBob(Player p)=>p.moving&&p.position.y<.1f?Mathf.Abs(Mathf.Sin(p.walk))*.045f:0;
+        // The hero's state follows the simulation, and so does the gun drawn in it: shots leave from the cell being shown.
+        static int HeroState(Player p){var h=p.Definition;return p.position.y>.1f?h.jumping:p.moving?h.run:h.idle;}
+        static void AnimateHero(Player p,float dt){int state=HeroState(p);if(state!=p.animState){p.animState=state;p.animTime=0;}else p.animTime+=dt;}
+        static int HeroCell(Player p)=>p.Definition.animations.Cell(p.animState<0?HeroState(p):p.animState,p.animTime,p.walk);
+        static float StrideBob(Player p)=>p.moving&&p.position.y<.1f?Mathf.Abs(Mathf.Sin(p.walk))*p.Definition.bob:0;
         // Where shots leave the gun drawn in the current frame, so tracers and flashes start at the barrel.
         static Vector2 MuzzlePoint(Player p)
         {
-            var tip=p.illustrated?HeroMuzzles[p.hero,HeroFrame(p)]:FallbackMuzzle;
+            var tip=p.Definition.muzzles[HeroCell(p)];
             return p.position+new Vector2(tip.x*p.facing,tip.y+StrideBob(p));
         }
         void SyncPlayer(int i)
         {
             var p=players[i];if(p==null||!p.root)return;
             p.root.position=p.position;p.root.localScale=new Vector3(p.facing,1,1);
-            if(p.illustrated)
-            {
-                p.illustrated.sprite=Frame(false,p.hero,HeroFrame(p));
-                p.illustrated.transform.localPosition=new Vector3(0,StrideBob(p),0);
-                ArcadeEffects.HitFlash(p.illustrated,p.flash>0?1:0,flashProperties);
-            }
-            if(p.leftLeg)p.leftLeg.localRotation=Quaternion.Euler(0,0,Mathf.Sin(p.walk)*16);
-            if(p.rightLeg)p.rightLeg.localRotation=Quaternion.Euler(0,0,-Mathf.Sin(p.walk)*16);
+            p.illustrated.sprite=p.Definition.animations.Sprite(HeroCell(p));
+            p.illustrated.transform.localPosition=new Vector3(0,StrideBob(p),0);
+            ArcadeEffects.HitFlash(p.illustrated,p.flash>0?1:0,flashProperties);
             float alpha=p.invulnerable>0&&Mathf.Sin(SimulationTime*35)>0?.45f:1;
             foreach(var r in p.renderers){var c=r.color;c.a=alpha;r.color=c;}
         }
@@ -300,8 +287,8 @@ namespace Paname
             {
                 // A locked wave enters from the edges of the screen; a free one appears around the leading hero.
                 float x=Mathf.Clamp(screenLocked?lockX+(pending%5==0?-SimHalfWidth-1.5f:SimHalfWidth+1.5f+(pending%3)*1.3f):LeaderX()+(pending%5==0?-6.5f:9+(pending%3)*1.3f),.5f,CurrentMission.length);
-                // From Arcade up, every fourth enemy is the mission's type 1.
-                SpawnEnemy(x,DifficultyIndex>0&&pending%4==0&&CurrentMission.enemies.Length>1?1:wave.enemyPattern[pending%wave.enemyPattern.Length]);pending--;spawnTimer=wave.spawnInterval*AttackFactors[DifficultyIndex];
+                var extra=CurrentMission.extraEnemy;
+                SpawnEnemy(x,extra.enemy>=0&&DifficultyIndex>=extra.fromDifficulty&&pending%extra.every==0?extra.enemy:wave.enemyPattern[pending%wave.enemyPattern.Length]);pending--;spawnTimer=wave.spawnInterval*AttackFactors[DifficultyIndex];
             }
             // A free wave is over once it has all appeared; a locked one when its last enemy falls.
             if(pending==0&&(!screenLocked||enemies.Count==0))
@@ -310,14 +297,11 @@ namespace Paname
                 Announce(Wave==CurrentMission.waves.Length?"PASSAGE LIBRE  »  "+CurrentMission.exitLabel+" !":"CONTINUEZ !  »");Score+=500;
             }
         }
-        // Per role: health, walking speed, distance kept from the target, firing range, aim time and cooldown.
-        static readonly float[] RoleHealth={2,3,6,3,4,7},RoleSpeed={5.8f,3.6f,3.3f,4.6f,3.8f,3f},RoleDistance={.6f,5,.6f,6,7.5f,3.2f};
-        static readonly float[] RoleRange={0,10,0,11,12,6},RoleAim={0,0,0,.42f,.5f,.55f},RoleCooldown={0,1.65f,0,1.7f,2.5f,2.3f};
         void SpawnEnemy(float x,int kind)
         {
-            var type=CurrentMission.enemies[kind];int role=(int)type.kind;
-            var e=new Enemy{position=new Vector2(x,0),kind=kind,type=type,hp=Mathf.CeilToInt(RoleHealth[role]*HealthFactors[DifficultyIndex]),attackTimer=type.Armed?1:.7f};
-            e.root=Actor(actors,0,Coral,true,type.row,enemySheet);e.illustrated=e.root.Find("Illustration")?.GetComponent<SpriteRenderer>();e.root.position=e.position;e.leftLeg=e.root.Find("Jambe arrière");e.rightLeg=e.root.Find("Jambe avant");enemies.Add(e);
+            var type=CurrentMission.roster[kind];
+            var e=new Enemy{position=new Vector2(x,0),kind=kind,type=type,hp=Mathf.CeilToInt(type.health*HealthFactors[DifficultyIndex]),attackTimer=type.firstAttack};
+            e.root=Actor(actors,type.animations,type.animations.states[type.idle].cells[0],Coral,false);e.illustrated=e.root.Find("Illustration").GetComponent<SpriteRenderer>();e.root.position=e.position;enemies.Add(e);
             effects.Play(3,e.position+Vector2.up*.12f,.6f,.3f);
         }
         void UpdateEnemies(float dt)
@@ -332,27 +316,30 @@ namespace Paname
                 e.flash=Mathf.Max(0,e.flash-dt);e.stagger=Mathf.Max(0,e.stagger-dt);
                 float lastX=e.position.x;
                 e.position.x=Mathf.Clamp(e.position.x+e.knockback*dt,.2f,CurrentMission.length+1);e.knockback=Mathf.Lerp(e.knockback,0,Mathf.Min(1,dt*14));
-                int role=(int)e.Role;bool shooting=e.windup>0||e.burst>0;
+                var type=e.type;bool shooting=e.windup>0||e.burst>0;
                 // A gunman keeps the direction it aimed in until its shots are fired, so players can get behind it.
                 if(!shooting)e.facing=target.position.x>=e.position.x?1:-1;
                 e.attackTimer-=dt;e.attackPose=Mathf.Max(0,e.attackPose-dt);
                 // An enemy holds its strike, throw or aim pose briefly instead of running through it.
-                bool walking=best>RoleDistance[role]&&e.stagger<=0&&e.attackPose<=0&&!shooting;
-                if(walking){e.position.x+=e.facing*RoleSpeed[role]*SpeedFactors[DifficultyIndex]*dt;e.walk+=dt*11;}
+                bool walking=best>type.keepDistance&&e.stagger<=0&&e.attackPose<=0&&!shooting;
+                if(walking){e.position.x+=e.facing*type.speed*SpeedFactors[DifficultyIndex]*dt;e.walk+=dt*type.strideRate;}
                 // While the screen is locked, an enemy that has walked in stays in view, so none is left to hunt off screen.
                 if(screenLocked&&Mathf.Abs(lastX-lockX)<=SimHalfWidth-.6f)e.position.x=Mathf.Clamp(e.position.x,lockX-SimHalfWidth+.6f,lockX+SimHalfWidth-.6f);
-                if(e.type.Armed&&e.stagger<=0)TickGunman(e,best,dt);
-                if(e.Role==EnemyRole.Thrower&&best<RoleRange[role]&&e.attackTimer<=0&&e.stagger<=0)
+                if(type.Armed&&e.stagger<=0)TickGunman(e,best,dt);
+                var t=type.@throw;
+                if(type.kind==EnemyBehavior.Thrower&&best<t.range&&e.attackTimer<=0&&e.stagger<=0)
                 {
-                    var hand=e.position+new Vector2(e.facing*MolotovRelease.x,MolotovRelease.y);
-                    Shoot(ShotLook.Molotov,hand,(target.position+Vector2.up-hand).normalized*(8+DifficultyIndex*2),1);
-                    e.attackTimer=RoleCooldown[role]*AttackFactors[DifficultyIndex];e.attackPose=AttackPoseTime;
+                    var hand=e.position+new Vector2(e.facing*type.hand.x,type.hand.y);
+                    Shoot(Look(t.projectile),hand,(target.position+Vector2.up*t.aimHeight-hand).normalized*t.speed[DifficultyIndex],t.damage);
+                    e.attackTimer=t.cooldown*AttackFactors[DifficultyIndex];e.attackPose=type.attackPose;
                 }
-                if(!e.type.Armed&&best<.9f&&target.position.y<1.35f&&e.attackTimer<=0&&e.stagger<=0){Damage(target,1);e.attackTimer=AttackFactors[DifficultyIndex];e.attackPose=AttackPoseTime;}
+                var m=type.melee;
+                if(!type.Armed&&best<m.reach&&target.position.y<m.height&&e.attackTimer<=0&&e.stagger<=0){Damage(target,m.damage);e.attackTimer=m.cooldown*AttackFactors[DifficultyIndex];e.attackPose=type.attackPose;}
                 e.root.position=e.position;e.root.localScale=new Vector3(e.facing,1,1);
-                if(e.illustrated){int frame=e.attackPose>0||e.windup>0||e.burst>0?3:walking?1+((int)(e.walk*.7f)%2):0;e.illustrated.sprite=EnemyFrame(enemySheet,e.type.row,frame);ArcadeEffects.HitFlash(e.illustrated,e.flash>0?1:0,flashProperties);e.illustrated.transform.localRotation=Quaternion.Euler(0,0,e.stagger>0?-7:0);}
-                if(e.leftLeg)e.leftLeg.localRotation=Quaternion.Euler(0,0,Mathf.Sin(e.walk)*18);
-                if(e.rightLeg)e.rightLeg.localRotation=Quaternion.Euler(0,0,-Mathf.Sin(e.walk)*18);
+                // Aim, then attack poses win over a hit reaction, then the run and idle cycles.
+                var set=type.animations;int state=e.windup>0?type.aim:e.attackPose>0||e.burst>0?type.attack:e.stagger>0&&type.hurt>=0?type.hurt:walking?type.run:type.idle;
+                if(state!=e.animState){e.animState=state;e.animTime=0;}else e.animTime+=dt;
+                e.illustrated.sprite=set.Sprite(set.Cell(state,e.animTime,e.walk));ArcadeEffects.HitFlash(e.illustrated,e.flash>0?1:0,flashProperties);e.illustrated.transform.localRotation=Quaternion.Euler(0,0,e.stagger>0?-7:0);
             }
         }
         // Gunmen aim, freeze in their shooting frame, then fire level at chest height: jumping dodges it.
@@ -361,35 +348,31 @@ namespace Paname
             if(e.windup>0)
             {
                 e.windup-=dt;
-                if(e.windup<=0){e.burst=e.Role==EnemyRole.Smg?3:1;e.burstTimer=0;}
+                if(e.windup<=0){e.burst=e.type.gun.burst;e.burstTimer=0;}
                 return;
             }
             if(e.burst>0)
             {
                 e.burstTimer-=dt;if(e.burstTimer>0)return;
-                Vector2 muzzle=e.position+new Vector2(e.type.muzzle.x*e.facing,e.type.muzzle.y),aim=new Vector2(e.facing,0);
-                if(e.Role==EnemyRole.Shotgun)
-                {
-                    // The shotgun is held above chest height: the spread fans downward so every pellet can reach a standing hero.
-                    for(int j=0;j<3;j++){var pellet=Shoot(ShotLook.Bullet,muzzle,(Vector2)(Quaternion.Euler(0,0,-(3+j*5)*e.facing)*aim)*(13+DifficultyIndex),1);if(pellet!=null)pellet.life=.45f;}
-                    shake=Mathf.Max(shake,.08f);
-                }
-                else Shoot(ShotLook.Bullet,muzzle,aim*(e.Role==EnemyRole.Smg?12+DifficultyIndex*1.4f:11+DifficultyIndex*1.5f),1);
-                effects.Muzzle(muzzle,aim,e.Role==EnemyRole.Shotgun);Sound(e.Role==EnemyRole.Smg?machineGunClip:pistolClip);
-                e.burst--;e.burstTimer=.11f;e.attackPose=.25f;
-                if(e.burst==0)e.attackTimer=RoleCooldown[(int)e.Role]*AttackFactors[DifficultyIndex];
+                var g=e.type.gun;Vector2 muzzle=e.position+new Vector2(e.type.muzzle.x*e.facing,e.type.muzzle.y),aim=new Vector2(e.facing,0);float speed=g.speed[DifficultyIndex];
+                // Several pellets fan out from spread degrees by spreadStep; a positive spread fans downward, so a gun held
+                // above chest height still reaches a standing hero.
+                if(g.pellets>1)for(int j=0;j<g.pellets;j++){var pellet=Shoot(Look(g.projectile),muzzle,(Vector2)(Quaternion.Euler(0,0,-(g.spread+j*g.spreadStep)*e.facing)*aim)*speed,g.damage);if(pellet!=null)pellet.life=g.life;}
+                else{var bullet=Shoot(Look(g.projectile),muzzle,aim*speed,g.damage);if(bullet!=null)bullet.life=g.life;}
+                shake=Mathf.Max(shake,g.shake);
+                effects.Muzzle(muzzle,aim,g.heavyFlash);Sound(g.clip?g.clip:(g.clip=Resources.Load<AudioClip>(g.sound)));
+                e.burst--;e.burstTimer=g.burstInterval;e.attackPose=g.pose;
+                if(e.burst==0)e.attackTimer=g.cooldown*AttackFactors[DifficultyIndex];
                 return;
             }
-            if(best<RoleRange[(int)e.Role]&&e.attackTimer<=0)e.windup=RoleAim[(int)e.Role]*(1-DifficultyIndex*.08f);
+            if(best<e.type.gun.range&&e.attackTimer<=0)e.windup=e.type.gun.aimTime*(1-DifficultyIndex*.08f);
         }
         void Damage(Player p,int amount)
         {
             if(bossDefeated||p.invulnerable>0||p.hp<=0)return;p.hp-=amount*(DifficultyIndex==3?2:1);p.invulnerable=DifficultyIndex==0?1.2f:DifficultyIndex==1?.75f:DifficultyIndex==2?.6f:.45f;p.flash=.075f;shake=.15f;effects.Impact(p.position+Vector2.up,-p.facing);Sound(playerHitClip);
             if(p.hp<=0){p.downTimer=2.5f;p.root.gameObject.SetActive(false);}
         }
-        // The bottle leaves the hand raised behind the head in the thrower's strike pose (facing right).
-        static readonly Vector2 MolotovRelease=new Vector2(-.62f,1.9f);
-        const float AttackPoseTime=.3f;
+        static ShotLook Look(string look)=>look=="molotov"?ShotLook.Molotov:look=="tracer"?ShotLook.Tracer:ShotLook.Bullet;
         // Projectiles only fly and collide; callers add the matching muzzle flash.
         Shot Shoot(ShotLook look,Vector2 pos,Vector2 velocity,int damage,bool heavy=false)
         {
@@ -422,7 +405,7 @@ namespace Paname
                     foreach(var p in players)if(p!=null&&p.hp>0&&SegmentDistance(before,s.position,p.position+Vector2.up)<.53f){Damage(p,s.damage);hit=true;break;}
                 }
                 else if(HitBossOrBomb(before,s.position,s.damage))hit=true;
-                else for(int e=0;e<enemies.Count;e++)if(SegmentDistance(before,s.position,enemies[e].position+Vector2.up)<(enemies[e].type.Heavy?.68f:.5f)){
+                else for(int e=0;e<enemies.Count;e++)if(SegmentDistance(before,s.position,enemies[e].position+Vector2.up)<enemies[e].type.hitRadius){
                     if(s.explosive){Vector2 blast=enemies[e].position+Vector2.up;for(int k=enemies.Count-1;k>=0;k--)if(Vector2.Distance(enemies[k].position+Vector2.up,blast)<2.5f)HitEnemy(k,s.damage,s.velocity.x>=0?1:-1,true);}
                     else HitEnemy(e,s.damage,s.velocity.x>=0?1:-1,false);
                     hit=true;break;
@@ -432,16 +415,17 @@ namespace Paname
         }
         void HitEnemy(int index,int damage,int direction=1,bool explosive=false)
         {
-            var e=enemies[index];e.hp-=damage;e.flash=.065f;e.stagger=.11f;e.knockback=direction*(e.type.Heavy?1.2f:3.5f);
-            effects.Impact(e.position+Vector2.up*1.1f,direction,e.type.Heavy,explosive);
-            if(e.illustrated)ArcadeEffects.HitFlash(e.illustrated,1,flashProperties);
+            var e=enemies[index];e.hp-=damage;e.flash=.065f;e.stagger=.11f;e.knockback=direction*e.type.knockback;
+            effects.Impact(e.position+Vector2.up*1.1f,direction,e.type.armored,explosive);
+            ArcadeEffects.HitFlash(e.illustrated,1,flashProperties);
             Sound(explosive?explosionClips:impactClips);shake=Mathf.Max(shake,explosive?.3f:.055f);
             if(e.hp<=0)
             {
-                RecordKill(e.position);if(e.type.Heavy)Score+=50;
+                RecordKill(e.position);Score+=e.type.bonusScore;
                 effects.Play(3,e.position+Vector2.up*.65f,1.5f,.5f,1,new Vector2(direction*.5f,.6f));
-                if(e.type.Heavy)effects.Play(1,e.position+Vector2.up*.8f,1.5f,.22f);
-                if(e.illustrated)effects.Defeat(e.illustrated,direction);
+                if(e.type.armored)effects.Play(1,e.position+Vector2.up*.8f,1.5f,.22f);
+                var death=e.type.death>=0?e.type.animations.states[e.type.death]:null;
+                effects.Defeat(e.illustrated,direction,death==null?null:Array.ConvertAll(death.cells,c=>e.type.animations.Sprite(c)),death?.fps??0);
                 e.root.gameObject.SetActive(false);Destroy(e.root.gameObject);enemies.RemoveAt(index);
             }
         }
@@ -483,25 +467,13 @@ namespace Paname
             bool clicked=GUI.Button(rect,text,new GUIStyle(style){normal={background=null,textColor=dark?Ink:Cream},hover={textColor=dark?Ink:Gold},active={textColor=Coral},padding=new RectOffset(6,6,3,3)});
             if(clicked)Sound(selectClip);return clicked;
         }
-        void Portrait(float x,float y,int hero,Color accent,float size=1)
+        // The whole cell of the hero's sheet named by portraitCell.
+        void Portrait(float x,float y,int hero,float size=1)
         {
-            var art=HeroesTexture;
-            if(art)
-            {
-                GUI.DrawTextureWithTexCoords(new Rect(x-11*size,y-13*size,190*size,190*size),art,new Rect(0,(3-hero)*.25f,.25f,.25f));
-                return;
-            }
-            float s=size;
-            Panel(x+26*s,y+107*s,104*s,59*s,hero==2?Cream:hero==0?C("A57B49"):C("3E5954"));
-            Panel(x+49*s,y+32*s,65*s,83*s,C("E3AB7A"));Panel(x+45*s,y+24*s,69*s,23*s,hero==0?C("935434"):C("3F3733"));
-            Panel(x+49*s,y+45*s,11*s,40*s,hero==0?C("935434"):C("3F3733"));
-            Panel(x+91*s,y+66*s,7*s,7*s,Ink);Panel(x+86*s,y+57*s,18*s,4*s,Ink);
-            Panel(x+80*s,y+96*s,24*s,4*s,Ink);Panel(x+29*s,y+117*s,11*s,28*s,accent);
-            if(hero==0)Panel(x+65*s,y+93*s,49*s,22*s,C("935434"));
-            if(hero==1)Panel(x+65*s,y+62*s,49*s,15*s,Ink);
-            if(hero>=2){Panel(x+45*s,y+44*s,69*s,10*s,hero==2?Teal:Coral);Panel(x+26*s,y+47*s,24*s,8*s,hero==2?Teal:Coral);}
+            var h=Heroes[hero];var set=h.animations;var art=set.Texture;if(!art)return;
+            int columns=set.sheet.columns,rows=set.sheet.rows,cell=h.portraitCell;
+            GUI.DrawTextureWithTexCoords(new Rect(x-11*size,y-13*size,190*size,190*size),art,new Rect(cell%columns/(float)columns,(rows-1-cell/columns)/(float)rows,1f/columns,1f/rows));
         }
-        static readonly string[] HeroShortNames={"CHUCK","ARNOLD","JCVD","SYLVESTER"};
         void DrawHUD()
         {
             for(int i=0;i<4;i++)
@@ -509,7 +481,7 @@ namespace Paname
                 var p=players[i];if(!slots[i].joined||p==null)continue;
                 float x=22+i*314;
                 Panel(x,18,264,62,new Color(.035f,.09f,.14f,.76f));Panel(x,18,3,62,PlayerColors[i]);
-                Label(x+12,22,166,22,PlayerTag(i)+"  "+HeroShortNames[p.hero],13,PlayerColors[i],true);
+                Label(x+12,22,166,22,PlayerTag(i)+"  "+p.Definition.shortName,13,PlayerColors[i],true);
                 Label(x+180,23,77,20,p.specialTimer>0?"SPÉCIAL "+Mathf.CeilToInt(p.specialTimer):"SPÉCIAL",11,p.specialTimer<=0?Gold:C("7C929A"),true,TextAnchor.MiddleRight);
                 for(int h=0;h<MaxPlayerHealth;h++)Panel(x+13+h*17,56,11,6,h<p.hp?PlayerColors[i]:C("344A55"));
                 string ammo=p.weapon==0?"FUSIL":(p.weapon==1?"MITRA":p.weapon==2?"TRIPLE":"ROQUETTES")+"  "+p.ammo;

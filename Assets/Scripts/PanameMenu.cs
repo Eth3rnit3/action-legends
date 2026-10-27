@@ -54,7 +54,7 @@ namespace Paname
             }
             int selectedSlot=Online?Mathf.Max(0,LocalSlotIndex):menuPlayer;
             if(!Online&&!slots[selectedSlot].joined){menuPlayer=0;selectedSlot=0;}
-            for(int hero=0;hero<4;hero++)
+            for(int hero=0;hero<HeroCount;hero++)
             {
                 float x=46+hero*298;Color accent=PlayerColors[selectedSlot];bool selected=slots[selectedSlot].hero==hero;
                 var card=new Rect(x,211,286,380);
@@ -62,11 +62,11 @@ namespace Paname
                 IllustratedPanel(card,selected?Color.white:new Color(.8f,.85f,.85f,1));
                 if(selected){Panel(x+14,222,258,28,accent);Label(x+18,222,250,28,PlayerTag(selectedSlot)+"  ·  SÉLECTIONNÉ",13,Ink,true,TextAnchor.MiddleCenter);}
                 else Label(x+20,224,246,28,"CHOISIR CE HÉROS",12,C("A5BBB8"),true,TextAnchor.MiddleCenter);
-                Portrait(x+49,252,hero,accent,1.12f);
-                Label(x+16,450,254,28,HeroNames[hero],21,Cream,true,TextAnchor.MiddleCenter);
-                Label(x+16,478,254,20,HeroRoles[hero],11,selected?accent:C("9AAFB2"),true,TextAnchor.MiddleCenter);
+                Portrait(x+49,252,hero,1.12f);
+                Label(x+16,450,254,28,Heroes[hero].name,21,Cream,true,TextAnchor.MiddleCenter);
+                Label(x+16,478,254,20,Heroes[hero].role,11,selected?accent:C("9AAFB2"),true,TextAnchor.MiddleCenter);
                 Panel(x+18,515,250,44,C("07192A"));
-                Label(x+22,520,242,32,HeroSpecials[hero],13,Cream,false,TextAnchor.MiddleCenter);
+                Label(x+22,520,242,32,Heroes[hero].specialName,13,Cream,false,TextAnchor.MiddleCenter);
             }
             for(int i=0;i<4;i++)if(slots[i].joined)
             {

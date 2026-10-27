@@ -1,0 +1,90 @@
+{
+  "id": "chuck-norris",
+  "order": 0,
+  "name": "CHUCK NORRIS",
+  "shortName": "CHUCK",
+  "role": "LE RANGER",
+  "specialName": "Coup circulaire",
+  "speed": 10.5,
+  "fireRate": 0.095,
+  "damage": 3,
+  "jump": 11,
+  "recoilShake": 0.025,
+  "strideRate": 13,
+  "bob": 0.045,
+  "special": {
+    "type": "blast",
+    "cooldown": 5,
+    "cooldownPerDifficulty": 1,
+    "radius": 4,
+    "damage": 8,
+    "bossDamage": 24,
+    "bossReach": 1,
+    "invulnerable": 1,
+    "leap": 0
+  },
+  "portraitCell": 0,
+  "animations": {
+    "sheet": {
+      "texture": "Art/heroes",
+      "columns": 4,
+      "rows": 4,
+      "cropLeft": 0.065,
+      "cropRight": 0.025,
+      "pivot": {
+        "x": 0.4,
+        "y": 0.045
+      },
+      "cellHeight": 2.2777777
+    },
+    "layer": 30,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "run",
+        "cells": [
+          1,
+          2
+        ],
+        "perStride": 0.7
+      },
+      {
+        "name": "jump",
+        "cells": [
+          3
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "muzzle",
+        "cell": 0,
+        "x": 1.25,
+        "y": 1.32
+      },
+      {
+        "name": "muzzle",
+        "cell": 1,
+        "x": 1.3,
+        "y": 1.29
+      },
+      {
+        "name": "muzzle",
+        "cell": 2,
+        "x": 1.36,
+        "y": 1.21
+      },
+      {
+        "name": "muzzle",
+        "cell": 3,
+        "x": 1.29,
+        "y": 1.41
+      }
+    ]
+  }
+}

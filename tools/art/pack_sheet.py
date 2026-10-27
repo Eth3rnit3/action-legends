@@ -3,7 +3,8 @@
 
 Each frame is cut from its grid cell (largest connected sprite), cleaned of faint alpha, then
 placed in a new grid with its feet on a common baseline and the middle of its legs on the pivot
-column: 40% of the cell for enemies, like PanameArt.Cut expects, the centre for the mecha. Prints the barrel tips the game needs.
+column: 40% of the cell for enemies, as their "sheet" settings in Resources/Content expect (pivot x .4,
+y .045, cropLeft .065), the centre for the mecha. Prints the barrel tips to write as "muzzle" anchors.
 
 usage: pack_sheet.py enemies IN.png OUT.png   (4 x 3 grid -> 4 x 3 cells of 420 x 362)
        pack_sheet.py mecha IN.png OUT.png     (3 x 2 grid -> 3 x 2 cells of 560 x 512)
@@ -65,7 +66,7 @@ def pack(kind, src, dst):
         hx = (legs.min() + legs.max()) / 2
         ox = int(round(col * cw + head * cw - hx))
         oy = int(round(row * ch + ch - feet - 1 - bottom))
-        # PanameArt.Cut drops the left 6.5% of each cell: a wide stance moves right to stay visible.
+        # The enemy sheets crop the left 6.5% of each cell (cropLeft): a wide stance moves right to stay visible.
         margin = int(cw * .07) if kind == "enemies" else 0
         if ox + xs.min() < col * cw + margin:
             print(f"  frame row {row} col {col} moved right by {col * cw + margin - ox - xs.min()} px")

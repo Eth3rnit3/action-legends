@@ -10,9 +10,13 @@ public static class VerifyReplays
     static readonly BindingFlags Flags=BindingFlags.NonPublic|BindingFlags.Instance;
     static object Call(object o,string method,params object[] args)=>o.GetType().GetMethod(method,Flags).Invoke(o,args);
     static void Check(bool ok,string label,List<string> checks){if(!ok)throw new Exception("ÉCHEC : "+label);checks.Add(label);}
+    // Missions by their place among the three this test was written for (Paris 0, Marseille 1, Tokyo 2): Saint-Remy now comes
+    // before Tokyo and has its own VerifySaintRemy. A test mission appended after the catalogue keeps its index.
+    static readonly string[] Three={"panique-a-paname","mistral-gagnant","tokyo-neon"};
+    static int Old(PanameGame game,int m){var all=(MissionDefinition[])game.GetType().GetField("missions",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(game);return m<Three.Length?Array.FindIndex(all,x=>x.id==Three[m]):m;}
     static ReplayRecord Play(PanameGame g,int mission,int difficulty,int[] heroes,int leaveAt)
     {
-        g.ReturnToLobby();Call(g,"LoadMission",mission);g.SetDifficulty(difficulty);
+        g.ReturnToLobby();Call(g,"LoadMission",Old(g,mission));g.SetDifficulty(difficulty);
         for(int i=0;i<4;i++){g.slots[i].joined=heroes[i]>=0;if(heroes[i]>=0)g.slots[i].hero=heroes[i];}
         g.BeginRound();
         var moves=new int[4];var flags=new int[4];var commands=new PlayerCommand[4];
@@ -46,7 +50,7 @@ public static class VerifyReplays
         foreach(var run in new[]{(m:2,d:1,h:new[]{0,-1,-1,-1},leave:-1),(m:0,d:0,h:new[]{1,2,-1,-1},leave:900),(m:1,d:3,h:new[]{3,0,1,2},leave:-1)})
         {
             var record=Play(g,run.m,run.d,run.h,run.leave);
-            string label=missions[run.m].id+" / "+PanameGame.DifficultyNames[run.d]+" / "+(run.h.Length-Array.FindAll(run.h,x=>x<0).Length)+" J";
+            string label=missions[Old(g,run.m)].id+" / "+PanameGame.DifficultyNames[run.d]+" / "+(run.h.Length-Array.FindAll(run.h,x=>x<0).Length)+" J";
             Check(record!=null&&record.ticks>600&&record.score>0,"Partie enregistrée : "+label+" ("+record?.ticks+" pas, "+record?.score+" pts, "+(record!=null&&record.won?"victoire":"défaite")+")",checks);
             sizes.Add(label+" : "+record.runs.Length+" caractères");
             // The recorded run may itself unlock the next mission; verifying it must not.

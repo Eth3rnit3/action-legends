@@ -28,9 +28,13 @@ public static class VerifyLot2b
     static PanameGame g;static PanameGame.Player[] players;static IList enemies,shots,thrown,hostages,pickups,arrivals,carriers;
     static readonly PlayerCommand[] commands=new PlayerCommand[4];
     static MissionDefinition[] original;static FieldInfo missionsField;
+    // Missions by their place among the three this test was written for (Paris 0, Marseille 1, Tokyo 2): Saint-Remy now comes
+    // before Tokyo and has its own VerifySaintRemy. A test mission appended after the catalogue keeps its index.
+    static readonly string[] Three={"panique-a-paname","mistral-gagnant","tokyo-neon"};
+    static int Old(PanameGame game,int m){var all=(MissionDefinition[])game.GetType().GetField("missions",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(game);return m<Three.Length?Array.FindIndex(all,x=>x.id==Three[m]):m;}
     static void Start(int mission,int difficulty,int heroes,int first=0)
     {
-        g.ReturnToLobby();Call(g,"LoadMission",mission);g.SetDifficulty(difficulty);
+        g.ReturnToLobby();Call(g,"LoadMission",Old(g,mission));g.SetDifficulty(difficulty);
         for(int i=0;i<4;i++){g.slots[i].joined=i<heroes;g.slots[i].hero=(first+i)%4;}
         g.BeginRound();players=(PanameGame.Player[])Get(g,"players");enemies=(IList)Get(g,"enemies");shots=(IList)Get(g,"shots");thrown=(IList)Get(g,"thrown");
         hostages=(IList)Get(g,"hostages");pickups=(IList)Get(g,"pickups");arrivals=(IList)Get(g,"arrivals");carriers=(IList)Get(g,"carriers");
@@ -295,8 +299,8 @@ public static class VerifyLot2b
     static void JsonOnly(List<string> checks)
     {
         ContentLibrary.AddCarrier(TestVan);var tank=ContentLibrary.AddBoss(TestTank);var mission=MissionDefinition.Parse(Mission);
-        missionsField.SetValue(g,new[]{original[0],original[1],original[2],mission});PlayerPrefs.SetInt("action-legends.unlocked.test-encounters",1);
-        Start(3,1,1);var p=players[0];int t=0;var entries=new HashSet<string>();bool truckSeen=false,boss=false,bossDown=false,unawareSeen=false;
+        var extended=new List<MissionDefinition>(original){mission};missionsField.SetValue(g,extended.ToArray());PlayerPrefs.SetInt("action-legends.unlocked.test-encounters",1);
+        Start(original.Length,1,1);var p=players[0];int t=0;var entries=new HashSet<string>();bool truckSeen=false,boss=false,bossDown=false,unawareSeen=false;
         for(;t<60*60*5&&g.phase==PanameGame.Phase.Playing;t++)
         {
             commands[0]=Bot(p,0,t);Tick(1);truckSeen|=carriers.Count>0;
@@ -360,7 +364,7 @@ public static class VerifyLot2b
         foreach(var (m,d,h) in new[]{(0,1,2),(1,0,1),(2,3,1)})
         {
             var run=Record(m,d,h,60*60*15,0,out var frames);foreach(var mm in original)PlayerPrefs.DeleteKey("action-legends.unlocked."+mm.id);
-            Check(Verify(run)&&Online(run,frames),"Une partie sur "+original[m].id+" ("+PanameGame.DifficultyNames[d]+", "+h+" joueur(s), rencontres, mini-boss) se rejoue à l'identique en replay et en trames en ligne : "+(run.won?"victoire":"défaite")+", "+run.ticks+" pas",checks);
+            Check(Verify(run)&&Online(run,frames),"Une partie sur "+original[Old(g,m)].id+" ("+PanameGame.DifficultyNames[d]+", "+h+" joueur(s), rencontres, mini-boss) se rejoue à l'identique en replay et en trames en ligne : "+(run.won?"victoire":"défaite")+", "+run.ticks+" pas",checks);
         }
         var slug=Record(0,Slug,1,60*60*20,3,out var slugFrames);foreach(var mm in original)PlayerPrefs.DeleteKey("action-legends.unlocked."+mm.id);
         Check(slug.continues>=1&&Verify(slug)&&Online(slug,slugFrames),"Une partie en SLUG sur Paris avec "+slug.continues+" continues se rejoue à l'identique ("+(slug.won?"victoire":"défaite")+", "+slug.ticks+" pas)",checks);

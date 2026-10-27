@@ -1,0 +1,147 @@
+{
+  "id": "arlesien",
+  "behavior": "melee",
+  "armored": false,
+  "bonusScore": 0,
+  "strideRate": 11,
+  "attackPose": 0.3,
+  "hitRadius": 0.5,
+  "knockback": 3.5,
+  "health": 3,
+  "speed": 5.6,
+  "keepDistance": 0.8,
+  "firstAttack": 0.6,
+  "melee": {
+    "reach": 1.2,
+    "height": 1.35,
+    "cooldown": 1,
+    "damage": 1
+  },
+  "awareness": {
+    "sight": 8,
+    "hearing": 2.5,
+    "surprise": 0.65,
+    "alarm": 5
+  },
+  "panic": {
+    "allies": 2,
+    "radius": 6,
+    "time": 1.8,
+    "speed": 1.4,
+    "returns": true
+  },
+  "cries": [
+    "Audio/Voices/cri-chute"
+  ],
+  "animations": {
+    "sheet": {
+      "texture": "Art/enemies/arlesien",
+      "columns": 4,
+      "rows": 4,
+      "cropLeft": 0.065,
+      "cropRight": 0.025,
+      "pivot": {
+        "x": 0.4,
+        "y": 0.0527344
+      },
+      "cellHeight": 2.879964
+    },
+    "layer": 30,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "run",
+        "cells": [
+          1,
+          2
+        ],
+        "perStride": 0.7
+      },
+      {
+        "name": "attack",
+        "cells": [
+          3
+        ]
+      },
+      {
+        "name": "unaware",
+        "cells": [
+          4,
+          5
+        ],
+        "fps": 1.6
+      },
+      {
+        "name": "surprised",
+        "cells": [
+          6
+        ]
+      },
+      {
+        "name": "hurt",
+        "cells": [
+          7
+        ]
+      },
+      {
+        "name": "flee",
+        "cells": [
+          8,
+          9
+        ],
+        "perStride": 0.7
+      },
+      {
+        "name": "fall",
+        "cells": [
+          6
+        ]
+      },
+      {
+        "name": "death",
+        "cells": [
+          10,
+          11
+        ],
+        "fps": 5,
+        "loop": false
+      },
+      {
+        "name": "deathExplosion",
+        "cells": [
+          12,
+          13,
+          11
+        ],
+        "fps": 4,
+        "loop": false
+      },
+      {
+        "name": "deathFire",
+        "cells": [
+          14,
+          14,
+          15
+        ],
+        "fps": 2.5,
+        "loop": false
+      },
+      {
+        "name": "deathKnife",
+        "cells": [
+          7,
+          10,
+          11
+        ],
+        "fps": 5,
+        "loop": false
+      }
+    ],
+    "anchors": []
+  }
+}

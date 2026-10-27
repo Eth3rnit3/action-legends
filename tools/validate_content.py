@@ -37,7 +37,9 @@ HOSTAGE_STATES = ("tied", "thanks", "give", "run")
 # Words that belong to one mission's content and must never be written in the engine's code.
 PROPER_NOUNS = ("Paris", "Parisien", "Macron", "Bastille", "Seine", "Eiffel", "Haussmann", "Marseille", "Marseillaise",
                 "Mistral", "Pastis", "Canebière", "Tokyo", "Shogun", "Sakura", "Shibuya", "Akihabara", "Chuck", "Norris",
-                "Arnold", "Jean-Claude", "JCVD", "Sylvester", "macron-helicopter", "mecha-shogun", "news-helicopter", "route-0")
+                "Arnold", "Jean-Claude", "JCVD", "Sylvester", "macron-helicopter", "mecha-shogun", "news-helicopter", "route-0",
+                "Saint-Rémy", "Saint-Remy", "Provence", "Provençal", "Nostradamus", "Arlésien", "Arlésienne", "arlesien", "arlesienne",
+                "Farandole", "Alpilles", "Glanum", "Favier", "Camargue", "taureau", "prophetie-en-provence")
 
 
 class Errors(list):

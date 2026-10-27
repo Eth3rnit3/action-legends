@@ -27,16 +27,18 @@ public static class VerifyCampaignTokyo
         foreach(var m in missions)PlayerPrefs.DeleteKey("action-legends.unlocked."+m.id);
         var players=(PanameGame.Player[])Get(g,"players");var commands=new PlayerCommand[4];
         var shots=(IList)Get(g,"shots");var enemies=(IList)Get(g,"enemies");var bombs=(IList)Get(g,"bossBombs");var waves=(IList)Get(g,"shockwaves");
-        Check(g.MissionCount==3&&missions[2].id=="tokyo-neon","Le catalogue contient Paris, Marseille et Tokyo",checks);
+        // Tokyo is found by its id: Saint-Remy comes before it since mission 4 (VerifySaintRemy covers the four-mission campaign).
+        int tokyo=Array.FindIndex(missions,m=>m.id=="tokyo-neon");
+        Check(g.MissionCount==4&&tokyo==3&&missions[0].id=="panique-a-paname"&&missions[1].id=="mistral-gagnant","Le catalogue contient Paris, Marseille, Saint-Rémy et Tokyo, Tokyo en dernier",checks);
         Check(missions[0].enemies.Length==3&&missions[0].enemies[2]=="looter-shield"&&missions[0].roster[2].animations.sheet.texture=="Art/enemies/looter-shield","Paris garde ses pilleurs (planche de chaque pillard, lot 2b)",checks);
-        Check(missions[2].enemies.Length==3&&missions[2].roster[0].Armed&&missions[2].roster[1].Armed&&missions[2].roster[2].Armed,"Les trois ennemis de Tokyo sont armés",checks);
+        Check(missions[tokyo].enemies.Length==3&&missions[tokyo].roster[0].Armed&&missions[tokyo].roster[1].Armed&&missions[tokyo].roster[2].Armed,"Les trois ennemis de Tokyo sont armés",checks);
         g.ReturnToLobby();Call(g,"LoadMission",0);
-        Check(!g.IsUnlocked(1)&&!g.IsUnlocked(2)&&g.UnlockedCount==1,"Seule la première mission est ouverte au départ",checks);
+        Check(!g.IsUnlocked(1)&&!g.IsUnlocked(2)&&!g.IsUnlocked(tokyo)&&g.UnlockedCount==1,"Seule la première mission est ouverte au départ",checks);
         g.SelectMission(1);Check(g.MissionIndex==0,"Les flèches sautent les missions verrouillées",checks);
         Check(!g.EnterMissionCode("NOPE")&&g.MissionIndex==0,"Un code inconnu est refusé",checks);
-        Check(g.EnterMissionCode("sakura")&&g.MissionIndex==2&&g.IsUnlocked(2),"Le code SAKURA ouvre et sélectionne Tokyo",checks);
-        g.SelectMission(1);Check(g.MissionIndex==0,"Les flèches passent de Tokyo à Paris sans s'arrêter sur Marseille",checks);
-        g.SelectMission(-1);Check(g.MissionIndex==2,"Tokyo reste accessible avec les flèches",checks);
+        Check(g.EnterMissionCode("sakura")&&g.MissionIndex==tokyo&&g.IsUnlocked(tokyo),"Le code SAKURA ouvre et sélectionne Tokyo",checks);
+        g.SelectMission(1);Check(g.MissionIndex==0,"Les flèches passent de Tokyo à Paris sans s'arrêter sur Marseille ni Saint-Rémy",checks);
+        g.SelectMission(-1);Check(g.MissionIndex==tokyo,"Tokyo reste accessible avec les flèches",checks);
 
         for(int i=0;i<4;i++)g.slots[i].joined=i==0;
         g.SetDifficulty(1);
@@ -46,10 +48,10 @@ public static class VerifyCampaignTokyo
             g.BeginRound();var hero=players[0];hero.invulnerable=0;int full=hero.hp,taken=0;
             Call(g,"SpawnEnemy",hero.position.x+3.5f,kind);
             for(int n=0;n<60*4;n++){g.TickSimulation(1f/60,commands);if(hero.hp<full){taken+=full-hero.hp;hero.hp=full;}}
-            Check(taken>0,"Le "+missions[2].enemies[kind]+" touche un héros immobile ("+taken+" touches en 4 s)",checks);
+            Check(taken>0,"Le "+missions[tokyo].enemies[kind]+" touche un héros immobile ("+taken+" touches en 4 s)",checks);
         }
         // A hero that only runs right cannot clear locked waves: this run looks at the gunmen, VerifyWaveLock at the locks.
-        foreach(var wave in missions[2].waves)wave.@lock=false;
+        foreach(var wave in missions[tokyo].waves)wave.@lock=false;
         PanameGame.Player p;int max,hits=0,hostile=0,aiming=0;
         try{
         g.BeginRound();p=players[0];max=p.hp;bool captured=false;var seenRoles=new HashSet<string>();
@@ -69,10 +71,10 @@ public static class VerifyCampaignTokyo
         Check(seenRoles.Count==3,"Pistolet, mitraillette et fusil à pompe apparaissent",checks);
         Check(aiming>0,"Les tireurs visent avant de tirer",checks);
         Check(hostile>0&&hits>0,"Les ennemis tirent des balles qui touchent le joueur ("+hits+" touches)",checks);
-        Check(g.BossActive&&!g.MidBossActive&&g.Wave==missions[2].waves.Length,"Le boss arrive après les "+missions[2].waves.Length+" vagues",checks);
+        Check(g.BossActive&&!g.MidBossActive&&g.Wave==missions[tokyo].waves.Length,"Le boss arrive après les "+missions[tokyo].waves.Length+" vagues",checks);
         }
         // A failure here must not leave Tokyo's waves unlocked for the tests that run next.
-        finally{foreach(var wave in missions[2].waves)wave.@lock=true;}
+        finally{foreach(var wave in missions[tokyo].waves)wave.@lock=true;}
 
         var renderer=(SpriteRenderer)Get(g,"bossRenderer");
         Check(renderer&&renderer.sprite&&renderer.sprite.texture==Resources.Load<Texture2D>("Art/tokyo/mecha-shogun"),"Le boss est le Mécha Shogun dessiné",checks);

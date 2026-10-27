@@ -90,11 +90,14 @@ public static class VerifyDataDriven
     // parachutes, vans, camps off guard, a mid-mission boss), enemies may panic and lob grenades, shots fly past an enemy
     // not yet in play off screen, and the state hash mixes each enemy's mode, the arrivals waiting and the vans.
     // A lot that changes gameplay on purpose records them again and says so.
+    // m: the position among the three missions these runs were recorded on (Saint-Remy has since come before Tokyo).
+    static readonly string[] OldIds={"panique-a-paname","mistral-gagnant","tokyo-neon"};
+    static int OldIndex(PanameGame g,int m)=>Array.FindIndex((MissionDefinition[])Get(g,"missions"),x=>x.id==OldIds[m]);
     static readonly (int m,int d,int[] h,bool inv,int ticks,int score,int hash)[] Legacy={
         (0,0,new[]{0,1,2,3},false,6372,99380,-1992666955),(1,1,new[]{2,3,-1,-1},false,7328,70600,1013089371),(2,0,new[]{3,2,1,0},false,5340,96800,-482492511),
         (2,3,new[]{1,-1,-1,-1},false,889,2650,-896010580),(0,2,new[]{0,-1,-1,-1},false,724,1000,1274428369),(1,3,new[]{1,0,3,2},false,1264,22300,-1637653415),
         (2,1,new[]{0,1,-1,-1},false,5524,67120,-2113353877),(0,1,new[]{2,-1,3,-1},false,5589,37200,404526836),(1,0,new[]{0,1,2,3},true,5330,106060,1038239749)};
-    static readonly string[] ProperNouns={"Paris","Parisien","Macron","Bastille","Seine","Eiffel","Haussmann","Marseille","Marseillaise","Mistral","Pastis","Canebière","Tokyo","Shogun","Sakura","Shibuya","Akihabara","Chuck","Norris","Arnold","Jean-Claude","JCVD","Sylvester","macron-helicopter","mecha-shogun","news-helicopter","route-0"};
+    static readonly string[] ProperNouns={"Paris","Parisien","Macron","Bastille","Seine","Eiffel","Haussmann","Marseille","Marseillaise","Mistral","Pastis","Canebière","Tokyo","Shogun","Sakura","Shibuya","Akihabara","Chuck","Norris","Arnold","Jean-Claude","JCVD","Sylvester","macron-helicopter","mecha-shogun","news-helicopter","route-0","Saint-Rémy","Saint-Remy","Provence","Provençal","Nostradamus","Arlésien","Arlésienne","arlesien","arlesienne","Farandole","Alpilles","Glanum","Favier","Camargue","taureau","prophetie-en-provence"};
 
     public static object Main(string captures)
     {
@@ -121,8 +124,10 @@ public static class VerifyDataDriven
         }
     }
 
-    static void OldNumbers(PanameGame g,MissionDefinition[] missions,List<string> checks)
+    static void OldNumbers(PanameGame g,MissionDefinition[] catalog,List<string> checks)
     {
+        // The numbers of the three missions that existed before the content library (later missions have none to keep).
+        var missions=Array.ConvertAll(OldIds,id=>Array.Find(catalog,x=>x.id==id));
         // Heroes: same order, names, speeds, fire rates, damage, jump, recoil, specials and barrel tips per frame.
         var heroes=ContentLibrary.Heroes;fails.Clear();Expect(heroes.Length==4);
         for(int i=0;i<heroes.Length&&i<4;i++)
@@ -176,7 +181,7 @@ public static class VerifyDataDriven
         for(int i=0;i<4;i++){g.slots[i].joined=i==0;g.slots[i].hero=i;}
         for(int m=0;m<missions.Length;m++)for(int d=0;d<4;d++)
         {
-            g.ReturnToLobby();Call(g,"LoadMission",m);g.SetDifficulty(d);g.BeginRound();
+            g.ReturnToLobby();Call(g,"LoadMission",Array.IndexOf(catalog,missions[m]));g.SetDifficulty(d);g.BeginRound();
             for(int k=0;k<missions[m].roster.Length;k++)
             {
                 var old=OldEnemies[missions[m].enemies[k]];where=missions[m].enemies[k]+" d"+d;
@@ -204,7 +209,7 @@ public static class VerifyDataDriven
         fails.Clear();
         for(int m=0;m<missions.Length;m++)
         {
-            g.slots[0].hero=0;g.ReturnToLobby();Call(g,"LoadMission",m);g.SetDifficulty(1);g.BeginRound();
+            g.slots[0].hero=0;g.ReturnToLobby();Call(g,"LoadMission",Array.IndexOf(catalog,missions[m]));g.SetDifficulty(1);g.BeginRound();
             players[0].position=new Vector2(missions[m].exitX-18,0);players[0].invulnerable=100;Call(g,"UpdateCamera",1f/60);g.TickSimulation(1f/60,commands);
             where=missions[m].id;Expect(g.BossActive&&(int)Get(g,"bossMaxHealth")==Mathf.RoundToInt(560*missions[m].boss.health));
         }
@@ -217,10 +222,10 @@ public static class VerifyDataDriven
         Check(sniper.kind==EnemyBehavior.Gunman&&sniper.animations.states.Length==6&&sniper.muzzle==new Vector2(1.33f,1.54f),"Un nouvel ennemi tireur est défini en JSON avec six états d'animation sur la planche des héros",checks);
         Check(gunship.walker==false&&gunship.attacks.Length==3&&gunship.animations.sheet.texture=="Art/marseille/news-helicopter"&&gunship.rotor.width==6.5f&&gunship.flight.sweep==5.2f,"Un boss existant est re-paramétré par extends (PV, vol, trois attaques) en gardant le reste",checks);
         Check(mission.roster[1]==ContentLibrary.Enemy("looter-rusher")&&mission.roster[2]==ContentLibrary.Enemy("gunman-pistol"),"La mission réutilise des ennemis d'autres missions",checks);
-        missionsField.SetValue(g,new[]{original[0],original[1],original[2],mission});
+        var extended=new List<MissionDefinition>(original){mission};missionsField.SetValue(g,extended.ToArray());
         PlayerPrefs.SetInt("action-legends.unlocked.test-data-driven",1);
         for(int i=0;i<4;i++){g.slots[i].joined=i==0;g.slots[i].hero=i;}
-        g.phase=PanameGame.Phase.Lobby;Call(g,"LoadMission",3);g.SetDifficulty(1);
+        g.phase=PanameGame.Phase.Lobby;Call(g,"LoadMission",original.Length);g.SetDifficulty(1);
         Check(g.CurrentMission.id=="test-data-driven"&&PanameArt.RouteSegments==3,"La carte assemble trois décors existants de trois missions",checks);
         g.BeginRound();
         var players=(PanameGame.Player[])Get(g,"players");var enemies=(IList)Get(g,"enemies");var commands=new PlayerCommand[4];
@@ -263,7 +268,7 @@ public static class VerifyDataDriven
         var players=(PanameGame.Player[])Get(g,"players");var enemies=(IList)Get(g,"enemies");var results=new List<string>();fails.Clear();
         foreach(var run in Legacy)
         {
-            g.ReturnToLobby();Call(g,"LoadMission",run.m);g.SetDifficulty(run.d);
+            g.ReturnToLobby();Call(g,"LoadMission",OldIndex(g,run.m));g.SetDifficulty(run.d);
             for(int i=0;i<4;i++){g.slots[i].joined=run.h[i]>=0;if(run.h[i]>=0)g.slots[i].hero=run.h[i];}
             g.BeginRound();var commands=new PlayerCommand[4];int ticks=0;
             for(int t=0;t<60*60*12&&g.phase==PanameGame.Phase.Playing;t++)

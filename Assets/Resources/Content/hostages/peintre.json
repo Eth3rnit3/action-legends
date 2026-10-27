@@ -1,0 +1,10 @@
+{
+  "id": "peintre",
+  "extends": "civilian",
+  "name": "PEINTRE",
+  "animations": {
+    "sheet": {
+      "texture": "Art/hostages/peintre"
+    }
+  }
+}

@@ -22,9 +22,13 @@ public static class VerifyLot1a
 
     static PanameGame g;static PanameGame.Player[] players;static IList enemies,shots,thrown;
     static readonly PlayerCommand[] commands=new PlayerCommand[4];
+    // Missions by their place among the three this test was written for (Paris 0, Marseille 1, Tokyo 2): Saint-Remy now comes
+    // before Tokyo and has its own VerifySaintRemy. A test mission appended after the catalogue keeps its index.
+    static readonly string[] Three={"panique-a-paname","mistral-gagnant","tokyo-neon"};
+    static int Old(PanameGame game,int m){var all=(MissionDefinition[])game.GetType().GetField("missions",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(game);return m<Three.Length?Array.FindIndex(all,x=>x.id==Three[m]):m;}
     static void Start(int mission,int difficulty,int heroes,int first=0)
     {
-        g.ReturnToLobby();Call(g,"LoadMission",mission);g.SetDifficulty(difficulty);
+        g.ReturnToLobby();Call(g,"LoadMission",Old(g,mission));g.SetDifficulty(difficulty);
         for(int i=0;i<4;i++){g.slots[i].joined=i<heroes;g.slots[i].hero=(first+i)%4;}
         g.BeginRound();players=(PanameGame.Player[])Get(g,"players");enemies=(IList)Get(g,"enemies");shots=(IList)Get(g,"shots");thrown=(IList)Get(g,"thrown");
         for(int i=0;i<4;i++)commands[i]=default;
@@ -181,7 +185,7 @@ public static class VerifyLot1a
             }
             var record=g.LastReplay;foreach(var m in missions)PlayerPrefs.DeleteKey("action-legends.unlocked."+m.id);
             bool ok=record!=null&&verifier.BeginVerify(JsonUtility.FromJson<ReplayRecord>(JsonUtility.ToJson(record)));bool? result=null;while(ok&&result==null)result=verifier.StepVerify(1e6f);
-            Check(ok&&result==true,"Une partie avec accroupi ("+use[0]+" pas), grenades ("+use[1]+") et couteau ("+use[2]+") se rejoue à l'identique : "+missions[run.m].id+" ("+(record!=null&&record.won?"victoire":"défaite")+", "+record?.ticks+" pas)",checks);
+            Check(ok&&result==true,"Une partie avec accroupi ("+use[0]+" pas), grenades ("+use[1]+") et couteau ("+use[2]+") se rejoue à l'identique : "+missions[Old(g,run.m)].id+" ("+(record!=null&&record.won?"victoire":"défaite")+", "+record?.ticks+" pas)",checks);
             for(int k=0;k<3;k++)total[k]+=use[k];
         }
         Check(total[0]>0&&total[1]>0&&total[2]>0,"Ces parties rejouées se servent des trois nouveautés",checks);

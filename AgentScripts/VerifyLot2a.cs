@@ -27,9 +27,13 @@ public static class VerifyLot2a
     static PanameGame g;static PanameGame.Player[] players;static IList enemies,shots,pickups,hostages;
     static readonly PlayerCommand[] commands=new PlayerCommand[4];
     const int Slug=4;
+    // Missions by their place among the three this test was written for (Paris 0, Marseille 1, Tokyo 2): Saint-Remy now comes
+    // before Tokyo and has its own VerifySaintRemy. A test mission appended after the catalogue keeps its index.
+    static readonly string[] Three={"panique-a-paname","mistral-gagnant","tokyo-neon"};
+    static int Old(PanameGame game,int m){var all=(MissionDefinition[])game.GetType().GetField("missions",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(game);return m<Three.Length?Array.FindIndex(all,x=>x.id==Three[m]):m;}
     static void Start(int mission,int difficulty,int heroes,int first=0)
     {
-        g.ReturnToLobby();Call(g,"LoadMission",mission);g.SetDifficulty(difficulty);
+        g.ReturnToLobby();Call(g,"LoadMission",Old(g,mission));g.SetDifficulty(difficulty);
         for(int i=0;i<4;i++){g.slots[i].joined=i<heroes;g.slots[i].hero=(first+i)%4;}
         g.BeginRound();players=(PanameGame.Player[])Get(g,"players");enemies=(IList)Get(g,"enemies");shots=(IList)Get(g,"shots");pickups=(IList)Get(g,"pickups");hostages=(IList)Get(g,"hostages");
         for(int i=0;i<4;i++)commands[i]=default;

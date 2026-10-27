@@ -1,0 +1,201 @@
+{
+  "id": "taureau",
+  "behavior": "walker",
+  "name": "TAUREAU DE CAMARGUE",
+  "intro": "UN TAUREAU FONCE SUR LA ROUTE !",
+  "rage": "IL VOIT ROUGE !",
+  "defeat": "LE TAUREAU RETOURNE AU PRÉ !",
+  "health": [
+    110,
+    180,
+    240,
+    300
+  ],
+  "healthPerExtraPlayer": 0.5,
+  "ragePace": 0.8,
+  "rageDelay": 0.4,
+  "firstAttack": 1.4,
+  "smokeSize": 0.6,
+  "score": 5000,
+  "flash": true,
+  "shadow": {
+    "x": 3.6,
+    "y": 0.35
+  },
+  "walk": {
+    "speed": [
+      2.6,
+      2.9,
+      3.2,
+      3.5
+    ],
+    "stopDistance": 5,
+    "margin": 2.2,
+    "stepLength": 1.0,
+    "stepShake": 0.02,
+    "entry": -3,
+    "foot": "foot"
+  },
+  "hitbox": {
+    "x": -1.2,
+    "y": 1.4,
+    "stepX": 1.2,
+    "stepY": 0,
+    "radius": 1.0,
+    "count": 3
+  },
+  "death": {
+    "fall": 0,
+    "spin": 0,
+    "spreadX": 1.6,
+    "spreadY": 0.9,
+    "core": {
+      "x": 0,
+      "y": 1.1
+    },
+    "spinWithFacing": false
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/bosses/taureau",
+      "columns": 4,
+      "rows": 2,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.0507812
+      },
+      "cellHeight": 4.6545455
+    },
+    "layer": 32,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "walk",
+        "cells": [
+          1,
+          2
+        ],
+        "perStride": 1
+      },
+      {
+        "name": "paw",
+        "cells": [
+          3
+        ]
+      },
+      {
+        "name": "charge",
+        "cells": [
+          4,
+          2
+        ],
+        "perStride": 1.4
+      },
+      {
+        "name": "skid",
+        "cells": [
+          5
+        ]
+      },
+      {
+        "name": "rear",
+        "cells": [
+          6
+        ]
+      },
+      {
+        "name": "wreck",
+        "cells": [
+          7
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "smoke",
+        "x": -1.6,
+        "y": 1.7
+      },
+      {
+        "name": "foot",
+        "x": -0.7,
+        "y": 0.1
+      }
+    ]
+  },
+  "attacks": [
+    {
+      "type": "charge",
+      "announce": "LE TAUREAU CHARGE : SAUTEZ !",
+      "aimState": "paw",
+      "state": "charge",
+      "recoverState": "skid",
+      "windup": 1.0,
+      "speed": [
+        11,
+        13,
+        15,
+        17
+      ],
+      "damage": 2,
+      "clearance": 1.5,
+      "reach": 1.7,
+      "recover": 0.9,
+      "shake": 0.3,
+      "sound": "Audio/Sfx/saint-remy/sabots-charge",
+      "startSound": "Audio/Sfx/saint-remy/taureau-souffle",
+      "cooldown": 1.2
+    },
+    {
+      "type": "stomp",
+      "announce": "IL SE CABRE !",
+      "state": "rear",
+      "recoverState": "idle",
+      "windup": 0.7,
+      "repeatWindup": 0.5,
+      "recover": 0.5,
+      "repeat": 1,
+      "rageRepeat": 2,
+      "speed": [
+        7,
+        8,
+        9,
+        10
+      ],
+      "waveReach": 0.6,
+      "waveHeight": 0.6,
+      "shake": 0.35,
+      "foot": "foot",
+      "damage": 1,
+      "startSound": "Audio/Sfx/saint-remy/taureau-souffle",
+      "cooldown": 1.0
+    },
+    {
+      "type": "charge",
+      "announce": "ENCORE UNE CHARGE !",
+      "aimState": "paw",
+      "state": "charge",
+      "recoverState": "skid",
+      "windup": 0.8,
+      "speed": [
+        12,
+        14,
+        16,
+        18
+      ],
+      "damage": 2,
+      "clearance": 1.5,
+      "reach": 1.7,
+      "recover": 0.8,
+      "shake": 0.3,
+      "sound": "Audio/Sfx/saint-remy/sabots-charge",
+      "startSound": "Audio/Sfx/saint-remy/taureau-souffle",
+      "cooldown": 1.4
+    }
+  ]
+}

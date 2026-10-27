@@ -1,0 +1,407 @@
+{
+  "id": "nostradamus",
+  "behavior": "walker",
+  "name": "NOSTRADAMUS",
+  "intro": "NOSTRADAMUS L'AVAIT PRÉDIT : VOUS N'IREZ PAS PLUS LOIN !",
+  "rage": "LES ASTRES S'EMBALLENT !",
+  "defeat": "ÇA, IL NE L'AVAIT PAS VU VENIR !",
+  "health": [
+    320,
+    560,
+    800,
+    1080
+  ],
+  "healthPerExtraPlayer": 0.65,
+  "ragePace": 0.72,
+  "rageDelay": 0.35,
+  "firstAttack": 1.2,
+  "smokeSize": 0.5,
+  "score": 10000,
+  "flash": true,
+  "shadow": {
+    "x": 2.2,
+    "y": 0.3
+  },
+  "walk": {
+    "speed": [
+      1.6,
+      1.8,
+      2.0,
+      2.2
+    ],
+    "stopDistance": 7,
+    "margin": 2,
+    "stepLength": 0.9,
+    "stepShake": 0,
+    "entry": -2,
+    "foot": "foot"
+  },
+  "hitbox": {
+    "x": 0,
+    "y": 0.8,
+    "stepX": 0,
+    "stepY": 0.95,
+    "radius": 0.8,
+    "count": 3
+  },
+  "death": {
+    "fall": 0,
+    "spin": 0,
+    "spreadX": 1,
+    "spreadY": 1.2,
+    "core": {
+      "x": 0,
+      "y": 1.5
+    },
+    "spinWithFacing": false
+  },
+  "missile": {
+    "texture": "Art/saint-remy/prophetie-fx",
+    "x": 0,
+    "y": 0,
+    "width": 0.25,
+    "height": 0.3333333,
+    "size": 1.6,
+    "hitRadius": 0.45,
+    "tipRadius": 0,
+    "hitLength": 0,
+    "outline": []
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/saint-remy/nostradamus",
+      "columns": 4,
+      "rows": 2,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.0527344
+      },
+      "cellHeight": 3.49
+    },
+    "layer": 32,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "walk",
+        "cells": [
+          1,
+          2
+        ],
+        "perStride": 1
+      },
+      {
+        "name": "cast",
+        "cells": [
+          3
+        ]
+      },
+      {
+        "name": "book",
+        "cells": [
+          4
+        ]
+      },
+      {
+        "name": "invoke",
+        "cells": [
+          5
+        ]
+      },
+      {
+        "name": "hurt",
+        "cells": [
+          6
+        ]
+      },
+      {
+        "name": "wreck",
+        "cells": [
+          7
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "hand",
+        "x": -1.2,
+        "y": 2.3
+      },
+      {
+        "name": "hand",
+        "cell": 4,
+        "x": -1.25,
+        "y": 2.2
+      },
+      {
+        "name": "sky",
+        "x": -0.9,
+        "y": 2.9
+      },
+      {
+        "name": "door",
+        "x": 1.3,
+        "y": 0.6
+      },
+      {
+        "name": "smoke",
+        "x": 0.7,
+        "y": 1.5
+      },
+      {
+        "name": "foot",
+        "x": 0,
+        "y": 0.05
+      }
+    ]
+  },
+  "attacks": [
+    {
+      "type": "gun",
+      "announce": "PARCHEMINS PROPHÉTIQUES !",
+      "aimState": "cast",
+      "state": "cast",
+      "aimTime": [
+        0.8,
+        0.7,
+        0.6,
+        0.5
+      ],
+      "duration": 1.5,
+      "interval": [
+        0.3,
+        0.26,
+        0.22,
+        0.18
+      ],
+      "speed": [
+        9,
+        10,
+        11,
+        12
+      ],
+      "sweep": 1.2,
+      "sweepRate": 3,
+      "aimHeight": 1.0,
+      "sightWidth": 3,
+      "muzzles": [
+        "hand"
+      ],
+      "sound": "Audio/Sfx/saint-remy/parchemin-tir",
+      "damage": 1,
+      "cooldown": 1.2,
+      "projectile": {
+        "sprite": {
+          "texture": "Art/saint-remy/prophetie-fx",
+          "columns": 4,
+          "rows": 3,
+          "cell": 4
+        },
+        "frames": 3,
+        "fps": 10,
+        "size": 1.4,
+        "y": 0
+      }
+    },
+    {
+      "type": "bombs",
+      "announce": "PROPHÉTIE : ÉCARTEZ-VOUS DES CERCLES !",
+      "state": "book",
+      "duration": 1.6,
+      "launch": 0.4,
+      "count": [
+        3,
+        3,
+        4,
+        4
+      ],
+      "rageExtra": 1,
+      "spacing": 3.2,
+      "delay": [
+        1.1,
+        1.0,
+        0.9,
+        0.8
+      ],
+      "stagger": 0.12,
+      "flight": [
+        0.55,
+        0.5,
+        0.45,
+        0.4
+      ],
+      "arc": 5,
+      "blastRadius": 1.3,
+      "blastHeight": 1.6,
+      "marker": 2.6,
+      "rack": "hand",
+      "damage": 1,
+      "sound": "Audio/Sfx/saint-remy/prophetie-alerte",
+      "impactSound": "Audio/Sfx/saint-remy/prophetie-impact",
+      "warning": {
+        "sprite": {
+          "texture": "Art/saint-remy/prophetie-fx",
+          "columns": 4,
+          "rows": 3,
+          "cell": 0
+        },
+        "frames": 4,
+        "fps": 8,
+        "size": 2.8,
+        "y": 0.05
+      },
+      "impact": {
+        "sprite": {
+          "texture": "Art/saint-remy/prophetie-fx",
+          "columns": 4,
+          "rows": 3,
+          "cell": 8
+        },
+        "frames": 4,
+        "fps": 9,
+        "size": 3,
+        "y": 1.2
+      },
+      "cooldown": 1.3
+    },
+    {
+      "type": "troops",
+      "announce": "LES ARLÉSIENS À LA RESCOUSSE !",
+      "state": "invoke",
+      "enemies": [
+        "arlesien",
+        "arlesienne",
+        "arlesien-fouet"
+      ],
+      "count": [
+        2,
+        2,
+        3,
+        3
+      ],
+      "interval": [
+        0.6,
+        0.55,
+        0.5,
+        0.45
+      ],
+      "duration": 1.6,
+      "door": "door",
+      "spread": 3,
+      "maxAlive": 4,
+      "cooldown": 1.2
+    },
+    {
+      "type": "gun",
+      "announce": "ENCORE DES PARCHEMINS !",
+      "aimState": "cast",
+      "state": "cast",
+      "aimTime": [
+        0.7,
+        0.6,
+        0.5,
+        0.45
+      ],
+      "duration": 1.8,
+      "interval": [
+        0.28,
+        0.24,
+        0.2,
+        0.16
+      ],
+      "speed": [
+        9,
+        10,
+        11,
+        12
+      ],
+      "sweep": 1.6,
+      "sweepRate": 3.5,
+      "aimHeight": 1.0,
+      "sightWidth": 3,
+      "muzzles": [
+        "hand"
+      ],
+      "sound": "Audio/Sfx/saint-remy/parchemin-tir",
+      "damage": 1,
+      "cooldown": 1.2,
+      "projectile": {
+        "sprite": {
+          "texture": "Art/saint-remy/prophetie-fx",
+          "columns": 4,
+          "rows": 3,
+          "cell": 4
+        },
+        "frames": 3,
+        "fps": 10,
+        "size": 1.4,
+        "y": 0
+      }
+    },
+    {
+      "type": "bombs",
+      "announce": "GRANDE PROPHÉTIE : TROUVEZ LA FAILLE !",
+      "state": "invoke",
+      "duration": 1.9,
+      "launch": 0.5,
+      "count": [
+        5,
+        5,
+        6,
+        6
+      ],
+      "rageExtra": 1,
+      "spacing": 3.4,
+      "delay": [
+        1.3,
+        1.2,
+        1.1,
+        1.0
+      ],
+      "stagger": 0.08,
+      "flight": [
+        0.5,
+        0.45,
+        0.42,
+        0.38
+      ],
+      "arc": 7,
+      "blastRadius": 1.3,
+      "blastHeight": 1.6,
+      "marker": 2.6,
+      "rack": "sky",
+      "damage": 1,
+      "sound": "Audio/Sfx/saint-remy/prophetie-alerte",
+      "impactSound": "Audio/Sfx/saint-remy/prophetie-impact",
+      "warning": {
+        "sprite": {
+          "texture": "Art/saint-remy/prophetie-fx",
+          "columns": 4,
+          "rows": 3,
+          "cell": 0
+        },
+        "frames": 4,
+        "fps": 8,
+        "size": 2.8,
+        "y": 0.05
+      },
+      "impact": {
+        "sprite": {
+          "texture": "Art/saint-remy/prophetie-fx",
+          "columns": 4,
+          "rows": 3,
+          "cell": 8
+        },
+        "frames": 4,
+        "fps": 9,
+        "size": 3,
+        "y": 1.2
+      },
+      "cooldown": 1.5
+    }
+  ]
+}

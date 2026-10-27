@@ -165,6 +165,28 @@ class MissionValidationTests(unittest.TestCase):
         self.assertFalse(self.rejected(lambda d: d["encounters"].append({"atX": 300, "boss": {"id": "speedboat", "name": "BARQUE"}})))
         self.assertFalse(self.rejected(lambda d: d["waves"][0].update(baseEnemies=0)))
 
+    def test_street_decor(self):
+        data = json.loads((RESOURCES / "Levels/prophetie-en-provence.json").read_text(encoding="utf-8"))
+        self.assertEqual(self.errors(data), [])
+        self.assertGreater(len(data["map"]["decor"]), 0)
+        item = {"sprite": {"texture": "Art/saint-remy/accessoires", "columns": 4, "rows": 3, "cell": 6}, "x": 30, "y": -0.3, "height": 1.8}
+        self.data["map"]["decor"] = [item, dict(item, flip=True, front=True)]
+        self.assertEqual(self.errors(), [])
+        changes = (
+            lambda d: d["map"]["decor"][0].update(x=d["length"] + 11),
+            lambda d: d["map"]["decor"][0].update(y=-4),
+            lambda d: d["map"]["decor"][0].update(height=0),
+            lambda d: d["map"]["decor"][0].update(flip="yes"),
+            lambda d: d["map"]["decor"][0]["sprite"].update(cell=12),
+            lambda d: d["map"]["decor"][0]["sprite"].update(texture="Art/missing"),
+            lambda d: d["map"]["decor"][0].pop("sprite"),
+            lambda d: d["map"].update(decor=[item] * 121),
+            lambda d: d["map"].update(decor={}),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                self.assertTrue(self.rejected(change))
+
     def test_hostage_placements(self):
         self.assertTrue(6 <= len(self.data["map"]["hostages"]) <= 10)
         self.assertTrue(any(h.get("wave", -1) >= 0 for h in self.data["map"]["hostages"]))
@@ -190,11 +212,12 @@ class LibraryValidationTests(unittest.TestCase):
     def test_shipped_library_is_valid(self):
         self.assertEqual(LIBRARY_ERRORS, [])
         self.assertEqual(sorted(LIBRARY["heroes"]), ["arnold", "chuck-norris", "jean-claude", "sylvester"])
-        self.assertEqual(len(LIBRARY["enemies"]), 6)
-        self.assertEqual(sorted(LIBRARY["bosses"]), ["armored-van", "combat-drone", "le-direct", "macron-helicopter", "mecha-shogun", "speedboat"])
+        self.assertEqual(len(LIBRARY["enemies"]), 9)
+        self.assertEqual(sorted(LIBRARY["bosses"]), ["armored-van", "combat-drone", "le-direct", "macron-helicopter", "mecha-shogun", "nostradamus",
+                                                     "speedboat", "taureau"])
         self.assertEqual(sorted(LIBRARY["carriers"]), ["black-minivan", "rusty-van"])
         self.assertEqual(sorted(LIBRARY["rules"]), ["default", "pow"])
-        self.assertEqual(sorted(LIBRARY["hostages"]), ["baker", "boules-player", "civilian", "office-worker"])
+        self.assertEqual(sorted(LIBRARY["hostages"]), ["baker", "boules-player", "civilian", "office-worker", "peintre"])
 
     def test_extends_merges_objects_and_replaces_lists(self):
         direct = LIBRARY["bosses"]["le-direct"]
@@ -438,6 +461,46 @@ class LibraryValidationTests(unittest.TestCase):
                 data = copy.deepcopy(van)
                 change(data)
                 self.assertTrue(validate_boss(data, RESOURCES, enemies))
+
+    def test_drawn_boss_moves_and_sounds(self):
+        """Saint-Remy's bosses: a gun's drawn projectile, a bombs move's warning and impact, startSound and impactSound."""
+        enemies = LIBRARY["enemies"]
+        for boss_id in ("taureau", "nostradamus"):
+            self.assertEqual(validate_boss(content("bosses", boss_id), RESOURCES, enemies), [])
+        prophet = content("bosses", "nostradamus")
+        gun = next(i for i, a in enumerate(prophet["attacks"]) if a["type"] == "gun")
+        bombs = next(i for i, a in enumerate(prophet["attacks"]) if a["type"] == "bombs")
+        troops = next(i for i, a in enumerate(prophet["attacks"]) if a["type"] == "troops")
+        changes = (
+            lambda d: d["attacks"][gun]["projectile"].update(frames=13),
+            lambda d: d["attacks"][gun]["projectile"].update(fps=0),
+            lambda d: d["attacks"][gun]["projectile"]["sprite"].update(texture="Art/missing"),
+            lambda d: d["attacks"][troops].update(projectile=d["attacks"][gun]["projectile"]),
+            lambda d: d["attacks"][gun].update(warning=d["attacks"][bombs]["warning"]),
+            lambda d: d["attacks"][troops].update(impactSound="Audio/Sfx/saint-remy/prophetie-impact"),
+            lambda d: d["attacks"][bombs]["warning"].update(size=20),
+            lambda d: d["attacks"][bombs]["impact"].update(y=-5),
+            lambda d: d["attacks"][bombs].update(impactSound="Audio/Sfx/missing"),
+            lambda d: d["attacks"][gun].update(startSound="Audio/Sfx/missing"),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                data = copy.deepcopy(prophet)
+                change(data)
+                self.assertTrue(validate_boss(data, RESOURCES, enemies))
+        # Without a texture a drawn part is simply absent: the engine's bullet, bar and explosion.
+        plain = copy.deepcopy(prophet)
+        plain["attacks"][gun]["projectile"] = {"sprite": {}}
+        del plain["attacks"][bombs]["warning"]
+        self.assertEqual(validate_boss(plain, RESOURCES, enemies), [])
+
+    def test_melee_sound(self):
+        whip = content("enemies", "arlesien-fouet")
+        self.assertEqual(validate_enemy(whip, RESOURCES), [])
+        whip["melee"]["sound"] = "Audio/Sfx/missing"
+        self.assertTrue(validate_enemy(whip, RESOURCES))
+        whip["melee"]["sound"] = "Art/saint-remy/sol"
+        self.assertTrue(validate_enemy(whip, RESOURCES))
 
     def test_deaths_and_staging_rules(self):
         base = content("rules", "default")

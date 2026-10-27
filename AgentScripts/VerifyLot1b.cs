@@ -24,9 +24,13 @@ public static class VerifyLot1b
     static PanameGame g;static PanameGame.Player[] players;static IList enemies,shots,pickups;
     static readonly PlayerCommand[] commands=new PlayerCommand[4];
     static readonly string[] Lettered={"heavy-machinegun","shotgun","flamethrower","rocket-launcher","laser"};
+    // Missions by their place among the three this test was written for (Paris 0, Marseille 1, Tokyo 2): Saint-Remy now comes
+    // before Tokyo and has its own VerifySaintRemy. A test mission appended after the catalogue keeps its index.
+    static readonly string[] Three={"panique-a-paname","mistral-gagnant","tokyo-neon"};
+    static int Old(PanameGame game,int m){var all=(MissionDefinition[])game.GetType().GetField("missions",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(game);return m<Three.Length?Array.FindIndex(all,x=>x.id==Three[m]):m;}
     static void Start(int mission,int difficulty,int heroes,int first=0)
     {
-        g.ReturnToLobby();Call(g,"LoadMission",mission);g.SetDifficulty(difficulty);
+        g.ReturnToLobby();Call(g,"LoadMission",Old(g,mission));g.SetDifficulty(difficulty);
         for(int i=0;i<4;i++){g.slots[i].joined=i<heroes;g.slots[i].hero=(first+i)%4;}
         g.BeginRound();players=(PanameGame.Player[])Get(g,"players");enemies=(IList)Get(g,"enemies");shots=(IList)Get(g,"shots");pickups=(IList)Get(g,"pickups");
         for(int i=0;i<4;i++)commands[i]=default;
@@ -215,14 +219,14 @@ public static class VerifyLot1b
     static void MissionTables(List<string> checks,MissionDefinition[] missions)
     {
         // The shipped missions: Paris plays the rules' table, the other two their own.
-        Check((missions[0].weapons==null||missions[0].weapons.Length==0)&&missions[0].weaponTable==missions[0].ruleSet.weapons&&missions[1].weaponTable[0].gun.id=="shotgun"&&missions[2].weaponTable[0].gun.id=="laser",
+        Check((missions[0].weapons==null||missions[0].weapons.Length==0)&&missions[0].weaponTable==missions[0].ruleSet.weapons&&missions[1].weaponTable[0].gun.id=="shotgun"&&missions[Old(g,2)].weaponTable[0].gun.id=="laser",
             "Chaque mission choisit ses armes : Paris garde la table des règles, Marseille et Tokyo ont la leur (mission.weapons)",checks);
         Start(0,1,1);g.CurrentMission.weaponTable=Table(("flamethrower",3),("laser",1));Call(g,"ResetWeaponDraws");var drawn=new List<string>();
         var p=players[0];
         for(int i=0;i<12;i++){Call(g,"SpawnPickup",new Vector2(p.position.x+20+i,0),0);drawn.Add(((WeaponDefinition)Field(pickups[pickups.Count-1],"gun")).letter);}
         int f=drawn.FindAll(l=>l=="F").Count;
         Check(f==9&&drawn.Count==12&&drawn[2]=="L","Ses caisses donnent ces armes dans ses proportions, réparties : 3 F pour 1 L ("+string.Join("",drawn)+")",checks);
-        var text=Resources.Load<TextAsset>("Levels/"+missions[2].id).text;bool refused=false;
+        var text=Resources.Load<TextAsset>("Levels/"+missions[Old(g,2)].id).text;bool refused=false;
         try{MissionDefinition.Parse(text.Replace("\"weapon\": \"laser\"","\"weapon\": \"arme-inconnue\""));}catch(ArgumentException){refused=true;}
         Check(refused,"Une mission qui nomme une arme inconnue est refusée",checks);
     }
@@ -246,7 +250,7 @@ public static class VerifyLot1b
             var record=g.LastReplay;foreach(var m in missions)PlayerPrefs.DeleteKey("action-legends.unlocked."+m.id);
             bool ok=record!=null&&verifier.BeginVerify(JsonUtility.FromJson<ReplayRecord>(JsonUtility.ToJson(record)));bool? result=null;while(ok&&result==null)result=verifier.StepVerify(1e6f);
             all.UnionWith(used.Keys);
-            Check(ok&&result==true&&used.Count>=1,"Une partie avec "+used.Count+" armes à lettres ("+Describe(used)+") se rejoue à l'identique, même empreinte d'état : "+missions[run.m].id+" ×"+run.h+" ("+(record.won?"victoire":"défaite")+", "+record.ticks+" pas)",checks);
+            Check(ok&&result==true&&used.Count>=1,"Une partie avec "+used.Count+" armes à lettres ("+Describe(used)+") se rejoue à l'identique, même empreinte d'état : "+missions[Old(g,run.m)].id+" ×"+run.h+" ("+(record.won?"victoire":"défaite")+", "+record.ticks+" pas)",checks);
         }
         Check(all.Count>=3,"Ces parties rejouées couvrent "+all.Count+" armes différentes",checks);
     }

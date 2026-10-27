@@ -5,7 +5,43 @@ namespace Paname
     public sealed partial class PanameGame
     {
         Texture2D menuLogo,menuCard,missionLogo;
+        // The last local player who changed hero with the mouse: the CONTINUE? buttons answer for him.
         int menuPlayer;
+        // One card per player, J1 to J4: the hero he plays (portrait, name, role, special, place in the list) with arrows to go
+        // through every hero; an empty place invites to join. Online, only this browser's card has arrows.
+        public static Rect HeroArrow(int slot,int direction)=>new Rect(46+slot*298+(direction<0?8:248),318,30,52);
+        static Rect PlayerCard(int slot)=>new Rect(46+slot*298,211,286,380);
+        void DrawPlayerCard(int i)
+        {
+            var card=PlayerCard(i);float x=card.x;bool joined=slots[i].joined;Color accent=PlayerColors[i];
+            IllustratedPanel(card,joined?Color.white:new Color(.55f,.6f,.62f,1));
+            Panel(x+14,222,258,28,joined?accent:C("304C56"));
+            Label(x+18,222,250,28,joined?SlotLabel(i).ToUpperInvariant():"J"+(i+1)+"  ·  LIBRE",13,joined?Ink:C("A5BBB8"),true,TextAnchor.MiddleCenter);
+            if(!joined)
+            {
+                Label(x+16,290,254,120,"?",96,new Color(.65f,.75f,.75f,.55f),true,TextAnchor.MiddleCenter);
+                Label(x+16,440,254,28,Online?"PLACE LIBRE":"REJOINDRE",21,Cream,true,TextAnchor.MiddleCenter);
+                Panel(x+18,515,250,44,C("07192A"));
+                Label(x+22,520,242,32,Online?"UN AMI REJOINT AVEC LE LIEN DE LA PARTIE":"APPUIE SUR A / CROIX D'UNE MANETTE",12,C("B2C7BD"),true,TextAnchor.MiddleCenter);
+                return;
+            }
+            int index=Mod(slots[i].hero,HeroCount);var hero=Heroes[index];
+            Portrait(x+49,252,index,1.12f);
+            Label(x+16,450,254,28,hero.name,21,Cream,true,TextAnchor.MiddleCenter);
+            Label(x+16,478,254,20,hero.role,11,accent,true,TextAnchor.MiddleCenter);
+            Panel(x+18,515,250,44,C("07192A"));
+            Label(x+22,520,242,32,hero.specialName,13,Cream,false,TextAnchor.MiddleCenter);
+            Label(x+16,563,254,20,(index+1)+" / "+HeroCount,12,Gold,true,TextAnchor.MiddleCenter);
+            if(HeroCount<2||Online&&i!=LocalSlotIndex)return;
+            for(int d=-1;d<=1;d+=2){var r=HeroArrow(i,d);if(Button(r.x,r.y,r.width,r.height,d<0?"<":">",C("304C56")))MenuArrow(i,d);}
+        }
+        // A card's arrow: this player goes to the previous or next hero (online, through the host).
+        void MenuArrow(int slot,int direction)
+        {
+            if(slot<0||slot>=4||!slots[slot].joined)return;
+            if(Online){if(slot==LocalSlotIndex)OnlineHero(Mod(slots[slot].hero+direction,HeroCount));return;}
+            menuPlayer=slot;ChangeHero(slot,direction);
+        }
         void LoadMenuArt()
         {
             if(!menuLogo)menuLogo=Resources.Load<Texture2D>("Art/action-legends-logo");
@@ -61,29 +97,11 @@ namespace Paname
                 Label(969,142,204,24,UnlockedCount+" / "+MissionCount+" MISSIONS DÉBLOQUÉES",11,Gold,true,TextAnchor.MiddleCenter);
                 if(browse&&Button(1179,142,26,24,">",C("304C56")))SelectMission(1);
             }
-            int selectedSlot=Online?Mathf.Max(0,LocalSlotIndex):menuPlayer;
-            if(!Online&&!slots[selectedSlot].joined){menuPlayer=0;selectedSlot=0;}
-            for(int hero=0;hero<HeroCount;hero++)
-            {
-                float x=46+hero*298;Color accent=PlayerColors[selectedSlot];bool selected=slots[selectedSlot].hero==hero;
-                var card=new Rect(x,211,286,380);
-                if(GUI.Button(card,GUIContent.none,GUIStyle.none))SelectHero(selectedSlot,hero);
-                IllustratedPanel(card,selected?Color.white:new Color(.8f,.85f,.85f,1));
-                if(selected){Panel(x+14,222,258,28,accent);Label(x+18,222,250,28,PlayerTag(selectedSlot)+"  ·  SÉLECTIONNÉ",13,Ink,true,TextAnchor.MiddleCenter);}
-                else Label(x+20,224,246,28,"CHOISIR CE HÉROS",12,C("A5BBB8"),true,TextAnchor.MiddleCenter);
-                Portrait(x+49,252,hero,1.12f);
-                Label(x+16,450,254,28,Heroes[hero].name,21,Cream,true,TextAnchor.MiddleCenter);
-                Label(x+16,478,254,20,Heroes[hero].role,11,selected?accent:C("9AAFB2"),true,TextAnchor.MiddleCenter);
-                Panel(x+18,515,250,44,C("07192A"));
-                Label(x+22,520,242,32,Heroes[hero].specialName,13,Cream,false,TextAnchor.MiddleCenter);
-            }
-            for(int i=0;i<4;i++)if(slots[i].joined)
-            {
-                if(Button(50+i*218,596,208,28,SlotLabel(i),(Online?LocalSlotIndex:menuPlayer)==i?PlayerColors[i]:C("304C56"),(Online?LocalSlotIndex:menuPlayer)==i)&&!Online)menuPlayer=i;
-            }
+            for(int i=0;i<4;i++)DrawPlayerCard(i);
             if(!DrawOnlineLobbyFooter())
             {
-                Label(51,633,800,22,"MANETTE : A / CROIX pour rejoindre",13,Cream);
+                Label(51,606,800,22,"MANETTE : A / CROIX POUR REJOINDRE  ·  CROIX GAUCHE / DROITE POUR CHANGER DE HÉROS",13,Cream);
+                Label(51,630,800,22,"J1 AU CLAVIER : Q / E OU FLÈCHES  ·  À LA SOURIS : LES FLÈCHES DE CHAQUE CARTE",13,C("B2C7BD"));
                 if(Button(932,609,296,59,"DÉPLOYER L'ÉQUIPE  »",Coral,true))BeginRound();
             }
         }

@@ -21,7 +21,7 @@ Le jeu publie et lit les scores sur des **relais Nostr publics**, sans serveur d
 
 ## Limites
 
-- Un replay ne se rejoue qu’avec la même simulation. Quand une version change le gameplay, les anciens scores ne se reproduisent plus et disparaissent du classement ; ils réapparaissent si la simulation redevient identique. Les verdicts sont mémorisés par version.
+- Un replay ne se rejoue qu’avec la même simulation. Quand une version change le gameplay, les anciens scores ne se reproduisent plus et disparaissent du classement ; ils réapparaissent si la simulation redevient identique. Les verdicts sont mémorisés par version. C'est le cas de la version 0.8.0 (commandes, armes, otages et missions nouvelles) : les scores publiés en 0.7.0 ne s'affichent plus.
 - Un replay vérifié prouve que la partie a été jouée avec ces entrées, pas qu’un humain les a saisies : un programme qui joue à la place du joueur reste possible.
 - Les relais publics ne garantissent ni la conservation ni la disponibilité. Un afflux de faux scores en tête de classement peut ralentir l’affichage : le navigateur vérifie au plus 25 replays par ouverture du classement.
 - Les pseudos et les parties publiés sont publics et ne peuvent pas être effacés de façon garantie.

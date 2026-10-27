@@ -129,7 +129,7 @@ public static class VerifyLot1a
         p.grenades=0;Call(g,"SpawnPickup",p.position,bonus);Tick(3);
         Check(p.grenades==rules.bonuses[bonus].amount[d],"Une caisse de grenades ramassée recharge aussi le stock",checks);
         // A mission naming other rules plays by them: here three grenades, crates that only give grenades.
-        var custom=ContentLibrary.AddRules(@"{""id"": ""test-rules"", ""extends"": ""default"", ""grenades"": {""start"": [3, 3, 3, 3], ""max"": [5, 5, 5, 5]}, ""supplies"": [6]}");
+        var custom=ContentLibrary.AddRules(@"{""id"": ""test-rules"", ""extends"": ""default"", ""grenades"": {""start"": [3, 3, 3, 3], ""max"": [5, 5, 5, 5]}, ""supplies"": [4]}");
         var mission=g.CurrentMission;var shipped=mission.ruleSet;mission.ruleSet=custom;
         try{g.BeginRound();p=players[0];Check(p.grenades==3&&custom.grenade.damage==gr.damage&&custom.supplies.Length==1,"Une mission qui nomme d'autres règles (extends default) en change le stock sans réécrire le reste",checks);}
         finally{mission.ruleSet=shipped;}
@@ -153,7 +153,7 @@ public static class VerifyLot1a
         commands[0]=default;Tick(30);SetField(e,"position",new Vector2(p.position.x+5,0));int hp=Hp(e);
         commands[0]=new PlayerCommand{fire=true};Tick(1);commands[0]=default;
         bool shot=shots.Count>0;Tick(20);
-        Check(shot&&hp-Hp(e)==p.Definition.damage,"À distance, le même bouton tire normalement",checks);
+        Check(shot&&hp-Hp(e)==p.Definition.Weapon.damage,"À distance, le même bouton tire normalement",checks);
     }
 
     // The new bits through the replay record and the online messages.

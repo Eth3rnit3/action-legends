@@ -8,13 +8,14 @@ namespace Paname
         public Difficulty SelectedDifficulty {get;private set;}=Difficulty.Arcade;
         int DifficultyIndex=>(int)SelectedDifficulty;
         public static readonly string[] DifficultyNames={"DÉTENTE","ARCADE","DIFFICILE","LÉGENDE"};
-        static readonly int[] HealthByDifficulty={6,5,4,3},LivesByDifficulty={3,2,1,1},BonusKills={15,22,28,35};
+        static readonly int[] HealthByDifficulty={6,5,4,3},LivesByDifficulty={3,2,1,1};
         static readonly float[] HealthFactors={1,1.8f,2.5f,3.2f},CountFactors={1,1.2f,1.5f,1.8f},SpeedFactors={1,1.12f,1.25f,1.4f},AttackFactors={1.15f,.85f,.65f,.5f};
         int MaxPlayerHealth=>HealthByDifficulty[DifficultyIndex];
         int StartingReserves=>JoinedCount*LivesByDifficulty[DifficultyIndex];
-        int KillsPerBonus=>BonusKills[DifficultyIndex];
-        float SupplySpacing=>SelectedDifficulty==Difficulty.Detente?72:SelectedDifficulty==Difficulty.Arcade?90:SelectedDifficulty==Difficulty.Difficile?110:130;
-        float FirstSupplyX=>SelectedDifficulty==Difficulty.Detente?24:SelectedDifficulty==Difficulty.Arcade?35:SelectedDifficulty==Difficulty.Difficile?45:55;
+        // How often crates and drops come is part of the mission's rules (Content/rules).
+        int KillsPerBonus=>Rules.killsPerDrop[DifficultyIndex];
+        float SupplySpacing=>Rules.supplySpacing[DifficultyIndex];
+        float FirstSupplyX=>Rules.firstSupply[DifficultyIndex];
         public void SetDifficulty(int index)
         {
             if(HostOnly(()=>SetDifficulty(index))||phase!=Phase.Lobby)return;

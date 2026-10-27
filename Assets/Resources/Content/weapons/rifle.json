@@ -1,0 +1,30 @@
+{
+  "id": "rifle",
+  "name": "FUSIL",
+  "ammo": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "fireRate": 0.1,
+  "damage": 3,
+  "projectile": {
+    "type": "bullet",
+    "speed": 36,
+    "life": 1.25
+  },
+  "recoil": {
+    "shake": 0.025,
+    "push": 0
+  },
+  "flash": "light",
+  "casings": true,
+  "sound": "Audio/Sfx/tir-D-pistolet-sec",
+  "icon": {
+    "texture": "Art/weapon-letters",
+    "columns": 3,
+    "rows": 2,
+    "cell": 5
+  }
+}

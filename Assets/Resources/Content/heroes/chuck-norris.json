@@ -5,11 +5,9 @@
   "shortName": "CHUCK",
   "role": "LE RANGER",
   "specialName": "Coup circulaire",
+  "weapon": "assault-rifle",
   "speed": 10.5,
-  "fireRate": 0.095,
-  "damage": 3,
   "jump": 11,
-  "recoilShake": 0.025,
   "strideRate": 13,
   "bob": 0.045,
   "special": {

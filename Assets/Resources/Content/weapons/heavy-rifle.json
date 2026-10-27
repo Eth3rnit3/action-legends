@@ -1,0 +1,9 @@
+{
+  "id": "heavy-rifle",
+  "extends": "rifle",
+  "fireRate": 0.065,
+  "damage": 5,
+  "recoil": {
+    "shake": 0.07
+  }
+}

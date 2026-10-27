@@ -1,0 +1,42 @@
+{
+  "id": "heavy-machinegun",
+  "letter": "H",
+  "name": "MITRAILLEUSE LOURDE",
+  "ammo": [
+    120,
+    102,
+    84,
+    66
+  ],
+  "fireRate": 0.055,
+  "damage": 5,
+  "projectile": {
+    "type": "bullet",
+    "speed": 38,
+    "life": 1.1,
+    "jitter": 3.5,
+    "size": 1.15,
+    "color": "FFD54A"
+  },
+  "recoil": {
+    "shake": 0.06,
+    "push": 0
+  },
+  "flash": "light",
+  "casings": true,
+  "sound": "Audio/Sfx/tir-H-lourde",
+  "announce": "MITRAILLEUSE LOURDE !",
+  "voice": "Audio/Voices/bonus-0",
+  "icon": {
+    "texture": "Art/weapon-letters",
+    "columns": 3,
+    "rows": 2,
+    "cell": 0
+  },
+  "crate": {
+    "texture": "Art/weapon-crates",
+    "columns": 3,
+    "rows": 2,
+    "cell": 0
+  }
+}

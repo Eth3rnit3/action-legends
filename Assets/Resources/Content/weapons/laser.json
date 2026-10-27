@@ -1,0 +1,47 @@
+{
+  "id": "laser",
+  "letter": "L",
+  "name": "LASER",
+  "ammo": [
+    120,
+    100,
+    85,
+    70
+  ],
+  "fireRate": 0.09,
+  "damage": 3,
+  "projectile": {
+    "type": "beam",
+    "range": 13,
+    "life": 0.1,
+    "pierce": -1,
+    "radius": 0.2,
+    "sprite": {
+      "texture": "Art/weapon-fx",
+      "columns": 3,
+      "rows": 2,
+      "cell": 3
+    },
+    "size": 2.2
+  },
+  "recoil": {
+    "shake": 0.015,
+    "push": 0
+  },
+  "flash": "light",
+  "casings": false,
+  "sound": "Audio/Sfx/tir-L-laser",
+  "announce": "LASER !",
+  "icon": {
+    "texture": "Art/weapon-letters",
+    "columns": 3,
+    "rows": 2,
+    "cell": 4
+  },
+  "crate": {
+    "texture": "Art/weapon-crates",
+    "columns": 3,
+    "rows": 2,
+    "cell": 4
+  }
+}

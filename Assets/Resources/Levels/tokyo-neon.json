@@ -170,5 +170,27 @@
     "enabled": true,
     "id": "mecha-shogun",
     "health": 1.3
-  }
+  },
+  "weapons": [
+    {
+      "weapon": "laser",
+      "weight": 3
+    },
+    {
+      "weapon": "heavy-machinegun",
+      "weight": 2
+    },
+    {
+      "weapon": "rocket-launcher",
+      "weight": 2
+    },
+    {
+      "weapon": "shotgun",
+      "weight": 2
+    },
+    {
+      "weapon": "flamethrower",
+      "weight": 1
+    }
+  ]
 }

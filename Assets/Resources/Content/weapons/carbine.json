@@ -1,0 +1,6 @@
+{
+  "id": "carbine",
+  "extends": "rifle",
+  "fireRate": 0.085,
+  "damage": 3
+}

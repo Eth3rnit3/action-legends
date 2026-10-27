@@ -21,6 +21,10 @@ HERO_SPECIALS = ("blast", "volley")
 HERO_STATES = ("idle", "run", "jump", "crouch", "aimUp", "jumpDown", "knife", "throw")
 HERO_FIRING = ("idle", "run", "jump", "crouch", "crouchWalk", "crouchShoot", "aimUp", "aimDiagonal", "jumpDown")
 BONUS_EFFECTS = ("weapon", "health", "turbo", "score", "grenades")
+# Generic projectiles of heroes' weapons (Content/weapons), not the looks of enemy projectiles (LOOKS).
+WEAPON_PROJECTILES = ("bullet", "flame", "rocket", "beam")
+WEAPON_FLASHES = ("none", "light", "heavy")
+LEGACY_HERO_WEAPON = ("fireRate", "damage", "recoilShake")
 ENEMY_BEHAVIORS = ("melee", "thrower", "gunman")
 BOSS_BEHAVIORS = ("flyer", "walker")
 ATTACKS = ("gun", "bombs", "stomp")
@@ -147,19 +151,36 @@ def first_cell(info, state):
     return cells[0] if isinstance(cells, list) and cells and type(cells[0]) is int else None
 
 
-def validate_hero(data, resources):
+def weapon_library(resources):
+    """The resolved weapons of Content/weapons, for validators called on their own."""
+    library, _ = load_library(resources, kinds=("weapons",))
+    return library["weapons"]
+
+
+def unlimited(weapon):
+    ammo = weapon.get("ammo") if isinstance(weapon, dict) else None
+    return not ammo or all(v == 0 for v in ammo)
+
+
+def validate_hero(data, resources, weapons=None):
     errors = Errors()
     label = f"hero {data.get('id')}"
+    weapons = weapon_library(resources) if weapons is None else weapons
     for key, limit in (("name", 24), ("shortName", 12), ("role", 24), ("specialName", 30)):
         errors.text(data, key, limit, label)
     errors.number(data, "order", 0, 999, label, 0, True)
     errors.number(data, "speed", 1, 30, label)
-    errors.number(data, "fireRate", .02, 2, label)
     errors.number(data, "jump", 1, 30, label)
-    errors.number(data, "recoilShake", 0, 1, label)
     errors.number(data, "strideRate", .1, 60, label)
     errors.number(data, "bob", 0, 1, label)
-    errors.number(data, "damage", 1, 100, label, 0, True)
+    for key in LEGACY_HERO_WEAPON:
+        if data.get(key, 0) != 0:
+            errors.append(f"{label}.{key}: set in the hero's weapon (weapon, Content/weapons) since lot 1b")
+    weapon = data.get("weapon")
+    if weapon not in weapons:
+        errors.append(f"{label}.weapon: unknown weapon {weapon} (Content/weapons/<id>.json)")
+    elif not unlimited(weapons[weapon]):
+        errors.append(f"{label}.weapon: a hero's own weapon must not run out (ammo 0)")
     special = obj(data, "special")
     kind = special.get("type")
     if kind not in HERO_SPECIALS:
@@ -220,9 +241,100 @@ def validate_cell(cell, resources, label, errors):
     errors.number(cell, "cell", 0, (columns or 1) * (rows or 1) - 1, label, 0, True)
 
 
-def validate_rules(data, resources):
+def validate_weapon(data, resources, library=None):
+    errors = Errors()
+    label = f"weapon {data.get('id')}"
+    errors.text(data, "name", 24, label)
+    ammo = data.get("ammo", [0, 0, 0, 0])
+    errors.per_difficulty({"ammo": ammo}, "ammo", 0, 9999, label, True)
+    limited = isinstance(ammo, list) and len(ammo) == 4 and all(isinstance(v, int) and not isinstance(v, bool) for v in ammo) and any(ammo)
+    if limited and not all(v > 0 for v in ammo):
+        errors.append(f"{label}.ammo: 0 everywhere (unlimited) or at least 1 everywhere")
+    letter = data.get("letter", "")
+    if letter not in (None, "") and not (isinstance(letter, str) and re.fullmatch(r"[A-Z]", letter)):
+        errors.append(f"{label}.letter: one capital letter")
+    if limited:
+        if not letter:
+            errors.append(f"{label}.letter: required for a weapon with ammunition")
+        errors.text(data, "announce", 30, label)
+        validate_cell(data.get("crate"), resources, label + ".crate", errors)
+    else:
+        errors.text(data, "announce", 30, label, required=False)
+        if "crate" in data:
+            validate_cell(data["crate"], resources, label + ".crate", errors)
+    voice = data.get("voice")
+    if voice not in (None, ""):
+        errors.resource(voice + "-a" if isinstance(voice, str) else voice, "Audio/", SOUNDS, resources, label + ".voice")
+    if "icon" in data:
+        validate_cell(data["icon"], resources, label + ".icon", errors)
+    errors.number(data, "fireRate", .02, 3, label)
+    errors.number(data, "damage", 1, 200, label, 0, True)
+    errors.resource(data.get("sound"), "Audio/", SOUNDS, resources, label + ".sound")
+    if data.get("flash", "light") not in WEAPON_FLASHES:
+        errors.append(f"{label}.flash: one of {', '.join(WEAPON_FLASHES)}")
+    if not isinstance(data.get("casings", True), bool):
+        errors.append(f"{label}.casings: true or false")
+    shot, pl = obj(data, "projectile"), label + ".projectile"
+    kind = shot.get("type", "bullet")
+    if kind not in WEAPON_PROJECTILES:
+        errors.append(f"{pl}.type: one of {', '.join(WEAPON_PROJECTILES)}")
+    errors.number(shot, "pellets", 1, 9, pl, 1, True)
+    errors.number(shot, "pierce", -1, 20, pl, 0, True)
+    for key, low, high, default in (("life", .016, 5, 1.25), ("spread", 0, 90, 0), ("jitter", 0, 30, 0), ("radius", 0, 3, 0), ("size", .05, 5, 1), ("growth", 0, 10, 0)):
+        errors.number(shot, key, low, high, pl, default)
+    if kind == "beam":
+        errors.number(shot, "range", 1, 40, pl)
+    else:
+        errors.number(shot, "speed", 1, 80, pl, 36)
+        errors.number(shot, "acceleration", -200, 200, pl)
+        errors.number(shot, "homing", 0, 1440, pl)
+    sprite = shot.get("sprite")
+    if isinstance(sprite, dict) and sprite.get("texture"):
+        validate_cell(sprite, resources, pl + ".sprite", errors)
+        frames = errors.number(shot, "frames", 1, 16, pl, 1, True)
+        cells = sprite.get("columns", 1) * sprite.get("rows", 1) if all(isinstance(sprite.get(k, 1), int) for k in ("columns", "rows")) else 0
+        if frames is not None and isinstance(sprite.get("cell", 0), int) and sprite.get("cell", 0) + frames > cells:
+            errors.append(f"{pl}.frames: the frames must stay inside the grid, from cell on")
+    elif kind in ("beam", "flame"):
+        errors.append(f"{pl}.sprite: a beam or a flame is drawn from a sprite")
+    color = shot.get("color")
+    if color not in (None, "") and not (isinstance(color, str) and re.fullmatch(r"[0-9A-Fa-f]{6}", color)):
+        errors.append(f"{pl}.color: six hexadecimal digits (RRGGBB)")
+    blast, bl = obj(data, "explosion"), label + ".explosion"
+    errors.number(blast, "radius", 0, 10, bl)
+    errors.number(blast, "damage", 0, 500, bl, 0, True)
+    errors.number(blast, "bossDamage", 0, 1000, bl, 0, True)
+    recoil = obj(data, "recoil")
+    errors.number(recoil, "shake", 0, 1, label + ".recoil")
+    errors.number(recoil, "push", 0, 20, label + ".recoil")
+    return errors
+
+
+def validate_table(table, weapons, label, required, errors):
+    """A weapons table: crates that name no weapon give these, weight times per sum of weights."""
+    if table in (None, []):
+        if required:
+            errors.append(f"{label}: at least one weapon, since a weapon crate names none")
+        return
+    if not isinstance(table, list) or len(table) > 16:
+        errors.append(f"{label}: a list of at most sixteen weapons")
+        return
+    for i, line in enumerate(table):
+        if not isinstance(line, dict):
+            errors.append(f"{label}[{i}]: object required")
+            continue
+        errors.number(line, "weight", 1, 100, f"{label}[{i}]", 1, True)
+        weapon = line.get("weapon")
+        if weapon not in weapons:
+            errors.append(f"{label}[{i}].weapon: unknown weapon {weapon}")
+        elif unlimited(weapons[weapon]):
+            errors.append(f"{label}[{i}].weapon: {weapon} has no ammunition to give")
+
+
+def validate_rules(data, resources, weapons=None):
     errors = Errors()
     label = f"rules {data.get('id')}"
+    weapons = weapon_library(resources) if weapons is None else weapons
     stock = obj(data, "grenades")
     errors.per_difficulty(stock, "start", 0, 99, label + ".grenades", True)
     errors.per_difficulty(stock, "max", 0, 99, label + ".grenades", True)
@@ -255,18 +367,36 @@ def validate_rules(data, resources):
         if bonus.get("effect") not in BONUS_EFFECTS:
             errors.append(f"{bl}.effect: one of {', '.join(BONUS_EFFECTS)}")
         if bonus.get("effect") == "weapon":
-            errors.number(bonus, "weapon", 1, 3, bl, 0, True)
-        errors.per_difficulty(bonus, "amount", 1, 100000, bl, True)
-        errors.text(bonus, "announce", 30, bl)
+            # The weapon brings its ammunition, crate, announce and voice; empty draws one from the weapons table.
+            weapon = bonus.get("weapon", "")
+            if weapon not in ("", None) and weapon not in weapons:
+                errors.append(f"{bl}.weapon: unknown weapon {weapon} (Content/weapons/<id>.json)")
+            elif weapon not in ("", None) and unlimited(weapons[weapon]):
+                errors.append(f"{bl}.weapon: {weapon} has no ammunition to give")
+            if bonus.get("amount") not in (None, []):
+                errors.append(f"{bl}.amount: not for a weapon, whose ammunition is in the weapon")
+            errors.text(bonus, "announce", 30, bl, required=False)
+            if "icon" in bonus:
+                validate_cell(bonus["icon"], resources, bl + ".icon", errors)
+        else:
+            if bonus.get("weapon") not in (None, ""):
+                errors.append(f"{bl}.weapon: only for effect weapon")
+            errors.per_difficulty(bonus, "amount", 1, 100000, bl, True)
+            errors.text(bonus, "announce", 30, bl)
+            validate_cell(bonus.get("icon"), resources, bl + ".icon", errors)
         errors.number(bonus, "scale", .2, 5, bl, 1.25)
         voice = bonus.get("voice")
         if voice not in (None, ""):
             errors.resource(voice + "-a" if isinstance(voice, str) else voice, "Audio/", SOUNDS, resources, bl + ".voice")
-        validate_cell(bonus.get("icon"), resources, bl + ".icon", errors)
     for key in ("supplies", "drops"):
         cycle = data.get(key)
         if not isinstance(cycle, list) or not 1 <= len(cycle) <= 64 or any(type(v) is not int or not 0 <= v < len(bonuses) for v in cycle):
             errors.append(f"{label}.{key}: one to 64 indices into bonuses")
+    errors.per_difficulty(data, "firstSupply", 5, 500, label)
+    errors.per_difficulty(data, "supplySpacing", 10, 500, label)
+    errors.per_difficulty(data, "killsPerDrop", 1, 500, label, True)
+    draws = any(isinstance(b, dict) and b.get("effect") == "weapon" and not b.get("weapon") for b in bonuses)
+    validate_table(data.get("weapons"), weapons, label + ".weapons", draws, errors)
     validate_cell(data.get("go"), resources, label + ".go", errors)
     return errors
 
@@ -441,14 +571,18 @@ def validate_boss(data, resources):
     return errors
 
 
-VALIDATORS = {"heroes": validate_hero, "enemies": validate_enemy, "bosses": validate_boss, "rules": validate_rules}
+# Weapons first: heroes and rules name them.
+VALIDATORS = {"weapons": validate_weapon, "heroes": validate_hero, "enemies": validate_enemy, "bosses": validate_boss, "rules": validate_rules}
+NEEDS_WEAPONS = ("heroes", "rules")
 
 
-def load_library(resources, extra=None):
+def load_library(resources, extra=None, kinds=None):
     """Read Content/<kind>/*.json, resolve "extends" and validate. Returns (library, errors);
     extra maps a kind to additional raw entries (dicts), as ContentLibrary.AddEnemy/AddBoss do."""
     library, errors = {kind: {} for kind in VALIDATORS}, []
     for kind, validate in VALIDATORS.items():
+        if kinds is not None and kind not in kinds:
+            continue
         sources = {}
         for file in sorted((resources / "Content" / kind).glob("*.json")):
             try:
@@ -480,8 +614,11 @@ def load_library(resources, extra=None):
             except ValueError as exc:
                 errors.append(f"Content/{kind}/{entry_id}: {exc}")
                 continue
-            errors.extend(f"Content/{kind}/{entry_id}: {e}" for e in validate(data, resources))
+            found = validate(data, resources, library["weapons"]) if kind in NEEDS_WEAPONS else validate(data, resources)
+            errors.extend(f"Content/{kind}/{entry_id}: {e}" for e in found)
             library[kind][entry_id] = data
+    if kinds is not None:
+        return library, errors
     if not 1 <= len(library["heroes"]) <= 4:
         errors.append("Content/heroes: one to four heroes are required")
     if "default" not in library["rules"]:
@@ -542,6 +679,7 @@ def validate_mission(data, resources, library=None):
     rules = data.get("rules", "default")
     if rules not in library["rules"]:
         errors.append(f"rules: unknown rules {rules} (Content/rules/{rules}.json)")
+    validate_table(data.get("weapons"), library["weapons"], "weapons", False, errors)
     enemies = data.get("enemies")
     roster = 0
     if not isinstance(enemies, list) or not 1 <= len(enemies) <= 8:

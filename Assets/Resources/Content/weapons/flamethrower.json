@@ -1,0 +1,50 @@
+{
+  "id": "flamethrower",
+  "letter": "F",
+  "name": "LANCE-FLAMMES",
+  "ammo": [
+    120,
+    105,
+    90,
+    75
+  ],
+  "fireRate": 0.065,
+  "damage": 2,
+  "projectile": {
+    "type": "flame",
+    "speed": 16,
+    "acceleration": -18,
+    "life": 0.5,
+    "pierce": -1,
+    "radius": 0.3,
+    "growth": 1.2,
+    "sprite": {
+      "texture": "Art/weapon-fx",
+      "columns": 3,
+      "rows": 2,
+      "cell": 0
+    },
+    "frames": 3,
+    "size": 1.2
+  },
+  "recoil": {
+    "shake": 0.02,
+    "push": 0
+  },
+  "flash": "none",
+  "casings": false,
+  "sound": "Audio/Sfx/tir-F-flammes",
+  "announce": "LANCE-FLAMMES !",
+  "icon": {
+    "texture": "Art/weapon-letters",
+    "columns": 3,
+    "rows": 2,
+    "cell": 2
+  },
+  "crate": {
+    "texture": "Art/weapon-crates",
+    "columns": 3,
+    "rows": 2,
+    "cell": 2
+  }
+}

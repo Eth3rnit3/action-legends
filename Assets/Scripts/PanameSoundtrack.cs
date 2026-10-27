@@ -9,7 +9,7 @@ namespace Paname
         AudioClip musicClip,bossMusicClip;
         // Three announcer takes per line; one is drawn at random each time it is spoken.
         AudioClip[] bossVoice,winVoice,impactClips,explosionClips;
-        AudioClip pistolClip,machineGunClip,tripleClip,rocketClip,bossGunClip,playerHitClip,bossDownClip,pickupClip,coinClip,selectClip,startClip;
+        AudioClip bossGunClip,playerHitClip,bossDownClip,pickupClip,coinClip,selectClip,startClip;
         // Cosmetic only: the simulation itself has no randomness, which keeps online peers in sync.
         readonly System.Random audioRandom=new System.Random();
         bool musicEnabled=true,voiceEnabled=true;
@@ -23,7 +23,7 @@ namespace Paname
             voiceOut=gameObject.AddComponent<AudioSource>();voiceOut.volume=.95f;
             LoadMissionMusic();
             bossVoice=Takes("boss-alert");winVoice=Takes("victory");
-            pistolClip=Sfx("tir-D-pistolet-sec");machineGunClip=Sfx("tir-A-mitraille");tripleClip=Sfx("tir-B-laser-snes");rocketClip=Sfx("roquette-depart");bossGunClip=Sfx("tir-C-blaster-cps1");
+            bossGunClip=Sfx("tir-C-blaster-cps1");
             impactClips=new[]{Sfx("impact-A-metal"),Sfx("impact-B-tchak"),Sfx("impact-C-ping")};
             explosionClips=new[]{Sfx("explosion-A-grosse"),Sfx("explosion-B-courte"),Sfx("explosion-C-bombe-neo")};
             playerHitClip=Sfx("joueur-touche");bossDownClip=Sfx("boss-explose");pickupClip=Sfx("bonus-ramasse");
@@ -35,7 +35,6 @@ namespace Paname
         }
         AudioClip Pick(AudioClip[] clips)=>clips==null||clips.Length==0?null:clips[audioRandom.Next(clips.Length)];
         void Sound(AudioClip[] clips)=>Sound(Pick(clips));
-        AudioClip FireClip(int weapon)=>weapon==1?machineGunClip:weapon==2?tripleClip:weapon==3?rocketClip:pistolClip;
         void Speak(AudioClip[] takes)
         {
             var clip=Pick(takes);

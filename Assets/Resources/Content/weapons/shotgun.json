@@ -1,0 +1,49 @@
+{
+  "id": "shotgun",
+  "letter": "S",
+  "name": "FUSIL À POMPE",
+  "ammo": [
+    30,
+    26,
+    22,
+    18
+  ],
+  "fireRate": 0.55,
+  "damage": 5,
+  "projectile": {
+    "type": "bullet",
+    "pellets": 5,
+    "spread": 7,
+    "speed": 28,
+    "life": 0.24,
+    "pierce": -1,
+    "radius": 0.25,
+    "sprite": {
+      "texture": "Art/weapon-fx",
+      "columns": 3,
+      "rows": 2,
+      "cell": 5
+    },
+    "size": 1.1
+  },
+  "recoil": {
+    "shake": 0.18,
+    "push": 6
+  },
+  "flash": "heavy",
+  "casings": true,
+  "sound": "Audio/Sfx/tir-S-pompe",
+  "announce": "FUSIL À POMPE !",
+  "icon": {
+    "texture": "Art/weapon-letters",
+    "columns": 3,
+    "rows": 2,
+    "cell": 1
+  },
+  "crate": {
+    "texture": "Art/weapon-crates",
+    "columns": 3,
+    "rows": 2,
+    "cell": 1
+  }
+}

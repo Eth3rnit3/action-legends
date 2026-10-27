@@ -23,9 +23,10 @@ public static class VerifyFastPlaytest
             }
             float travel=g.GetPlayerPosition(0).x-start;
             if(Mathf.Abs(travel-21.4f)>.15f)throw new Exception("Vitesse irrégulière : "+travel);
+            // Bonus 0 is a weapon crate drawn from the weapons table: a lettered weapon with its Détente ammunition.
             g.GiveBonus(0,0);var players=(PanameGame.Player[])typeof(PanameGame).GetField("players",flags).GetValue(g);
-            if(players[0].weapon!=1||players[0].ammo!=120)throw new Exception("Mitrailleuse bonus");
-            g.GiveBonus(0,4);if(players[0].boost<=0)throw new Exception("Bonus vitesse");
+            if(players[0].weapon.Unlimited||players[0].ammo!=players[0].weapon.ammo[0])throw new Exception("Arme bonus");
+            g.GiveBonus(0,2);if(players[0].boost<=0)throw new Exception("Bonus vitesse");
             return new{keyboardSelection=true,twoPlayersTravel=travel,enemies=g.EnemyCount,bonus=true,length=g.CurrentMission.length,waves=g.CurrentMission.waves.Length};
         }
         finally{foreach(var wave in g.CurrentMission.waves)wave.@lock=true;for(int i=1;i<4;i++)g.slots[i].joined=false;g.ReturnToLobby();Time.timeScale=old;}

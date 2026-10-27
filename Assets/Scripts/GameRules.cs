@@ -9,6 +9,7 @@ namespace Paname
         public int columns=1,rows=1,cell;
         [NonSerialized] Texture2D loaded;
         [NonSerialized] Sprite sprite;
+        [NonSerialized] Sprite[] following;
         public Texture2D Texture=>loaded?loaded:(loaded=Resources.Load<Texture2D>(texture));
         // The cell in texture coordinates, for OnGUI.
         public Rect TexCoords=>new Rect(cell%columns/(float)columns,(rows-1-cell/columns)/(float)rows,1f/columns,1f/rows);
@@ -20,6 +21,14 @@ namespace Paname
                 if(sprite)return sprite;var t=Texture;if(!t)return null;float w=t.width/(float)columns,h=t.height/(float)rows;
                 return sprite=UnityEngine.Sprite.Create(t,new Rect(cell%columns*w,t.height-(cell/columns+1)*h,w,h),new Vector2(.5f,.5f),h,0,SpriteMeshType.FullRect);
             }
+        }
+        // The cell offset places after this one, for frames that follow each other in the grid.
+        public Sprite At(int offset)
+        {
+            if(offset<=0)return Sprite;var t=Texture;if(!t)return null;
+            following??=new Sprite[columns*rows];int c=Mathf.Min(cell+offset,columns*rows-1);if(following[c])return following[c];
+            float w=t.width/(float)columns,h=t.height/(float)rows;
+            return following[c]=UnityEngine.Sprite.Create(t,new Rect(c%columns*w,t.height-(c/columns+1)*h,w,h),new Vector2(.5f,.5f),h,0,SpriteMeshType.FullRect);
         }
         public void Validate(string label)
         {
@@ -40,19 +49,23 @@ namespace Paname
         public SpriteCell sprite=new SpriteCell(),icon=new SpriteCell();
         [NonSerialized] public AudioClip throwClip;
     }
-    // A bonus a crate or a defeated enemy leaves. effect: weapon (weapon 1 to 3, amount = ammunition), health
-    // (amount = points of health), turbo (amount = seconds), score (amount = points) or grenades (amount = grenades).
+    // A bonus a crate or a defeated enemy leaves. effect: weapon (weapon = a library weapon id, or empty to draw one from
+    // the weapons table; its ammunition, crate, announce and voice come from the weapon), health (amount = points of health),
+    // turbo (amount = seconds), score (amount = points) or grenades (amount = grenades).
     [Serializable] public sealed class BonusDefinition
     {
-        public string id,effect,announce,voice;
-        public int weapon;
+        public string id,effect,announce,voice,weapon;
         public int[] amount;
         public float scale=1.25f;
         public SpriteCell icon=new SpriteCell();
         public static readonly string[] Effects={"weapon","health","turbo","score","grenades"};
         [NonSerialized] public int kind;
+        [NonSerialized] public WeaponDefinition gun;
+        public bool Draws=>kind==0&&gun==null;
     }
-    // Rules every mission plays by unless it names other ones: grenades, bonuses and the GO sign.
+    // One line of a weapons table: weapon crates that do not name their weapon give these, weight times in every sum of weights.
+    [Serializable] public sealed class WeaponChance {public string weapon;public int weight=1;[NonSerialized] public WeaponDefinition gun;}
+    // Rules every mission plays by unless it names other ones: grenades, bonuses, weapon crates and the GO sign.
     // Resources/Content/rules/<id>.json, "default" unless the mission sets "rules".
     [Serializable] public sealed class GameRules
     {
@@ -62,6 +75,11 @@ namespace Paname
         public BonusDefinition[] bonuses;
         // Bonuses by index in bonuses: crates along the route take supplies in turn, defeated enemies leave drops in turn.
         public int[] supplies,drops;
+        // Per difficulty: where the first crate stands, the distance between crates, and the enemies defeated per drop.
+        public float[] firstSupply,supplySpacing;
+        public int[] killsPerDrop;
+        // What weapon crates that name no weapon give, and in which proportions (a mission may replace it with its own "weapons").
+        public WeaponChance[] weapons;
         public SpriteCell go=new SpriteCell();
         public void Validate()
         {
@@ -81,13 +99,37 @@ namespace Paname
                 var b=bonuses[i];string bl=label+".bonuses["+i+"]";
                 if(b==null||string.IsNullOrWhiteSpace(b.id))throw new ArgumentException(bl+" : id requis");
                 b.kind=Array.IndexOf(BonusDefinition.Effects,b.effect);if(b.kind<0)throw new ArgumentException(bl+" : effect doit être weapon, health, turbo, score ou grenades");
-                if(b.kind==0&&(b.weapon<1||b.weapon>3))throw new ArgumentException(bl+" : weapon entre 1 et 3");
-                Content.PerDifficulty(b.amount,1,100000,bl+".amount");Content.Text(b.announce,30,bl+".announce");Content.Range(b.scale,.2f,5,bl+".scale");
-                if(!string.IsNullOrEmpty(b.voice))Content.Path(b.voice,"Audio/",bl+".voice");
-                b.icon.Validate(bl+".icon");
+                Content.Range(b.scale,.2f,5,bl+".scale");if(!string.IsNullOrEmpty(b.voice))Content.Path(b.voice,"Audio/",bl+".voice");
+                if(b.kind==0)
+                {
+                    // The weapon brings its own ammunition; the crate, announce and voice default to the weapon's.
+                    if(b.amount!=null&&b.amount.Length>0)throw new ArgumentException(bl+" : amount ne s'applique pas à une arme, ses munitions sont dans l'arme");
+                    b.gun=null;if(!string.IsNullOrEmpty(b.weapon)){b.gun=ContentLibrary.FindWeapon(b.weapon);if(b.gun==null)throw new ArgumentException(bl+" : arme inconnue "+b.weapon);if(b.gun.Unlimited)throw new ArgumentException(bl+" : "+b.weapon+" n'a pas de munitions à donner");}
+                    if(!string.IsNullOrEmpty(b.announce))Content.Text(b.announce,30,bl+".announce");
+                    if(!string.IsNullOrEmpty(b.icon?.texture))b.icon.Validate(bl+".icon");
+                }
+                else
+                {
+                    if(!string.IsNullOrEmpty(b.weapon))throw new ArgumentException(bl+" : weapon ne sert qu'à effect weapon");
+                    Content.PerDifficulty(b.amount,1,100000,bl+".amount");Content.Text(b.announce,30,bl+".announce");b.icon.Validate(bl+".icon");
+                }
             }
             Cycle(supplies,label+".supplies");Cycle(drops,label+".drops");
+            Content.PerDifficulty(firstSupply,5,500,label+".firstSupply");Content.PerDifficulty(supplySpacing,10,500,label+".supplySpacing");Content.PerDifficulty(killsPerDrop,1,500,label+".killsPerDrop");
+            Table(weapons,label+".weapons",Array.Exists(bonuses,b=>b.Draws));
             go.Validate(label+".go");
+        }
+        // Also checks a mission's own table; required when some weapon crate draws from it.
+        public static void Table(WeaponChance[] table,string label,bool required)
+        {
+            if(table==null||table.Length==0){if(required)throw new ArgumentException(label+" : au moins une arme, puisqu'une caisse d'arme ne nomme pas la sienne");return;}
+            if(table.Length>16)throw new ArgumentException(label+" : seize armes au plus");
+            foreach(var line in table)
+            {
+                if(line==null||line.weight<1||line.weight>100)throw new ArgumentException(label+" : weight entre 1 et 100");
+                line.gun=ContentLibrary.FindWeapon(line.weapon);if(line.gun==null)throw new ArgumentException(label+" : arme inconnue "+line.weapon);
+                if(line.gun.Unlimited)throw new ArgumentException(label+" : "+line.weapon+" n'a pas de munitions à donner");
+            }
         }
         void Cycle(int[] cycle,string label)
         {

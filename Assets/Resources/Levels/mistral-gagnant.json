@@ -203,5 +203,27 @@
     "enabled": true,
     "id": "le-direct",
     "health": 1.2
-  }
+  },
+  "weapons": [
+    {
+      "weapon": "shotgun",
+      "weight": 3
+    },
+    {
+      "weapon": "flamethrower",
+      "weight": 3
+    },
+    {
+      "weapon": "heavy-machinegun",
+      "weight": 2
+    },
+    {
+      "weapon": "rocket-launcher",
+      "weight": 1
+    },
+    {
+      "weapon": "laser",
+      "weight": 1
+    }
+  ]
 }

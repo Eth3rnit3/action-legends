@@ -78,13 +78,16 @@ public static class VerifyDataDriven
     static readonly int[] OldDamage={3,5,3,4};
     static readonly float[] HealthFactors={1,1.8f,2.5f,3.2f},SpeedFactors={1,1.12f,1.25f,1.4f};
     // Bot runs (mission, difficulty, heroes, invulnerable): ticks, score, state hash. Recorded on the engine before the
-    // library, then again in lot 1a, which changes gameplay on purpose: the new hero sheets move every barrel tip (shots
-    // leave from another point), the knife replaces a shot when the bot creeps within reach, the bonus cycles now hold
-    // grenade crates, and the state hash includes grenades. A lot that changes gameplay on purpose records them again and says so.
+    // library, then again in lot 1a, which changed gameplay on purpose (new hero sheets move every barrel tip, the knife
+    // replaces a shot when the bot creeps within reach, the bonus cycles hold grenade crates, the state hash includes
+    // grenades), and again in lot 1b: weapon crates now give the lettered weapons of Content/weapons (heavy machine gun,
+    // shotgun, flame thrower, rockets that home and explode anywhere, laser) drawn from a weighted table instead of the
+    // machine gun, triple shot and rockets in turn, and the state hash mixes the weapon's id hash instead of its old index.
+    // A lot that changes gameplay on purpose records them again and says so.
     static readonly (int m,int d,int[] h,bool inv,int ticks,int score,int hash)[] Legacy={
-        (0,0,new[]{0,1,2,3},false,7076,189500,-1071455707),(1,1,new[]{2,3,-1,-1},false,2682,27100,-1461635582),(2,0,new[]{3,2,1,0},false,7156,140650,59450490),
-        (2,3,new[]{1,-1,-1,-1},false,569,1100,-865923552),(0,2,new[]{0,-1,-1,-1},false,724,2000,280097480),(1,3,new[]{1,0,3,2},false,1029,23000,-682329150),
-        (2,1,new[]{0,1,-1,-1},false,5613,42050,1423870097),(0,1,new[]{2,-1,3,-1},false,2532,25700,517487189),(1,0,new[]{0,1,2,3},true,5993,178950,1411155241)};
+        (0,0,new[]{0,1,2,3},false,7180,168200,413947412),(1,1,new[]{2,3,-1,-1},false,3955,42400,-471109190),(2,0,new[]{3,2,1,0},false,7158,133550,1927838300),
+        (2,3,new[]{1,-1,-1,-1},false,569,1100,226595055),(0,2,new[]{0,-1,-1,-1},false,724,2000,-156924533),(1,3,new[]{1,0,3,2},false,1003,23600,-666926990),
+        (2,1,new[]{0,1,-1,-1},false,4718,41800,1814998279),(0,1,new[]{2,-1,3,-1},false,2805,26600,-1833939736),(1,0,new[]{0,1,2,3},true,5993,163750,-446113515)};
     static readonly string[] ProperNouns={"Paris","Parisien","Macron","Bastille","Seine","Eiffel","Haussmann","Marseille","Marseillaise","Mistral","Pastis","Canebière","Tokyo","Shogun","Sakura","Shibuya","Akihabara","Chuck","Norris","Arnold","Jean-Claude","JCVD","Sylvester","macron-helicopter","mecha-shogun","news-helicopter","route-0"};
 
     public static object Main(string captures)
@@ -119,11 +122,12 @@ public static class VerifyDataDriven
         for(int i=0;i<heroes.Length&&i<4;i++)
         {
             var h=heroes[i];where=h.id;var s=h.special;
-            Expect(h.name==OldHeroNames[i]&&h.speed==OldSpeed[i]&&h.fireRate==OldRate[i]&&h.damage==OldDamage[i]&&h.jump==OldJump[i]&&h.recoilShake==OldShake[i]&&h.strideRate==13&&h.bob==.045f);
+            Expect(h.name==OldHeroNames[i]&&h.speed==OldSpeed[i]&&h.Weapon.fireRate==OldRate[i]&&h.Weapon.damage==OldDamage[i]&&h.jump==OldJump[i]&&h.Weapon.recoil.shake==OldShake[i]&&h.Weapon.Unlimited&&h.strideRate==13&&h.bob==.045f);
             Expect(s.cooldown==5&&s.cooldownPerDifficulty==1&&h.blast==(i==0||i==2));
             if(h.blast)Expect(s.radius==(i==0?4:3.2f)&&s.damage==8&&s.bossDamage==24&&s.bossReach==1&&s.invulnerable==1&&s.leap==(i==2?12.8f:0));
             else Expect(s.shots==7&&s.speed==(i==1?26:19)&&s.spread==(i==1?.8f:2)&&s.damage==(i==1?4:5)&&s.explosive);
         }
+        // Since lot 1b, the fire rate, damage and recoil live in each hero's own weapon (Content/weapons).
         // Their barrel tips moved with the lot 1a sheets (one sheet per hero, Art/heroes/<id>.png): VerifyLot1a checks those.
         Check(Clean(),"Les quatre héros gardent noms, vitesses, cadences, dégâts, sauts et spéciaux",checks);
         // Enemies: the old role tables, per-difficulty projectile speeds computed with the old formulas, bit for bit.
@@ -274,7 +278,7 @@ public static class VerifyDataDriven
             int hash=(int)Call(g,"StateHash");bool ok=ticks==run.ticks&&g.Score==run.score&&hash==run.hash;if(!ok)fails.Add("run");
             results.Add(g.CurrentMission.id+" d"+run.d+" ×"+Array.FindAll(run.h,x=>x>=0).Length+(ok?" =":" ≠ "+ticks+"/"+g.Score+"/"+hash));
         }
-        Check(Clean(),"Neuf parties de bot enregistrées (lot 1a) finissent au même pas, au même score et au même état ("+string.Join(" ; ",results)+")",checks);
+        Check(Clean(),"Neuf parties de bot enregistrées (lot 1b) finissent au même pas, au même score et au même état ("+string.Join(" ; ",results)+")",checks);
     }
 
     static void Capture(PanameGame g,string path)

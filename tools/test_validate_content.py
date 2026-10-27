@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from validate_content import (ROOT, find_proper_nouns, load_library, merge, validate_boss, validate_enemy, validate_hero,
-                              validate_mission, validate_rules)
+                              validate_mission, validate_rules, validate_weapon)
 
 RESOURCES = ROOT / "Assets/Resources"
 LIBRARY, LIBRARY_ERRORS = load_library(RESOURCES)
@@ -208,6 +208,10 @@ class LibraryValidationTests(unittest.TestCase):
             lambda d: d["knife"].update(damage=0),
             lambda d: d["knife"].update(sound="Audio/Sfx/none"),
             lambda d: d.update(portraitFrame={"x": .5, "y": 0, "size": .72}),
+            lambda d: d.update(weapon="nope"),
+            lambda d: d.update(weapon="laser"),
+            lambda d: d.update(fireRate=.1),
+            lambda d: d.update(damage=5),
         )
         for change in changes:
             with self.subTest(change=change):
@@ -231,8 +235,16 @@ class LibraryValidationTests(unittest.TestCase):
             lambda d: d["grenade"].update(throwSound="Audio/Sfx/none"),
             lambda d: d["grenade"]["sprite"].update(cell=4),
             lambda d: d["bonuses"][0].update(effect="jetpack"),
-            lambda d: d["bonuses"][0].update(weapon=4),
-            lambda d: d["bonuses"][6].update(amount=[1, 2]),
+            lambda d: d["bonuses"][0].update(weapon="nope"),
+            lambda d: d["bonuses"][0].update(weapon="rifle"),
+            lambda d: d["bonuses"][0].update(amount=[1, 1, 1, 1]),
+            lambda d: d["bonuses"][1].update(weapon="laser"),
+            lambda d: d["bonuses"][4].update(amount=[1, 2]),
+            lambda d: d.update(weapons=[]),
+            lambda d: d.update(weapons=[{"weapon": "laser", "weight": 0}]),
+            lambda d: d.update(weapons=[{"weapon": "carbine", "weight": 1}]),
+            lambda d: d.update(killsPerDrop=[15, 22, 28]),
+            lambda d: d.update(supplySpacing=[72, 90, 110, 0]),
             lambda d: d["bonuses"][1].update(voice="Audio/Voices/none"),
             lambda d: d.update(supplies=[0, 7]),
             lambda d: d.update(drops=[]),
@@ -243,10 +255,73 @@ class LibraryValidationTests(unittest.TestCase):
                 data = copy.deepcopy(base)
                 change(data)
                 self.assertTrue(validate_rules(data, RESOURCES))
-        variant = {"id": "test-rules", "extends": "default", "grenades": {"start": [3, 3, 3, 3], "max": [3, 3, 3, 3]}, "supplies": [6]}
+        # A crate that names its weapon needs no table.
+        named = copy.deepcopy(base)
+        named["bonuses"][0]["weapon"] = "laser"
+        named.pop("weapons")
+        self.assertEqual(validate_rules(named, RESOURCES), [])
+        variant = {"id": "test-rules", "extends": "default", "grenades": {"start": [3, 3, 3, 3], "max": [3, 3, 3, 3]}, "supplies": [4]}
         library, errors = load_library(RESOURCES, {"rules": [variant]})
         self.assertEqual(errors, [])
         self.assertEqual(library["rules"]["test-rules"]["grenade"], LIBRARY["rules"]["default"]["grenade"])
+
+    def test_weapons(self):
+        for weapon_id in ("rifle", "heavy-machinegun", "shotgun", "flamethrower", "rocket-launcher", "laser"):
+            self.assertEqual(validate_weapon(LIBRARY["weapons"][weapon_id], RESOURCES), [], weapon_id)
+        base = copy.deepcopy(LIBRARY["weapons"]["shotgun"])
+        changes = (
+            lambda d: d["projectile"].update(type="plasma"),
+            lambda d: d.update(letter=""),
+            lambda d: d.update(letter="sh"),
+            lambda d: d.update(ammo=[5, 0, 5, 5]),
+            lambda d: d.update(ammo=[5, 5, 5]),
+            lambda d: d.update(fireRate=0),
+            lambda d: d.update(damage=0),
+            lambda d: d.update(sound="Audio/Sfx/none"),
+            lambda d: d.update(flash="huge"),
+            lambda d: d.pop("crate"),
+            lambda d: d.pop("announce"),
+            lambda d: d["projectile"].update(pellets=12),
+            lambda d: d["projectile"].update(pierce=-2),
+            lambda d: d["projectile"].update(speed=0),
+            lambda d: d["projectile"].update(color="orange"),
+            lambda d: d["projectile"].update(frames=9),
+            lambda d: d["projectile"]["sprite"].update(texture="Art/none"),
+            lambda d: d["explosion"].update(radius=20) if "explosion" in d else d.update(explosion={"radius": 20}),
+            lambda d: d["recoil"].update(push=50),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                data = copy.deepcopy(base)
+                change(data)
+                self.assertTrue(validate_weapon(data, RESOURCES))
+        # A beam or a flame needs its sprite; a base weapon needs neither letter nor crate.
+        beam = copy.deepcopy(LIBRARY["weapons"]["laser"])
+        beam["projectile"].pop("sprite")
+        self.assertTrue(validate_weapon(beam, RESOURCES))
+        self.assertEqual(LIBRARY["weapons"]["carbine"]["fireRate"], .085)
+        self.assertNotIn("letter", LIBRARY["weapons"]["carbine"])
+
+    def test_new_weapon_from_data_only(self):
+        zapper = {"id": "test-zapper", "extends": "shotgun", "letter": "Z", "name": "ZAPPEUR", "announce": "ZAPPEUR !",
+                  "projectile": {"type": "rocket", "homing": 90}}
+        rules = {"id": "test-zap", "extends": "default", "bonuses": [{"id": "zap", "effect": "weapon", "weapon": "test-zapper"}],
+                 "supplies": [0], "drops": [0]}
+        library, errors = load_library(RESOURCES, {"weapons": [zapper], "rules": [rules]})
+        self.assertEqual(errors, [])
+        self.assertEqual(library["weapons"]["test-zapper"]["projectile"]["pellets"], 5)
+        library, errors = load_library(RESOURCES, {"rules": [rules]})
+        self.assertTrue(errors)
+
+    def test_mission_weapons_table(self):
+        data = json.loads((RESOURCES / "Levels/tokyo-neon.json").read_text(encoding="utf-8"))
+        self.assertEqual(validate_mission(data, RESOURCES, LIBRARY), [])
+        for table in ([{"weapon": "nope", "weight": 1}], [{"weapon": "laser", "weight": 101}], [{"weapon": "rifle", "weight": 1}], "laser"):
+            with self.subTest(table=table):
+                data["weapons"] = table
+                self.assertTrue(validate_mission(data, RESOURCES, LIBRARY))
+        data.pop("weapons")
+        self.assertEqual(validate_mission(data, RESOURCES, LIBRARY), [])
 
     def test_mission_rules_reference(self):
         data = json.loads((RESOURCES / "Levels/panique-a-paname.json").read_text(encoding="utf-8"))

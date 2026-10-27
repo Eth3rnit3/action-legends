@@ -5,11 +5,9 @@
   "shortName": "SYLVESTER",
   "role": "LE COMMANDO",
   "specialName": "Salve explosive",
+  "weapon": "battle-rifle",
   "speed": 10.7,
-  "fireRate": 0.1,
-  "damage": 4,
   "jump": 11,
-  "recoilShake": 0.025,
   "strideRate": 13,
   "bob": 0.045,
   "special": {

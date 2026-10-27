@@ -5,11 +5,9 @@
   "shortName": "ARNOLD",
   "role": "LE COLOSSE",
   "specialName": "Rafale lourde",
+  "weapon": "heavy-rifle",
   "speed": 9.8,
-  "fireRate": 0.065,
-  "damage": 5,
   "jump": 11,
-  "recoilShake": 0.07,
   "strideRate": 13,
   "bob": 0.045,
   "special": {

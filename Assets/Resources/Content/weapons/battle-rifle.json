@@ -1,0 +1,6 @@
+{
+  "id": "battle-rifle",
+  "extends": "rifle",
+  "fireRate": 0.1,
+  "damage": 4
+}

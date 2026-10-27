@@ -1,0 +1,6 @@
+{
+  "id": "assault-rifle",
+  "extends": "rifle",
+  "fireRate": 0.095,
+  "damage": 3
+}

@@ -67,7 +67,9 @@ namespace Paname
         public sealed class Player
         {
             public Vector2 position; public float vertical,fireTimer,specialTimer,invulnerable,downTimer,walk,recoil,flash,dust;
-            public int weapon,ammo,animState=-1,grenades; public float boost,boostMax=1,animTime,grenadeTimer,knifePose,throwPose;
+            public int ammo,shots,animState=-1,grenades; public float boost,boostMax=1,animTime,grenadeTimer,knifePose,throwPose,kick;
+            // The weapon in hand (Content/weapons), with ammo rounds left unless it is unlimited; shots counts what it has fired.
+            public WeaponDefinition weapon;
             public int hp=6,hero,facing=1; public bool moving,aimUp,aimDown,crouching; public Transform root; public SpriteRenderer illustrated; public SpriteRenderer[] renderers;
             public HeroDefinition Definition=>Heroes[hero];
         }
@@ -77,11 +79,15 @@ namespace Paname
             public EnemyDefinition type; public string Role=>type.id;
             public Transform root; public SpriteRenderer illustrated;
         }
-        enum ShotLook { Tracer, Molotov, Bullet }
+        // Sprite: a heroes' weapon projectile drawn from its weapon's sheet.
+        enum ShotLook { Tracer, Molotov, Bullet, Sprite }
         sealed class Shot
         {
-            public Vector2 position,velocity; public float life=1.8f; public int damage; public ShotLook look; public bool explosive,active; public Transform root;
-            public bool Hostile=>look!=ShotLook.Tracer;
+            public Vector2 position,velocity,heading; public float life=1.8f,age,blast,length; public int damage,pierce,blastDamage,blastBoss; public ShotLook look; public bool hostile,active,blastAnywhere; public Transform root;
+            // Heroes' weapons: the weapon that fired it and its owner (a beam follows the barrel); struck: enemies it has passed through.
+            public WeaponDefinition weapon; public Player owner; public SpriteRenderer sprite,halo;
+            public readonly List<Enemy> struck=new List<Enemy>();
+            public bool Hostile=>hostile;
         }
 
         void Awake()
@@ -116,7 +122,7 @@ namespace Paname
         }
         void SpawnPlayer(int i,float x)
         {
-            var p=new Player{position=new Vector2(x,0),hero=Mod(slots[i].hero,HeroCount),hp=MaxPlayerHealth,invulnerable=2,grenades=Rules.grenades.start[DifficultyIndex]};var hero=p.Definition;
+            var p=new Player{position=new Vector2(x,0),hero=Mod(slots[i].hero,HeroCount),hp=MaxPlayerHealth,invulnerable=2,grenades=Rules.grenades.start[DifficultyIndex]};var hero=p.Definition;p.weapon=hero.Weapon;
             p.root=Actor(actors,hero.animations,hero.animations.states[hero.idle].cells[0],PlayerColors[i],true);p.root.name="J"+(i+1)+" • "+hero.name;
             p.illustrated=p.root.Find("Illustration").GetComponent<SpriteRenderer>();
             p.renderers=p.root.GetComponentsInChildren<SpriteRenderer>();players[i]=p;SyncPlayer(i);
@@ -214,7 +220,7 @@ namespace Paname
                 if(p.hp<=0)
                 {
                     p.downTimer-=dt;
-                    if(p.downTimer<=0&&Reserves>0){Reserves--;p.hp=MaxPlayerHealth;p.position=new Vector2(Mathf.Clamp(LeaderX()-1,1,CurrentMission.length-1),0);p.vertical=0;p.invulnerable=3;p.root.gameObject.SetActive(true);if(Rules.grenades.refillOnRespawn)p.grenades=Mathf.Max(p.grenades,Rules.grenades.start[DifficultyIndex]);}
+                    if(p.downTimer<=0&&Reserves>0){Reserves--;p.hp=MaxPlayerHealth;p.position=new Vector2(Mathf.Clamp(LeaderX()-1,1,CurrentMission.length-1),0);p.vertical=0;p.invulnerable=3;p.root.gameObject.SetActive(true);Disarm(p);if(Rules.grenades.refillOnRespawn)p.grenades=Mathf.Max(p.grenades,Rules.grenades.start[DifficultyIndex]);}
                     else {p.root.gameObject.SetActive(false);continue;}
                 }
                 PlayerCommand input=i<commands.Length?commands[i]:default;
@@ -224,6 +230,8 @@ namespace Paname
                 p.crouching=input.down&&!input.aimUp&&grounded&&!input.jump;
                 if(p.crouching){p.position.x+=move*hero.crouch.speed*(p.boost>0?1.35f:1)*dt;p.walk+=Mathf.Abs(move)*dt*hero.strideRate*(hero.crouch.speed/hero.speed);}
                 else{p.position.x+=move*hero.speed*(p.boost>0?1.35f:1)*dt;p.walk+=Mathf.Abs(move)*dt*hero.strideRate;}
+                // A heavy weapon's recoil pushes the hero back for a moment.
+                if(p.kick!=0){p.position.x+=p.kick*dt;p.kick=Mathf.Abs(p.kick)<.05f?0:Mathf.Lerp(p.kick,0,Mathf.Min(1,dt*14));}
                 p.position.x=Mathf.Clamp(p.position.x,rear,BossActive?bossArenaX+ArenaHalfWidth-1:screenLocked?lockX+SimHalfWidth-1:CurrentMission.length);p.aimUp=input.aimUp;
                 if(input.jump&&grounded)p.vertical=hero.jump;
                 p.vertical-=29*dt;p.position.y+=p.vertical*dt;if(p.position.y<0){p.position.y=0;p.vertical=0;}
@@ -254,7 +262,7 @@ namespace Paname
             else
             {
                 Vector2 aim=AimDirection(p),side=new Vector2(-aim.y,aim.x),muzzle=MuzzlePoint(p);
-                for(int j=0;j<s.shots;j++)Shoot(ShotLook.Tracer,muzzle,aim*s.speed+side*(j-(s.shots-1)*.5f)*s.spread,s.damage,s.explosive);
+                for(int j=0;j<s.shots;j++)Shoot(ShotLook.Tracer,muzzle,aim*s.speed+side*(j-(s.shots-1)*.5f)*s.spread,s.damage,s.explosive,true);
                 effects.Muzzle(muzzle,aim,true);
             }
         }
@@ -386,25 +394,31 @@ namespace Paname
         void Damage(Player p,int amount)
         {
             if(bossDefeated||p.invulnerable>0||p.hp<=0)return;p.hp-=amount*(DifficultyIndex==3?2:1);p.invulnerable=DifficultyIndex==0?1.2f:DifficultyIndex==1?.75f:DifficultyIndex==2?.6f:.45f;p.flash=.075f;shake=.15f;effects.Impact(p.position+Vector2.up,-p.facing);Sound(playerHitClip);
-            if(p.hp<=0){p.downTimer=2.5f;p.root.gameObject.SetActive(false);}
+            // A hero who falls loses the weapon in hand and comes back with the hero's own.
+            if(p.hp<=0){p.downTimer=2.5f;p.root.gameObject.SetActive(false);Disarm(p);}
         }
         static ShotLook Look(string look)=>look=="molotov"?ShotLook.Molotov:look=="tracer"?ShotLook.Tracer:ShotLook.Bullet;
-        // Projectiles only fly and collide; callers add the matching muzzle flash.
-        Shot Shoot(ShotLook look,Vector2 pos,Vector2 velocity,int damage,bool heavy=false)
+        static readonly Color TracerHalo=new Color(1,.45f,.08f,.65f);
+        // Projectiles only fly and collide; callers add the matching muzzle flash. friendly: fired by a hero.
+        // heavy: an explosive special (blast of 2.5 around the enemy it hits); weapons set their own projectile after (Load).
+        Shot Shoot(ShotLook look,Vector2 pos,Vector2 velocity,int damage,bool heavy=false,bool friendly=false)
         {
+            // Bounded by the shots in flight, so the game never depends on what earlier rounds left in the pool.
+            if(shots.Count>=240)return null;
             Shot s=null;
             foreach(var cached in shotPool)if(!cached.active&&cached.look==look){s=cached;break;}
             if(s==null)
             {
-                if(shotPool.Count>=240)return null;
                 s=new Shot{look=look};
-                var g=new GameObject(look==ShotLook.Tracer?"Traceur":look==ShotLook.Molotov?"Cocktail Molotov":"Balle de mitrailleuse");g.transform.SetParent(projectileRoot,false);s.root=g.transform;
+                var g=new GameObject(look==ShotLook.Tracer?"Traceur":look==ShotLook.Molotov?"Cocktail Molotov":look==ShotLook.Sprite?"Projectile d'arme":"Balle de mitrailleuse");g.transform.SetParent(projectileRoot,false);s.root=g.transform;
                 if(look==ShotLook.Molotov){Shape(s.root,"Bouteille",0,0,.18f,.23f,Coral,60,true);Box(s.root,"Mèche",0,.13f,.025f,.07f,Gold,61);}
                 else if(look==ShotLook.Bullet){Shape(s.root,"Traînée rouge",-.08f,0,.42f,.09f,new Color(1,.3f,.15f,.7f),59,true);Shape(s.root,"Cœur brûlant",0,0,.22f,.05f,C("FFE2B8"),61,true);}
-                else{Shape(s.root,"Halo ambré",-.1f,0,.48f,.1f,new Color(1,.45f,.08f,.65f),59,true);Shape(s.root,"Cœur blanc",0,0,.28f,.045f,C("FFF5CC"),61,true);}
+                else if(look==ShotLook.Sprite){s.sprite=g.AddComponent<SpriteRenderer>();s.sprite.sortingOrder=60;}
+                else{s.halo=Shape(s.root,"Halo ambré",-.1f,0,.48f,.1f,TracerHalo,59,true).GetComponent<SpriteRenderer>();Shape(s.root,"Cœur blanc",0,0,.28f,.045f,C("FFF5CC"),61,true);}
                 shotPool.Add(s);
             }
-            s.active=true;s.root.gameObject.SetActive(true);s.position=pos;s.velocity=velocity;s.damage=damage;s.life=1.25f;s.explosive=heavy&&!s.Hostile;s.root.position=pos;
+            s.active=true;s.root.gameObject.SetActive(true);s.position=pos;s.velocity=velocity;s.damage=damage;s.life=1.25f;s.age=0;s.hostile=!friendly;s.root.position=pos;
+            s.weapon=null;s.owner=null;s.pierce=0;s.struck.Clear();s.blast=heavy&&friendly?2.5f:0;s.blastDamage=damage;s.blastBoss=0;s.blastAnywhere=false;if(s.halo)s.halo.color=TracerHalo;
             s.root.localRotation=Quaternion.Euler(0,0,Mathf.Atan2(velocity.y,velocity.x)*Mathf.Rad2Deg);s.root.localScale=Vector3.one*(heavy||look==ShotLook.Molotov?1.5f:1);
             shots.Add(s);return s;
         }
@@ -415,18 +429,32 @@ namespace Paname
         {
             for(int i=shots.Count-1;i>=0;i--)
             {
-                var s=shots[i];var before=s.position;s.position+=s.velocity*dt;s.life-=dt;bool hit=false;
+                var s=shots[i];s.age+=dt;if(s.weapon!=null)Steer(s,dt);
+                var before=s.position;s.position+=s.velocity*dt;s.life-=dt;bool hit=false;int direction=s.velocity.x>=0?1:-1;
                 if(s.Hostile)
                 {
                     foreach(var p in players)if(p!=null&&p.hp>0&&SegmentDistance(before,s.position,HitCenter(p))<HitRadius(p)){Damage(p,s.damage);hit=true;break;}
                 }
-                else if(HitBossOrBomb(before,s.position,s.damage))hit=true;
-                else for(int e=0;e<enemies.Count;e++)if(SegmentDistance(before,s.position,enemies[e].position+Vector2.up)<enemies[e].type.hitRadius){
-                    if(s.explosive){Vector2 blast=enemies[e].position+Vector2.up;for(int k=enemies.Count-1;k>=0;k--)if(Vector2.Distance(enemies[k].position+Vector2.up,blast)<2.5f)HitEnemy(k,s.damage,s.velocity.x>=0?1:-1,true);}
-                    else HitEnemy(e,s.damage,s.velocity.x>=0?1:-1,false);
-                    hit=true;break;
+                // A beam struck everything when it was fired; it only lingers on screen.
+                else if(s.weapon!=null&&s.weapon.projectile.Beam){}
+                else if(HitBossOrBomb(before,s.position,s.damage)){hit=true;if(s.blast>0&&s.blastAnywhere)Blast(s.position,s.blast,s.blastDamage,0,direction,true);}
+                else
+                {
+                    // A piercing projectile passes through enemies, each of them once; an explosive one bursts on the first.
+                    float reach=Reach(s);
+                    for(int e=0;e<enemies.Count;e++)
+                    {
+                        var enemy=enemies[e];
+                        if(s.struck.Count>0&&s.struck.Contains(enemy)||SegmentDistance(before,s.position,enemy.position+Vector2.up)>=enemy.type.hitRadius+reach)continue;
+                        if(s.blast>0){Blast(enemy.position+Vector2.up,s.blast,s.blastDamage,s.blastBoss,direction,s.blastAnywhere);hit=true;break;}
+                        int count=enemies.Count;HitEnemy(e,s.damage,direction,false);s.struck.Add(enemy);if(enemies.Count<count)e--;
+                        if(s.pierce>=0&&s.struck.Count>s.pierce){hit=true;break;}
+                    }
                 }
-                if(hit||s.life<=0||s.position.y<-.3f){s.active=false;s.root.gameObject.SetActive(false);shots.RemoveAt(i);}else s.root.position=s.position;
+                // A weapon's explosive goes off on the ground and at the end of its flight too.
+                bool grounded=s.weapon==null||!s.weapon.projectile.Beam?s.position.y<(s.blastAnywhere&&s.blast>0?0:-.3f):false;
+                if(!hit&&s.blastAnywhere&&s.blast>0&&(grounded||s.life<=0)){Blast(new Vector2(s.position.x,Mathf.Max(s.position.y,.25f)),s.blast,s.blastDamage,s.blastBoss,direction,true);hit=true;}
+                if(hit||s.life<=0||grounded){s.active=false;s.root.gameObject.SetActive(false);shots.RemoveAt(i);}else{s.root.position=s.position;if(s.weapon!=null)DrawWeaponShot(s,dt);}
             }
         }
         void HitEnemy(int index,int damage,int direction=1,bool explosive=false)
@@ -500,8 +528,10 @@ namespace Paname
                 Label(x+12,22,166,22,PlayerTag(i)+"  "+p.Definition.shortName,13,PlayerColors[i],true);
                 Label(x+180,23,77,20,p.specialTimer>0?"SPÉCIAL "+Mathf.CeilToInt(p.specialTimer):"SPÉCIAL",11,p.specialTimer<=0?Gold:C("7C929A"),true,TextAnchor.MiddleRight);
                 for(int h=0;h<MaxPlayerHealth;h++)Panel(x+13+h*17,56,11,6,h<p.hp?PlayerColors[i]:C("344A55"));
-                string ammo=p.weapon==0?"FUSIL":(p.weapon==1?"MITRA":p.weapon==2?"TRIPLE":"ROQUETTES")+"  "+p.ammo;
-                Label(x+112,45,141,25,p.hp<=0?"×":ammo,14,Cream,true,TextAnchor.MiddleRight);
+                // The weapon's badge, then its ammunition, or its name when it never runs out.
+                var w=p.weapon;if(p.hp>0&&w.HasIcon&&w.icon.Texture)GUI.DrawTextureWithTexCoords(new Rect(x+170,44,26,26),w.icon.Texture,w.icon.TexCoords);
+                string ammo=w.Unlimited?w.name:(w.HasIcon?"":w.letter+"  ")+p.ammo;
+                Label(x+112,45,141,25,p.hp<=0?"×":ammo,14,w.Unlimited?Cream:Gold,true,TextAnchor.MiddleRight);
                 if(p.boost>0)Panel(x+3,77,261*Mathf.Clamp01(p.boost/p.boostMax),3,Gold);
                 var icon=Rules.grenade.icon;if(icon.Texture)GUI.DrawTextureWithTexCoords(new Rect(x+10,61,17,17),icon.Texture,icon.TexCoords);
                 Label(x+28,60,60,19,"×"+p.grenades,12,p.grenades>0?Cream:C("7C929A"),true);

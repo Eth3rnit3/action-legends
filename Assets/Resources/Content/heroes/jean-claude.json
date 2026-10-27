@@ -5,11 +5,9 @@
   "shortName": "JCVD",
   "role": "LE VOLTIGEUR",
   "specialName": "Double coup sauté",
+  "weapon": "carbine",
   "speed": 11.5,
-  "fireRate": 0.085,
-  "damage": 3,
   "jump": 12.8,
-  "recoilShake": 0.025,
   "strideRate": 13,
   "bob": 0.045,
   "special": {

@@ -89,6 +89,14 @@ namespace Paname
         public bool explosive;
         public static readonly string[] Types={"blast","volley"};
     }
+    // Where enemy shots hit the hero: a circle y above the feet. Crouched, the circle is lower and the hero slower,
+    // so shots fired at chest height fly over.
+    [Serializable] public sealed class HeroHitbox {public float y=1,radius=.53f;}
+    [Serializable] public sealed class HeroCrouch {public float speed,y,radius;}
+    // With the fire button, an enemy within reach in front of the hero (and the hero below height) is stabbed instead of shot.
+    // The square of the portrait cell shown in the menu, in fractions of the cell from its bottom-left corner.
+    [Serializable] public sealed class PortraitFrame {public float x,y,size=1;}
+    [Serializable] public sealed class HeroKnife {public float reach,height,cooldown,pose;public int damage;public string sound;[NonSerialized] public AudioClip clip;}
     // A playable hero. Heroes are listed by order, then id: replays and online play refer to them by that position.
     [Serializable] public sealed class HeroDefinition
     {
@@ -96,9 +104,17 @@ namespace Paname
         public int order,damage,portraitCell;
         public float speed,fireRate,jump,recoilShake,strideRate,bob;
         public HeroSpecial special=new HeroSpecial();
+        public HeroHitbox hitbox=new HeroHitbox();
+        public HeroCrouch crouch=new HeroCrouch();
+        public HeroKnife knife=new HeroKnife();
+        public PortraitFrame portraitFrame=new PortraitFrame();
         public AnimationSet animations=new AnimationSet();
-        [NonSerialized] public int idle,run,jumping;
+        // States the engine reads; the optional ones fall back to a near pose: crouchWalk and crouchShoot to crouch, aimDiagonal to aimUp.
+        public static readonly string[] Required={"idle","run","jump","crouch","aimUp","jumpDown","knife","throw"};
+        [NonSerialized] public int idle,run,jumping,crouching,crouchWalk,crouchShoot,aimUp,aimDiagonal,jumpDown,stab,throwing;
         [NonSerialized] public Vector2[] muzzles;
+        // Where a thrown grenade leaves the hand, in the last image of the throw.
+        [NonSerialized] public Vector2 hand;
         [NonSerialized] public bool blast;
         public void Validate()
         {
@@ -114,11 +130,21 @@ namespace Paname
             if(s.damage<1||s.damage>100)throw new ArgumentException(label+" : special.damage entre 1 et 100");
             if(blast){Content.Range(s.radius,.5f,15,label+".special.radius");Content.Range(s.bossReach,0,10,label+".special.bossReach");Content.Range(s.invulnerable,0,5,label+".special.invulnerable");Content.Range(s.leap,0,30,label+".special.leap");if(s.bossDamage<0||s.bossDamage>500)throw new ArgumentException(label+" : special.bossDamage entre 0 et 500");}
             else{Content.Range(s.speed,1,60,label+".special.speed");Content.Range(s.spread,0,10,label+".special.spread");if(s.shots<1||s.shots>15)throw new ArgumentException(label+" : special.shots entre 1 et 15");}
-            animations.Validate(label,"idle","run","jump");
+            Content.Range(hitbox.y,.1f,5,label+".hitbox.y");Content.Range(hitbox.radius,.1f,3,label+".hitbox.radius");
+            Content.Range(crouch.speed,0,30,label+".crouch.speed");Content.Range(crouch.y,.05f,5,label+".crouch.y");Content.Range(crouch.radius,.1f,3,label+".crouch.radius");
+            var k=knife;Content.Range(k.reach,.1f,5,label+".knife.reach");Content.Range(k.height,0,5,label+".knife.height");Content.Range(k.cooldown,.02f,3,label+".knife.cooldown");Content.Range(k.pose,0,2,label+".knife.pose");
+            if(k.damage<1||k.damage>500)throw new ArgumentException(label+" : knife.damage entre 1 et 500");
+            Content.Path(k.sound,"Audio/",label+".knife.sound");Content.Require<AudioClip>(k.sound,label+" : son du couteau");
+            animations.Validate(label,Required);
             if(portraitCell<0||portraitCell>=animations.CellCount)throw new ArgumentException(label+" : portraitCell hors de la planche");
-            idle=animations.Find("idle");run=animations.Find("run");jumping=animations.Find("jump");
-            foreach(var state in new[]{idle,run,jumping})foreach(int cell in animations.states[state].cells)if(!animations.HasAnchor("muzzle",cell))throw new ArgumentException(label+" : ancrage muzzle manquant pour l'image "+cell);
-            muzzles=animations.Points("muzzle");
+            var f=portraitFrame;if(!(f.size>.05f&&f.x>=0&&f.y>=0&&f.x+f.size<=1.0001f&&f.y+f.size<=1.0001f))throw new ArgumentException(label+" : portraitFrame dans la case (x, y, size entre 0 et 1)");
+            var a=animations;idle=a.Find("idle");run=a.Find("run");jumping=a.Find("jump");crouching=a.Find("crouch");crouchWalk=a.Find("crouchWalk",crouching);crouchShoot=a.Find("crouchShoot",crouching);
+            aimUp=a.Find("aimUp");aimDiagonal=a.Find("aimDiagonal",aimUp);jumpDown=a.Find("jumpDown");stab=a.Find("knife");throwing=a.Find("throw");
+            // Shots leave from the image shown, so every pose the hero fires from needs its barrel tip; the knife and the throw do not fire.
+            foreach(var state in new[]{idle,run,jumping,crouching,crouchWalk,crouchShoot,aimUp,aimDiagonal,jumpDown})foreach(int cell in a.states[state].cells)if(!a.HasAnchor("muzzle",cell))throw new ArgumentException(label+" : ancrage muzzle manquant pour l'image "+cell);
+            muzzles=a.Points("muzzle");
+            var thrown=a.states[throwing].cells;int release=thrown[thrown.Length-1];
+            if(!a.HasAnchor("hand",release))throw new ArgumentException(label+" : ancrage hand requis sur la dernière image de throw");hand=a.Points("hand")[release];
         }
     }
     public enum EnemyBehavior { Melee, Thrower, Gunman }
@@ -203,22 +229,26 @@ namespace Paname
         static HeroDefinition[] heroes;
         static readonly Dictionary<string,EnemyDefinition> enemies=new Dictionary<string,EnemyDefinition>();
         static readonly Dictionary<string,BossDefinition> bosses=new Dictionary<string,BossDefinition>();
+        static readonly Dictionary<string,GameRules> rules=new Dictionary<string,GameRules>();
         static readonly Dictionary<string,string> sources=new Dictionary<string,string>();
         static bool loaded;
         public static HeroDefinition[] Heroes{get{Load();return heroes;}}
         public static EnemyDefinition Enemy(string id){Load();if(id!=null&&enemies.TryGetValue(id,out var e))return e;throw new ArgumentException("Ennemi inconnu : "+id);}
         public static BossDefinition Boss(string id){Load();if(id!=null&&bosses.TryGetValue(id,out var b))return b;throw new ArgumentException("Boss inconnu : "+id);}
+        public static GameRules Rules(string id){Load();if(id!=null&&rules.TryGetValue(id,out var r))return r;throw new ArgumentException("Règles inconnues : "+id);}
         public static void Load()
         {
             if(loaded)return;
-            sources.Clear();enemies.Clear();bosses.Clear();
-            var heroTexts=Read("heroes");var enemyTexts=Read("enemies");var bossTexts=Read("bosses");
+            sources.Clear();enemies.Clear();bosses.Clear();rules.Clear();
+            var heroTexts=Read("heroes");var enemyTexts=Read("enemies");var bossTexts=Read("bosses");var ruleTexts=Read("rules");
             var list=new List<HeroDefinition>();var ids=new HashSet<string>();
             foreach(var text in heroTexts){var hero=Parse<HeroDefinition>("heroes",text);hero.Validate();if(!ids.Add(hero.id))throw new ArgumentException("Héros dupliqué : "+hero.id);list.Add(hero);}
             list.Sort((a,b)=>a.order!=b.order?a.order.CompareTo(b.order):string.CompareOrdinal(a.id,b.id));
             if(list.Count<1||list.Count>4)throw new ArgumentException("Un à quatre héros sont requis dans Resources/Content/heroes");
             foreach(var text in enemyTexts){var enemy=Parse<EnemyDefinition>("enemies",text);enemy.Validate();enemies[enemy.id]=enemy;}
             foreach(var text in bossTexts){var boss=Parse<BossDefinition>("bosses",text);boss.Validate();bosses[boss.id]=boss;}
+            foreach(var text in ruleTexts){var set=Parse<GameRules>("rules",text);set.Validate();rules[set.id]=set;}
+            if(!rules.ContainsKey("default"))throw new ArgumentException("Resources/Content/rules/default.json est requis");
             heroes=list.ToArray();loaded=true;
         }
         static List<string> Read(string folder)
@@ -245,6 +275,7 @@ namespace Paname
         // For tools and tests: adds or replaces an entry from JSON, which may extend a loaded one.
         public static EnemyDefinition AddEnemy(string json){Load();var e=Parse<EnemyDefinition>("enemies",json);e.Validate();enemies[e.id]=e;sources["enemies/"+e.id]=json;return e;}
         public static BossDefinition AddBoss(string json){Load();var b=Parse<BossDefinition>("bosses",json);b.Validate();bosses[b.id]=b;sources["bosses/"+b.id]=json;return b;}
+        public static GameRules AddRules(string json){Load();var r=Parse<GameRules>("rules",json);r.Validate();rules[r.id]=r;sources["rules/"+r.id]=json;return r;}
         public static void Reload(){loaded=false;Load();}
     }
 }

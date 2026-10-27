@@ -67,8 +67,8 @@ namespace Paname
         public sealed class Player
         {
             public Vector2 position; public float vertical,fireTimer,specialTimer,invulnerable,downTimer,walk,recoil,flash,dust;
-            public int weapon,ammo,animState=-1; public float boost,animTime;
-            public int hp=6,hero,facing=1; public bool moving,aimUp; public Transform root; public SpriteRenderer illustrated; public SpriteRenderer[] renderers;
+            public int weapon,ammo,animState=-1,grenades; public float boost,boostMax=1,animTime,grenadeTimer,knifePose,throwPose;
+            public int hp=6,hero,facing=1; public bool moving,aimUp,aimDown,crouching; public Transform root; public SpriteRenderer illustrated; public SpriteRenderer[] renderers;
             public HeroDefinition Definition=>Heroes[hero];
         }
         sealed class Enemy
@@ -107,7 +107,7 @@ namespace Paname
         {
             for(int i=actors.childCount-1;i>=0;i--){var child=actors.GetChild(i).gameObject;child.SetActive(false);Destroy(child);}
             foreach(var shot in shots){shot.active=false;shot.root.gameObject.SetActive(false);}
-            Array.Clear(players,0,4);enemies.Clear();shots.Clear();effects?.Clear();ResetBonuses();ResetBoss();
+            Array.Clear(players,0,4);enemies.Clear();shots.Clear();thrown.Clear();effects?.Clear();ResetBonuses();ResetBoss();
         }
         void BuildLobbyActors()
         {
@@ -116,7 +116,7 @@ namespace Paname
         }
         void SpawnPlayer(int i,float x)
         {
-            var p=new Player{position=new Vector2(x,0),hero=Mod(slots[i].hero,HeroCount),hp=MaxPlayerHealth,invulnerable=2};var hero=p.Definition;
+            var p=new Player{position=new Vector2(x,0),hero=Mod(slots[i].hero,HeroCount),hp=MaxPlayerHealth,invulnerable=2,grenades=Rules.grenades.start[DifficultyIndex]};var hero=p.Definition;
             p.root=Actor(actors,hero.animations,hero.animations.states[hero.idle].cells[0],PlayerColors[i],true);p.root.name="J"+(i+1)+" • "+hero.name;
             p.illustrated=p.root.Find("Illustration").GetComponent<SpriteRenderer>();
             p.renderers=p.root.GetComponentsInChildren<SpriteRenderer>();players[i]=p;SyncPlayer(i);
@@ -210,25 +210,33 @@ namespace Paname
             {
                 var p=players[i];if(p==null)continue;
                 p.invulnerable=Mathf.Max(0,p.invulnerable-dt);p.specialTimer=Mathf.Max(0,p.specialTimer-dt);p.fireTimer-=dt;p.recoil=Mathf.Max(0,p.recoil-dt);p.flash=Mathf.Max(0,p.flash-dt);p.dust-=dt;p.boost=Mathf.Max(0,p.boost-dt);
+                p.grenadeTimer-=dt;p.knifePose=Mathf.Max(0,p.knifePose-dt);p.throwPose=Mathf.Max(0,p.throwPose-dt);
                 if(p.hp<=0)
                 {
                     p.downTimer-=dt;
-                    if(p.downTimer<=0&&Reserves>0){Reserves--;p.hp=MaxPlayerHealth;p.position=new Vector2(Mathf.Clamp(LeaderX()-1,1,CurrentMission.length-1),0);p.vertical=0;p.invulnerable=3;p.root.gameObject.SetActive(true);}
+                    if(p.downTimer<=0&&Reserves>0){Reserves--;p.hp=MaxPlayerHealth;p.position=new Vector2(Mathf.Clamp(LeaderX()-1,1,CurrentMission.length-1),0);p.vertical=0;p.invulnerable=3;p.root.gameObject.SetActive(true);if(Rules.grenades.refillOnRespawn)p.grenades=Mathf.Max(p.grenades,Rules.grenades.start[DifficultyIndex]);}
                     else {p.root.gameObject.SetActive(false);continue;}
                 }
                 PlayerCommand input=i<commands.Length?commands[i]:default;
                 float move=Mathf.Clamp(input.move,-1,1);p.moving=Mathf.Abs(move)>.1f;if(Mathf.Abs(move)>.1f)p.facing=move>0?1:-1;
-                var hero=p.Definition;p.position.x+=move*hero.speed*(p.boost>0?1.35f:1)*dt;p.walk+=Mathf.Abs(move)*dt*hero.strideRate;
+                var hero=p.Definition;bool grounded=p.position.y<=.001f;
+                // Down crouches on the ground (slower, lower) and aims straight down in the air; up wins over it.
+                p.crouching=input.down&&!input.aimUp&&grounded&&!input.jump;
+                if(p.crouching){p.position.x+=move*hero.crouch.speed*(p.boost>0?1.35f:1)*dt;p.walk+=Mathf.Abs(move)*dt*hero.strideRate*(hero.crouch.speed/hero.speed);}
+                else{p.position.x+=move*hero.speed*(p.boost>0?1.35f:1)*dt;p.walk+=Mathf.Abs(move)*dt*hero.strideRate;}
                 p.position.x=Mathf.Clamp(p.position.x,rear,BossActive?bossArenaX+ArenaHalfWidth-1:screenLocked?lockX+SimHalfWidth-1:CurrentMission.length);p.aimUp=input.aimUp;
-                if(input.jump&&p.position.y<=.001f)p.vertical=hero.jump;
+                if(input.jump&&grounded)p.vertical=hero.jump;
                 p.vertical-=29*dt;p.position.y+=p.vertical*dt;if(p.position.y<0){p.position.y=0;p.vertical=0;}
+                p.aimDown=input.down&&!input.aimUp&&p.position.y>.1f;
                 AnimateHero(p,dt);
-                if(input.fire&&p.fireTimer<=0)FirePlayer(p);
-                if(input.special&&p.specialTimer<=0)Special(p);
+                // An enemy at arm's length in front takes the knife instead of a bullet; the knife and the throw poses do not shoot.
+                if(input.fire&&p.fireTimer<=0&&p.knifePose<=0&&p.throwPose<=0){int victim=KnifeTarget(p);if(victim>=0)Stab(p,victim);else FirePlayer(p);}
+                if(input.grenade&&p.grenadeTimer<=0&&p.grenades>0)ThrowGrenade(p);
+                if(input.special&&p.specialTimer<=0&&p.knifePose<=0&&p.throwPose<=0)Special(p);
                 if(p.moving&&p.position.y<.03f&&p.dust<=0){effects.Play(3,p.position+new Vector2(-p.facing*.28f,.1f),.42f,.3f,1,new Vector2(-p.facing*.18f,.2f));p.dust=.19f;}
                 SyncPlayer(i);
             }
-            TickBoss(dt);if(!bossStarted)UpdateWaves(dt);UpdateEnemies(dt);UpdateShots(dt);effects.Tick(dt);TickBonuses(dt);
+            TickBoss(dt);if(!bossStarted)UpdateWaves(dt);UpdateEnemies(dt);UpdateShots(dt);TickGrenades(dt);effects.Tick(dt);TickBonuses(dt);
             bool alive=false;foreach(var p in players)if(p!=null&&p.hp>0)alive=true;
             if(!alive&&Reserves==0){phase=Phase.Lost;Announce("ON REMET ÇA ?");}
         }
@@ -251,7 +259,14 @@ namespace Paname
             }
         }
         // The hero's state follows the simulation, and so does the gun drawn in it: shots leave from the cell being shown.
-        static int HeroState(Player p){var h=p.Definition;return p.position.y>.1f?h.jumping:p.moving?h.run:h.idle;}
+        static int HeroState(Player p)
+        {
+            var h=p.Definition;bool airborne=p.position.y>.1f;
+            if(p.knifePose>0)return h.stab;if(p.throwPose>0)return h.throwing;
+            if(p.aimDown)return h.jumpDown;if(p.aimUp)return p.moving?h.aimDiagonal:h.aimUp;if(airborne)return h.jumping;
+            if(p.crouching)return p.moving?h.crouchWalk:p.recoil>0?h.crouchShoot:h.crouching;
+            return p.moving?h.run:h.idle;
+        }
         static void AnimateHero(Player p,float dt){int state=HeroState(p);if(state!=p.animState){p.animState=state;p.animTime=0;}else p.animTime+=dt;}
         static int HeroCell(Player p)=>p.Definition.animations.Cell(p.animState<0?HeroState(p):p.animState,p.animTime,p.walk);
         static float StrideBob(Player p)=>p.moving&&p.position.y<.1f?Mathf.Abs(Mathf.Sin(p.walk))*p.Definition.bob:0;
@@ -330,7 +345,8 @@ namespace Paname
                 if(type.kind==EnemyBehavior.Thrower&&best<t.range&&e.attackTimer<=0&&e.stagger<=0)
                 {
                     var hand=e.position+new Vector2(e.facing*type.hand.x,type.hand.y);
-                    Shoot(Look(t.projectile),hand,(target.position+Vector2.up*t.aimHeight-hand).normalized*t.speed[DifficultyIndex],t.damage);
+                    // A bottle is aimed at the hero's chest, or lower at a crouching hero.
+                    Shoot(Look(t.projectile),hand,(target.position+Vector2.up*Mathf.Min(t.aimHeight,HitCenter(target).y-target.position.y)-hand).normalized*t.speed[DifficultyIndex],t.damage);
                     e.attackTimer=t.cooldown*AttackFactors[DifficultyIndex];e.attackPose=type.attackPose;
                 }
                 var m=type.melee;
@@ -402,7 +418,7 @@ namespace Paname
                 var s=shots[i];var before=s.position;s.position+=s.velocity*dt;s.life-=dt;bool hit=false;
                 if(s.Hostile)
                 {
-                    foreach(var p in players)if(p!=null&&p.hp>0&&SegmentDistance(before,s.position,p.position+Vector2.up)<.53f){Damage(p,s.damage);hit=true;break;}
+                    foreach(var p in players)if(p!=null&&p.hp>0&&SegmentDistance(before,s.position,HitCenter(p))<HitRadius(p)){Damage(p,s.damage);hit=true;break;}
                 }
                 else if(HitBossOrBomb(before,s.position,s.damage))hit=true;
                 else for(int e=0;e<enemies.Count;e++)if(SegmentDistance(before,s.position,enemies[e].position+Vector2.up)<enemies[e].type.hitRadius){
@@ -471,8 +487,8 @@ namespace Paname
         void Portrait(float x,float y,int hero,float size=1)
         {
             var h=Heroes[hero];var set=h.animations;var art=set.Texture;if(!art)return;
-            int columns=set.sheet.columns,rows=set.sheet.rows,cell=h.portraitCell;
-            GUI.DrawTextureWithTexCoords(new Rect(x-11*size,y-13*size,190*size,190*size),art,new Rect(cell%columns/(float)columns,(rows-1-cell/columns)/(float)rows,1f/columns,1f/rows));
+            int columns=set.sheet.columns,rows=set.sheet.rows,cell=h.portraitCell;var f=h.portraitFrame;
+            GUI.DrawTextureWithTexCoords(new Rect(x-11*size,y-13*size,190*size,190*size),art,new Rect((cell%columns+f.x)/columns,(rows-1-cell/columns+f.y)/rows,f.size/columns,f.size/rows));
         }
         void DrawHUD()
         {
@@ -486,7 +502,9 @@ namespace Paname
                 for(int h=0;h<MaxPlayerHealth;h++)Panel(x+13+h*17,56,11,6,h<p.hp?PlayerColors[i]:C("344A55"));
                 string ammo=p.weapon==0?"FUSIL":(p.weapon==1?"MITRA":p.weapon==2?"TRIPLE":"ROQUETTES")+"  "+p.ammo;
                 Label(x+112,45,141,25,p.hp<=0?"×":ammo,14,Cream,true,TextAnchor.MiddleRight);
-                if(p.boost>0)Panel(x+3,77,261*Mathf.Clamp01(p.boost/(DifficultyIndex==0?10:8-DifficultyIndex)),3,Gold);
+                if(p.boost>0)Panel(x+3,77,261*Mathf.Clamp01(p.boost/p.boostMax),3,Gold);
+                var icon=Rules.grenade.icon;if(icon.Texture)GUI.DrawTextureWithTexCoords(new Rect(x+10,61,17,17),icon.Texture,icon.TexCoords);
+                Label(x+28,60,60,19,"×"+p.grenades,12,p.grenades>0?Cream:C("7C929A"),true);
                 if(slots[i].pad!=null&&!slots[i].Connected)Label(x+112,22,24,22,"!",16,Coral,true);
             }
             Label(22,88,230,28,Score.ToString("00000000"),20,Gold,true);
@@ -507,8 +525,9 @@ namespace Paname
         void DrawGo()
         {
             if(phase!=Phase.Playing||goFromX<0||screenLocked||bossStarted||cameraX>=goFromX+8||Mathf.Repeat(Time.unscaledTime,.7f)>.45f)return;
-            Label(1004,244,200,90,"GO",64,Ink,true,TextAnchor.MiddleRight);Label(1000,240,200,90,"GO",64,Gold,true,TextAnchor.MiddleRight);
-            for(int i=0;i<9;i++){float h=72-i*8;Panel(1214+i*5,289-h*.5f,5,h,Gold);}
+            var go=Rules.go;var t=go.Texture;if(!t)return;
+            float w=t.width/(float)go.columns,h=t.height/(float)go.rows,height=Mathf.Min(150,250*h/w);
+            GUI.DrawTextureWithTexCoords(new Rect(1262-height*w/h,289-height*.5f,height*w/h,height),t,go.TexCoords);
         }
         void Overlay(string title,string subtitle,Action action,string button)
         {
@@ -527,7 +546,7 @@ namespace Paname
             if(phase==Phase.Paused)
             {
                 if(Button(440,467,400,46,"RETOUR À LA SÉLECTION",C("34515C")))ReturnToLobby();
-                Label(220,538,840,70,"CLAVIER   Q / A, D : bouger   ·   W / Z / HAUT : viser haut   ·   ESPACE : sauter   ·   J : tirer   ·   K : spécial\nMANETTE   stick : bouger   ·   A / CROIX : sauter   ·   X / CARRÉ, RT : tirer   ·   Y / TRIANGLE, RB : spécial\nÉCHAP / START : reprendre",14,Cream,false,TextAnchor.MiddleCenter);
+                Label(160,538,960,70,"CLAVIER   Q / A, D : bouger   ·   Z / W / HAUT : viser haut   ·   S / BAS : accroupi, tir bas en saut   ·   ESPACE : sauter\nJ : tirer, couteau au contact   ·   L : grenade   ·   K : spécial   ·   ÉCHAP / START : reprendre\nMANETTE   stick : bouger, viser, s'accroupir   ·   A / CROIX : sauter   ·   X / CARRÉ : tirer   ·   B / ROND : grenade   ·   Y / TRIANGLE : spécial",14,Cream,false,TextAnchor.MiddleCenter);
             }
         }
     }

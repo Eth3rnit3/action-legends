@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from validate_content import (ROOT, find_proper_nouns, load_library, merge, validate_boss, validate_enemy, validate_hero,
-                              validate_mission)
+                              validate_mission, validate_rules)
 
 RESOURCES = ROOT / "Assets/Resources"
 LIBRARY, LIBRARY_ERRORS = load_library(RESOURCES)
@@ -136,6 +136,7 @@ class LibraryValidationTests(unittest.TestCase):
         self.assertEqual(sorted(LIBRARY["heroes"]), ["arnold", "chuck-norris", "jean-claude", "sylvester"])
         self.assertEqual(len(LIBRARY["enemies"]), 6)
         self.assertEqual(sorted(LIBRARY["bosses"]), ["le-direct", "macron-helicopter", "mecha-shogun"])
+        self.assertEqual(sorted(LIBRARY["rules"]), ["default"])
 
     def test_extends_merges_objects_and_replaces_lists(self):
         direct = LIBRARY["bosses"]["le-direct"]
@@ -192,18 +193,67 @@ class LibraryValidationTests(unittest.TestCase):
         self.assertEqual(validate_hero(base, RESOURCES), [])
         changes = (
             lambda d: d["animations"].update(anchors=d["animations"]["anchors"][:-1]),
-            lambda d: d["animations"]["states"].pop(),
+            lambda d: d["animations"]["states"].pop(0),
             lambda d: d["special"].update(type="teleport"),
             lambda d: d["special"].update(shots=0),
-            lambda d: d.update(portraitCell=16),
+            lambda d: d.update(portraitCell=24),
             lambda d: d.update(name=""),
             lambda d: d.update(speed=0),
+            lambda d: d["animations"].update(states=[s for s in d["animations"]["states"] if s["name"] != "crouch"]),
+            lambda d: d["animations"].update(states=[s for s in d["animations"]["states"] if s["name"] != "knife"]),
+            lambda d: d["animations"].update(anchors=[a for a in d["animations"]["anchors"] if a["name"] != "hand"]),
+            lambda d: d["animations"].update(anchors=[a for a in d["animations"]["anchors"] if a.get("cell") != 12]),
+            lambda d: d["crouch"].update(radius=0),
+            lambda d: d.pop("crouch"),
+            lambda d: d["knife"].update(damage=0),
+            lambda d: d["knife"].update(sound="Audio/Sfx/none"),
+            lambda d: d.update(portraitFrame={"x": .5, "y": 0, "size": .72}),
         )
         for change in changes:
             with self.subTest(change=change):
                 data = copy.deepcopy(base)
                 change(data)
                 self.assertTrue(validate_hero(data, RESOURCES))
+
+    def test_optional_hero_states_fall_back(self):
+        hero = content("heroes", "sylvester")
+        hero["animations"]["states"] = [s for s in hero["animations"]["states"] if s["name"] not in ("crouchWalk", "crouchShoot", "aimDiagonal")]
+        self.assertEqual(validate_hero(hero, RESOURCES), [])
+
+    def test_game_rules(self):
+        base = content("rules", "default")
+        self.assertEqual(validate_rules(base, RESOURCES), [])
+        changes = (
+            lambda d: d["grenades"].update(start=[10, 10, 8]),
+            lambda d: d["grenades"].update(start=[30, 10, 8, 6]),
+            lambda d: d["grenade"].update(radius=0),
+            lambda d: d["grenade"].update(bounces=9),
+            lambda d: d["grenade"].update(throwSound="Audio/Sfx/none"),
+            lambda d: d["grenade"]["sprite"].update(cell=4),
+            lambda d: d["bonuses"][0].update(effect="jetpack"),
+            lambda d: d["bonuses"][0].update(weapon=4),
+            lambda d: d["bonuses"][6].update(amount=[1, 2]),
+            lambda d: d["bonuses"][1].update(voice="Audio/Voices/none"),
+            lambda d: d.update(supplies=[0, 7]),
+            lambda d: d.update(drops=[]),
+            lambda d: d["go"].update(texture="Art/none"),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                data = copy.deepcopy(base)
+                change(data)
+                self.assertTrue(validate_rules(data, RESOURCES))
+        variant = {"id": "test-rules", "extends": "default", "grenades": {"start": [3, 3, 3, 3], "max": [3, 3, 3, 3]}, "supplies": [6]}
+        library, errors = load_library(RESOURCES, {"rules": [variant]})
+        self.assertEqual(errors, [])
+        self.assertEqual(library["rules"]["test-rules"]["grenade"], LIBRARY["rules"]["default"]["grenade"])
+
+    def test_mission_rules_reference(self):
+        data = json.loads((RESOURCES / "Levels/panique-a-paname.json").read_text(encoding="utf-8"))
+        data["rules"] = "nope"
+        self.assertTrue(validate_mission(data, RESOURCES, LIBRARY))
+        data["rules"] = "default"
+        self.assertEqual(validate_mission(data, RESOURCES, LIBRARY), [])
 
     def test_boss_rules(self):
         for boss_id in ("macron-helicopter", "mecha-shogun"):

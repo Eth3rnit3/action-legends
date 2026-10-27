@@ -17,6 +17,10 @@ SCHEMA = 2
 ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 LOOKS = ("tracer", "molotov", "bullet")
 HERO_SPECIALS = ("blast", "volley")
+# Hero states the engine reads (HeroDefinition.Required), the ones it fires from, and the optional ones.
+HERO_STATES = ("idle", "run", "jump", "crouch", "aimUp", "jumpDown", "knife", "throw")
+HERO_FIRING = ("idle", "run", "jump", "crouch", "crouchWalk", "crouchShoot", "aimUp", "aimDiagonal", "jumpDown")
+BONUS_EFFECTS = ("weapon", "health", "turbo", "score", "grenades")
 ENEMY_BEHAVIORS = ("melee", "thrower", "gunman")
 BOSS_BEHAVIORS = ("flyer", "walker")
 ATTACKS = ("gun", "bombs", "stomp")
@@ -174,13 +178,96 @@ def validate_hero(data, resources):
         errors.number(special, "speed", 1, 60, sl)
         errors.number(special, "spread", 0, 10, sl)
         errors.number(special, "shots", 1, 15, sl, 0, True)
-    info = validate_animations(data.get("animations"), resources, label, ("idle", "run", "jump"), errors)
+    hitbox = obj(data, "hitbox")
+    errors.number(hitbox, "y", .1, 5, label + ".hitbox", 1)
+    errors.number(hitbox, "radius", .1, 3, label + ".hitbox", .53)
+    crouch = obj(data, "crouch")
+    errors.number(crouch, "speed", 0, 30, label + ".crouch")
+    errors.number(crouch, "y", .05, 5, label + ".crouch")
+    errors.number(crouch, "radius", .1, 3, label + ".crouch")
+    knife = obj(data, "knife")
+    errors.number(knife, "reach", .1, 5, label + ".knife")
+    errors.number(knife, "height", 0, 5, label + ".knife")
+    errors.number(knife, "cooldown", .02, 3, label + ".knife")
+    errors.number(knife, "pose", 0, 2, label + ".knife")
+    errors.number(knife, "damage", 1, 500, label + ".knife", 0, True)
+    errors.resource(knife.get("sound"), "Audio/", SOUNDS, resources, label + ".knife.sound")
+    info = validate_animations(data.get("animations"), resources, label, HERO_STATES, errors)
     if info and info["cells"] is not None:
         errors.number(data, "portraitCell", 0, info["cells"] - 1, label, 0, True)
-        for state in ("idle", "run", "jump"):
+        frame = obj(data, "portraitFrame") if "portraitFrame" in data else {"size": 1}
+        fx, fy = errors.number(frame, "x", 0, 1, label + ".portraitFrame"), errors.number(frame, "y", 0, 1, label + ".portraitFrame")
+        size = errors.number(frame, "size", .05, 1, label + ".portraitFrame", 1)
+        if None not in (fx, fy, size) and (fx + size > 1.0001 or fy + size > 1.0001):
+            errors.append(f"{label}.portraitFrame: must stay inside the cell")
+        for state in HERO_FIRING:
             for cell in info["states"].get(state, {}).get("cells", []) or []:
                 if not has_anchor(info, "muzzle", cell):
-                    errors.append(f"{label}: muzzle anchor missing for cell {cell}")
+                    errors.append(f"{label}: muzzle anchor missing for cell {cell} ({state})")
+        thrown = info["states"].get("throw", {}).get("cells")
+        if isinstance(thrown, list) and thrown and not has_anchor(info, "hand", thrown[-1]):
+            errors.append(f"{label}: hand anchor required on the last cell of throw")
+    return errors
+
+
+def validate_cell(cell, resources, label, errors):
+    if not isinstance(cell, dict):
+        errors.append(f"{label}: object required")
+        return
+    errors.resource(cell.get("texture"), "Art/", IMAGES, resources, label + ".texture")
+    columns = errors.number(cell, "columns", 1, 32, label, 1, True)
+    rows = errors.number(cell, "rows", 1, 32, label, 1, True)
+    errors.number(cell, "cell", 0, (columns or 1) * (rows or 1) - 1, label, 0, True)
+
+
+def validate_rules(data, resources):
+    errors = Errors()
+    label = f"rules {data.get('id')}"
+    stock = obj(data, "grenades")
+    errors.per_difficulty(stock, "start", 0, 99, label + ".grenades", True)
+    errors.per_difficulty(stock, "max", 0, 99, label + ".grenades", True)
+    if not isinstance(stock.get("refillOnRespawn", True), bool):
+        errors.append(f"{label}.grenades.refillOnRespawn: true or false")
+    if isinstance(stock.get("start"), list) and isinstance(stock.get("max"), list) and len(stock["start"]) == len(stock["max"]) == 4 \
+            and all(isinstance(v, (int, float)) for v in stock["start"] + stock["max"]) and any(a > b for a, b in zip(stock["start"], stock["max"])):
+        errors.append(f"{label}.grenades: start cannot exceed max")
+    grenade, gl = obj(data, "grenade"), label + ".grenade"
+    for key, low, high in (("throwX", 0, 30), ("throwY", -10, 30), ("gravity", 1, 100), ("bounce", 0, 1), ("friction", 0, 1), ("fuse", .1, 10),
+                           ("radius", .2, 10), ("size", .05, 2), ("cooldown", 0, 5), ("pose", 0, 2)):
+        errors.number(grenade, key, low, high, gl)
+    errors.number(grenade, "bounces", 0, 5, gl, 0, True)
+    errors.number(grenade, "damage", 1, 500, gl, 0, True)
+    errors.number(grenade, "bossDamage", 0, 1000, gl, 0, True)
+    if not isinstance(grenade.get("destroysBombs", False), bool):
+        errors.append(f"{gl}.destroysBombs: true or false")
+    errors.resource(grenade.get("throwSound"), "Audio/", SOUNDS, resources, gl + ".throwSound")
+    validate_cell(grenade.get("sprite"), resources, gl + ".sprite", errors)
+    validate_cell(grenade.get("icon"), resources, gl + ".icon", errors)
+    bonuses = data.get("bonuses")
+    if not isinstance(bonuses, list) or not 1 <= len(bonuses) <= 16:
+        errors.append(f"{label}.bonuses: one to sixteen bonuses")
+        bonuses = []
+    for i, bonus in enumerate(bonuses):
+        bl = f"{label}.bonuses[{i}]"
+        if not isinstance(bonus, dict) or not isinstance(bonus.get("id"), str) or not bonus["id"].strip():
+            errors.append(f"{bl}: id required")
+            continue
+        if bonus.get("effect") not in BONUS_EFFECTS:
+            errors.append(f"{bl}.effect: one of {', '.join(BONUS_EFFECTS)}")
+        if bonus.get("effect") == "weapon":
+            errors.number(bonus, "weapon", 1, 3, bl, 0, True)
+        errors.per_difficulty(bonus, "amount", 1, 100000, bl, True)
+        errors.text(bonus, "announce", 30, bl)
+        errors.number(bonus, "scale", .2, 5, bl, 1.25)
+        voice = bonus.get("voice")
+        if voice not in (None, ""):
+            errors.resource(voice + "-a" if isinstance(voice, str) else voice, "Audio/", SOUNDS, resources, bl + ".voice")
+        validate_cell(bonus.get("icon"), resources, bl + ".icon", errors)
+    for key in ("supplies", "drops"):
+        cycle = data.get(key)
+        if not isinstance(cycle, list) or not 1 <= len(cycle) <= 64 or any(type(v) is not int or not 0 <= v < len(bonuses) for v in cycle):
+            errors.append(f"{label}.{key}: one to 64 indices into bonuses")
+    validate_cell(data.get("go"), resources, label + ".go", errors)
     return errors
 
 
@@ -354,7 +441,7 @@ def validate_boss(data, resources):
     return errors
 
 
-VALIDATORS = {"heroes": validate_hero, "enemies": validate_enemy, "bosses": validate_boss}
+VALIDATORS = {"heroes": validate_hero, "enemies": validate_enemy, "bosses": validate_boss, "rules": validate_rules}
 
 
 def load_library(resources, extra=None):
@@ -397,6 +484,8 @@ def load_library(resources, extra=None):
             library[kind][entry_id] = data
     if not 1 <= len(library["heroes"]) <= 4:
         errors.append("Content/heroes: one to four heroes are required")
+    if "default" not in library["rules"]:
+        errors.append("Content/rules/default.json is required")
     return library, errors
 
 
@@ -450,6 +539,9 @@ def validate_mission(data, resources, library=None):
             errors.append(f"map.{key} is reserved for a later batch: leave the list empty")
     if data.get("encounters") not in (None, []):
         errors.append("encounters is reserved for a later batch: leave the list empty")
+    rules = data.get("rules", "default")
+    if rules not in library["rules"]:
+        errors.append(f"rules: unknown rules {rules} (Content/rules/{rules}.json)")
     enemies = data.get("enemies")
     roster = 0
     if not isinstance(enemies, list) or not 1 <= len(enemies) <= 8:

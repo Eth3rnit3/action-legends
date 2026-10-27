@@ -50,11 +50,14 @@ public static class VerifyCampaignTokyo
         }
         // A hero that only runs right cannot clear locked waves: this run looks at the gunmen, VerifyWaveLock at the locks.
         foreach(var wave in missions[2].waves)wave.@lock=false;
-        g.BeginRound();var p=players[0];int max=p.hp;
-        int hits=0,hostile=0,aiming=0;bool captured=false;var seenRoles=new HashSet<string>();
+        PanameGame.Player p;int max,hits=0,hostile=0,aiming=0;
+        try{
+        g.BeginRound();p=players[0];max=p.hp;bool captured=false;var seenRoles=new HashSet<string>();
+        // It stops for a second every four: since lot 1a the knife clears a gunman it runs into, and a hero that never
+        // stops mostly outruns the aim (two hits per run before, none after); standing still it is in the line of fire.
         for(int n=0;n<60*240&&!g.BossActive&&g.phase==PanameGame.Phase.Playing;n++)
         {
-            commands[0]=new PlayerCommand{move=1,fire=true,jump=n%50==0};
+            commands[0]=new PlayerCommand{move=n%240<180?1:0,fire=true,jump=n%50==0};
             g.TickSimulation(1f/60,commands);
             if(p.hp<max){hits+=max-p.hp;p.hp=max;}
             foreach(var s in shots){var look=s.GetType().GetProperty("Hostile").GetValue(s);if((bool)look)hostile++;}
@@ -65,7 +68,9 @@ public static class VerifyCampaignTokyo
         Check(aiming>0,"Les tireurs visent avant de tirer",checks);
         Check(hostile>0&&hits>0,"Les ennemis tirent des balles qui touchent le joueur ("+hits+" touches)",checks);
         Check(g.BossActive&&g.Wave==missions[2].waves.Length,"Le boss arrive après les neuf vagues",checks);
-        foreach(var wave in missions[2].waves)wave.@lock=true;
+        }
+        // A failure here must not leave Tokyo's waves unlocked for the tests that run next.
+        finally{foreach(var wave in missions[2].waves)wave.@lock=true;}
 
         var renderer=(SpriteRenderer)Get(g,"bossRenderer");
         Check(renderer&&renderer.sprite&&renderer.sprite.texture==Resources.Load<Texture2D>("Art/tokyo/mecha-shogun"),"Le boss est le Mécha Shogun dessiné",checks);
@@ -82,7 +87,9 @@ public static class VerifyCampaignTokyo
             if(!shotGun&&(int)Get(g,"bossCell")==4&&bullets>20){Capture(g,captures+"/mecha-gatling.png");shotGun=true;}
         }
         Check(frames.Contains(1)&&frames.Contains(2)&&frames.Contains(3)&&frames.Contains(4)&&frames.Contains(5),"Le mécha marche, piétine, mitraille et lance ses missiles ("+string.Join(",",frames)+")",checks);
-        Check(maxWaves==2&&maxBombs>=3&&bullets>0,"Ondes de choc, missiles et rafales sont lancés",checks);
+        // A stomp sends two waves; since lot 1a's sheets moved the barrels the mecha can enrage sooner and stomp
+        // again before the last two have faded.
+        Check(maxWaves>=2&&maxBombs>=3&&bullets>0,"Ondes de choc, missiles et rafales sont lancés ("+maxWaves+" ondes, "+maxBombs+" missiles, "+bullets+" balles)",checks);
         int health=g.BossHealth;Check(health<(int)Get(g,"bossMaxHealth"),"Les tirs des héros blessent le mécha",checks);
         commands[0]=default;
         p.position=new Vector2(p.position.x,2);p.vertical=0;var before=p.hp;

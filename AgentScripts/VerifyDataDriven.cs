@@ -76,18 +76,15 @@ public static class VerifyDataDriven
     static readonly string[] OldHeroNames={"CHUCK NORRIS","ARNOLD","JEAN-CLAUDE","SYLVESTER"};
     static readonly float[] OldSpeed={10.5f,9.8f,11.5f,10.7f},OldRate={.095f,.065f,.085f,.10f},OldJump={11,11,12.8f,11},OldShake={.025f,.07f,.025f,.025f};
     static readonly int[] OldDamage={3,5,3,4};
-    static readonly Vector2[,] OldHeroMuzzles={
-        {new Vector2(1.25f,1.32f),new Vector2(1.30f,1.29f),new Vector2(1.36f,1.21f),new Vector2(1.29f,1.41f)},
-        {new Vector2(1.36f,1.31f),new Vector2(1.36f,1.24f),new Vector2(1.36f,1.14f),new Vector2(1.32f,1.46f)},
-        {new Vector2(1.28f,1.39f),new Vector2(1.28f,1.28f),new Vector2(1.36f,1.28f),new Vector2(1.30f,1.51f)},
-        {new Vector2(1.21f,1.40f),new Vector2(1.36f,1.37f),new Vector2(1.36f,1.33f),new Vector2(1.28f,1.37f)}};
     static readonly float[] HealthFactors={1,1.8f,2.5f,3.2f},SpeedFactors={1,1.12f,1.25f,1.4f};
-    // Bot runs recorded on the engine before the library (mission, difficulty, heroes, invulnerable): ticks, score, state hash.
-    // A lot that changes gameplay on purpose records them again and says so.
+    // Bot runs (mission, difficulty, heroes, invulnerable): ticks, score, state hash. Recorded on the engine before the
+    // library, then again in lot 1a, which changes gameplay on purpose: the new hero sheets move every barrel tip (shots
+    // leave from another point), the knife replaces a shot when the bot creeps within reach, the bonus cycles now hold
+    // grenade crates, and the state hash includes grenades. A lot that changes gameplay on purpose records them again and says so.
     static readonly (int m,int d,int[] h,bool inv,int ticks,int score,int hash)[] Legacy={
-        (0,0,new[]{0,1,2,3},false,7184,187900,-259053416),(1,1,new[]{2,3,-1,-1},false,2321,19650,-499632837),(2,0,new[]{3,2,1,0},false,7204,140650,-2071497202),
-        (2,3,new[]{1,-1,-1,-1},false,569,900,1632740242),(0,2,new[]{0,-1,-1,-1},false,722,2150,1545268496),(1,3,new[]{1,0,3,2},false,676,11300,305800904),
-        (2,1,new[]{0,1,-1,-1},false,2911,20300,2104067739),(0,1,new[]{2,-1,3,-1},false,2431,11600,-2139134742),(1,0,new[]{0,1,2,3},true,5978,185050,160445752)};
+        (0,0,new[]{0,1,2,3},false,7076,189500,-1071455707),(1,1,new[]{2,3,-1,-1},false,2682,27100,-1461635582),(2,0,new[]{3,2,1,0},false,7156,140650,59450490),
+        (2,3,new[]{1,-1,-1,-1},false,569,1100,-865923552),(0,2,new[]{0,-1,-1,-1},false,724,2000,280097480),(1,3,new[]{1,0,3,2},false,1029,23000,-682329150),
+        (2,1,new[]{0,1,-1,-1},false,5613,42050,1423870097),(0,1,new[]{2,-1,3,-1},false,2532,25700,517487189),(1,0,new[]{0,1,2,3},true,5993,178950,1411155241)};
     static readonly string[] ProperNouns={"Paris","Parisien","Macron","Bastille","Seine","Eiffel","Haussmann","Marseille","Marseillaise","Mistral","Pastis","Canebière","Tokyo","Shogun","Sakura","Shibuya","Akihabara","Chuck","Norris","Arnold","Jean-Claude","JCVD","Sylvester","macron-helicopter","mecha-shogun","news-helicopter","route-0"};
 
     public static object Main(string captures)
@@ -126,9 +123,9 @@ public static class VerifyDataDriven
             Expect(s.cooldown==5&&s.cooldownPerDifficulty==1&&h.blast==(i==0||i==2));
             if(h.blast)Expect(s.radius==(i==0?4:3.2f)&&s.damage==8&&s.bossDamage==24&&s.bossReach==1&&s.invulnerable==1&&s.leap==(i==2?12.8f:0));
             else Expect(s.shots==7&&s.speed==(i==1?26:19)&&s.spread==(i==1?.8f:2)&&s.damage==(i==1?4:5)&&s.explosive);
-            for(int f=0;f<4;f++)Expect(h.muzzles[h.animations.Cell(f==0?h.idle:f==3?h.jumping:h.run,0,f==2?1/.7f+.01f:0)]==OldHeroMuzzles[i,f]);
         }
-        Check(Clean(),"Les quatre héros gardent noms, vitesses, cadences, dégâts, sauts, spéciaux et bouts de canon",checks);
+        // Their barrel tips moved with the lot 1a sheets (one sheet per hero, Art/heroes/<id>.png): VerifyLot1a checks those.
+        Check(Clean(),"Les quatre héros gardent noms, vitesses, cadences, dégâts, sauts et spéciaux",checks);
         // Enemies: the old role tables, per-difficulty projectile speeds computed with the old formulas, bit for bit.
         fails.Clear();
         foreach(var pair in OldEnemies)
@@ -277,7 +274,7 @@ public static class VerifyDataDriven
             int hash=(int)Call(g,"StateHash");bool ok=ticks==run.ticks&&g.Score==run.score&&hash==run.hash;if(!ok)fails.Add("run");
             results.Add(g.CurrentMission.id+" d"+run.d+" ×"+Array.FindAll(run.h,x=>x>=0).Length+(ok?" =":" ≠ "+ticks+"/"+g.Score+"/"+hash));
         }
-        Check(Clean(),"Neuf parties de bot enregistrées sur l'ancien moteur finissent au même pas, au même score et au même état ("+string.Join(" ; ",results)+")",checks);
+        Check(Clean(),"Neuf parties de bot enregistrées (lot 1a) finissent au même pas, au même score et au même état ("+string.Join(" ; ",results)+")",checks);
     }
 
     static void Capture(PanameGame g,string path)

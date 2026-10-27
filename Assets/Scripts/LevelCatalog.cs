@@ -52,7 +52,10 @@ namespace Paname
         public MissionWave[] waves;
         public MissionEncounter[] encounters;
         public MissionBoss boss=new MissionBoss();
+        // Library rules (grenades, bonuses, GO sign) the mission plays by.
+        public string rules="default";
         [NonSerialized] public EnemyDefinition[] roster;
+        [NonSerialized] public GameRules ruleSet;
         public static MissionDefinition Parse(string text)
         {
             var mission=JsonUtility.FromJson<MissionDefinition>(text);
@@ -85,6 +88,7 @@ namespace Paname
                 if(wave.enemyPattern==null||wave.enemyPattern.Length<1||wave.enemyPattern.Length>30)throw new ArgumentException("enemyPattern est requis");
                 foreach(int kind in wave.enemyPattern)if(kind<0||kind>=enemies.Length)throw new ArgumentException("Type d'ennemi inconnu");
             }
+            ruleSet=ContentLibrary.Rules(string.IsNullOrEmpty(rules)?"default":rules);
             extraEnemy??=new MissionExtraEnemy();
             if(extraEnemy.enemy<-1||extraEnemy.enemy>=enemies.Length||extraEnemy.every<1||extraEnemy.every>30||extraEnemy.fromDifficulty<0||extraEnemy.fromDifficulty>3)throw new ArgumentException("extraEnemy : enemy de -1 à la taille du roster, every de 1 à 30, fromDifficulty de 0 à 3");
             boss??=new MissionBoss();

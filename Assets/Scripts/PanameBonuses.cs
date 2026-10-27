@@ -5,19 +5,13 @@ namespace Paname
 {
     public sealed partial class PanameGame
     {
+        // kind: the bonus's index in the rules' list of bonuses.
         sealed class Pickup {public int kind;public Vector2 position;public Transform root;public float age;}
         readonly List<Pickup> pickups=new List<Pickup>();
-        static Texture2D bonusTexture;static readonly Sprite[] bonusSprites=new Sprite[6];
+        readonly Dictionary<string,AudioClip[]> bonusTakes=new Dictionary<string,AudioClip[]>();
         int kills,nextSupply;float comboClock;int combo;
         public int BonusCount=>pickups.Count;
         public static string WeaponName(int kind)=>kind==1?"MITRAILLEUSE":kind==2?"TRIPLE TIR":kind==3?"ROQUETTES":"FUSIL";
-        static Sprite BonusSprite(int kind)
-        {
-            if(bonusSprites[kind])return bonusSprites[kind];
-            if(!bonusTexture)bonusTexture=Resources.Load<Texture2D>("Art/bonus-icons");if(!bonusTexture)return null;
-            float w=bonusTexture.width/3f,h=bonusTexture.height/2f;
-            return bonusSprites[kind]=Sprite.Create(bonusTexture,new Rect(kind%3*w,bonusTexture.height-(kind/3+1)*h,w,h),new Vector2(.5f,.5f),h,0,SpriteMeshType.FullRect);
-        }
         void ResetBonuses()
         {
             pickups.Clear();kills=0;combo=0;comboClock=0;nextSupply=0;
@@ -25,27 +19,32 @@ namespace Paname
         void SpawnPickup(Vector2 position,int kind)
         {
             if(pickups.Count>=20)return;
-            var root=new GameObject("Bonus • "+kind).transform;root.SetParent(actors,false);position.y=.65f;root.position=position;
-            var sprite=BonusSprite(kind);
-            if(sprite){var r=root.gameObject.AddComponent<SpriteRenderer>();r.sprite=sprite;r.sortingOrder=48;root.localScale=Vector3.one*1.25f;}
-            else {Box(root,"Caisse bonus",0,0,.65f,.65f,kind==3?Coral:Gold,48);Text(root,kind==3?"+":"?",0,0,1.5f,Ink,50);}
+            var bonus=Rules.bonuses[kind];
+            var root=new GameObject("Bonus • "+bonus.id).transform;root.SetParent(actors,false);position.y=.65f;root.position=position;
+            var r=root.gameObject.AddComponent<SpriteRenderer>();r.sprite=bonus.icon.Sprite;r.sortingOrder=48;root.localScale=Vector3.one*bonus.scale;
             pickups.Add(new Pickup{root=root,position=position,kind=kind});
         }
         public void GiveBonus(int slot,int kind)
         {
-            var p=players[slot];if(p==null||p.hp<=0)return;
-            if(kind<3){p.weapon=kind+1;p.ammo=Mathf.RoundToInt((kind==0?120:kind==1?55:20)*(1-DifficultyIndex*.15f));Announce(WeaponName(p.weapon)+" !");}
-            else if(kind==3){p.hp=Mathf.Min(MaxPlayerHealth,p.hp+(DifficultyIndex==0?3:2));Announce("SOINS !");}
-            else if(kind==4){p.boost=DifficultyIndex==0?10:8-DifficultyIndex;Announce("TURBO !");}
-            else {Score+=1500;Announce("BONUS +1500");}
-            effects.Play(1,p.position+Vector2.up,.95f,.2f);Sound(pickupClip);Speak(bonusVoices[Mathf.Clamp(kind,0,5)]);
+            var p=players[slot];if(p==null||p.hp<=0||kind<0||kind>=Rules.bonuses.Length)return;
+            var bonus=Rules.bonuses[kind];int amount=bonus.amount[DifficultyIndex];
+            switch(bonus.kind)
+            {
+                case 0:p.weapon=bonus.weapon;p.ammo=amount;break;
+                case 1:p.hp=Mathf.Min(MaxPlayerHealth,p.hp+amount);break;
+                case 2:p.boost=p.boostMax=amount;break;
+                case 3:Score+=amount;break;
+                default:p.grenades=Mathf.Min(Rules.grenades.max[DifficultyIndex],p.grenades+amount);break;
+            }
+            Announce(bonus.announce);effects.Play(1,p.position+Vector2.up,.95f,.2f);Sound(pickupClip);
+            if(!string.IsNullOrEmpty(bonus.voice)){if(!bonusTakes.TryGetValue(bonus.voice,out var takes))bonusTakes[bonus.voice]=takes=TakesAt(bonus.voice);Speak(takes);}
         }
         void TickBonuses(float dt)
         {
             if(bossStarted)return;
             comboClock-=dt;if(comboClock<=0)combo=0;
             while(nextSupply*SupplySpacing+FirstSupplyX<CurrentMission.length-5&&LeaderX()+13>=nextSupply*SupplySpacing+FirstSupplyX)
-            {SpawnPickup(new Vector2(nextSupply*SupplySpacing+FirstSupplyX,0),nextSupply%6);nextSupply++;}
+            {var cycle=Rules.supplies;SpawnPickup(new Vector2(nextSupply*SupplySpacing+FirstSupplyX,0),cycle[nextSupply%cycle.Length]);nextSupply++;}
             for(int i=pickups.Count-1;i>=0;i--)
             {
                 var item=pickups[i];item.age+=dt;item.root.position=item.position+Vector2.up*(Mathf.Sin(SimulationTime*5+i)*.11f);
@@ -60,7 +59,7 @@ namespace Paname
         void RecordKill(Vector2 at)
         {
             kills++;combo++;comboClock=2;Score+=100*Mathf.Min(5,1+combo/8);
-            if(kills%KillsPerBonus==0)SpawnPickup(at,(kills/KillsPerBonus-1)%6);
+            if(kills%KillsPerBonus==0){var cycle=Rules.drops;SpawnPickup(at,cycle[(kills/KillsPerBonus-1)%cycle.Length]);}
         }
         void FirePlayer(Player p)
         {
@@ -73,7 +72,7 @@ namespace Paname
             if(mode>0&&--p.ammo<=0){p.weapon=0;p.ammo=0;}
             effects.Casing(muzzle+new Vector2(-p.facing*.62f,.04f),p.facing);shake=Mathf.Max(shake,hero.recoilShake);Sound(FireClip(mode));
         }
-        static Vector2 AimDirection(Player p)=>p.aimUp?(p.moving?new Vector2(p.facing,1).normalized:Vector2.up):new Vector2(p.facing,0);
+        static Vector2 AimDirection(Player p)=>p.aimUp?(p.moving?new Vector2(p.facing,1).normalized:Vector2.up):p.aimDown?Vector2.down:new Vector2(p.facing,0);
         static string Clock(float time){int minutes=(int)time/60;return minutes.ToString("00")+":"+(time%60).ToString("00.0");}
     }
 }

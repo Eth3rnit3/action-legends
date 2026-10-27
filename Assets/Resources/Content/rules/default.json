@@ -1,0 +1,199 @@
+{
+  "id": "default",
+  "grenades": {
+    "start": [
+      10,
+      10,
+      8,
+      6
+    ],
+    "max": [
+      20,
+      15,
+      12,
+      10
+    ],
+    "refillOnRespawn": true
+  },
+  "grenade": {
+    "throwX": 7,
+    "throwY": 8.5,
+    "gravity": 26,
+    "bounce": 0.35,
+    "friction": 0.6,
+    "bounces": 1,
+    "fuse": 2.5,
+    "radius": 2.3,
+    "size": 0.9,
+    "damage": 10,
+    "bossDamage": 25,
+    "cooldown": 0.35,
+    "pose": 0.28,
+    "destroysBombs": true,
+    "throwSound": "Audio/Sfx/grenade-lancer",
+    "sprite": {
+      "texture": "Art/grenades",
+      "columns": 2,
+      "rows": 2,
+      "cell": 0
+    },
+    "icon": {
+      "texture": "Art/grenades",
+      "columns": 2,
+      "rows": 2,
+      "cell": 1
+    }
+  },
+  "bonuses": [
+    {
+      "id": "machinegun",
+      "effect": "weapon",
+      "weapon": 1,
+      "amount": [
+        120,
+        102,
+        84,
+        66
+      ],
+      "announce": "MITRAILLEUSE !",
+      "voice": "Audio/Voices/bonus-0",
+      "icon": {
+        "texture": "Art/bonus-icons",
+        "columns": 3,
+        "rows": 2,
+        "cell": 0
+      }
+    },
+    {
+      "id": "triple",
+      "effect": "weapon",
+      "weapon": 2,
+      "amount": [
+        55,
+        47,
+        38,
+        30
+      ],
+      "announce": "TRIPLE TIR !",
+      "voice": "Audio/Voices/bonus-1",
+      "icon": {
+        "texture": "Art/bonus-icons",
+        "columns": 3,
+        "rows": 2,
+        "cell": 1
+      }
+    },
+    {
+      "id": "rockets",
+      "effect": "weapon",
+      "weapon": 3,
+      "amount": [
+        20,
+        17,
+        14,
+        11
+      ],
+      "announce": "ROQUETTES !",
+      "voice": "Audio/Voices/bonus-2",
+      "icon": {
+        "texture": "Art/bonus-icons",
+        "columns": 3,
+        "rows": 2,
+        "cell": 2
+      }
+    },
+    {
+      "id": "health",
+      "effect": "health",
+      "amount": [
+        3,
+        2,
+        2,
+        2
+      ],
+      "announce": "SOINS !",
+      "voice": "Audio/Voices/bonus-3",
+      "icon": {
+        "texture": "Art/bonus-icons",
+        "columns": 3,
+        "rows": 2,
+        "cell": 3
+      }
+    },
+    {
+      "id": "turbo",
+      "effect": "turbo",
+      "amount": [
+        10,
+        7,
+        6,
+        5
+      ],
+      "announce": "TURBO !",
+      "voice": "Audio/Voices/bonus-4",
+      "icon": {
+        "texture": "Art/bonus-icons",
+        "columns": 3,
+        "rows": 2,
+        "cell": 4
+      }
+    },
+    {
+      "id": "score",
+      "effect": "score",
+      "amount": [
+        1500,
+        1500,
+        1500,
+        1500
+      ],
+      "announce": "BONUS +1500",
+      "voice": "Audio/Voices/bonus-5",
+      "icon": {
+        "texture": "Art/bonus-icons",
+        "columns": 3,
+        "rows": 2,
+        "cell": 5
+      }
+    },
+    {
+      "id": "grenades",
+      "effect": "grenades",
+      "amount": [
+        10,
+        10,
+        8,
+        6
+      ],
+      "announce": "GRENADES !",
+      "icon": {
+        "texture": "Art/grenades",
+        "columns": 2,
+        "rows": 2,
+        "cell": 2
+      }
+    }
+  ],
+  "supplies": [
+    0,
+    1,
+    2,
+    6,
+    3,
+    4,
+    5
+  ],
+  "drops": [
+    0,
+    1,
+    6,
+    2,
+    3,
+    6,
+    4,
+    5
+  ],
+  "go": {
+    "texture": "Art/go-sign"
+  }
+}

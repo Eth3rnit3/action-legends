@@ -176,6 +176,13 @@ namespace Paname
             {DamageBoss(damage);effects.Impact(to,1,true);return true;}
             return false;
         }
+        // Whether a circle touches the boss's body.
+        bool BossWithin(Vector2 at,float radius)
+        {
+            if(!BossActive||!bossRoot)return false;var h=Boss.hitbox;float facing=bossRoot.localScale.x;
+            for(int i=0;i<h.count;i++)if(Vector2.Distance(at,bossPosition+new Vector2((h.x+i*h.stepX)*facing,h.y+i*h.stepY))<radius+h.radius)return true;
+            return false;
+        }
         void DamageBoss(int amount)
         {
             if(!BossActive)return;

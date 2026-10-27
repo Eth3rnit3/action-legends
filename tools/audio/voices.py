@@ -7,7 +7,8 @@ from pathlib import Path
 OUT = Path(__file__).resolve().parents[2] / 'Assets/Resources/Audio/Voices'
 LINES = {'bonus-0': 'Mitrailleuse !', 'bonus-1': 'Triple tir !', 'bonus-2': 'Roquettes !', 'bonus-3': 'Soins !',
          'bonus-4': 'Turbo !', 'bonus-5': 'Bonus !', 'boss-alert': 'Alerte ! Boss en approche !', 'victory': 'Mission accomplie !',
-         'bonus-grenades': 'Grenades !'}
+         'bonus-grenades': 'Grenades !', 'weapon-h': 'Mitrailleuse lourde !', 'weapon-s': 'Fusil à pompe !',
+         'weapon-f': 'Lance-flammes !', 'weapon-r': 'Lance-roquettes !', 'weapon-l': 'Laser !'}
 # The 3.x models read stage directions aloud, so they get audio tags; 2.5 Pro follows a spoken instruction.
 TAKES = {'a': ('gemini-2.5-pro-preview-tts', 'Fenrir', 'Say in French, shouting excitedly like an arcade announcer: {}'),
          'b': ('gemini-2.5-pro-preview-tts', 'Orus', 'Say in French, shouting excitedly like an arcade announcer: {}'),

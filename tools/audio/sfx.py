@@ -113,6 +113,20 @@ SOUNDS = {
     'grenade-lancer': lambda: np.concatenate([gen('square', 2600, 2200, .025, duty=.3, punch=.5),
                                               layer((1, gen('noise', 500, 1900, .26, attack=.04, curve=.9, lp=3500, crush=(16000, 8))),
                                                     (.3, gen('tri', 260, 420, .22)))]),
+    # Lettered weapons (lot 1b), also last for the same reason.
+    'tir-H-lourde': lambda: layer((1, gen('noise', 2000, 380, .075, punch=.8, lp=5200, crush=(16000, 8))),
+                                  (.75, gen('square', 260, 70, .07, duty=.35)),
+                                  (.35, gen('noise', 7000, 2500, .025, hp=3000))),
+    'tir-S-pompe': lambda: np.concatenate([layer((1, gen('noise', 1800, 90, .34, sustain=.01, punch=1, curve=1.5, lp=4500, crush=(11025, 8))),
+                                                 (.6, gen('tri', 120, 40, .3))),
+                                           np.zeros(int(.05 * SR)),
+                                           gen('square', 900, 700, .03, duty=.2, punch=.3),
+                                           np.zeros(int(.03 * SR)),
+                                           gen('square', 1100, 850, .03, duty=.2, punch=.3)]),
+    'tir-F-flammes': lambda: layer((1, gen('noise', 700, 1100, .13, attack=.02, sustain=.05, punch=.2, curve=.8, lp=2600, crush=(11025, 8))),
+                                   (.3, gen('noise', 3000, 2000, .1, attack=.02, hp=1500))),
+    'tir-L-laser': lambda: layer((.8, gen('square', 1750, 1500, .09, attack=.004, sustain=.05, duty=.18, vib=(55, .05), punch=.1, crush=(22050, 8))),
+                                 (.5, gen('saw', 880, 760, .09, attack=.004, sustain=.05, lp=6000, crush=(22050, 8)))),
 }
 
 if __name__ == '__main__':

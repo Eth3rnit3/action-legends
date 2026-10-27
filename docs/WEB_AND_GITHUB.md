@@ -15,7 +15,7 @@ L’export utilise gzip avec décompression de secours intégrée : il ne dépen
 3. Utiliser **Action Legends → Construire la version navigateur**.
 4. Servir `WebBuild` avec la commande du README, puis ouvrir l’adresse locale.
 
-En automatisation, l’entrée de compilation est `ActionLegends.Editor.WebBuilder.Build`. Elle valide les missions et génère `WebBuild/`, `.nojekyll` et `build-info.json`.
+En automatisation, l’entrée de compilation est `ActionLegends.Editor.WebBuilder.Build`. Elle valide les missions et génère `WebBuild/`, `.nojekyll` et `build-info.json`. La variable d’environnement facultative `ACTION_LEGENDS_WEB_DIR` change le dossier de sortie (par exemple `ACTION_LEGENDS_WEB_DIR=WebBuild-light`, pour ne pas toucher à un `WebBuild/` en cours d’essai) ; sans elle, la CI et le menu écrivent dans `WebBuild/`. Les dossiers `WebBuild-*/` sont ignorés par git.
 
 ## État actuel de GitHub Actions
 

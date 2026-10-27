@@ -35,7 +35,9 @@ namespace ActionLegends.Editor
         {
             if(EditorApplication.isPlaying)throw new BuildFailedException("Arrêter le mode Play avant de compiler.");
             if(EditorUserBuildSettings.activeBuildTarget!=BuildTarget.WebGL)throw new BuildFailedException("Choisir Web dans Build Profiles et activer cette plateforme avant la compilation.");
-            Configure();string path=Path.GetFullPath("WebBuild");
+            // ACTION_LEGENDS_WEB_DIR builds elsewhere (e.g. WebBuild-light) while WebBuild/ is being served; CI keeps the default.
+            var folder=Environment.GetEnvironmentVariable("ACTION_LEGENDS_WEB_DIR");
+            Configure();string path=Path.GetFullPath(string.IsNullOrEmpty(folder)?"WebBuild":folder);
             var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Paris2026.unity"},target=BuildTarget.WebGL,locationPathName=path,options=BuildOptions.None});
             if(report.summary.result!=BuildResult.Succeeded)throw new BuildFailedException("Compilation web échouée : "+report.summary.result);
             // GameCI valide une méthode de build personnalisée en cherchant ce texte exact dans la sortie Unity.

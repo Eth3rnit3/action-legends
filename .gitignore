@@ -12,6 +12,7 @@ UserSettings/
 *.user
 .DS_Store
 WebBuild/
+WebBuild-*/
 __pycache__/
 *.pyc
 *.ulf

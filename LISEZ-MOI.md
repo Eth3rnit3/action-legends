@@ -25,11 +25,15 @@ Le joueur 1 peut jouer immédiatement au clavier. Sans manette, un seul joueur r
 
 Le clavier contrôle uniquement le joueur 1. Pour jouer à plusieurs, brancher des manettes.
 
+**Otages.** Comme dans Metal Slug, des prisonniers attachés attendent le long du parcours, certains au milieu d'un assaut : tirer sur leurs liens, les toucher, ou faire exploser une grenade à côté les libère. L'otage salue, lâche un cadeau (une caisse d'arme, des grenades, des soins ou des points) puis s'enfuit en courant. Chaque joueur compte ses otages sous sa fiche (icône et ×N) et perd son compte s'il tombe. À la victoire, le **décompte de fin de mission** paie 1 000 points par otage compté et 10 points par seconde d'avance sur le temps de référence de la mission (5 minutes à Paris, 4 à Marseille, 3 min 40 à Tokyo), avant l'écran de victoire ; Entrée ou **PASSER** enchaîne tout de suite. Chaque ville a son otage (un boulanger à Paris, un bouliste à Marseille, un employé de bureau à Tokyo) ; les caisses du parcours sont deux fois moins nombreuses qu'avant.
+
+**Mode SLUG.** La cinquième difficulté du menu joue comme une borne d'arcade : **mort en un coup**, trois vies par joueur (deux de réserve), retour sur place après une seconde, clignotant et invulnérable, avec le fusil de base. Quand plus personne n'a de vie, **CONTINUE ?** compte dix secondes : après une seconde, **saut** (Espace, A / croix) ou un nouvel appui sur **tir** continue (chaque héros revient sur place avec trois vies, la mission reprend où elle en était), **grenade** (L, B / rond) abandonne, et la fin du compte à rebours mène à la défaite. Les boutons CONTINUER et ABANDONNER de l'écran font de même. Le nombre de continues s'affiche sur l'écran de fin ; une partie continuée n'est pas publiable au classement.
+
 **Accroupi**, le héros avance lentement et tire plus bas ; les balles tirées à hauteur de poitrine (les tireurs de Tokyo) lui passent au-dessus, mais pas les coups de près, les bouteilles ni les explosions. **En l'air**, bas + tir tire droit vers le bas. Avec le bouton de tir, un ennemi **au contact** devant le héros prend un coup de **couteau** (plus de dégâts, sans projectile). Les **grenades** partent en cloche, rebondissent une fois et explosent à l'impact sur un ennemi ou au sol : elles blessent tout ce qui est dans le rayon, boss compris, et détruisent les missiles du boss pris dedans. Le stock (affiché sous la vie, ×10) dépend de la difficulté : 10 au départ en Détente et Arcade, 8 en Difficile, 6 en Légende, avec un maximum de 20, 15, 12 et 10 ; il est rendu à chaque renfort, et les caisses vertes aux deux grenades en redonnent. Ces valeurs sont dans `Assets/Resources/Content/rules/default.json`.
 
 ## Première mission : Panique à Paname
 
-Avancer vers la droite à travers douze assauts, puis affronter le boss en hélicoptère à Bastille. Le parcours est six fois plus long que celui de la version 0.4.0 ; à chaque assaut, l’écran se bloque jusqu’à la chute du dernier ennemi, puis une flèche **GO** clignote et le défilement reprend. Trois types d'ennemis : fonceur, lanceur de projectiles et costaud au bouclier. Les attaques spéciales se rechargent en cinq à huit secondes selon la difficulté. Les points de vie et les renforts dépendent de la difficulté ; les renforts sont partagés. En Détente, tous les trois assauts déployés, les héros encore debout reçoivent des soins et un renfort est ajouté ; en Arcade, cela arrive tous les quatre assauts. Difficile et Légende ne reçoivent pas ce réapprovisionnement. Il n'y a pas de tirs entre alliés.
+Avancer vers la droite à travers douze assauts, puis affronter le boss en hélicoptère à Bastille. Le parcours est six fois plus long que celui de la version 0.4.0 ; à chaque assaut, l’écran se bloque jusqu’à la chute du dernier ennemi, puis une flèche **GO** clignote et le défilement reprend. Trois types d'ennemis : fonceur, lanceur de projectiles et costaud au bouclier. Les attaques spéciales se rechargent en cinq à huit secondes selon la difficulté. Les points de vie et les renforts dépendent de la difficulté ; les renforts sont partagés (sauf en Slug, où chacun a ses vies). En Détente, tous les trois assauts déployés, les héros encore debout reçoivent des soins et un renfort est ajouté ; en Arcade, cela arrive tous les quatre assauts. Difficile et Légende ne reçoivent pas ce réapprovisionnement. Il n'y a pas de tirs entre alliés.
 
 Ramasser les caisses pour obtenir une arme, des soins, dix secondes de turbo ou des points. Le chronomètre permet de comparer ses temps de parcours.
 
@@ -45,7 +49,7 @@ Ramasser les caisses pour obtenir une arme, des soins, dix secondes de turbo ou 
 
 Ramasser la même arme remplit ses munitions ; une arme vide, ou un héros qui tombe, revient au fusil de base. Toutes les visées marchent avec chaque arme : haut, diagonale, accroupi, bas en saut. Paris tire ses caisses d'armes d'une table commune (plus de mitrailleuses lourdes), Marseille donne surtout fusils à pompe et lance-flammes, Tokyo surtout des lasers. Les armes sont décrites dans `Assets/Resources/Content/weapons/` et chaque mission choisit lesquelles ses caisses donnent (voir le guide des niveaux).
 
-La fréquence des bonus, les munitions et la durée du turbo dépendent de la difficulté. Détente conserve le réglage de la version 0.4.3 : un bonus pour quinze ennemis et des caisses espacées de 72 unités. Les autres modes distribuent moins de ressources : moins de caisses et des armes aux munitions plus comptées (par exemple 120 tirs de mitrailleuse lourde en Détente, 66 en Légende). Ces réglages sont dans `Assets/Resources/Content/rules/default.json` et `Content/weapons/`.
+La fréquence des bonus, les munitions et la durée du turbo dépendent de la difficulté. Détente donne un bonus pour quinze ennemis et, depuis l'arrivée des otages, une caisse toutes les 150 unités (72 auparavant). Les autres modes distribuent moins de ressources : moins de caisses et des armes aux munitions plus comptées (par exemple 120 tirs de mitrailleuse lourde en Détente, 66 en Légende). Ces réglages sont dans `Assets/Resources/Content/rules/` (`default.json`, et `pow.json` que jouent les trois missions) et `Content/weapons/`.
 
 ## Deuxième mission : Mistral Gagnant
 
@@ -61,7 +65,7 @@ Les missions s’enchaînent. Au départ, seule Panique à Paname est ouverte. U
 
 ## Classement mondial
 
-À la fin d’une mission, **PUBLIER MON SCORE** envoie le score et le replay de la partie sur des relais Nostr publics, sous le pseudo de la page d’accueil. **CLASSEMENT**, au menu, montre le top 10 de chaque mission et difficulté ; chaque score est rejoué dans le navigateur avant d’être affiché. Depuis la version 0.7.0, le jeu local avance par pas fixes de 1/60 s comme le jeu en ligne. Détails et limites dans [docs/CLASSEMENT.md](docs/CLASSEMENT.md).
+À la fin d’une mission, **PUBLIER MON SCORE** envoie le score et le replay de la partie sur des relais Nostr publics, sous le pseudo de la page d’accueil. **CLASSEMENT**, au menu, montre le top 10 de chaque mission et difficulté (Slug compris, parties sans continue seulement) ; chaque score est rejoué dans le navigateur avant d’être affiché. Depuis la version 0.7.0, le jeu local avance par pas fixes de 1/60 s comme le jeu en ligne. Détails et limites dans [docs/CLASSEMENT.md](docs/CLASSEMENT.md).
 
 ## État de cette version
 
@@ -91,14 +95,17 @@ Le nom du jeu est Action Legends. Les missions sont chargées depuis les JSON de
 
 ## Difficultés et boss — version 0.5.0
 
-Choisir Détente, Arcade (par défaut), Difficile ou Légende dans le menu. La difficulté reste fixe pendant une partie. Elle modifie la résistance, le nombre et l’agressivité des ennemis, les bonus, les dégâts en Légende et la résistance du boss.
+Choisir Détente, Arcade (par défaut), Difficile, Légende ou Slug dans le menu ; une ligne sous les boutons résume la difficulté choisie. La difficulté reste fixe pendant une partie. Elle modifie la résistance, le nombre et l’agressivité des ennemis, les bonus, les dégâts en Légende et la résistance du boss. Les règles de chaque difficulté sont dans `Assets/Resources/Content/difficulties/` (voir le guide des niveaux).
 
-| Difficulté | PV | Renforts par joueur | Bonus par éliminations |
-|---|---:|---:|---:|
-| Détente | 6 | 3 | 15 |
-| Arcade | 5 | 2 | 22 |
-| Difficile | 4 | 1 | 28 |
-| Légende | 3 | 1 | 35 |
+| Difficulté | PV | Renforts | Bonus par éliminations | Au fil des assauts | Continue |
+|---|---:|---|---:|---|---|
+| Détente | 6 | 3 par joueur, partagés | 15 | soins (+2) et un renfort tous les 3 assauts | non |
+| Arcade | 5 | 2 par joueur, partagés | 22 | soins (+1) et un renfort tous les 4 assauts | non |
+| Difficile | 4 | 1 par joueur, partagé | 28 | — | non |
+| Légende | 3 | 1 par joueur, partagé ; dégâts doublés | 35 | — | non |
+| Slug | 1 (mort en un coup) | 2 vies de réserve chacun, retour sur place | 22 | — | oui, 10 s, illimités |
+
+Slug reprend les ennemis, le boss, les bonus et les munitions d'Arcade. Le classement a un tableau Slug par mission, réservé aux parties sans continue.
 
 À Bastille, la caméra cadre une arène et le boss caricatural apparaît. Les repères rouges annoncent ses attaques. Bouger pour éviter le mitraillage, sauter au-dessus des explosions ou détruire les bombes en vol. Maintenir W / Z / flèche haut avec J pour tirer verticalement ; courir en visant vers le haut donne un tir diagonal. À la manette, diriger le stick vers le haut avec X / RT. La victoire exige de détruire l’hélico. Sa résistance augmente avec le nombre de joueurs.
 

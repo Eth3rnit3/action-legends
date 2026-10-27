@@ -11,7 +11,9 @@ Assets/Resources/
   Content/heroes/<id>.json       les héros jouables (un à quatre)
   Content/enemies/<id>.json      la bibliothèque des types d’ennemis
   Content/bosses/<id>.json       la bibliothèque des boss
-  Content/rules/<id>.json        règles de partie : grenades, bonus, caisses d’armes, flèche GO ("default" pour toutes les missions)
+  Content/rules/<id>.json        règles de partie : grenades, bonus, caisses d’armes, décompte de fin, flèche GO
+  Content/hostages/<id>.json     les otages (POW) que les missions placent sur leur carte
+  Content/difficulties/<id>.json les difficultés du menu (DÉTENTE, ARCADE, DIFFICILE, LÉGENDE, SLUG)
   Art/<mission>/...              images (PNG) de la mission
   Audio/Music/...                musiques (WAV, OGG ou MP3)
 ```
@@ -33,7 +35,7 @@ Assets/Resources/
 ```
 
 - Les nombres sont en **unités du monde** : un personnage mesure environ 2 unités, l’écran 20,6 × 11,6 unités, le sol est à `y = 0`. Les durées sont en secondes.
-- Les valeurs **par difficulté** sont des listes de quatre nombres : DÉTENTE, ARCADE, DIFFICILE, LÉGENDE. Certaines valeurs livrées ont des décimales étranges (`0.45000002`, `2.3999999`) : elles reproduisent au bit près les anciens réglages du moteur, pour que les replays du classement restent valides. Une nouvelle entrée peut utiliser des valeurs rondes.
+- Les valeurs **par difficulté** sont des listes de quatre nombres, les colonnes DÉTENTE, ARCADE, DIFFICILE, LÉGENDE. Une difficulté du menu (section 5 quinquies) dit quelle colonne elle lit : SLUG lit celle d’ARCADE, et une nouvelle difficulté n’allonge aucune liste. Certaines valeurs livrées ont des décimales étranges (`0.45000002`, `2.3999999`) : elles reproduisent au bit près les anciens réglages du moteur, pour que les replays du classement restent valides. Une nouvelle entrée peut utiliser des valeurs rondes.
 - Les textes affichés sont en français ; ceux du HUD en MAJUSCULES. La police du jeu web ne contient que les caractères jusqu’à U+00FF : pas de « → », d’emoji ni de guillemets typographiques dans les textes affichés.
 
 ## 1. La mission
@@ -57,7 +59,8 @@ Copier une mission de `Assets/Resources/Levels/`, la renommer avec son nouvel `i
 | `waves` | Une à vingt vagues triées par `atX`. |
 | `encounters` | Réservé (section 6) : laisser `[]` ou ne pas l’écrire. |
 | `boss` | Le boss final, voir plus bas. |
-| `rules` | Facultatif, `"default"` par défaut : identifiant de `Content/rules` (section 5 bis). Une mission peut ainsi donner plus ou moins de grenades, d’autres bonus ou une autre flèche GO. |
+| `rules` | Facultatif, `"default"` par défaut : identifiant de `Content/rules` (section 5 bis). Une mission peut ainsi donner plus ou moins de grenades, d’autres bonus, moins de caisses ou une autre flèche GO. Les trois missions livrées jouent `pow` : `default` avec deux fois moins de caisses sur le parcours, puisque les otages donnent aussi des bonus. |
+| `parTime` | Facultatif, `0` par défaut : temps de référence en secondes. Au décompte de fin de mission, chaque seconde gagnée sur lui rapporte `tally.perSecond` points (règles, section 5 bis). Paris 300, Marseille 240, Tokyo 220. |
 | `weapons` | Facultatif : les armes que donnent les caisses d’armes de la mission et leurs proportions, `[{"weapon": "laser", "weight": 3}, {"weapon": "heavy-machinegun", "weight": 2}]`, à la place de la table des règles (section 5 ter). Marseille et Tokyo ont la leur. |
 
 ### Vagues
@@ -74,15 +77,35 @@ La vague démarre quand l’équipe arrive à 9 unités de `atX`. Elle compte `b
 "map": {
   "backgrounds": ["Art/tokyo/shibuya", "Art/marseille/panier", "Art/canal-panorama"],
   "ground": "Art/marseille/sol",
-  "terrain": [], "props": [], "hostages": [], "vehicles": []
+  "terrain": [], "props": [], "vehicles": [],
+  "hostages": [
+    {"id": "baker", "x": 34, "y": 0},
+    {"id": "baker", "x": 49, "y": 0, "wave": 1, "reward": "weapon"},
+    {"id": "civilian", "x": 238, "y": 0, "wave": 6, "weapon": "heavy-machinegun"}
+  ]
 }
 ```
 
 - `backgrounds` : une à huit images de décor, dans l’ordre de gauche à droite. Chacune est affichée sur 13 unités de hauteur, la ligne de sol à 80 % de sa hauteur depuis le haut ; les portions sont accolées, et une portion large (plus de deux fois plus large que haute) se fond sur 1,5 unité dans la précédente. Le moteur fait défiler la fresque en parallaxe pour couvrir tout le parcours, quel que soit le format d’écran. Les images ne contiennent ni personnages ni interface ; un panorama découpé sans perte donne des raccords exacts (Paris).
 - `ground` : image dont les 20 % du bas sont répétés le long de la rue, devant le décor.
-- `terrain`, `props`, `hostages`, `vehicles` : réservés (section 6), à laisser vides.
+- `hostages` : les otages de la mission (voir plus bas).
+- `terrain`, `props`, `vehicles` : réservés (section 6), à laisser vides.
 
 Une carte peut réutiliser les décors d’autres missions.
+
+### Otages
+
+Chaque élément de `map.hostages` attache un otage de `Content/hostages` (section 5 quater) dans la rue :
+
+| Champ | Utilisation |
+|---|---|
+| `id` | Un otage de la bibliothèque. |
+| `x`, `y` | Position (de 1 à `length - 1`), `y` au-dessus de la rue (0 en général). |
+| `wave` | Facultatif, `-1` par défaut. L’otage n’apparaît qu’au départ de cette vague (indice dans `waves`), dans son écran bloqué : il doit être placé entre `atX - 14` et `atX + 2`. |
+| `reward` | Facultatif : l’`id` d’un bonus des règles de la mission (`"grenades"`, `"health"`, `"score"`, `"weapon"` pour une arme tirée de la table). Sans `reward` ni `weapon`, l’otage tire sa récompense de sa propre table. |
+| `weapon` | Facultatif : une arme à munitions de `Content/weapons`, donnée dans sa caisse. |
+
+Un otage se libère quand un héros tire sur ses liens ou le touche (selon son `release`) ; seul un otage visible à l’écran peut être libéré. Libéré, il salue, lâche sa récompense devant lui (un bonus à ramasser, comme une caisse) puis s’enfuit hors de l’écran : dans une vague bloquée, il donne toujours sa récompense dans l’écran avant de partir. Le héros qui l’a libéré le compte (HUD, sous sa fiche) ; il perd son compte s’il tombe. À la victoire, le **décompte de fin de mission** paie chaque otage encore compté et l’avance sur `parTime`. Les missions livrées placent 8 ou 9 otages, dont quatre dans des vagues.
 
 ### Boss de mission
 
@@ -314,6 +337,7 @@ Les quatre héros sont dans `Content/heroes/` ; le menu en affiche un à quatre,
 | `firstSupply`, `supplySpacing`, `killsPerDrop` | Par difficulté : position de la première caisse, distance entre deux caisses, ennemis vaincus pour un bonus lâché (`[24, 35, 45, 55]`, `[72, 90, 110, 130]`, `[15, 22, 28, 35]`). |
 | `weapons` | La table des caisses d’armes qui ne nomment pas leur arme : `[{"weapon": "<id>", "weight": 3}, …]`. Sur toute suite de tirages aussi longue que la somme des poids, chaque arme sort `weight` fois, réparties (tourniquet pondéré, le même sur toutes les machines). Une mission peut la remplacer par son propre champ `weapons`. Obligatoire dès qu’un bonus `weapon` ne nomme pas d’arme. |
 | `go` | L’image de la flèche GO, `{"texture": "Art/go-sign"}`. |
+| `tally` | Le décompte de fin de mission : `hostage` (points par otage compté) et `perSecond` (points par seconde gagnée sur le `parTime` de la mission), par difficulté (`[1000, 1000, 1000, 1000]` et `[10, 10, 10, 10]`), et `icon`, la case qui représente les otages au HUD et au décompte. |
 
 ```json
 {"id": "beaucoup-de-grenades", "extends": "default", "grenades": {"start": [20, 20, 15, 10], "max": [30, 30, 20, 15]}, "supplies": [4, 0, 4, 1]}
@@ -358,7 +382,66 @@ Une caisse qui donne toujours la même arme, et des caisses plus serrées :
 }
 ```
 
-Une nouvelle arme n’a besoin que de son JSON (et de ses images s’il en faut de nouvelles) : l’ajouter à la table `weapons` des règles ou d’une mission, ou la nommer dans un bonus. Les planches `Art/weapon-crates.png` (caisses H, S, F, R, L et une caisse grise sans emblème), `Art/weapon-letters.png` (badges H, S, F, R, L et un badge fusil) et `Art/weapon-fx.png` (trois images de flamme, rayon, roquette, plomb) sont en 3 × 2 cases ; voir `docs/ART_LOT1B.md`. Le code peut aussi donner une arme à un héros par `GiveWeapon(joueur, "<id>")` : c’est par là que passeront les otages.
+Une nouvelle arme n’a besoin que de son JSON (et de ses images s’il en faut de nouvelles) : l’ajouter à la table `weapons` des règles ou d’une mission, ou la nommer dans un bonus. Les planches `Art/weapon-crates.png` (caisses H, S, F, R, L et une caisse grise sans emblème), `Art/weapon-letters.png` (badges H, S, F, R, L et un badge fusil) et `Art/weapon-fx.png` (trois images de flamme, rayon, roquette, plomb) sont en 3 × 2 cases ; voir `docs/ART_LOT1B.md`. Le code peut aussi donner une arme à un héros par `GiveWeapon(joueur, "<id>")` ; un otage dont la récompense est une arme la lâche dans sa caisse, qui arme le héros par le même chemin.
+
+## 5 quater. Les otages
+
+`Content/hostages/<id>.json` décrit un otage : comment on le libère, ses quatre états et ce qu’il donne. Le moteur fait le reste (attaché → remerciement → don → fuite). Les otages livrés : `civilian` (générique) et ses variantes par ville, qui l’étendent avec leur seule planche : `baker` (Paris), `boules-player` (Marseille), `office-worker` (Tokyo).
+
+| Champ | Utilisation |
+|---|---|
+| `name` | Nom (24 caractères). |
+| `release` | `shot` : un tir sur ses liens (ou une explosion, un rayon) ; `touch` : le contact d’un héros ; `both` (par défaut). |
+| `hits` | Tirs nécessaires (1 par défaut) ; un même projectile ne compte qu’une fois. |
+| `hitbox` | `{"y", "radius"}` : le cercle que les tirs doivent toucher, `y` au-dessus des pieds. |
+| `touchRadius` | Distance horizontale à laquelle un héros le libère au contact. |
+| `thanks`, `give`, `giveAt` | Durées des états `thanks` (salut) et `give` (don) ; la récompense tombe `giveAt` s après le début du don. |
+| `run` | `{"speed", "direction"}` : vitesse de fuite et sens (`-1` gauche, `1` droite, `0` à l’opposé du héros qui l’a libéré). Il disparaît hors de l’écran. |
+| `rewards` | Sa table : `[{"bonus": "<id d’un bonus des règles>", "weapon": "<arme>", "weight": 2}, …]`. Sur toute suite de libérations aussi longue que la somme des poids, chaque récompense sort `weight` fois (tourniquet pondéré déterministe, comme les armes). Chaque `bonus` doit exister dans les règles des missions qui placent l’otage. |
+| `sound`, `voice` | Son de libération (`Audio/Sfx/otage-libere`) et voix facultative (`Audio/Voices/<ligne>`, prises `-a`, `-b`, `-c`). |
+| `animations` | Planche et états (section 2) : `tied`, `thanks`, `give`, `run` sont requis. |
+
+```json
+{
+  "id": "civilian", "name": "OTAGE", "release": "both", "hits": 1, "touchRadius": 0.9,
+  "thanks": 1.3, "give": 0.9, "giveAt": 0.5, "hitbox": {"y": 0.7, "radius": 0.6}, "run": {"speed": 7.5, "direction": -1},
+  "sound": "Audio/Sfx/otage-libere",
+  "rewards": [{"bonus": "weapon", "weight": 2}, {"bonus": "grenades", "weight": 2}, {"bonus": "health", "weight": 1}, {"bonus": "score", "weight": 1}],
+  "animations": {
+    "sheet": {"texture": "Art/hostages/civilian", "columns": 4, "rows": 3, "pivot": {"x": 0.45, "y": 0.0352941}, "cellHeight": 3.1481481},
+    "states": [{"name": "tied", "cells": [0, 0, 1, 0], "fps": 3}, {"name": "thanks", "cells": [2, 3, 3, 3, 4, 4], "fps": 4.6, "loop": false},
+               {"name": "give", "cells": [5, 6, 6, 7], "fps": 4.5, "loop": false}, {"name": "run", "cells": [8, 9, 10, 11], "fps": 11}],
+    "layer": 28
+  }
+}
+```
+
+Une variante par ville n’a besoin que de sa planche : `{"id": "baker", "extends": "civilian", "name": "BOULANGER", "animations": {"sheet": {"texture": "Art/hostages/baker"}}}`. Les planches font 4 × 3 cases de 340 px (attaché ×2, libéré, salut, joie, fouille du sac, cadeau tendu, pouce levé, course ×4) ; `tools/art/pack_sheet.py hero tools/art/hostages/<otage>.json` les recale et `docs/ART_LOT2A.md` donne les prompts.
+
+## 5 quinquies. Les difficultés
+
+`Content/difficulties/<id>.json` décrit chaque difficulté du menu, rangée par `order` puis `id` : les replays, le jeu en ligne et le classement la désignent par cette position (0 DÉTENTE, 1 ARCADE, 2 DIFFICILE, 3 LÉGENDE, 4 SLUG).
+
+| Champ | Utilisation |
+|---|---|
+| `name`, `tagline` | Nom du bouton (14 caractères) et ligne affichée sous les boutons quand elle est choisie (70 caractères). |
+| `order`, `column` | Position dans le menu ; colonne (0 à 3) des valeurs par difficulté de tout le contenu. |
+| `health` | Points de vie d’un héros (1 : mort en un coup). |
+| `lives`, `livesPerPlayer` | Renforts : partagés par l’équipe (`lives` × joueurs, `false`) ou propres à chaque héros (`true`). |
+| `damageTaken`, `hurtInvulnerable` | Multiplicateur des dégâts reçus ; invulnérabilité après un coup (s). |
+| `enemyHealth`, `enemyCount`, `enemySpeed`, `enemyCadence`, `gunmanAim` | Facteurs des PV, du nombre, de la vitesse et du délai entre deux attaques des ennemis, et du temps de visée des tireurs. |
+| `waveReward` | `{"every", "lives", "health"}` : toutes les `every` vagues vaincues (0 : jamais), `lives` renforts de plus et `health` PV rendus aux héros debout. |
+| `respawn` | `{"delay", "invulnerable", "inPlace"}` : délai avant le retour d’un héros tombé, invulnérabilité (clignotement), retour là où il est tombé (`true`) ou près du héros de tête. |
+| `continues` | `{"enabled", "seconds", "grace", "lives"}` : quand toute l’équipe est à court de vies, un écran **CONTINUE ?** compte `seconds` s ; après `grace` s, un saut ou un nouvel appui sur tir continue (chaque héros revient sur place avec `lives` vies), une grenade abandonne. |
+
+```json
+{"id": "slug", "order": 4, "name": "SLUG", "tagline": "MORT EN UN COUP, 3 VIES PAR JOUEUR, PUIS CONTINUE ?", "column": 1,
+ "health": 1, "lives": 2, "livesPerPlayer": true, "damageTaken": 1, "enemyHealth": 1.8, "enemyCount": 1.2, "enemySpeed": 1.12,
+ "enemyCadence": 0.85, "gunmanAim": 0.92, "hurtInvulnerable": 0.75, "waveReward": {"every": 0, "lives": 0, "health": 0},
+ "respawn": {"delay": 1.2, "invulnerable": 2.5, "inPlace": true}, "continues": {"enabled": true, "seconds": 10, "grace": 1, "lives": 2}}
+```
+
+Les quatre premières reprennent au bit près les anciennes règles du code (`0.84000003` pour la visée en DIFFICILE).
 
 ## 6. Emplacements réservés aux lots suivants
 
@@ -368,7 +451,6 @@ Ces champs existent déjà dans le schéma pour que les prochaines mécaniques s
 |---|---|---|
 | `map.terrain` | `{"type": "platform" \| "slope" \| "pit", "x": 40, "width": 6, "height": 2, "toHeight": 3}` : relief le long du parcours. | — |
 | `map.props` | `{"id": "<prop>", "x": 52, "y": 0, "wave": 3}` : décor destructible, objectif de la vague `wave` si elle est donnée. | `Content/props/<id>.json` |
-| `map.hostages` | `{"id": "<otage>", "x": 70, "y": 0, "reward": "<bonus ou arme>"}` ; une arme se donnera par `GiveWeapon`. | `Content/hostages/<id>.json` |
 | `map.vehicles` | `{"id": "<véhicule>", "x": 120}` : véhicule pilotable posé sur la carte. | `Content/vehicles/<id>.json` |
 | `encounters` | `{"atX": 90, "wave": 2, "spawns": [{"enemy": "<id>", "x": 95, "delay": 0.5, "entry": "door" \| "parachute" \| "truck"}]}` : rencontre scénarisée. | — |
 
@@ -389,7 +471,7 @@ python3 tools/validate_content.py
 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
-Le validateur lit la bibliothèque et les missions comme le jeu : `extends`, références d’armes, d’ennemis et de boss, images et sons présents, états d’animation requis par chaque comportement, ancrages, bornes de tous les nombres, emplacements réservés vides. Il refuse aussi qu’un nom propre à une mission apparaisse dans `Assets/Scripts`. Le jeu refait les mêmes contrôles au démarrage et refuse une mission invalide.
+Le validateur lit la bibliothèque et les missions comme le jeu : `extends`, références d’armes, d’ennemis et de boss, images et sons présents, états d’animation requis par chaque comportement, ancrages, bornes de tous les nombres, otages placés dans l’écran de leur vague et récompenses connues des règles, emplacements réservés vides. Il refuse aussi qu’un nom propre à une mission apparaisse dans `Assets/Scripts`. Le jeu refait les mêmes contrôles au démarrage et refuse une mission invalide.
 
 Dans Unity, jouer la mission avec un puis plusieurs joueurs dans plusieurs difficultés : vagues, sortie, raccords du décor, animations et boss. Pour l’ouvrir sans jouer les précédentes, saisir son code dans **CODE MISSION**. `AgentScripts/VerifyDataDriven.cs` montre comment charger une mission depuis du JSON et la faire finir par un bot.
 

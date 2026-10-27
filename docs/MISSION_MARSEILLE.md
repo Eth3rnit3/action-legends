@@ -13,7 +13,7 @@ Générées avec le générateur d’images intégré de Codex CLI, en prenant `
 | `Art/marseille/vieux-port.png` | 2172×724 | Décor 1 |
 | `Art/marseille/panier.png` | 2172×724 | Décor 2 |
 | `Art/marseille/canebiere.png` | 2172×724 | Décor 3 |
-| `Art/marseille/sol.png` | 2172×724 | Chaussée : seuls les 20 % inférieurs sont répétés |
+| `ArtSources/marseille-sol.png` | 2172×724 | Ancienne chaussée répétée devant les acteurs ; depuis 0.8.0 la bande de premier plan reprend le bas de `panier.png` (`map.groundBand`), dont le pavé raccorde |
 | `Art/marseille/news-helicopter.png` | 2161×728, transparent | Boss |
 
 ## Musique

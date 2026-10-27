@@ -55,7 +55,7 @@ public static class VerifyDataDriven
       ""schemaVersion"": 2, ""order"": 90, ""id"": ""test-data-driven"", ""title"": ""Mission en données"", ""location"": ""Banc d'essai"",
       ""intro"": ""ESSAI : TOUT VIENT DU JSON !"", ""exitLabel"": ""LA SORTIE"", ""winTitle"": ""ESSAI RÉUSSI."",
       ""music"": ""Audio/Music/sakura-arcade"", ""bossMusic"": ""Audio/Music/coupo-santo-boss"",
-      ""map"": {""backgrounds"": [""Art/tokyo/shibuya"", ""Art/marseille/panier"", ""Art/canal-panorama""], ""ground"": ""Art/marseille/sol"",
+      ""map"": {""backgrounds"": [""Art/tokyo/shibuya"", ""Art/marseille/panier"", ""Art/canal-panorama""], ""ground"": ""Art/marseille/panier"",
                ""terrain"": [], ""props"": [], ""hostages"": [], ""vehicles"": []},
       ""enemies"": [""test-sniper"", ""looter-rusher"", ""gunman-pistol""],
       ""extraEnemy"": {""enemy"": 0, ""every"": 3, ""fromDifficulty"": 0},

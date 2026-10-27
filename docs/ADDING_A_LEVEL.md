@@ -84,7 +84,8 @@ Exemple (positions à adapter aux vagues de la mission : un otage de vague se pl
 ```json
 "map": {
   "backgrounds": ["Art/tokyo/shibuya", "Art/marseille/panier", "Art/canal-panorama"],
-  "ground": "Art/marseille/sol",
+  "ground": "Art/marseille/panier",
+  "horizon": 0.1, "groundBand": 0.12, "groundTop": -0.9, "groundFade": 0.25,
   "terrain": [], "props": [], "vehicles": [],
   "decor": [
     {"sprite": {"texture": "Art/saint-remy/accessoires", "columns": 4, "rows": 3, "cell": 6}, "x": 79, "y": -0.4, "height": 1.85},
@@ -98,8 +99,18 @@ Exemple (positions à adapter aux vagues de la mission : un otage de vague se pl
 }
 ```
 
-- `backgrounds` : une à huit images de décor, dans l’ordre de gauche à droite. Chacune est affichée sur 13 unités de hauteur, la ligne de sol à 80 % de sa hauteur depuis le haut ; les portions sont accolées, et une portion large (plus de deux fois plus large que haute) se fond sur 1,5 unité dans la précédente. Le moteur fait défiler la fresque en parallaxe pour couvrir tout le parcours, quel que soit le format d’écran. Les images ne contiennent ni personnages ni interface ; un panorama découpé sans perte donne des raccords exacts (Paris).
-- `ground` : image dont les 20 % du bas sont répétés le long de la rue, devant le décor.
+- `backgrounds` : une à huit images de décor, dans l’ordre de gauche à droite. Chacune est affichée sur 13 unités de hauteur, la ligne de marche (`y = 0`, où les pieds se posent) à `horizon` de sa hauteur depuis le bas ; les portions sont accolées, et une portion large (plus de deux fois plus large que haute) se fond sur 1,5 unité dans la précédente. Le moteur fait défiler la fresque en parallaxe pour couvrir tout le parcours, quel que soit le format d’écran. Les images ne contiennent ni personnages ni interface ; un panorama découpé sans perte donne des raccords exacts (Paris).
+- `ground` : image dont le bas (`groundBand`) est répété le long de la rue, devant le décor ; souvent l’un des panoramas lui-même, dont le bas ne montre que le sol.
+- Cadrage du sol, facultatif et purement visuel (la simulation ne le lit pas) :
+
+| Champ | Défaut | Rôle |
+|---|---|---|
+| `horizon` | `0.2` | Hauteur de la ligne de marche dans chaque panorama, en fraction de sa hauteur depuis le bas. Mesurer où le sol peint (pavé, chaussée, quai) commence et finit, et placer la ligne **au milieu** de cette bande : à `0.2`, le bord du fond du trottoir, les personnages paraissent collés aux façades. |
+| `groundBand` | `0.2` | Part du bas de l’image `ground` répétée devant les acteurs (13 unités × `groundBand` de haut). |
+| `groundTop` | `0` | Hauteur du bord haut de cette bande. La placer **sous** les pieds pour qu’elle ne cache pas le sol peint du panorama, mais au-dessus du bas du panorama (`-13 × horizon`) pour qu’il n’y ait pas de trou. |
+| `groundFade` | `0.22` | Part de la bande fondue vers le haut ; le fondu doit finir avant le bas du panorama. |
+
+Les quatre missions livrées utilisent `horizon` 0,1, `groundBand` 0,12, `groundTop` -0,9 et `groundFade` 0,25 : les pieds tombent au milieu du pavé ou de la chaussée peints, et la bande (le bas d’un panorama de la mission à Marseille et Saint-Rémy, la chaussée `sol` à Paris et Tokyo) prolonge ce sol jusqu’au bas de l’écran. L’écran va de `y = -2,2` à `y = 9,4`.
 - `hostages` : les otages de la mission (voir plus bas).
 - `decor` : facultatif, jusqu’à 120 accessoires dessinés dans la rue, devant le décor : un tonneau, une fontaine, une terrasse de café. Ils ne font que se voir (rien ne les touche, ils ne gênent personne). Chacun est une case d’une planche (`sprite`, comme une icône : `{"texture", "columns", "rows", "cell"}`) affichée sur `height` unités de haut (la hauteur de la case), le milieu du bas de la case posé en (`x`, `y`) ; un `y` négatif enfonce dans la rue un dessin qui n’atteint pas le bas de sa case (le tonneau de Saint-Rémy finit à 17 % du bas de la sienne : `y` = −0,17 × `height`). `flip` le retourne, `front` le dessine devant les personnages (derrière par défaut). Un ennemi peut en sortir : une entrée `door` dont `fromX` est celui de l’accessoire et `"opening": "none"`.
 - `terrain`, `props`, `vehicles` : réservés (section 6), à laisser vides.

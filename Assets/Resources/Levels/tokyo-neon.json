@@ -17,6 +17,10 @@
       "Art/tokyo/minato"
     ],
     "ground": "Art/tokyo/sol",
+    "horizon": 0.1,
+    "groundBand": 0.12,
+    "groundTop": -0.9,
+    "groundFade": 0.25,
     "terrain": [],
     "props": [],
     "hostages": [

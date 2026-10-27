@@ -75,6 +75,9 @@ namespace Paname
     {
         public string[] backgrounds;
         public string ground;
+        // Framing, drawing only: the walking line (y = 0) at this fraction of the panoramas' height; the bottom groundBand
+        // of the ground image repeated in front of the actors with its top edge at y = groundTop, faded over groundFade of it.
+        public float horizon=.2f,groundBand=.2f,groundTop,groundFade=.22f;
         public MapTerrain[] terrain;
         public MapProp[] props;
         public MapHostage[] hostages;
@@ -215,6 +218,8 @@ namespace Paname
             if(map.backgrounds==null||map.backgrounds.Length<1||map.backgrounds.Length>8)throw new ArgumentException("map.backgrounds : une à huit images sont requises");
             foreach(var path in map.backgrounds){Content.Path(path,"Art/","map.backgrounds");Content.Require<Texture2D>(path,"Image");}
             Content.Path(map.ground,"Art/","map.ground");Content.Require<Texture2D>(map.ground,"Sol");
+            if(!(map.horizon>=0&&map.horizon<=.6f&&map.groundBand>=.02f&&map.groundBand<=1&&map.groundTop>=-6&&map.groundTop<=3&&map.groundFade>=0&&map.groundFade<=1))
+                throw new ArgumentException("map : horizon de 0 à 0.6, groundBand de 0.02 à 1, groundTop de -6 à 3, groundFade de 0 à 1");
             Reserved(map.terrain,"map.terrain");Reserved(map.props,"map.props");Reserved(map.vehicles,"map.vehicles");
             map.decor??=new MapDecor[0];if(map.decor.Length>120)throw new ArgumentException("map.decor : 120 éléments au plus");
             for(int i=0;i<map.decor.Length;i++)

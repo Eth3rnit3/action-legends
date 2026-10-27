@@ -25,7 +25,7 @@ Les panoramas, les planches des Arlésiens, du taureau et de Nostradamus, les ac
 |---|---|---|
 | `Art/saint-remy/centre-ville.png`, `ruelles-favier.png`, `sortie-saint-remy.png`, `antiques.png`, `glanum.png`, `alpilles.png` | 2172×724 | Les six panoramas, dans cet ordre (226 u de fresque : la parallaxe défile à mi-vitesse sur les 407 u de caméra) |
 | `ArtSources/saint-remy/place-eglise.png`, `glanum-alpilles.png` | 2171×724 | Variantes de décor de la PR, non utilisées (hors `Resources` pour ne pas alourdir l'export) : une septième pièce dépasserait ce que la parallaxe peut montrer sur un parcours de 420 u (voir `UpdatePanorama`) |
-| `Art/saint-remy/sol.png` | 2172×724 | Dalles de pierre : les 20 % inférieurs sont répétés |
+| `ArtSources/saint-remy/sol.png` | 2172×724 | Dalles vues de dessus, abandonnées en 0.8.0 : elles cachaient le pavé en perspective des panoramas. Le premier plan reprend le bas de `antiques.png` (`map.ground`, `groundBand` 0,12) |
 | `Art/saint-remy/accessoires.png` | 2048×1536, 4 × 3 | Accessoires posés dans la rue (`map.decor`) : table, chaise, parasol, ardoise, olivier en pot, caisse, tonneau, tonneau brisé, fontaine, colonne, muret, olivier |
 | `ArtSources/saint-remy/enemies.png` | 2048×1536, 4 × 3 | Planche source : ligne 1 de chaque planche d'Arlésien, copiée au pixel près |
 | `Art/enemies/arlesien.png`, `arlesienne.png`, `arlesien-fouet.png` | 2048×2048, 4 × 4 cases de 512 | Planche de chaque Arlésien : ligne 1 de la PR, lignes 2 à 4 générées (inattentif ×2, sursaut, touché, fuite ×2, renversé, à terre, soufflé ×2, en feu, carbonisé) |

@@ -926,6 +926,11 @@ def validate_mission(data, resources, library=None):
         for path in backgrounds:
             errors.resource(path, "Art/", IMAGES, resources, "map.backgrounds")
     errors.resource(game_map.get("ground"), "Art/", IMAGES, resources, "map.ground")
+    # Framing (drawing only): walking line in the panoramas, band of the ground image in front of the actors.
+    errors.number(game_map, "horizon", 0, 0.6, "map", default=0.2)
+    errors.number(game_map, "groundBand", 0.02, 1, "map", default=0.2)
+    errors.number(game_map, "groundTop", -6, 3, "map", default=0)
+    errors.number(game_map, "groundFade", 0, 1, "map", default=0.22)
     for key in RESERVED_MAP:
         if game_map.get(key) not in (None, []):
             errors.append(f"map.{key} is reserved for a later batch: leave the list empty")

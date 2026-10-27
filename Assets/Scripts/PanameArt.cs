@@ -63,8 +63,8 @@ namespace Paname
             CheckGlyphs(text); var t=g.AddComponent<TextMesh>(); t.text=text; t.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); t.fontSize=48; t.characterSize=size/10; t.anchor=TextAnchor.MiddleCenter; t.color=color;
             var r=g.GetComponent<MeshRenderer>(); r.sharedMaterial=t.font.material; r.sortingOrder=order;
         }
-        // The panorama pieces side by side, each 13 units tall with its horizon at 20 % of its height; wide pieces
-        // cross-fade into the previous one. The bottom fifth of the ground image is repeated along the street.
+        // The panorama pieces side by side, each 13 units tall with the walking line at map.horizon of its height; wide pieces
+        // cross-fade into the previous one. The bottom map.groundBand of the ground image is repeated along the street.
         public static void Street(Transform root,MissionMap map,float length)
         {
             routeRoot=new GameObject("Panorama").transform;routeRoot.SetParent(root,false);
@@ -72,7 +72,7 @@ namespace Paname
             for(int i=0;i<routePaths.Length;i++)
             {
                 var texture=Resources.Load<Texture2D>(routePaths[i]);if(!texture)continue;
-                var sprite=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),new Vector2(0,.2f),texture.height/13f,0,SpriteMeshType.FullRect);
+                var sprite=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),new Vector2(0,map.horizon),texture.height/13f,0,SpriteMeshType.FullRect);
                 bool blend=i>0&&(texture.width/(float)texture.height>2||Resources.Load<Texture2D>(routePaths[i-1]).width/(float)Resources.Load<Texture2D>(routePaths[i-1]).height>2);
                 if(blend)RouteWidth-=1.5f;
                 var g=new GameObject("Décor "+(i+1)+" • "+routePaths[i]);g.transform.SetParent(routeRoot,false);g.transform.localPosition=new Vector3(RouteWidth,0,0);
@@ -81,12 +81,12 @@ namespace Paname
                 RouteWidth+=sprite.bounds.size.x;RouteSegments++;
             }
             var ground=Resources.Load<Texture2D>(map.ground);if(!ground)return;
-            var road=Sprite.Create(ground,new Rect(0,0,ground.width,ground.height*.2f),new Vector2(0,1),ground.height/13f,0,SpriteMeshType.FullRect);
+            var road=Sprite.Create(ground,new Rect(0,0,ground.width,ground.height*map.groundBand),new Vector2(0,1),ground.height/13f,0,SpriteMeshType.FullRect);
             var blendShader=Resources.Load<Shader>("BackgroundBlend");var material=blendShader?new Material(blendShader):null;
-            if(material){material.SetFloat("_LeftFade",.05f);material.SetFloat("_TopFade",.22f);}
+            if(material){material.SetFloat("_LeftFade",.05f);material.SetFloat("_TopFade",map.groundFade);material.SetFloat("_Band",map.groundBand);}
             for(float x=-12;x<length+25;x+=road.bounds.size.x-2)
             {
-                var go=new GameObject("Chaussée • premier plan");go.transform.SetParent(root,false);go.transform.localPosition=new Vector3(x,0,0);
+                var go=new GameObject("Chaussée • premier plan");go.transform.SetParent(root,false);go.transform.localPosition=new Vector3(x,map.groundTop,0);
                 var r=go.AddComponent<SpriteRenderer>();r.sprite=road;r.sortingOrder=-35;if(material)r.sharedMaterial=material;
             }
             // Street scenery: behind the actors (a fountain an enemy steps out from), or in front of them.

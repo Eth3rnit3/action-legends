@@ -194,6 +194,22 @@ class MissionValidationTests(unittest.TestCase):
             with self.subTest(change=change):
                 self.assertTrue(self.rejected(change))
 
+    def test_map_framing(self):
+        self.assertFalse(self.rejected(lambda d: d["map"].update(horizon=0.1, groundBand=0.12, groundTop=-1.1, groundFade=0.5)))
+        changes = (
+            lambda d: d["map"].update(horizon=0.7),
+            lambda d: d["map"].update(horizon=-0.1),
+            lambda d: d["map"].update(groundBand=0),
+            lambda d: d["map"].update(groundBand=1.5),
+            lambda d: d["map"].update(groundTop=-7),
+            lambda d: d["map"].update(groundTop=4),
+            lambda d: d["map"].update(groundFade=2),
+            lambda d: d["map"].update(horizon="low"),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                self.assertTrue(self.rejected(change))
+
     def test_hostage_placements(self):
         self.assertTrue(6 <= len(self.data["map"]["hostages"]) <= 10)
         self.assertTrue(any(h.get("wave", -1) >= 0 for h in self.data["map"]["hostages"]))

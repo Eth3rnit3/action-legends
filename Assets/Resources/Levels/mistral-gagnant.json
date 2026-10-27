@@ -16,7 +16,11 @@
       "Art/marseille/panier",
       "Art/marseille/canebiere"
     ],
-    "ground": "Art/marseille/sol",
+    "ground": "Art/marseille/panier",
+    "horizon": 0.1,
+    "groundBand": 0.12,
+    "groundTop": -0.9,
+    "groundFade": 0.25,
     "terrain": [],
     "props": [],
     "hostages": [

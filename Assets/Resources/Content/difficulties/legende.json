@@ -1,0 +1,30 @@
+{
+  "id": "legende",
+  "order": 3,
+  "name": "LÉGENDE",
+  "tagline": "3 PV, 1 RENFORT PAR JOUEUR, CHAQUE COUP COMPTE DOUBLE",
+  "column": 3,
+  "health": 3,
+  "lives": 1,
+  "livesPerPlayer": false,
+  "damageTaken": 2,
+  "enemyHealth": 3.2,
+  "enemyCount": 1.8,
+  "enemySpeed": 1.4,
+  "enemyCadence": 0.5,
+  "gunmanAim": 0.76,
+  "hurtInvulnerable": 0.45,
+  "waveReward": {
+    "every": 0,
+    "lives": 0,
+    "health": 0
+  },
+  "respawn": {
+    "delay": 2.5,
+    "invulnerable": 3,
+    "inPlace": false
+  },
+  "continues": {
+    "enabled": false
+  }
+}

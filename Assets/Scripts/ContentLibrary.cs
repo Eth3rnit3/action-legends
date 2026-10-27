@@ -226,12 +226,13 @@ namespace Paname
         public static void Path(string path,string prefix,string label){if(string.IsNullOrEmpty(path)||!path.StartsWith(prefix,StringComparison.Ordinal)||path.Contains("..")||path.Contains(":")||path.Contains("\\"))throw new ArgumentException("Chemin invalide pour "+label);}
         public static void Require<T>(string path,string label) where T:UnityEngine.Object{if(!Resources.Load<T>(path))throw new ArgumentException(label+" manquant : "+path);}
     }
-    // Weapons, heroes, enemies, bosses and rules shared by every mission, one JSON per entry under Resources/Content/<kind>/.
+    // Weapons, heroes, enemies, bosses, rules and difficulties shared by every mission, one JSON per entry under Resources/Content/<kind>/.
     // An entry may name a parent with "extends": the parent is read first, then the entry's own fields replace its values.
     public static class ContentLibrary
     {
         [Serializable] sealed class Header {public string id,extends;}
         static HeroDefinition[] heroes;
+        static DifficultyDefinition[] difficulties;
         static readonly Dictionary<string,EnemyDefinition> enemies=new Dictionary<string,EnemyDefinition>();
         static readonly Dictionary<string,BossDefinition> bosses=new Dictionary<string,BossDefinition>();
         static readonly Dictionary<string,GameRules> rules=new Dictionary<string,GameRules>();
@@ -239,6 +240,7 @@ namespace Paname
         static readonly Dictionary<string,string> sources=new Dictionary<string,string>();
         static bool loaded;
         public static HeroDefinition[] Heroes{get{Load();return heroes;}}
+        public static DifficultyDefinition[] Difficulties{get{Load();return difficulties;}}
         public static EnemyDefinition Enemy(string id){Load();if(id!=null&&enemies.TryGetValue(id,out var e))return e;throw new ArgumentException("Ennemi inconnu : "+id);}
         public static BossDefinition Boss(string id){Load();if(id!=null&&bosses.TryGetValue(id,out var b))return b;throw new ArgumentException("Boss inconnu : "+id);}
         public static GameRules Rules(string id){Load();if(id!=null&&rules.TryGetValue(id,out var r))return r;throw new ArgumentException("Règles inconnues : "+id);}
@@ -249,7 +251,7 @@ namespace Paname
         {
             if(loaded)return;
             sources.Clear();enemies.Clear();bosses.Clear();rules.Clear();weapons.Clear();
-            var weaponTexts=Read("weapons");var heroTexts=Read("heroes");var enemyTexts=Read("enemies");var bossTexts=Read("bosses");var ruleTexts=Read("rules");
+            var weaponTexts=Read("weapons");var heroTexts=Read("heroes");var enemyTexts=Read("enemies");var bossTexts=Read("bosses");var ruleTexts=Read("rules");var difficultyTexts=Read("difficulties");
             // Weapons first: heroes and rules name them.
             foreach(var text in weaponTexts){var weapon=Parse<WeaponDefinition>("weapons",text);weapon.Validate();weapons[weapon.id]=weapon;}
             var list=new List<HeroDefinition>();var ids=new HashSet<string>();
@@ -260,7 +262,11 @@ namespace Paname
             foreach(var text in bossTexts){var boss=Parse<BossDefinition>("bosses",text);boss.Validate();bosses[boss.id]=boss;}
             foreach(var text in ruleTexts){var set=Parse<GameRules>("rules",text);set.Validate();rules[set.id]=set;}
             if(!rules.ContainsKey("default"))throw new ArgumentException("Resources/Content/rules/default.json est requis");
-            heroes=list.ToArray();loaded=true;
+            var levels=new List<DifficultyDefinition>();
+            foreach(var text in difficultyTexts){var level=Parse<DifficultyDefinition>("difficulties",text);level.Validate();levels.Add(level);}
+            levels.Sort((a,b)=>a.order!=b.order?a.order.CompareTo(b.order):string.CompareOrdinal(a.id,b.id));
+            if(levels.Count<1||levels.Count>6)throw new ArgumentException("Une à six difficultés sont requises dans Resources/Content/difficulties");
+            heroes=list.ToArray();difficulties=levels.ToArray();loaded=true;
         }
         static List<string> Read(string folder)
         {

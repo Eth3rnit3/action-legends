@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from validate_content import (ROOT, find_proper_nouns, load_library, merge, validate_boss, validate_enemy, validate_hero,
-                              validate_mission, validate_rules, validate_weapon)
+                              validate_mission, validate_rules, validate_weapon, validate_difficulty)
 
 RESOURCES = ROOT / "Assets/Resources"
 LIBRARY, LIBRARY_ERRORS = load_library(RESOURCES)
@@ -354,6 +354,32 @@ class LibraryValidationTests(unittest.TestCase):
         walker = content("bosses", "mecha-shogun")
         walker["animations"]["states"] = [s for s in walker["animations"]["states"] if s["name"] != "walk"]
         self.assertTrue(validate_boss(walker, RESOURCES))
+
+    def test_difficulties(self):
+        shipped = sorted(LIBRARY["difficulties"].values(), key=lambda d: (d.get("order", 0), d["id"]))
+        self.assertEqual([d["id"] for d in shipped[:4]], ["detente", "arcade", "difficile", "legende"])
+        self.assertEqual([d["column"] for d in shipped[:4]], [0, 1, 2, 3])
+        base = content("difficulties", "arcade")
+        self.assertEqual(validate_difficulty(base, RESOURCES), [])
+        changes = (
+            lambda d: d.update(column=4),
+            lambda d: d.update(health=0),
+            lambda d: d.update(name=""),
+            lambda d: d.update(enemyHealth=0),
+            lambda d: d.update(livesPerPlayer="yes"),
+            lambda d: d["waveReward"].update(every=-1),
+            lambda d: d.update(continues={"enabled": True, "seconds": 0}),
+            lambda d: d.update(continues={"enabled": True, "seconds": 5, "grace": 6}),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                data = copy.deepcopy(base)
+                change(data)
+                self.assertTrue(validate_difficulty(data, RESOURCES))
+        # A new difficulty in data only reads one of the four columns of the content.
+        library, errors = load_library(RESOURCES, {"difficulties": [dict(base, id="test-easy", order=9, name="TEST", column=0)]})
+        self.assertEqual(errors, [])
+        self.assertIn("test-easy", library["difficulties"])
 
 
 class EngineCodeTests(unittest.TestCase):

@@ -220,7 +220,7 @@ namespace Paname
                 if(p.hp<=0)
                 {
                     p.downTimer-=dt;
-                    if(p.downTimer<=0&&Reserves>0){Reserves--;p.hp=MaxPlayerHealth;p.position=new Vector2(Mathf.Clamp(LeaderX()-1,1,CurrentMission.length-1),0);p.vertical=0;p.invulnerable=3;p.root.gameObject.SetActive(true);Disarm(p);if(Rules.grenades.refillOnRespawn)p.grenades=Mathf.Max(p.grenades,Rules.grenades.start[DifficultyIndex]);}
+                    if(p.downTimer<=0&&Reserves>0){Reserves--;p.hp=MaxPlayerHealth;p.position=new Vector2(Mathf.Clamp(LeaderX()-1,1,CurrentMission.length-1),0);p.vertical=0;p.invulnerable=Level.respawn.invulnerable;p.root.gameObject.SetActive(true);Disarm(p);if(Rules.grenades.refillOnRespawn)p.grenades=Mathf.Max(p.grenades,Rules.grenades.start[DifficultyIndex]);}
                     else {p.root.gameObject.SetActive(false);continue;}
                 }
                 PlayerCommand input=i<commands.Length?commands[i]:default;
@@ -303,27 +303,27 @@ namespace Paname
             if(Wave>=CurrentMission.waves.Length)return;
             var wave=CurrentMission.waves[Wave];
             float gate=wave.atX;
-            if(!waveLive&&LeaderX()>gate-9){waveLive=true;pending=Mathf.CeilToInt((wave.baseEnemies+JoinedCount*wave.enemiesPerPlayer)*CountFactors[DifficultyIndex]);spawnTimer=.05f;if(wave.@lock){lockX=cameraX=Mathf.Max(cameraX,CameraTarget());screenLocked=true;}Announce("VAGUE "+(Wave+1)+"  /  "+CurrentMission.waves.Length);}
+            if(!waveLive&&LeaderX()>gate-9){waveLive=true;pending=Mathf.CeilToInt((wave.baseEnemies+JoinedCount*wave.enemiesPerPlayer)*CountFactor);spawnTimer=.05f;if(wave.@lock){lockX=cameraX=Mathf.Max(cameraX,CameraTarget());screenLocked=true;}Announce("VAGUE "+(Wave+1)+"  /  "+CurrentMission.waves.Length);}
             if(!waveLive)return;
             spawnTimer-=dt;
-            if(pending>0&&spawnTimer<=0&&enemies.Count<Mathf.Min(42,Mathf.CeilToInt(wave.maxAlive*CountFactors[DifficultyIndex])))
+            if(pending>0&&spawnTimer<=0&&enemies.Count<Mathf.Min(42,Mathf.CeilToInt(wave.maxAlive*CountFactor)))
             {
                 // A locked wave enters from the edges of the screen; a free one appears around the leading hero.
                 float x=Mathf.Clamp(screenLocked?lockX+(pending%5==0?-SimHalfWidth-1.5f:SimHalfWidth+1.5f+(pending%3)*1.3f):LeaderX()+(pending%5==0?-6.5f:9+(pending%3)*1.3f),.5f,CurrentMission.length);
                 var extra=CurrentMission.extraEnemy;
-                SpawnEnemy(x,extra.enemy>=0&&DifficultyIndex>=extra.fromDifficulty&&pending%extra.every==0?extra.enemy:wave.enemyPattern[pending%wave.enemyPattern.Length]);pending--;spawnTimer=wave.spawnInterval*AttackFactors[DifficultyIndex];
+                SpawnEnemy(x,extra.enemy>=0&&DifficultyIndex>=extra.fromDifficulty&&pending%extra.every==0?extra.enemy:wave.enemyPattern[pending%wave.enemyPattern.Length]);pending--;spawnTimer=wave.spawnInterval*AttackFactor;
             }
             // A free wave is over once it has all appeared; a locked one when its last enemy falls.
             if(pending==0&&(!screenLocked||enemies.Count==0))
             {
-                Wave++;waveLive=false;if(screenLocked){screenLocked=false;goFromX=cameraX;}if((DifficultyIndex==0&&Wave%3==0)||(DifficultyIndex==1&&Wave%4==0)){Reserves++;foreach(var p in players)if(p!=null&&p.hp>0)p.hp=Mathf.Min(MaxPlayerHealth,p.hp+(DifficultyIndex==0?2:1));}
+                Wave++;waveLive=false;if(screenLocked){screenLocked=false;goFromX=cameraX;}var reward=Level.waveReward;if(reward.every>0&&Wave%reward.every==0){Reserves+=reward.lives;foreach(var p in players)if(p!=null&&p.hp>0)p.hp=Mathf.Min(MaxPlayerHealth,p.hp+reward.health);}
                 Announce(Wave==CurrentMission.waves.Length?"PASSAGE LIBRE  »  "+CurrentMission.exitLabel+" !":"CONTINUEZ !  »");Score+=500;
             }
         }
         void SpawnEnemy(float x,int kind)
         {
             var type=CurrentMission.roster[kind];
-            var e=new Enemy{position=new Vector2(x,0),kind=kind,type=type,hp=Mathf.CeilToInt(type.health*HealthFactors[DifficultyIndex]),attackTimer=type.firstAttack};
+            var e=new Enemy{position=new Vector2(x,0),kind=kind,type=type,hp=Mathf.CeilToInt(type.health*HealthFactor),attackTimer=type.firstAttack};
             e.root=Actor(actors,type.animations,type.animations.states[type.idle].cells[0],Coral,false);e.illustrated=e.root.Find("Illustration").GetComponent<SpriteRenderer>();e.root.position=e.position;enemies.Add(e);
             effects.Play(3,e.position+Vector2.up*.12f,.6f,.3f);
         }
@@ -345,7 +345,7 @@ namespace Paname
                 e.attackTimer-=dt;e.attackPose=Mathf.Max(0,e.attackPose-dt);
                 // An enemy holds its strike, throw or aim pose briefly instead of running through it.
                 bool walking=best>type.keepDistance&&e.stagger<=0&&e.attackPose<=0&&!shooting;
-                if(walking){e.position.x+=e.facing*type.speed*SpeedFactors[DifficultyIndex]*dt;e.walk+=dt*type.strideRate;}
+                if(walking){e.position.x+=e.facing*type.speed*SpeedFactor*dt;e.walk+=dt*type.strideRate;}
                 // While the screen is locked, an enemy that has walked in stays in view, so none is left to hunt off screen.
                 if(screenLocked&&Mathf.Abs(lastX-lockX)<=SimHalfWidth-.6f)e.position.x=Mathf.Clamp(e.position.x,lockX-SimHalfWidth+.6f,lockX+SimHalfWidth-.6f);
                 if(type.Armed&&e.stagger<=0)TickGunman(e,best,dt);
@@ -355,10 +355,10 @@ namespace Paname
                     var hand=e.position+new Vector2(e.facing*type.hand.x,type.hand.y);
                     // A bottle is aimed at the hero's chest, or lower at a crouching hero.
                     Shoot(Look(t.projectile),hand,(target.position+Vector2.up*Mathf.Min(t.aimHeight,HitCenter(target).y-target.position.y)-hand).normalized*t.speed[DifficultyIndex],t.damage);
-                    e.attackTimer=t.cooldown*AttackFactors[DifficultyIndex];e.attackPose=type.attackPose;
+                    e.attackTimer=t.cooldown*AttackFactor;e.attackPose=type.attackPose;
                 }
                 var m=type.melee;
-                if(!type.Armed&&best<m.reach&&target.position.y<m.height&&e.attackTimer<=0&&e.stagger<=0){Damage(target,m.damage);e.attackTimer=m.cooldown*AttackFactors[DifficultyIndex];e.attackPose=type.attackPose;}
+                if(!type.Armed&&best<m.reach&&target.position.y<m.height&&e.attackTimer<=0&&e.stagger<=0){Damage(target,m.damage);e.attackTimer=m.cooldown*AttackFactor;e.attackPose=type.attackPose;}
                 e.root.position=e.position;e.root.localScale=new Vector3(e.facing,1,1);
                 // Aim, then attack poses win over a hit reaction, then the run and idle cycles.
                 var set=type.animations;int state=e.windup>0?type.aim:e.attackPose>0||e.burst>0?type.attack:e.stagger>0&&type.hurt>=0?type.hurt:walking?type.run:type.idle;
@@ -386,16 +386,16 @@ namespace Paname
                 shake=Mathf.Max(shake,g.shake);
                 effects.Muzzle(muzzle,aim,g.heavyFlash);Sound(g.clip?g.clip:(g.clip=Resources.Load<AudioClip>(g.sound)));
                 e.burst--;e.burstTimer=g.burstInterval;e.attackPose=g.pose;
-                if(e.burst==0)e.attackTimer=g.cooldown*AttackFactors[DifficultyIndex];
+                if(e.burst==0)e.attackTimer=g.cooldown*AttackFactor;
                 return;
             }
-            if(best<e.type.gun.range&&e.attackTimer<=0)e.windup=e.type.gun.aimTime*(1-DifficultyIndex*.08f);
+            if(best<e.type.gun.range&&e.attackTimer<=0)e.windup=e.type.gun.aimTime*Level.gunmanAim;
         }
         void Damage(Player p,int amount)
         {
-            if(bossDefeated||p.invulnerable>0||p.hp<=0)return;p.hp-=amount*(DifficultyIndex==3?2:1);p.invulnerable=DifficultyIndex==0?1.2f:DifficultyIndex==1?.75f:DifficultyIndex==2?.6f:.45f;p.flash=.075f;shake=.15f;effects.Impact(p.position+Vector2.up,-p.facing);Sound(playerHitClip);
+            if(bossDefeated||p.invulnerable>0||p.hp<=0)return;p.hp-=amount*Level.damageTaken;p.invulnerable=Level.hurtInvulnerable;p.flash=.075f;shake=.15f;effects.Impact(p.position+Vector2.up,-p.facing);Sound(playerHitClip);
             // A hero who falls loses the weapon in hand and comes back with the hero's own.
-            if(p.hp<=0){p.downTimer=2.5f;p.root.gameObject.SetActive(false);Disarm(p);}
+            if(p.hp<=0){p.downTimer=Level.respawn.delay;p.root.gameObject.SetActive(false);Disarm(p);}
         }
         static ShotLook Look(string look)=>look=="molotov"?ShotLook.Molotov:look=="tracer"?ShotLook.Tracer:ShotLook.Bullet;
         static readonly Color TracerHalo=new Color(1,.45f,.08f,.65f);

@@ -117,7 +117,7 @@ namespace Paname
             Announce(a.announce);
         }
         // The rest before the next move: rageCooldown, when given, replaces the faster pace of an enraged boss.
-        void EndBossAttack(BossAttack a){bossPhase=BossIdle;bossTimer=(a.rageCooldown>=0&&bossEnraged?a.rageCooldown:a.cooldown)*AttackFactors[DifficultyIndex]*(a.rageCooldown>=0?1:BossAttackPace);}
+        void EndBossAttack(BossAttack a){bossPhase=BossIdle;bossTimer=(a.rageCooldown>=0&&bossEnraged?a.rageCooldown:a.cooldown)*AttackFactor*(a.rageCooldown>=0?1:BossAttackPace);}
         void DropBossBombs(BossAttack a,Player target)
         {
             int count=a.count[DifficultyIndex]+(bossEnraged?a.rageExtra:0);

@@ -571,8 +571,44 @@ def validate_boss(data, resources):
     return errors
 
 
+def validate_difficulty(data, resources):
+    """DifficultyDefinition.Validate: a lobby difficulty, its column of the content's per-difficulty lists and its own rules."""
+    errors = Errors()
+    label = f"difficulty {data.get('id')}"
+    errors.text(data, "name", 14, label)
+    errors.text(data, "tagline", 70, label, required=False)
+    errors.number(data, "order", 0, 99, label, 0, True)
+    errors.number(data, "column", 0, 3, label, 0, True)
+    errors.number(data, "health", 1, 20, label, 5, True)
+    errors.number(data, "lives", 0, 20, label, 2, True)
+    errors.number(data, "damageTaken", 1, 10, label, 1, True)
+    if not isinstance(data.get("livesPerPlayer", False), bool):
+        errors.append(f"{label}.livesPerPlayer: true or false")
+    for key in ("enemyHealth", "enemyCount", "enemySpeed", "enemyCadence", "gunmanAim"):
+        errors.number(data, key, .1, 10, label, 1)
+    errors.number(data, "hurtInvulnerable", 0, 10, label, .75)
+    reward = obj(data, "waveReward")
+    errors.number(reward, "every", 0, 20, label + ".waveReward", 0, True)
+    errors.number(reward, "lives", 0, 10, label + ".waveReward", 0, True)
+    errors.number(reward, "health", 0, 20, label + ".waveReward", 0, True)
+    respawn = obj(data, "respawn")
+    errors.number(respawn, "delay", .1, 10, label + ".respawn", 2.5)
+    errors.number(respawn, "invulnerable", 0, 10, label + ".respawn", 3)
+    if not isinstance(respawn.get("inPlace", False), bool):
+        errors.append(f"{label}.respawn.inPlace: true or false")
+    cont = obj(data, "continues")
+    if not isinstance(cont.get("enabled", False), bool):
+        errors.append(f"{label}.continues.enabled: true or false")
+    elif cont.get("enabled", False):
+        seconds = errors.number(cont, "seconds", 1, 60, label + ".continues", 10)
+        errors.number(cont, "grace", 0, seconds if seconds is not None else 60, label + ".continues", 1)
+        errors.number(cont, "lives", 0, 20, label + ".continues", 0, True)
+    return errors
+
+
 # Weapons first: heroes and rules name them.
-VALIDATORS = {"weapons": validate_weapon, "heroes": validate_hero, "enemies": validate_enemy, "bosses": validate_boss, "rules": validate_rules}
+VALIDATORS = {"weapons": validate_weapon, "heroes": validate_hero, "enemies": validate_enemy, "bosses": validate_boss, "rules": validate_rules,
+              "difficulties": validate_difficulty}
 NEEDS_WEAPONS = ("heroes", "rules")
 
 
@@ -623,6 +659,8 @@ def load_library(resources, extra=None, kinds=None):
         errors.append("Content/heroes: one to four heroes are required")
     if "default" not in library["rules"]:
         errors.append("Content/rules/default.json is required")
+    if not 1 <= len(library["difficulties"]) <= 6:
+        errors.append("Content/difficulties: one to six difficulties are required")
     return library, errors
 
 

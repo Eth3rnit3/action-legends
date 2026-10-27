@@ -4,28 +4,36 @@ namespace Paname
 {
     public sealed partial class PanameGame
     {
-        public enum Difficulty { Detente, Arcade, Difficile, Legende }
-        public Difficulty SelectedDifficulty {get;private set;}=Difficulty.Arcade;
-        int DifficultyIndex=>(int)SelectedDifficulty;
-        public static readonly string[] DifficultyNames={"DÉTENTE","ARCADE","DIFFICILE","LÉGENDE"};
-        static readonly int[] HealthByDifficulty={6,5,4,3},LivesByDifficulty={3,2,1,1};
-        static readonly float[] HealthFactors={1,1.8f,2.5f,3.2f},CountFactors={1,1.2f,1.5f,1.8f},SpeedFactors={1,1.12f,1.25f,1.4f},AttackFactors={1.15f,.85f,.65f,.5f};
-        int MaxPlayerHealth=>HealthByDifficulty[DifficultyIndex];
-        int StartingReserves=>JoinedCount*LivesByDifficulty[DifficultyIndex];
+        // Difficulties come from Resources/Content/difficulties; replays, online play and the leaderboard store their position in this list.
+        public static DifficultyDefinition[] Difficulties=>ContentLibrary.Difficulties;
+        public static int DifficultyCount=>Difficulties.Length;
+        public static string[] DifficultyNames=>System.Array.ConvertAll(Difficulties,d=>d.name);
+        // The position in the lobby's list; the content's per-difficulty values are read at the difficulty's column.
+        public int SelectedDifficulty {get;private set;}=1;
+        public DifficultyDefinition Level=>Difficulties[Mathf.Clamp(SelectedDifficulty,0,DifficultyCount-1)];
+        int DifficultyIndex=>Level.column;
+        int MaxPlayerHealth=>Level.health;
+        int StartingReserves=>Level.livesPerPlayer?0:JoinedCount*Level.lives;
         // How often crates and drops come is part of the mission's rules (Content/rules).
         int KillsPerBonus=>Rules.killsPerDrop[DifficultyIndex];
         float SupplySpacing=>Rules.supplySpacing[DifficultyIndex];
         float FirstSupplyX=>Rules.firstSupply[DifficultyIndex];
+        float HealthFactor=>Level.enemyHealth;
+        float CountFactor=>Level.enemyCount;
+        float SpeedFactor=>Level.enemySpeed;
+        float AttackFactor=>Level.enemyCadence;
         public void SetDifficulty(int index)
         {
             if(HostOnly(()=>SetDifficulty(index))||phase!=Phase.Lobby)return;
-            SelectedDifficulty=(Difficulty)Mathf.Clamp(index,0,3);
+            SelectedDifficulty=Mathf.Clamp(index,0,DifficultyCount-1);
         }
         void DrawDifficulty()
         {
-            Label(54,174,110,28,"DIFFICULTÉ",12,Gold,true);
-            for(int i=0;i<4;i++)
-                if(Button(172+i*174,174,164,29,DifficultyNames[i],DifficultyIndex==i?Gold:C("2A414E"),DifficultyIndex==i))SetDifficulty(i);
+            Label(54,166,110,26,"DIFFICULTÉ",12,Gold,true);
+            int n=DifficultyCount;float step=692f/n;
+            for(int i=0;i<n;i++)
+                if(Button(172+i*step,166,step-8,26,Difficulties[i].name,SelectedDifficulty==i?Gold:C("2A414E"),SelectedDifficulty==i))SetDifficulty(i);
+            if(!string.IsNullOrEmpty(Level.tagline))Label(172,192,692,16,Level.tagline,11,Cream,true,TextAnchor.MiddleCenter);
         }
     }
 }

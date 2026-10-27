@@ -122,7 +122,7 @@ namespace Paname
         }
         string LobbyJson()
         {
-            var lobby=new NetLobby{build=BuildId,mission=missionIndex,difficulty=DifficultyIndex,score=carriedScore};
+            var lobby=new NetLobby{build=BuildId,mission=missionIndex,difficulty=SelectedDifficulty,score=carriedScore};
             for(int i=0;i<4;i++){lobby.joined[i]=slots[i].joined;lobby.heroes[i]=slots[i].hero;lobby.peers[i]=slotPeers[i]??"";lobby.names[i]=playerNames[i]??"";}
             return JsonUtility.ToJson(lobby);
         }
@@ -230,7 +230,7 @@ namespace Paname
             // victory screen when the host chains into the next mission.
             if(lobby.mission!=missionIndex&&(phase==Phase.Lobby||start))LoadMission(lobby.mission);
             if(start)carriedScore=lobby.score;
-            SelectedDifficulty=(Difficulty)Mathf.Clamp(lobby.difficulty,0,DifficultyNames.Length-1);
+            SelectedDifficulty=Mathf.Clamp(lobby.difficulty,0,DifficultyCount-1);
             LocalSlotIndex=-1;
             for(int i=0;i<4;i++)
             {

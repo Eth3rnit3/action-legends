@@ -1,0 +1,30 @@
+{
+  "id": "arcade",
+  "order": 1,
+  "name": "ARCADE",
+  "tagline": "5 PV, 2 RENFORTS PAR JOUEUR, RENFORT TOUTES LES 4 VAGUES",
+  "column": 1,
+  "health": 5,
+  "lives": 2,
+  "livesPerPlayer": false,
+  "damageTaken": 1,
+  "enemyHealth": 1.8,
+  "enemyCount": 1.2,
+  "enemySpeed": 1.12,
+  "enemyCadence": 0.85,
+  "gunmanAim": 0.92,
+  "hurtInvulnerable": 0.75,
+  "waveReward": {
+    "every": 4,
+    "lives": 1,
+    "health": 1
+  },
+  "respawn": {
+    "delay": 2.5,
+    "invulnerable": 3,
+    "inPlace": false
+  },
+  "continues": {
+    "enabled": false
+  }
+}

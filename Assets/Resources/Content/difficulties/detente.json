@@ -1,0 +1,30 @@
+{
+  "id": "detente",
+  "order": 0,
+  "name": "DÉTENTE",
+  "tagline": "6 PV, 3 RENFORTS PAR JOUEUR, SOINS ET RENFORT TOUTES LES 3 VAGUES",
+  "column": 0,
+  "health": 6,
+  "lives": 3,
+  "livesPerPlayer": false,
+  "damageTaken": 1,
+  "enemyHealth": 1,
+  "enemyCount": 1,
+  "enemySpeed": 1,
+  "enemyCadence": 1.15,
+  "gunmanAim": 1,
+  "hurtInvulnerable": 1.2,
+  "waveReward": {
+    "every": 3,
+    "lives": 1,
+    "health": 2
+  },
+  "respawn": {
+    "delay": 2.5,
+    "invulnerable": 3,
+    "inPlace": false
+  },
+  "continues": {
+    "enabled": false
+  }
+}

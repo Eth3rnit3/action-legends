@@ -66,7 +66,7 @@ namespace Paname
             replayRuns.Clear();replayToken="";replayCount=0;replayTicks=0;replayBroken="";replayStartScore=Score;localClock=0;
             for(int i=0;i<4;i++){localJump[i]=false;localSpecial[i]=false;localGrenade[i]=false;}
             recording=!headless;LastReplay=null;publish=Publish.None;verifyingOwn=false;
-            var record=new ReplayRecord{version=Application.version,mission=CurrentMission.id,difficulty=DifficultyIndex};
+            var record=new ReplayRecord{version=Application.version,mission=CurrentMission.id,difficulty=SelectedDifficulty};
             for(int i=0;i<4;i++){record.heroes[i]=slots[i].joined?slots[i].hero:-1;record.names[i]=slots[i].joined&&Online?playerNames[i]??"":"";}
             pendingRecord=record;
         }
@@ -119,11 +119,11 @@ namespace Paname
             verifying=null;verifyRuns.Clear();
             if(record==null||record.v!=1||record.heroes==null||record.heroes.Length!=4||string.IsNullOrEmpty(record.runs))return false;
             int index=Array.FindIndex(missions,m=>m.id==record.mission);
-            if(index<0||record.difficulty<0||record.difficulty>3)return false;
+            if(index<0||record.difficulty<0||record.difficulty>=DifficultyCount)return false;
             int joined=0;
             for(int i=0;i<4;i++){slots[i].joined=record.heroes[i]>=0;slots[i].pad=null;if(slots[i].joined){slots[i].hero=Mathf.Clamp(record.heroes[i],0,HeroCount-1);joined++;}}
             if(joined==0||!ParseRuns(record.runs,record.heroes))return false;
-            SelectedDifficulty=(Difficulty)record.difficulty;missionIndex=index;
+            SelectedDifficulty=record.difficulty;missionIndex=index;
             carriedScore=0;phase=Phase.Lobby;BeginRound();
             verifying=record;verifyRun=0;verifyLeft=verifyRuns.Count>0?verifyRuns[0].count:0;verifyTicks=0;return true;
         }

@@ -84,7 +84,7 @@ namespace Paname
         }
         void OpenBoard()
         {
-            boardOpen=true;boardMission=missionIndex;boardDifficulty=DifficultyIndex;LoadBoard();
+            boardOpen=true;boardMission=missionIndex;boardDifficulty=SelectedDifficulty;LoadBoard();
         }
         void LoadBoard()
         {
@@ -147,9 +147,9 @@ namespace Paname
             if(Button(300,136,30,26,"<",C("304C56"))){boardMission=Mod(boardMission-1,MissionCount);LoadBoard();}
             Label(334,136,240,26,missions[boardMission].title.ToUpperInvariant(),15,Cream,true,TextAnchor.MiddleCenter);
             if(Button(578,136,30,26,">",C("304C56"))){boardMission=Mod(boardMission+1,MissionCount);LoadBoard();}
-            if(Button(672,136,30,26,"<",C("304C56"))){boardDifficulty=Mod(boardDifficulty-1,4);LoadBoard();}
-            Label(706,136,240,26,DifficultyNames[boardDifficulty],15,Cream,true,TextAnchor.MiddleCenter);
-            if(Button(950,136,30,26,">",C("304C56"))){boardDifficulty=Mod(boardDifficulty+1,4);LoadBoard();}
+            if(Button(672,136,30,26,"<",C("304C56"))){boardDifficulty=Mod(boardDifficulty-1,DifficultyCount);LoadBoard();}
+            Label(706,136,240,26,Difficulties[boardDifficulty].name,15,Cream,true,TextAnchor.MiddleCenter);
+            if(Button(950,136,30,26,">",C("304C56"))){boardDifficulty=Mod(boardDifficulty+1,DifficultyCount);LoadBoard();}
             float y=180;
             Label(300,y,40,20,"#",11,C("9AAFB2"),true);Label(340,y,330,20,"ÉQUIPE",11,C("9AAFB2"),true);Label(670,y,130,20,"SCORE",11,C("9AAFB2"),true,TextAnchor.MiddleRight);
             Label(810,y,80,20,"TEMPS",11,C("9AAFB2"),true,TextAnchor.MiddleRight);Label(900,y,90,20,"",11,C("9AAFB2"),true,TextAnchor.MiddleRight);

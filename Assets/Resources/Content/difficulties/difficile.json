@@ -1,0 +1,30 @@
+{
+  "id": "difficile",
+  "order": 2,
+  "name": "DIFFICILE",
+  "tagline": "4 PV, 1 RENFORT PAR JOUEUR, ENNEMIS PLUS NOMBREUX",
+  "column": 2,
+  "health": 4,
+  "lives": 1,
+  "livesPerPlayer": false,
+  "damageTaken": 1,
+  "enemyHealth": 2.5,
+  "enemyCount": 1.5,
+  "enemySpeed": 1.25,
+  "enemyCadence": 0.65,
+  "gunmanAim": 0.84000003,
+  "hurtInvulnerable": 0.6,
+  "waveReward": {
+    "every": 0,
+    "lives": 0,
+    "health": 0
+  },
+  "respawn": {
+    "delay": 2.5,
+    "invulnerable": 3,
+    "inPlace": false
+  },
+  "continues": {
+    "enabled": false
+  }
+}

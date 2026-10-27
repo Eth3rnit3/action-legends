@@ -23,7 +23,7 @@ namespace Paname
     public sealed partial class PanameGame
     {
         readonly StringBuilder replayRuns=new StringBuilder();
-        readonly bool[] localJump=new bool[4],localSpecial=new bool[4];
+        readonly bool[] localJump=new bool[4],localSpecial=new bool[4],localGrenade=new bool[4];
         readonly PlayerCommand[] localHeld=new PlayerCommand[4];
         string replayToken="",replayBroken="";
         int replayCount,replayTicks,replayStartScore;
@@ -38,7 +38,7 @@ namespace Paname
             for(int i=0;i<4;i++)
             {
                 var read=slots[i].joined?LocalControls.Read(slots[i],i):default;localHeld[i]=read;
-                if(read.jump)localJump[i]=true;if(read.special)localSpecial[i]=true;
+                if(read.jump)localJump[i]=true;if(read.special)localSpecial[i]=true;if(read.grenade)localGrenade[i]=true;
             }
             localClock=Mathf.Min(localClock+Time.deltaTime,.25f);
             var moves=new int[4];var flags=new int[4];
@@ -50,18 +50,21 @@ namespace Paname
                     var held=localHeld[i];
                     // Tenths of a stick: what is simulated is exactly what is recorded.
                     moves[i]=Mathf.RoundToInt(Mathf.Clamp(held.move,-1,1)*10)*10;
-                    flags[i]=(held.fire?1:0)|(held.aimUp?2:0)|(localJump[i]?4:0)|(localSpecial[i]?8:0);
-                    frameInputs[i]=Command(moves[i],flags[i]);localJump[i]=false;localSpecial[i]=false;
+                    flags[i]=HeldFlags(held)|(localJump[i]?4:0)|(localSpecial[i]?8:0)|(localGrenade[i]?32:0);
+                    frameInputs[i]=Command(moves[i],flags[i]);localJump[i]=false;localSpecial[i]=false;localGrenade[i]=false;
                 }
                 RecordTick(0,moves,flags);TickSimulation(NetStep,frameInputs);EndReplayTick();
             }
         }
-        static PlayerCommand Command(int move,int flags)=>new PlayerCommand{move=move/100f,fire=(flags&1)!=0,aimUp=(flags&2)!=0,jump=(flags&4)!=0,special=(flags&8)!=0};
+        // Input bits shared by replays and online frames: 1 fire, 2 up, 4 jump, 8 special, 16 down (held), 32 grenade (pressed).
+        const int HeldMask=1|2|16,FlagMask=63;
+        static int HeldFlags(PlayerCommand c)=>(c.fire?1:0)|(c.aimUp?2:0)|(c.down?16:0);
+        static PlayerCommand Command(int move,int flags)=>new PlayerCommand{move=move/100f,fire=(flags&1)!=0,aimUp=(flags&2)!=0,jump=(flags&4)!=0,special=(flags&8)!=0,down=(flags&16)!=0,grenade=(flags&32)!=0};
 
         void StartReplay()
         {
             replayRuns.Clear();replayToken="";replayCount=0;replayTicks=0;replayBroken="";replayStartScore=Score;localClock=0;
-            for(int i=0;i<4;i++){localJump[i]=false;localSpecial[i]=false;}
+            for(int i=0;i<4;i++){localJump[i]=false;localSpecial[i]=false;localGrenade[i]=false;}
             recording=!headless;LastReplay=null;publish=Publish.None;verifyingOwn=false;
             var record=new ReplayRecord{version=Application.version,mission=CurrentMission.id,difficulty=DifficultyIndex};
             for(int i=0;i<4;i++){record.heroes[i]=slots[i].joined?slots[i].hero:-1;record.names[i]=slots[i].joined&&Online?playerNames[i]??"":"";}
@@ -137,7 +140,7 @@ namespace Paname
                 {
                     if(k>=parts.Length)return false;var pair=parts[k++].Split('.');
                     if(pair.Length!=2||!int.TryParse(pair[0],out run.moves[i])||!int.TryParse(pair[1],out run.flags[i]))return false;
-                    run.moves[i]=Mathf.Clamp(run.moves[i],-100,100);run.flags[i]&=15;
+                    run.moves[i]=Mathf.Clamp(run.moves[i],-100,100);run.flags[i]&=FlagMask;
                 }
                 if(k!=parts.Length)return false;
                 total+=count;if(total>60*60*60)return false;

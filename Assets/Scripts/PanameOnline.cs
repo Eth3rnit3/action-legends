@@ -26,7 +26,7 @@ namespace Paname
         const int HashInterval=60;
         [Serializable] sealed class NetConfig {public string mode,code,name,self;}
         [Serializable] sealed class NetLobby {public string build;public int mission,difficulty,score;public bool[] joined=new bool[4];public int[] heroes=new int[4];public string[] peers=new string[4],names=new string[4];}
-        struct NetInput {public int move,flags,jumps,specials,usedJumps,usedSpecials;}
+        struct NetInput {public int move,flags,jumps,specials,grenades,usedJumps,usedSpecials,usedGrenades;}
         sealed class NetFrame {public int left;public readonly int[] moves=new int[4],flags=new int[4];}
         public bool Online {get;private set;}
         public bool IsHost {get;private set;}
@@ -43,7 +43,7 @@ namespace Paname
         readonly StringBuilder netOut=new StringBuilder();
         bool netBypass;
         float netClock,netSendClock,netWaitClock;
-        int netLeftMask,localJumps,localSpecials,lastHash;
+        int netLeftMask,localJumps,localSpecials,localGrenades,lastHash;
         Phase reportedPhase;
         string lastInputSent="";
         static string BuildId=>Application.version+"/"+Application.buildGUID;
@@ -117,8 +117,8 @@ namespace Paname
         static void ParseInput(string body,ref NetInput input)
         {
             string[] v=body.Split(',');
-            if(v.Length<4||!int.TryParse(v[0],out int move)||!int.TryParse(v[1],out int flags)||!int.TryParse(v[2],out int jumps)||!int.TryParse(v[3],out int specials))return;
-            input.move=Mathf.Clamp(move,-100,100);input.flags=flags&3;input.jumps=jumps;input.specials=specials;
+            if(v.Length<5||!int.TryParse(v[0],out int move)||!int.TryParse(v[1],out int flags)||!int.TryParse(v[2],out int jumps)||!int.TryParse(v[3],out int specials)||!int.TryParse(v[4],out int grenades))return;
+            input.move=Mathf.Clamp(move,-100,100);input.flags=flags&HeldMask;input.jumps=jumps;input.specials=specials;input.grenades=grenades;
         }
         string LobbyJson()
         {
@@ -161,11 +161,11 @@ namespace Paname
         {
             netFrames.Clear();hostHashes.Clear();NetTick=0;netClock=0;netWaitClock=0;netLeftMask=0;NetDesync=false;
             for(int i=0;i<4;i++)netInputs[i]=default;
-            localJumps=0;localSpecials=0;lastInputSent="";
+            localJumps=0;localSpecials=0;localGrenades=0;lastInputSent="";
         }
         void HostStep(PlayerCommand local)
         {
-            netInputs[0].move=Quantize(local.move);netInputs[0].flags=(local.fire?1:0)|(local.aimUp?2:0);netInputs[0].jumps=localJumps;netInputs[0].specials=localSpecials;
+            netInputs[0].move=Quantize(local.move);netInputs[0].flags=HeldFlags(local);netInputs[0].jumps=localJumps;netInputs[0].specials=localSpecials;netInputs[0].grenades=localGrenades;
             netClock=Mathf.Min(netClock+Time.unscaledDeltaTime,.25f);netOut.Clear();
             while(netClock>=NetStep&&phase==Phase.Playing)
             {
@@ -177,6 +177,7 @@ namespace Paname
                     ref var input=ref netInputs[i];int flags=input.flags;
                     if(input.jumps!=input.usedJumps){flags|=4;input.usedJumps=input.jumps;}
                     if(input.specials!=input.usedSpecials){flags|=8;input.usedSpecials=input.specials;}
+                    if(input.grenades!=input.usedGrenades){flags|=32;input.usedGrenades=input.grenades;}
                     frame.moves[i]=input.move;frame.flags[i]=flags;
                 }
                 if(netOut.Length>0)netOut.Append('/');
@@ -251,9 +252,11 @@ namespace Paname
                 netFrames.Enqueue(frame);
             }
         }
+        // Held buttons as flags, pressed ones as counters, so a press survives a lost or merged message.
+        string GuestInput(PlayerCommand local)=>Quantize(local.move)+","+HeldFlags(local)+","+localJumps+","+localSpecials+","+localGrenades;
         void GuestStep(PlayerCommand local)
         {
-            string input=Quantize(local.move)+","+((local.fire?1:0)|(local.aimUp?2:0))+","+localJumps+","+localSpecials;
+            string input=GuestInput(local);
             netSendClock-=Time.unscaledDeltaTime;
             if(input!=lastInputSent||netSendClock<=0){NetSend(netHost,"I"+input);lastInputSent=input;netSendClock=.2f;}
             // Play frames at 60 Hz, and catch up when a hitch let the buffer grow.
@@ -272,7 +275,7 @@ namespace Paname
             if(!Online)return false;
             netLocal.pad=Gamepad.current;
             var local=LocalControls.Read(netLocal,0);
-            if(local.jump)localJumps++;if(local.special)localSpecials++;
+            if(local.jump)localJumps++;if(local.special)localSpecials++;if(local.grenade)localGrenades++;
             if(phase==Phase.Lobby)OnlineLobbyInput();
             else if(phase==Phase.Playing){if(IsHost)HostStep(local);else GuestStep(local);}
             else if(IsHost&&(phase==Phase.Won||phase==Phase.Lost)&&Keyboard.current!=null&&Keyboard.current.escapeKey.wasPressedThisFrame)ReturnToLobby();
@@ -295,7 +298,7 @@ namespace Paname
         void RunFrame(NetFrame frame)
         {
             if(frame.left!=0)for(int i=0;i<4;i++)if((frame.left&(1<<i))!=0)DropPlayer(i);
-            for(int i=0;i<4;i++){int f=frame.flags[i];frameInputs[i]=new PlayerCommand{move=frame.moves[i]/100f,fire=(f&1)!=0,aimUp=(f&2)!=0,jump=(f&4)!=0,special=(f&8)!=0};}
+            for(int i=0;i<4;i++)frameInputs[i]=Command(frame.moves[i],frame.flags[i]&FlagMask);
             RecordTick(frame.left,frame.moves,frame.flags);TickSimulation(NetStep,frameInputs);EndReplayTick();NetTick++;
             if(NetTick%HashInterval!=0)return;
             lastHash=StateHash();

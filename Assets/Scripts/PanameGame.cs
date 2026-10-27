@@ -501,13 +501,19 @@ namespace Paname
             Fall(e,direction,wound);
             e.root.gameObject.SetActive(false);Destroy(e.root.gameObject);enemies.RemoveAt(index);Fallen(e);
         }
+        // Rendering only: viewX is where the camera is drawn. When a locked wave lifts with the hero at the
+        // right edge, cameraX jumps up to 12 units in one step; the view pans there instead of popping.
+        float viewX=7,goSeen=-1,goSince=-10;
         void UpdateCamera(float dt)
         {
             float target=phase==Phase.Lobby?CurrentMission.cameraMin:CameraTarget();
             if(phase!=Phase.Lobby)target=Mathf.Max(cameraX,target);
             cameraX=phase==Phase.Lobby?Mathf.Lerp(cameraX,target,1-Mathf.Exp(-dt*5)):target;
-            UpdatePanorama(cameraX,gameCamera.orthographicSize*gameCamera.aspect,CurrentMission.cameraMin,CurrentMission.cameraMax);
-            gameCamera.transform.position=new Vector3(cameraX+(phase==Phase.Playing?Mathf.Sin(Time.unscaledTime*70)*shake*.15f:0),3.6f,-10);
+            // A camera that went back (new round, new mission, lobby) or far ahead is followed at once.
+            viewX=phase==Phase.Lobby||dt<=0||cameraX<viewX||cameraX>viewX+40?cameraX:Mathf.MoveTowards(viewX,cameraX,25*dt);
+            if(goFromX!=goSeen){goSeen=goFromX;goSince=Time.unscaledTime;}
+            UpdatePanorama(viewX,gameCamera.orthographicSize*gameCamera.aspect,CurrentMission.cameraMin,CurrentMission.cameraMax);
+            gameCamera.transform.position=new Vector3(viewX+(phase==Phase.Playing?Mathf.Sin(Time.unscaledTime*70)*shake*.15f:0),3.6f,-10);
         }
         void OnGUI()
         {
@@ -583,7 +589,10 @@ namespace Paname
         // After a locked wave, a blinking GO points the way until the team has moved on.
         void DrawGo()
         {
-            if(phase!=Phase.Playing||goFromX<0||screenLocked||bossStarted||cameraX>=goFromX+8||Mathf.Repeat(Time.unscaledTime,.7f)>.45f)return;
+            // Shown until the camera has gone 8 units on, and in any case for 2.5 s: the camera can jump past
+            // those 8 units the moment the wave lifts when the hero waits at the right edge.
+            bool shown=cameraX<goFromX+8||Time.unscaledTime<goSince+2.5f;
+            if(phase!=Phase.Playing||goFromX<0||screenLocked||bossStarted||!shown||Mathf.Repeat(Time.unscaledTime,.7f)>.45f)return;
             var go=Rules.go;var t=go.Texture;if(!t)return;
             float w=t.width/(float)go.columns,h=t.height/(float)go.rows,height=Mathf.Min(150,250*h/w);
             GUI.DrawTextureWithTexCoords(new Rect(1262-height*w/h,289-height*.5f,height*w/h,height),t,go.TexCoords);

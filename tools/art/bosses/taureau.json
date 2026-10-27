@@ -1,0 +1,59 @@
+{
+ "output": "taureau.png",
+ "columns": 4,
+ "rows": 2,
+ "cell": [
+  512,
+  512
+ ],
+ "feet": 26,
+ "pivotX": 0.5,
+ "ppu": 110,
+ "height": 3.3,
+ "sources": {
+  "O": {
+   "image": "taureaux.png",
+   "grid": [
+    4,
+    2
+   ],
+   "exact": true,
+   "mirror": true
+  }
+ },
+ "frames": [
+  [
+   "O",
+   0
+  ],
+  [
+   "O",
+   1
+  ],
+  [
+   "O",
+   2
+  ],
+  [
+   "O",
+   3
+  ],
+  [
+   "O",
+   4
+  ],
+  [
+   "O",
+   5
+  ],
+  [
+   "O",
+   6
+  ],
+  [
+   "O",
+   7
+  ]
+ ],
+ "anchors": {}
+}

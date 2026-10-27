@@ -1,0 +1,107 @@
+{
+ "output": "arlesien-fouet.png",
+ "columns": 4,
+ "rows": 4,
+ "cell": [
+  512,
+  512
+ ],
+ "feet": 27,
+ "pivotX": 0.4,
+ "ppu": 160,
+ "height": 2,
+ "heightFrom": [
+  "O",
+  8
+ ],
+ "margins": [
+  36,
+  14
+ ],
+ "defringe": true,
+ "sources": {
+  "O": {
+   "image": "saint-remy-enemies.png",
+   "grid": [
+    4,
+    3
+   ],
+   "exact": true
+  },
+  "N": {
+   "image": "arlesien-fouet-new.png",
+   "grid": [
+    4,
+    3
+   ],
+   "reference": 0
+  }
+ },
+ "frames": [
+  [
+   "O",
+   8
+  ],
+  [
+   "O",
+   9
+  ],
+  [
+   "O",
+   10
+  ],
+  [
+   "O",
+   11
+  ],
+  [
+   "N",
+   0
+  ],
+  [
+   "N",
+   1
+  ],
+  [
+   "N",
+   2
+  ],
+  [
+   "N",
+   3
+  ],
+  [
+   "N",
+   4
+  ],
+  [
+   "N",
+   5
+  ],
+  [
+   "N",
+   6
+  ],
+  [
+   "N",
+   7
+  ],
+  [
+   "N",
+   8
+  ],
+  [
+   "N",
+   9
+  ],
+  [
+   "N",
+   10
+  ],
+  [
+   "N",
+   11
+  ]
+ ],
+ "anchors": {}
+}

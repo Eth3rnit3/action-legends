@@ -1,0 +1,290 @@
+{
+  "id": "brigitte-bardot",
+  "order": 5,
+  "name": "BRIGITTE BARDOT",
+  "shortName": "BARDOT",
+  "role": "LA PISTOLERA",
+  "specialName": "Feu croisé",
+  "weapon": "revolver",
+  "speed": 11,
+  "jump": 11.5,
+  "strideRate": 13,
+  "bob": 0.045,
+  "special": {
+    "type": "salvo",
+    "cooldown": 5,
+    "cooldownPerDifficulty": 1,
+    "pose": 0.62,
+    "damage": 5,
+    "shots": 3,
+    "spread": 6,
+    "speed": 30,
+    "bursts": 5,
+    "interval": 0.12,
+    "directions": [
+      {
+        "angle": 0,
+        "anchor": "muzzle"
+      },
+      {
+        "angle": 180,
+        "anchor": "back"
+      }
+    ],
+    "sound": "Audio/Sfx/tir-D-pistolet-sec",
+    "voice": "Audio/Voices/special-feu-croise"
+  },
+  "hitbox": {
+    "y": 1,
+    "radius": 0.53
+  },
+  "crouch": {
+    "speed": 3.6,
+    "y": 0.55,
+    "radius": 0.45
+  },
+  "knife": {
+    "reach": 1.3,
+    "height": 0.3,
+    "damage": 13,
+    "cooldown": 0.24,
+    "pose": 0.24,
+    "sound": "Audio/Sfx/couteau"
+  },
+  "portraitCell": 0,
+  "portraitFrame": {
+    "x": 0.02,
+    "y": 0,
+    "size": 0.72
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/heroes/brigitte-bardot",
+      "columns": 6,
+      "rows": 4,
+      "pivot": {
+        "x": 0.34,
+        "y": 0.0411765
+      },
+      "cellHeight": 3.1481481
+    },
+    "layer": 30,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "run",
+        "cells": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "perStride": 0.95
+      },
+      {
+        "name": "jump",
+        "cells": [
+          7
+        ]
+      },
+      {
+        "name": "jumpDown",
+        "cells": [
+          8
+        ]
+      },
+      {
+        "name": "aimUp",
+        "cells": [
+          9
+        ]
+      },
+      {
+        "name": "aimDiagonal",
+        "cells": [
+          10
+        ]
+      },
+      {
+        "name": "crouch",
+        "cells": [
+          11
+        ]
+      },
+      {
+        "name": "crouchWalk",
+        "cells": [
+          12,
+          13
+        ],
+        "perStride": 1.2
+      },
+      {
+        "name": "crouchShoot",
+        "cells": [
+          14
+        ]
+      },
+      {
+        "name": "knife",
+        "cells": [
+          15,
+          16,
+          17
+        ],
+        "fps": 12.5,
+        "loop": false
+      },
+      {
+        "name": "throw",
+        "cells": [
+          18,
+          19
+        ],
+        "fps": 7,
+        "loop": false
+      },
+      {
+        "name": "special",
+        "cells": [
+          20
+        ]
+      },
+      {
+        "name": "hurt",
+        "cells": [
+          21
+        ]
+      },
+      {
+        "name": "down",
+        "cells": [
+          22
+        ]
+      },
+      {
+        "name": "victory",
+        "cells": [
+          23
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "muzzle",
+        "cell": 0,
+        "x": 0.92,
+        "y": 1.63
+      },
+      {
+        "name": "muzzle",
+        "cell": 1,
+        "x": 0.94,
+        "y": 1.57
+      },
+      {
+        "name": "muzzle",
+        "cell": 2,
+        "x": 1.14,
+        "y": 1.54
+      },
+      {
+        "name": "muzzle",
+        "cell": 3,
+        "x": 1.26,
+        "y": 1.51
+      },
+      {
+        "name": "muzzle",
+        "cell": 4,
+        "x": 0.87,
+        "y": 1.46
+      },
+      {
+        "name": "muzzle",
+        "cell": 5,
+        "x": 1.16,
+        "y": 1.52
+      },
+      {
+        "name": "muzzle",
+        "cell": 6,
+        "x": 0.93,
+        "y": 1.42
+      },
+      {
+        "name": "muzzle",
+        "cell": 7,
+        "x": 0.8,
+        "y": 1.23
+      },
+      {
+        "name": "muzzle",
+        "cell": 8,
+        "x": 0.52,
+        "y": 0.38
+      },
+      {
+        "name": "muzzle",
+        "cell": 9,
+        "x": -0.07,
+        "y": 2.61
+      },
+      {
+        "name": "muzzle",
+        "cell": 10,
+        "x": 0.97,
+        "y": 2.18
+      },
+      {
+        "name": "muzzle",
+        "cell": 11,
+        "x": 0.94,
+        "y": 1.1
+      },
+      {
+        "name": "muzzle",
+        "cell": 12,
+        "x": 0.98,
+        "y": 1.02
+      },
+      {
+        "name": "muzzle",
+        "cell": 13,
+        "x": 0.95,
+        "y": 1.03
+      },
+      {
+        "name": "muzzle",
+        "cell": 14,
+        "x": 1.08,
+        "y": 1.05
+      },
+      {
+        "name": "muzzle",
+        "cell": 20,
+        "x": 1.44,
+        "y": 1.3
+      },
+      {
+        "name": "hand",
+        "cell": 19,
+        "x": 0.98,
+        "y": 1.77
+      },
+      {
+        "name": "back",
+        "cell": 20,
+        "x": -1.04,
+        "y": 1.3
+      }
+    ]
+  }
+}

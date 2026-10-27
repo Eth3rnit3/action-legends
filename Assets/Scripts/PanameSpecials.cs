@@ -52,7 +52,8 @@ namespace Paname
         void TickSalvo(Player p,float dt)
         {
             p.salvoTimer-=dt;if(p.salvoTimer>0)return;
-            var h=p.Definition;var s=h.special;p.salvo--;p.salvoTimer=s.interval;
+            // The interval is added, not set, so that bursts keep their cadence on the 60 Hz steps.
+            var h=p.Definition;var s=h.special;p.salvo--;p.salvoTimer+=s.interval;
             // Shots leave from the special image's anchors (fixed, like the pose), else from the middle of the body.
             int cell=h.specialPose>=0?h.animations.states[h.specialPose].cells[0]:-1;
             foreach(var d in s.directions)

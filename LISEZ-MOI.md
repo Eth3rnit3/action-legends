@@ -1,6 +1,6 @@
 # Action Legends — guide de jeu
 
-Prototype Unity 2D — version 0.8.0 : quatre héros sélectionnables et coopération locale sur un même écran. Quatre missions qui s’enchaînent : Paris, Marseille, Saint-Rémy-de-Provence, puis Tokyo. Les nouveautés de cette version pour le joueur sont résumées dans [docs/UPDATE_080.md](docs/UPDATE_080.md).
+Prototype Unity 2D — version 0.8.0 : sept héros sélectionnables (Chuck Norris, Arnold, Jean-Claude, Sylvester, Fernandel, Brigitte Bardot et Jeanne d'Arc) et coopération locale sur un même écran. Quatre missions qui s’enchaînent : Paris, Marseille, Saint-Rémy-de-Provence, puis Tokyo. Les nouveautés de cette version pour le joueur sont résumées dans [docs/UPDATE_080.md](docs/UPDATE_080.md).
 
 ## Jouer
 
@@ -8,7 +8,7 @@ Prototype Unity 2D — version 0.8.0 : quatre héros sélectionnables et coopér
 2. Ouvrir `Assets/Scenes/Paris2026.unity` si nécessaire.
 3. Cliquer sur **Play**, choisir son héros, puis **Déployer l’équipe** ou **Entrée**.
 
-Le joueur 1 peut jouer immédiatement au clavier. Sans manette, un seul joueur rejoint la partie. Appuyer sur **A / croix** sur une manette pour ajouter un partenaire : les places 2 à 4 sont occupées en premier ; une quatrième manette peut prendre le joueur 1. Les joueurs peuvent aussi rejoindre pendant le niveau. Cliquer sur une carte pour choisir son héros ; les pastilles J1 à J4 permettent de choisir le joueur concerné. Chaque manette peut choisir son propre héros avec la croix. Les héros peuvent être choisis plusieurs fois.
+Le joueur 1 peut jouer immédiatement au clavier. Sans manette, un seul joueur rejoint la partie. Appuyer sur **A / croix** sur une manette pour ajouter un partenaire : les places 2 à 4 sont occupées en premier ; une quatrième manette peut prendre le joueur 1. Les joueurs peuvent aussi rejoindre pendant le niveau. Le menu montre quatre cartes, une par joueur (J1 à J4) : chacun fait défiler tous les héros sur la sienne avec ses flèches (souris), Q / E ou ← / → pour J1 au clavier, ou la croix gauche / droite de sa manette ; la carte indique le rôle, la spéciale et la place du héros (« 5 / 7 »). Une carte vide invite à rejoindre. Les héros peuvent être choisis plusieurs fois.
 
 | Action | Joueur 1 au clavier | Manette |
 |---|---|---|
@@ -20,7 +20,7 @@ Le joueur 1 peut jouer immédiatement au clavier. Sans manette, un seul joueur r
 | Grenade | L | B / rond |
 | Attaque spéciale | K | Y / triangle ou bouton supérieur droit |
 | Pause | Échap | Start / Options |
-| Choisir le héros, au menu | Clic sur une carte, ← / →, Q / E ou A / D | Croix gauche / droite |
+| Choisir le héros, au menu | Flèches de sa carte (souris), ← / →, Q / E ou A / D | Croix gauche / droite |
 | Changer de mission, au menu | Clic sur < / > | LB / RB (manette du joueur 1) |
 | Démarrer, au menu | Entrée | Start / Options |
 
@@ -77,7 +77,7 @@ Les missions s’enchaînent : Paris, Marseille (code PASTIS), Saint-Rémy (FARA
 ## État de cette version
 
 - Déplacements, sauts, tirs, dégâts, renforts, score, pause, victoire et défaite.
-- Quatre héros aux vitesses, cadences et attaques spéciales différentes.
+- Sept héros aux vitesses, armes et attaques spéciales différentes : coup circulaire (Chuck), rafale lourde (Arnold), double coup sauté (Jean-Claude), salve explosive (Sylvester), Marguerite à la rescousse (Fernandel siffle, sa vache charge et piétine tout ce qu'elle croise, clin d'œil à « La Vache et le prisonnier »), feu croisé (Brigitte tire aux deux revolvers des deux côtés) et charge à l'étendard (Jeanne fonce, invulnérable, et renverse les ennemis). Jeanne se bat à l'épée : sa lame lance une courte vague de lumière qui traverse un ennemi, et son coup au contact porte plus loin et plus fort. Brigitte a un revolver rapide, Fernandel un fusil lent qui frappe fort et traverse.
 - Sprites et décor générés, intégrés à Unity ; animation courte par changement de poses.
 - Nouveau menu avec logo illustré, cadres métalliques, sélection au clavier, souris ou manette.
 - Boulevard, quais, canal Saint-Martin et Bastille : décors successifs avec fondus aux raccords, défilement en parallaxe et chaussée au premier plan.

@@ -1,0 +1,31 @@
+{
+  "id": "revolver",
+  "name": "REVOLVER",
+  "ammo": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "fireRate": 0.12,
+  "damage": 4,
+  "projectile": {
+    "type": "bullet",
+    "speed": 40,
+    "life": 1.1,
+    "sprite": {
+      "texture": "Art/heroes/legend-fx",
+      "columns": 3,
+      "rows": 2,
+      "cell": 5
+    },
+    "size": 0.7
+  },
+  "recoil": {
+    "shake": 0.03,
+    "push": 0
+  },
+  "flash": "light",
+  "casings": false,
+  "sound": "Audio/Sfx/tir-D-pistolet-sec"
+}

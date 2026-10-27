@@ -1,0 +1,17 @@
+{
+  "id": "fusil-lebel",
+  "extends": "rifle",
+  "name": "FUSIL LEBEL",
+  "fireRate": 0.22,
+  "damage": 9,
+  "projectile": {
+    "type": "bullet",
+    "speed": 44,
+    "life": 1.25,
+    "pierce": 1
+  },
+  "recoil": {
+    "shake": 0.045,
+    "push": 0
+  }
+}

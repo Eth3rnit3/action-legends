@@ -12,7 +12,10 @@ LINES = {'bonus-0': 'Mitrailleuse !', 'bonus-1': 'Triple tir !', 'bonus-2': 'Roq
          'hostage-merci': 'Merci !',
          # Lot 2b: enemies' cries when they fall and when they spot the heroes, and the mid-mission boss alert.
          'cri-chute': 'Aaaargh ! Nooon !', 'cri-panique': 'Ouaaah ! Au secours !', 'cri-surprise': 'Hein ?! Là-bas !',
-         'miniboss-alert': 'Attention ! Gros calibre !'}
+         'miniboss-alert': 'Attention ! Gros calibre !',
+         # Lot 3H: the new heroes' specials.
+         'special-marguerite': 'Marguerite ! À la rescousse !', 'special-etendard': 'En avant ! Chargez !',
+         'special-feu-croise': 'Feu croisé !'}
 # The 3.x models read stage directions aloud, so they get audio tags; 2.5 Pro follows a spoken instruction.
 TAKES = {'a': ('gemini-2.5-pro-preview-tts', 'Fenrir', 'Say in French, shouting excitedly like an arcade announcer: {}'),
          'b': ('gemini-2.5-pro-preview-tts', 'Orus', 'Say in French, shouting excitedly like an arcade announcer: {}'),

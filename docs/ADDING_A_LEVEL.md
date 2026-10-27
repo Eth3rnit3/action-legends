@@ -8,7 +8,7 @@ Tout ce qui fait un niveau d’**Action Legends** — sa carte, ses ennemis et l
 Assets/Resources/
   Levels/<mission>.json          une mission (schemaVersion 2), chargée automatiquement
   Content/weapons/<id>.json      les armes des héros : fusils de base et armes à lettres (H, S, F, R, L…)
-  Content/heroes/<id>.json       les héros jouables (un à quatre)
+  Content/heroes/<id>.json       les héros jouables (autant que voulu : chaque joueur les fait défiler sur sa carte du menu)
   Content/enemies/<id>.json      la bibliothèque des types d’ennemis
   Content/bosses/<id>.json       la bibliothèque des boss
   Content/rules/<id>.json        règles de partie : grenades, bonus, caisses d’armes, décompte de fin, flèche GO
@@ -240,7 +240,7 @@ Les états lus par le moteur :
 
 | Acteur | Requis | Facultatifs |
 |---|---|---|
-| Héros | `idle` (immobile au sol), `run` (court), `jump` (en l’air), `crouch` (accroupi), `aimUp` (vise en haut), `jumpDown` (en l’air, vise en bas), `knife` (coup de couteau, joué pendant `knife.pose`), `throw` (lancer de grenade, joué pendant `grenade.pose`) | `crouchWalk` (avance accroupi, sinon `crouch`), `crouchShoot` (tire accroupi, sinon `crouch`), `aimDiagonal` (vise en haut en avançant, sinon `aimUp`) |
+| Héros | `idle` (immobile au sol), `run` (court), `jump` (en l’air), `crouch` (accroupi), `aimUp` (vise en haut), `jumpDown` (en l’air, vise en bas), `knife` (coup de couteau, joué pendant `knife.pose`), `throw` (lancer de grenade, joué pendant `grenade.pose`) | `crouchWalk` (avance accroupi, sinon `crouch`), `crouchShoot` (tire accroupi, sinon `crouch`), `aimDiagonal` (vise en haut en avançant, sinon `aimUp`), `special` (montré pendant la `pose` de sa spéciale ; sinon la pose courante) |
 | Ennemi | `idle`, `run`, `attack` (frappe, lancer, tir) | `aim` (visée d’un tireur, sinon `attack`), `hurt` (sous les balles, sinon l’image courante penche), `unaware` (inattentif, sinon `idle`), `surprised` (sursaut, sinon `idle`), `flee` (fuite, sinon `run`), `fall` (sous un parachute, sinon `idle`), `throw` (lancer de grenade, sinon `attack`), `death` (mort par balle), `deathExplosion`, `deathFire`, `deathKnife` (morts par explosion, feu, couteau, sinon `death`) ; sans aucun état de mort, l’image courante est projetée |
 | Boss | `idle` ; `walk` pour un marcheur | ceux que nomment ses attaques (`state`, `aimState`, `recoverState`) ; `wreck` (montré à sa chute) |
 | Véhicule de dépôt | `drive`, `open` | — |
@@ -262,7 +262,7 @@ Un état qui n’est pas dans ce tableau est accepté et ignoré : une planche p
 
 Les neuf ennemis livrés ont chacun leur planche, `Art/enemies/<id>.png` (4 × 4 cases) : la première ligne reprend au pixel près leurs quatre anciennes cases (pour les Arlésiens, leur ligne de `Assets/ArtSources/saint-remy/enemies.png`), les trois suivantes ajoutent inattentif, sursaut, touché ou lancer, fuite et les morts (`docs/ART_LOT2B.md`, `docs/MISSION_SAINT_REMY.md`) ; `pack_sheet.py hero tools/art/enemies/<id>.json` la refait. Les planches des Arlésiens ont des cases de 512 px : `pivot` (0,4 ; 0,0527344), `cellHeight` 2,88 (3,2 pour l’Arlésien au fouet, dessiné plus petit).
 
-`tools/art/pack_sheet.py` recale une planche générée (pieds sur une même ligne, jambes sur le pivot) et affiche les bouts de canon. Pour un héros, `pack_sheet.py hero tools/art/heroes/<héros>.json` assemble ses planches générées en une seule (une taille commune fixée par une image de référence de chaque planche), mesure les `muzzle` (vers l’avant, le haut, le bas ou en diagonale selon la case) et la `hand`, et imprime les ancrages JSON ; voir `docs/ART_LOT1A.md`. `tools/art/measure_muzzles.py` mesure ceux de l’ancienne planche `Assets/ArtSources/heroes.png`.
+`tools/art/pack_sheet.py` recale une planche générée (pieds sur une même ligne, jambes sur le pivot) et affiche les bouts de canon. Pour un héros, `pack_sheet.py hero tools/art/heroes/<héros>.json` assemble ses planches générées en une seule (une taille commune fixée par une image de référence de chaque planche), mesure les `muzzle` (vers l’avant `right`, l’arrière `left`, le haut `up`, le bas `down`, en bas devant `downRight` ou en diagonale `diagonal` selon la case ; `right:2.0` ignore ce qui est dessiné à plus de 2 u au-dessus des pieds, comme l’étendard de Jeanne au-dessus de son épée) et la `hand`, et imprime les ancrages JSON ; voir `docs/ART_LOT1A.md` et `docs/ART_LOT3H.md` (une planche de 12 poses fournie, complétée par 12 poses générées). `tools/art/measure_muzzles.py` mesure ceux de l’ancienne planche `Assets/ArtSources/heroes.png`.
 
 ## 3. Les ennemis
 
@@ -418,7 +418,9 @@ Un nouveau boss volant reprend la mise en page de l’hélicoptère : vue de pro
 
 ## 5. Les héros
 
-Les quatre héros sont dans `Content/heroes/` ; le menu en affiche un à quatre, triés par `order` puis `id`. **Les replays et le jeu en ligne désignent un héros par sa position dans cette liste** : changer l’ordre ou les chiffres d’un héros change le jeu, et les scores publiés auparavant ne se rejouent plus.
+Les héros sont dans `Content/heroes/`, **autant que voulu** (jusqu’à 99), triés par `order` puis `id` : les quatre d’origine (`order` 0 à 3) puis Fernandel, Brigitte Bardot et Jeanne d’Arc (4 à 6). Le menu a toujours quatre cartes, une par joueur (J1 à J4) : chacun y fait défiler tous les héros (flèches de la carte à la souris, Q / E ou ← / → pour J1 au clavier, croix gauche / droite de sa manette) ; plusieurs joueurs peuvent prendre le même. **Les replays nomment leurs héros par leur `id`** (`heroIds`, depuis le lot 3H) : ajouter un héros n’en casse aucun ; les anciens replays, sans ids, les désignent par leur position. Le jeu en ligne envoie la position (même version du jeu chez tous les joueurs). Changer les chiffres d’un héros change le jeu : les scores publiés auparavant avec lui ne se rejouent plus.
+
+Un nouveau héros n’a besoin que de sa planche (`Art/heroes/<id>.png`), de son JSON et, s’il en faut, de son arme (section 5 ter) et des images de sa spéciale. Il peut étendre un héros livré (`"extends"`) et n’en changer qu’une partie.
 
 | Champ | Utilisation |
 |---|---|
@@ -426,12 +428,41 @@ Les quatre héros sont dans `Content/heroes/` ; le menu en affiche un à quatre,
 | `speed`, `jump` | Vitesse de course, vitesse verticale au saut. |
 | `weapon` | Son arme de base, un identifiant de `Content/weapons` **sans limite de munitions** (section 5 ter) : il commence chaque vie avec elle et la retrouve quand une arme à lettre est vide ou à sa mort. Cadence, dégâts et recul y sont réglés (les anciens champs `fireRate`, `damage`, `recoilShake` du héros sont refusés). |
 | `strideRate`, `bob` | Vitesse de la foulée (section 2) et balancement vertical en courant. |
-| `portraitCell`, `portraitFrame` | Case de la planche affichée dans la fiche du menu, et le carré de cette case qui y est montré : `{"x": 0.02, "y": 0, "size": 0.72}` en fractions de la case depuis son coin inférieur gauche (toute la case par défaut). |
+| `portraitCell`, `portraitFrame` | Case de la planche affichée dans la carte du menu, et le carré de cette case qui y est montré : `{"x": 0.02, "y": 0, "size": 0.72}` en fractions de la case depuis son coin inférieur gauche (toute la case par défaut). `size` est une fraction de la **largeur** de la case et le carré reste carré : dans une case plus large que haute (Jeanne : 480 × 420), il monte de `size × largeur / hauteur` et doit rester dans la case. |
 | `hitbox` | Où le touchent les tirs ennemis, debout : un cercle de rayon `radius` à `y` au-dessus des pieds (`{"y": 1, "radius": 0.53}`). |
 | `crouch` | Accroupi : vitesse `speed`, et le cercle touché `y`, `radius` (`{"speed": 3.6, "y": 0.55, "radius": 0.45}` : les balles tirées à hauteur de poitrine passent au-dessus). |
 | `knife` | Avec le bouton de tir, un ennemi à moins de `reach` devant le héros (qui est à moins de `height` du sol) reçoit `damage` au couteau au lieu d’une balle ; `cooldown` avant le coup suivant, pose `knife` pendant `pose` s, son `sound`. |
-| `special` | `type` `blast` : frappe tout ce qui est à moins de `radius` (`damage`), le boss à moins de `radius + bossReach` (`bossDamage`), rend invulnérable `invulnerable` s et fait bondir de `leap` (0 : non). `type` `volley` : `shots` tirs en éventail à `speed`, écartés de `spread`, `damage` chacun, explosifs si `explosive`. Recharge : `cooldown + difficulté × cooldownPerDifficulty` s. |
+| `special` | Un des types génériques ci-dessous (`type`). Recharge : `cooldown + difficulté × cooldownPerDifficulty` s. |
 | `animations` | Les états de la section 2, un `muzzle` sur chaque case d’où il tire et une `hand` sur la dernière case de `throw`. |
+
+### Les spéciales
+
+Chaque spéciale est un comportement générique, réglé par le JSON du héros ; n’importe quel héros peut prendre n’importe lequel.
+
+| `type` | Ce qu’il fait | Champs |
+|---|---|---|
+| `blast` | Frappe tout ce qui est à moins de `radius` (`damage`), le boss à moins de `radius + bossReach` (`bossDamage`), rend invulnérable `invulnerable` s et fait bondir de `leap` (0 : non). | `radius`, `bossReach`, `invulnerable`, `leap` |
+| `volley` | `shots` tirs en éventail dans la direction visée, à `speed`, écartés de `spread`, `damage` chacun, explosifs si `explosive`. | `shots`, `speed`, `spread`, `explosive` |
+| `summon` | Après `delay` s, un allié (`ally`) traverse l’écran depuis son bord derrière le héros (`from` `edge`) ou depuis `margin` u derrière lui (`behind`), à `speed` u/s, à `y` au-dessus de la rue ; il piétine une fois chaque ennemi dont le milieu est à moins de `reach` devant ou derrière son milieu et sous `height`, et le boss une fois (`bossDamage`). Il disparaît de l’autre côté de l’écran ou au bout de `life` s ; `sound` joue à son arrivée. Son dessin est une animation (section 2) avec l’état `run` (`perStride` : images par unité parcourue). | `delay`, `ally {from, speed, reach, height, y, life, margin, sound, animations}` |
+| `dash` | Le héros fonce devant lui à `speed` pendant `time` s, quoi que dise le stick, invulnérable `time + invulnerable` s ; il renverse une fois chaque ennemi à moins de `radius` de son torse et le boss une fois (`bossDamage`). | `speed`, `time`, `radius`, `invulnerable` |
+| `salvo` | `bursts` salves, une toutes les `interval` s ; chaque salve tire `shots` balles (écartées de `spread` degrés) dans chacune des `directions` à la fois : `{"angle", "anchor"}`, angle en degrés depuis l’avant du héros (0 devant, 180 derrière, 90 en haut), depuis l’ancrage `anchor` de l’image `special` (sinon depuis le milieu du corps). `explosive` comme `volley`. | `bursts`, `interval`, `shots`, `spread`, `speed`, `directions`, `explosive` |
+
+Champs communs, facultatifs : `pose` (s pendant lesquelles le héros montre son état `special`, s’il en a un, sans tirer ni lancer de grenade ; une charge ou une salve dure au moins le temps de la charge ou des salves), `sound` (joué à l’appui ; à chaque salve pour `salvo`), `voice` (une annonce enregistrée en prises `-a`, `-b`, `-c`, comme celles des bonus), `wound` (`bullet`, `explosion` par défaut, `fire`, `knife` : la façon dont tombent les ennemis d’une invocation ou d’une charge), `trail` et `impact` (dessins `{"sprite", "frames", "fps", "size", "y"}` comme ceux des boss : traînée laissée toutes les `trailEvery` s derrière une invocation ou une charge, éclat sur chaque ennemi frappé). Les spéciales `blast` et `volley` gardent leur son d’explosion.
+
+Les trois héros du lot 3H en sont les exemples : Fernandel siffle (`summon`) et Marguerite, la vache, charge à travers l’écran ; Jeanne charge à l’étendard (`dash`) ; Brigitte tire aux deux revolvers des deux côtés (`salvo`, ancrages `muzzle` et `back` de sa case `special`). Un héros entièrement en JSON avec une spéciale nouvelle (repris par `AgentScripts/VerifyLot3Heroes.cs`) :
+
+```json
+{
+  "id": "quatre-vents",
+  "extends": "chuck-norris",
+  "order": 20,
+  "name": "QUATRE VENTS",
+  "special": {
+    "type": "salvo", "cooldown": 3, "damage": 6, "shots": 1, "speed": 25, "bursts": 2, "interval": 0.1,
+    "directions": [{"angle": 0}, {"angle": 90}, {"angle": 180}, {"angle": 270}]
+  }
+}
+```
 
 ## 5 bis. Les règles de partie
 

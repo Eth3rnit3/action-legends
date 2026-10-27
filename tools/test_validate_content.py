@@ -252,7 +252,7 @@ class MissionValidationTests(unittest.TestCase):
 class LibraryValidationTests(unittest.TestCase):
     def test_shipped_library_is_valid(self):
         self.assertEqual(LIBRARY_ERRORS, [])
-        self.assertEqual(sorted(LIBRARY["heroes"]), ["arnold", "chuck-norris", "jean-claude", "sylvester"])
+        self.assertEqual(sorted(LIBRARY["heroes"]), ["arnold", "brigitte-bardot", "chuck-norris", "fernandel", "jean-claude", "jeanne-d-arc", "sylvester"])
         self.assertEqual(len(LIBRARY["enemies"]), 9)
         self.assertEqual(sorted(LIBRARY["bosses"]), ["armored-van", "combat-drone", "le-direct", "macron-helicopter", "mecha-shogun", "nostradamus",
                                                      "speedboat", "taureau"])
@@ -345,6 +345,54 @@ class LibraryValidationTests(unittest.TestCase):
                 data = copy.deepcopy(base)
                 change(data)
                 self.assertTrue(validate_hero(data, RESOURCES))
+
+    def test_new_specials(self):
+        # Lot 3H: a summoned ally that charges, the hero's own charge, shots in several directions.
+        for hero in ("fernandel", "jeanne-d-arc", "brigitte-bardot"):
+            self.assertEqual(validate_hero(content("heroes", hero), RESOURCES), [], hero)
+        summon, dash, salvo = content("heroes", "fernandel"), content("heroes", "jeanne-d-arc"), content("heroes", "brigitte-bardot")
+        changes = [
+            (summon, lambda s: s.update(type="stampede")),
+            (summon, lambda s: s["ally"].update(from_="x") or s["ally"].update({"from": "sky"})),
+            (summon, lambda s: s["ally"].update(speed=0)),
+            (summon, lambda s: s["ally"].update(reach=9)),
+            (summon, lambda s: s["ally"]["animations"].update(states=[{"name": "walk", "cells": [0]}])),
+            (summon, lambda s: s["ally"]["animations"]["sheet"].update(texture="Art/heroes/none")),
+            (summon, lambda s: s.update(delay=4)),
+            (summon, lambda s: s.update(sound="Audio/Sfx/none")),
+            (summon, lambda s: s.update(voice="Audio/Voices/none")),
+            (summon, lambda s: s.update(trail={"sprite": {"texture": "Art/heroes/legend-fx", "columns": 3, "rows": 2, "cell": 5}, "frames": 2})),
+            (dash, lambda s: s.update(time=0)),
+            (dash, lambda s: s.update(radius=10)),
+            (dash, lambda s: s.update(bossDamage=-1)),
+            (dash, lambda s: s.update(wound="sword")),
+            (salvo, lambda s: s.update(directions=[])),
+            (salvo, lambda s: s.update(directions=[{"angle": 400}])),
+            (salvo, lambda s: s.update(bursts=0)),
+            (salvo, lambda s: s.update(interval=0)),
+            (salvo, lambda s: s.update(shots=16)),
+            (salvo, lambda s: s.update(pose=6)),
+        ]
+        for base, change in changes:
+            data = copy.deepcopy(base)
+            change(data["special"])
+            with self.subTest(hero=base["id"], special=data["special"].get("type")):
+                self.assertTrue(validate_hero(data, RESOURCES))
+        # One salvo bursts once without an interval; a direction may leave from the body (no anchor).
+        data = copy.deepcopy(salvo)
+        data["special"].update(bursts=1, interval=0, directions=[{"angle": 90}])
+        self.assertEqual(validate_hero(data, RESOURCES), [])
+        # A portrait frame is a square of the cell: in a cell wider than tall it may not reach the top.
+        data = copy.deepcopy(dash)
+        data["portraitFrame"] = {"x": 0, "y": 0.2, "size": 0.8}
+        self.assertTrue(validate_hero(data, RESOURCES))
+
+    def test_any_number_of_heroes(self):
+        # Five more heroes written only as JSON, extending shipped ones: twelve heroes load without errors.
+        extra = [{"id": f"test-hero-{i}", "extends": "fernandel", "order": 10 + i, "name": f"TEST {i}"} for i in range(5)]
+        library, errors = load_library(RESOURCES, {"heroes": extra})
+        self.assertEqual(errors, [])
+        self.assertEqual(len(library["heroes"]), 12)
 
     def test_optional_hero_states_fall_back(self):
         hero = content("heroes", "sylvester")

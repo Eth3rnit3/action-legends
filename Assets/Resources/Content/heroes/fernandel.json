@@ -1,0 +1,313 @@
+{
+  "id": "fernandel",
+  "order": 4,
+  "name": "FERNANDEL",
+  "shortName": "FERNANDEL",
+  "role": "LE PRISONNIER",
+  "specialName": "Marguerite à la rescousse",
+  "weapon": "fusil-lebel",
+  "speed": 10.2,
+  "jump": 11,
+  "strideRate": 13,
+  "bob": 0.045,
+  "special": {
+    "type": "summon",
+    "cooldown": 7,
+    "cooldownPerDifficulty": 1,
+    "pose": 0.8,
+    "delay": 0.45,
+    "damage": 14,
+    "bossDamage": 45,
+    "sound": "Audio/Sfx/legend-whistle",
+    "voice": "Audio/Voices/special-marguerite",
+    "ally": {
+      "from": "edge",
+      "speed": 15,
+      "reach": 1.5,
+      "height": 1.9,
+      "y": 0,
+      "life": 5,
+      "margin": 2.5,
+      "sound": "Audio/Sfx/legend-charge",
+      "animations": {
+        "sheet": {
+          "texture": "Art/heroes/marguerite",
+          "columns": 2,
+          "rows": 2,
+          "pivot": {
+            "x": 0.5,
+            "y": 0.04375
+          },
+          "cellHeight": 3.4
+        },
+        "layer": 32,
+        "states": [
+          {
+            "name": "run",
+            "cells": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "perStride": 1.1
+          }
+        ]
+      }
+    },
+    "trail": {
+      "sprite": {
+        "texture": "Art/heroes/legend-fx",
+        "columns": 3,
+        "rows": 2,
+        "cell": 3
+      },
+      "frames": 2,
+      "fps": 7,
+      "size": 1.6,
+      "y": 0.2
+    },
+    "trailEvery": 0.09
+  },
+  "hitbox": {
+    "y": 1,
+    "radius": 0.53
+  },
+  "crouch": {
+    "speed": 3.6,
+    "y": 0.55,
+    "radius": 0.45
+  },
+  "knife": {
+    "reach": 1.35,
+    "height": 0.3,
+    "damage": 15,
+    "cooldown": 0.3,
+    "pose": 0.24,
+    "sound": "Audio/Sfx/couteau"
+  },
+  "portraitCell": 0,
+  "portraitFrame": {
+    "x": 0.02,
+    "y": 0,
+    "size": 0.72
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/heroes/fernandel",
+      "columns": 6,
+      "rows": 4,
+      "pivot": {
+        "x": 0.34,
+        "y": 0.0411765
+      },
+      "cellHeight": 3.1481481
+    },
+    "layer": 30,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "run",
+        "cells": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "perStride": 0.95
+      },
+      {
+        "name": "jump",
+        "cells": [
+          7
+        ]
+      },
+      {
+        "name": "jumpDown",
+        "cells": [
+          8
+        ]
+      },
+      {
+        "name": "aimUp",
+        "cells": [
+          9
+        ]
+      },
+      {
+        "name": "aimDiagonal",
+        "cells": [
+          10
+        ]
+      },
+      {
+        "name": "crouch",
+        "cells": [
+          11
+        ]
+      },
+      {
+        "name": "crouchWalk",
+        "cells": [
+          12,
+          13
+        ],
+        "perStride": 1.2
+      },
+      {
+        "name": "crouchShoot",
+        "cells": [
+          14
+        ]
+      },
+      {
+        "name": "knife",
+        "cells": [
+          15,
+          16,
+          17
+        ],
+        "fps": 12.5,
+        "loop": false
+      },
+      {
+        "name": "throw",
+        "cells": [
+          18,
+          19
+        ],
+        "fps": 7,
+        "loop": false
+      },
+      {
+        "name": "special",
+        "cells": [
+          20
+        ]
+      },
+      {
+        "name": "hurt",
+        "cells": [
+          21
+        ]
+      },
+      {
+        "name": "down",
+        "cells": [
+          22
+        ]
+      },
+      {
+        "name": "victory",
+        "cells": [
+          23
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "muzzle",
+        "cell": 0,
+        "x": 1.22,
+        "y": 1.39
+      },
+      {
+        "name": "muzzle",
+        "cell": 1,
+        "x": 1.24,
+        "y": 1.31
+      },
+      {
+        "name": "muzzle",
+        "cell": 2,
+        "x": 1.37,
+        "y": 1.34
+      },
+      {
+        "name": "muzzle",
+        "cell": 3,
+        "x": 1.34,
+        "y": 1.28
+      },
+      {
+        "name": "muzzle",
+        "cell": 4,
+        "x": 1.02,
+        "y": 1.33
+      },
+      {
+        "name": "muzzle",
+        "cell": 5,
+        "x": 1.24,
+        "y": 1.35
+      },
+      {
+        "name": "muzzle",
+        "cell": 6,
+        "x": 1.36,
+        "y": 1.24
+      },
+      {
+        "name": "muzzle",
+        "cell": 7,
+        "x": 0.92,
+        "y": 1.08
+      },
+      {
+        "name": "muzzle",
+        "cell": 8,
+        "x": 0.7,
+        "y": 0.06
+      },
+      {
+        "name": "muzzle",
+        "cell": 9,
+        "x": 0.1,
+        "y": 2.54
+      },
+      {
+        "name": "muzzle",
+        "cell": 10,
+        "x": 1.19,
+        "y": 2.23
+      },
+      {
+        "name": "muzzle",
+        "cell": 11,
+        "x": 1.41,
+        "y": 0.91
+      },
+      {
+        "name": "muzzle",
+        "cell": 12,
+        "x": 1.29,
+        "y": 0.95
+      },
+      {
+        "name": "muzzle",
+        "cell": 13,
+        "x": 1.25,
+        "y": 0.91
+      },
+      {
+        "name": "muzzle",
+        "cell": 14,
+        "x": 1.42,
+        "y": 0.86
+      },
+      {
+        "name": "hand",
+        "cell": 19,
+        "x": 1.2,
+        "y": 1.84
+      }
+    ]
+  }
+}

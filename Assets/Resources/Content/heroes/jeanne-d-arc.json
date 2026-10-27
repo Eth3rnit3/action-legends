@@ -1,0 +1,292 @@
+{
+  "id": "jeanne-d-arc",
+  "order": 6,
+  "name": "JEANNE D'ARC",
+  "shortName": "JEANNE",
+  "role": "LA PUCELLE",
+  "specialName": "Charge à l'étendard",
+  "weapon": "lame-de-lumiere",
+  "speed": 10.4,
+  "jump": 11,
+  "strideRate": 13,
+  "bob": 0.045,
+  "special": {
+    "type": "dash",
+    "cooldown": 5,
+    "cooldownPerDifficulty": 1,
+    "pose": 0.55,
+    "speed": 19,
+    "time": 0.55,
+    "radius": 1.4,
+    "invulnerable": 0.4,
+    "damage": 16,
+    "bossDamage": 40,
+    "sound": "Audio/Sfx/legend-charge",
+    "voice": "Audio/Voices/special-etendard",
+    "trail": {
+      "sprite": {
+        "texture": "Art/heroes/legend-fx",
+        "columns": 3,
+        "rows": 2,
+        "cell": 2
+      },
+      "frames": 1,
+      "fps": 6,
+      "size": 0.9,
+      "y": 0.2
+    },
+    "trailEvery": 0.07,
+    "impact": {
+      "sprite": {
+        "texture": "Art/heroes/legend-fx",
+        "columns": 3,
+        "rows": 2,
+        "cell": 2
+      },
+      "frames": 1,
+      "fps": 5,
+      "size": 1.8
+    }
+  },
+  "hitbox": {
+    "y": 1,
+    "radius": 0.53
+  },
+  "crouch": {
+    "speed": 3.6,
+    "y": 0.55,
+    "radius": 0.45
+  },
+  "knife": {
+    "reach": 1.9,
+    "height": 0.3,
+    "damage": 18,
+    "cooldown": 0.28,
+    "pose": 0.24,
+    "sound": "Audio/Sfx/couteau"
+  },
+  "portraitCell": 0,
+  "portraitFrame": {
+    "x": 0.06,
+    "y": 0.02,
+    "size": 0.7
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/heroes/jeanne-d-arc",
+      "columns": 6,
+      "rows": 4,
+      "pivot": {
+        "x": 0.42,
+        "y": 0.0333333
+      },
+      "cellHeight": 3.8888889
+    },
+    "layer": 30,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "run",
+        "cells": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "perStride": 0.95
+      },
+      {
+        "name": "jump",
+        "cells": [
+          7
+        ]
+      },
+      {
+        "name": "jumpDown",
+        "cells": [
+          8
+        ]
+      },
+      {
+        "name": "aimUp",
+        "cells": [
+          9
+        ]
+      },
+      {
+        "name": "aimDiagonal",
+        "cells": [
+          10
+        ]
+      },
+      {
+        "name": "crouch",
+        "cells": [
+          11
+        ]
+      },
+      {
+        "name": "crouchWalk",
+        "cells": [
+          12,
+          13
+        ],
+        "perStride": 1.2
+      },
+      {
+        "name": "crouchShoot",
+        "cells": [
+          14
+        ]
+      },
+      {
+        "name": "knife",
+        "cells": [
+          15,
+          16,
+          17
+        ],
+        "fps": 12.5,
+        "loop": false
+      },
+      {
+        "name": "throw",
+        "cells": [
+          18,
+          19
+        ],
+        "fps": 7,
+        "loop": false
+      },
+      {
+        "name": "special",
+        "cells": [
+          20
+        ]
+      },
+      {
+        "name": "hurt",
+        "cells": [
+          21
+        ]
+      },
+      {
+        "name": "down",
+        "cells": [
+          22
+        ]
+      },
+      {
+        "name": "victory",
+        "cells": [
+          23
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "muzzle",
+        "cell": 0,
+        "x": 1.79,
+        "y": 1.36
+      },
+      {
+        "name": "muzzle",
+        "cell": 1,
+        "x": 1.53,
+        "y": 1.03
+      },
+      {
+        "name": "muzzle",
+        "cell": 2,
+        "x": 1.69,
+        "y": 1.36
+      },
+      {
+        "name": "muzzle",
+        "cell": 3,
+        "x": 1.66,
+        "y": 1.15
+      },
+      {
+        "name": "muzzle",
+        "cell": 4,
+        "x": 1.26,
+        "y": 0.94
+      },
+      {
+        "name": "muzzle",
+        "cell": 5,
+        "x": 1.63,
+        "y": 1.1
+      },
+      {
+        "name": "muzzle",
+        "cell": 6,
+        "x": 1.53,
+        "y": 1.06
+      },
+      {
+        "name": "muzzle",
+        "cell": 7,
+        "x": 1.51,
+        "y": 1.32
+      },
+      {
+        "name": "muzzle",
+        "cell": 8,
+        "x": 0.84,
+        "y": 0.03
+      },
+      {
+        "name": "muzzle",
+        "cell": 9,
+        "x": -0.45,
+        "y": 3.09
+      },
+      {
+        "name": "muzzle",
+        "cell": 10,
+        "x": 1.58,
+        "y": 2.73
+      },
+      {
+        "name": "muzzle",
+        "cell": 11,
+        "x": 1.42,
+        "y": 0.81
+      },
+      {
+        "name": "muzzle",
+        "cell": 12,
+        "x": 1.76,
+        "y": 0.87
+      },
+      {
+        "name": "muzzle",
+        "cell": 13,
+        "x": 1.78,
+        "y": 0.88
+      },
+      {
+        "name": "muzzle",
+        "cell": 14,
+        "x": 1.77,
+        "y": 0.96
+      },
+      {
+        "name": "hand",
+        "cell": 19,
+        "x": 0.69,
+        "y": 2.49
+      }
+    ]
+  }
+}

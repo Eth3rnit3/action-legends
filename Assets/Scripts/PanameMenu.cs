@@ -21,17 +21,18 @@ namespace Paname
             {
                 Label(x+16,290,254,120,"?",96,new Color(.65f,.75f,.75f,.55f),true,TextAnchor.MiddleCenter);
                 Label(x+16,440,254,28,Online?"PLACE LIBRE":"REJOINDRE",21,Cream,true,TextAnchor.MiddleCenter);
-                Panel(x+18,515,250,44,C("07192A"));
-                Label(x+22,520,242,32,Online?"UN AMI REJOINT AVEC LE LIEN DE LA PARTIE":"APPUIE SUR A / CROIX D'UNE MANETTE",12,C("B2C7BD"),true,TextAnchor.MiddleCenter);
+                Panel(x+18,499,250,40,C("07192A"));
+                Label(x+22,503,242,32,Online?"UN AMI REJOINT AVEC LE LIEN DE LA PARTIE":"APPUIE SUR A / CROIX D'UNE MANETTE",12,C("B2C7BD"),true,TextAnchor.MiddleCenter);
                 return;
             }
             int index=Mod(slots[i].hero,HeroCount);var hero=Heroes[index];
             Portrait(x+49,252,index,1.12f);
             Label(x+16,450,254,28,hero.name,21,Cream,true,TextAnchor.MiddleCenter);
-            Label(x+16,478,254,20,hero.role,11,accent,true,TextAnchor.MiddleCenter);
-            Panel(x+18,515,250,44,C("07192A"));
-            Label(x+22,520,242,32,hero.specialName,13,Cream,false,TextAnchor.MiddleCenter);
-            Label(x+16,563,254,20,(index+1)+" / "+HeroCount,12,Gold,true,TextAnchor.MiddleCenter);
+            Label(x+16,476,254,20,hero.role,11,accent,true,TextAnchor.MiddleCenter);
+            Panel(x+18,499,250,40,C("07192A"));
+            Label(x+22,503,242,32,hero.specialName,13,Cream,false,TextAnchor.MiddleCenter);
+            // Above the card's bevelled bottom edge.
+            Label(x+16,542,254,20,(index+1)+" / "+HeroCount,12,Gold,true,TextAnchor.MiddleCenter);
             if(HeroCount<2||Online&&i!=LocalSlotIndex)return;
             for(int d=-1;d<=1;d+=2){var r=HeroArrow(i,d);if(Button(r.x,r.y,r.width,r.height,d<0?"<":">",C("304C56")))MenuArrow(i,d);}
         }

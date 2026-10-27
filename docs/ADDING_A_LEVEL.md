@@ -14,6 +14,7 @@ Assets/Resources/
   Content/rules/<id>.json        règles de partie : grenades, bonus, caisses d’armes, décompte de fin, flèche GO
   Content/hostages/<id>.json     les otages (POW) que les missions placent sur leur carte
   Content/difficulties/<id>.json les difficultés du menu (DÉTENTE, ARCADE, DIFFICILE, LÉGENDE, SLUG)
+  Content/carriers/<id>.json     les véhicules qui déposent les ennemis d’une rencontre (camionnette, monospace)
   Art/<mission>/...              images (PNG) de la mission
   Audio/Music/...                musiques (WAV, OGG ou MP3)
 ```
@@ -57,7 +58,7 @@ Copier une mission de `Assets/Resources/Levels/`, la renommer avec son nouvel `i
 | `length`, `exitX` | Longueur du parcours et position de sortie. Le boss apparaît quand l’équipe atteint `exitX - 18`. |
 | `cameraMin`, `cameraMax` | Bornes horizontales de la caméra. |
 | `waves` | Une à vingt vagues triées par `atX`. |
-| `encounters` | Réservé (section 6) : laisser `[]` ou ne pas l’écrire. |
+| `encounters` | Facultatif : les rencontres mises en scène (ennemis placés, entrées, mini-boss), voir plus bas. |
 | `boss` | Le boss final, voir plus bas. |
 | `rules` | Facultatif, `"default"` par défaut : identifiant de `Content/rules` (section 5 bis). Une mission peut ainsi donner plus ou moins de grenades, d’autres bonus, moins de caisses ou une autre flèche GO. Les trois missions livrées jouent `pow` : `default` avec deux fois moins de caisses sur le parcours, puisque les otages donnent aussi des bonus. |
 | `parTime` | Facultatif, `0` par défaut : temps de référence en secondes. Au décompte de fin de mission, chaque seconde gagnée sur lui rapporte `tally.perSecond` points (règles, section 5 bis). Paris 300, Marseille 240, Tokyo 220. |
@@ -69,7 +70,7 @@ Copier une mission de `Assets/Resources/Levels/`, la renommer avec son nouvel `i
 {"atX": 18, "baseEnemies": 7, "enemiesPerPlayer": 3, "maxAlive": 10, "spawnInterval": 0.65, "enemyPattern": [0, 1, 2], "lock": true}
 ```
 
-La vague démarre quand l’équipe arrive à 9 unités de `atX`. Elle compte `baseEnemies + joueurs × enemiesPerPlayer` ennemis (davantage selon la difficulté) ; `maxAlive` limite les ennemis présents à la fois, `spawnInterval` espace les apparitions. `enemyPattern` est répété dans l’ordre. Avec `lock` (vrai par défaut), l’écran se bloque, les ennemis entrent par les bords et la vague ne finit qu’à la chute du dernier, puis une flèche **GO** relance le défilement ; `"lock": false` laisse l’équipe courir et finit la vague quand tous ses ennemis sont apparus.
+La vague démarre quand l’équipe arrive à 9 unités de `atX`. `baseEnemies` peut valoir 0 : la vague n’est alors faite que de ses rencontres. Elle compte `baseEnemies + joueurs × enemiesPerPlayer` ennemis (davantage selon la difficulté) ; `maxAlive` limite les ennemis présents à la fois, `spawnInterval` espace les apparitions. `enemyPattern` est répété dans l’ordre. Avec `lock` (vrai par défaut), l’écran se bloque, les ennemis entrent par les bords et la vague ne finit qu’à la chute du dernier, puis une flèche **GO** relance le défilement ; `"lock": false` laisse l’équipe courir et finit la vague quand tous ses ennemis sont apparus. Dans les deux cas, la vague attend aussi les ennemis placés de ses rencontres (`"wave"`, ci-dessous).
 
 ### Carte
 
@@ -106,6 +107,58 @@ Chaque élément de `map.hostages` attache un otage de `Content/hostages` (secti
 | `weapon` | Facultatif : une arme à munitions de `Content/weapons`, donnée dans sa caisse. |
 
 Un otage se libère quand un héros tire sur ses liens ou le touche (selon son `release`) ; seul un otage visible à l’écran peut être libéré. Libéré, il salue, lâche sa récompense devant lui (un bonus à ramasser, comme une caisse) puis s’enfuit hors de l’écran : dans une vague bloquée, il donne toujours sa récompense dans l’écran avant de partir. Le héros qui l’a libéré le compte (HUD, sous sa fiche) ; il perd son compte s’il tombe. À la victoire, le **décompte de fin de mission** paie chaque otage encore compté et l’avance sur `parTime`. Les missions livrées placent 8 ou 9 otages, dont quatre dans des vagues.
+
+### Rencontres
+
+Une rencontre place des ennemis précis, qui font leur entrée là où l’équipe les voit arriver. Elle démarre quand l’équipe atteint `atX`, ou avec une vague (`"wave"`), ou quand cette vague est vaincue (`"on": "clear"`). Les ennemis d’une rencontre de vague s’ajoutent à sa horde : la vague ne finit qu’à leur chute.
+
+```json
+"encounters": [
+  {"wave": 0, "spawns": [
+    {"enemy": "looter-thrower", "entry": "door", "x": 12, "fromX": 13},
+    {"enemy": "looter-thrower", "entry": "window", "x": 45, "y": 2, "fromX": 45, "fromY": 2, "delay": 1},
+    {"enemy": "looter-rusher", "entry": "walk", "x": 10, "side": "right", "delay": 1.2}]},
+  {"wave": 2, "truck": {"id": "rusty-van", "side": "right", "x": 97},
+   "spawns": [{"enemy": "looter-rusher", "entry": "truck", "x": 96}, {"enemy": "looter-thrower", "entry": "truck", "x": 95}]},
+  {"atX": 70, "spawns": [{"enemy": "looter-rusher", "entry": "none", "x": 85, "unaware": true, "facing": -1}]},
+  {"atX": 150, "lock": true, "announce": "EMBUSCADE !", "spawns": [{"enemy": "looter-rusher", "entry": "drop", "x": 156}]},
+  {"wave": 8, "on": "clear", "lock": true, "spawns": [{"enemy": "looter-rusher", "entry": "walk", "x": 398, "side": "left"}]},
+  {"atX": 215, "boss": {"id": "armored-van"}}
+]
+```
+
+| Champ | Utilisation |
+|---|---|
+| `atX` | Rencontre sans vague : elle démarre quand l’équipe atteint `atX`. |
+| `wave`, `on` | Rencontre d’une vague (indice dans `waves`) : `"start"` (défaut) au départ de la vague, `"clear"` quand elle est vaincue. |
+| `lock` | L’écran se bloque jusqu’à la chute de ses ennemis (une vague bloquée le tient déjà). |
+| `announce` | Facultatif : annonce affichée au départ (40 caractères). |
+| `truck` | Un véhicule de `Content/carriers` (section 5 sexies) qui arrive du côté `side` (`right` par défaut) et s’arrête le centre en `x` ; les apparitions `"entry": "truck"` en descendent. |
+| `spawns` | Une à seize apparitions (ci-dessous). |
+| `boss` | Un boss de mi-parcours (ci-dessous) ; il se déclenche seul, sans `wave`, `spawns`, `lock` ni `truck`. |
+
+Chaque apparition :
+
+| Champ | Utilisation |
+|---|---|
+| `enemy` | Un ennemi de la bibliothèque (pas forcément de la liste `enemies` de la mission). |
+| `x`, `y` | Sa place. `y` au-dessus de la rue : il y reste (rebord, fenêtre, toit) et tire vers le bas ; un ennemi de corps à corps reste dans la rue. |
+| `delay` | Secondes après le départ de la rencontre (pour un camion : après son arrêt, en plus de son intervalle). |
+| `entry` | `walk` : entre à pied par le bord `side` de l’écran (sinon le bord opposé à l’équipe) ; `door`, `window` : sort en fondu d’une ouverture des règles dessinée en (`fromX`, `fromY`), puis saute dans la rue s’il est plus bas, ou reste à la fenêtre si `y` = `fromY` ; `parachute` : descend du haut de l’écran sous un parachute ; `drop` : tombe d’au-dessus de l’écran ; `truck` : descend du véhicule de la rencontre ; `none` : déjà là, hors de l’écran devant l’équipe (rencontre `atX` sans `lock` seulement, entre `atX + 14` et `atX + 40`) ; un ennemi inattentif hors de l’écran qu’une vague bloque ne la retient pas, et les tirs le traversent tant qu’il n’est pas à l’écran. |
+| `opening` | Pour `door` et `window` : l’ouverture dessinée, un `id` des `stage.openings` des règles (`door`, `window`, `shutter`, `manhole` dans `default`) ; par défaut celle qui porte le nom de l’entrée ; `"none"` : aucune. |
+| `unaware`, `facing` | Inattentif au départ (section 3), regardant à gauche (`-1`) ou à droite (`1`) ; `0` : vers l’équipe. |
+
+Une fenêtre à `fromY` 2 (les missions livrées) reste à portée d’un héros qui saute, vise en haut ou lance une grenade ; plus haut, l’ennemi n’est atteint qu’en visant en haut. Pour que l’équipe voie chaque entrée, `x` (et `fromX`, et le `x` d’un camion) doit être dans l’écran de la rencontre : de `atX - 15` à `atX + 2,5` pour une rencontre de vague, de `atX - 7` à `atX + 12` pour une rencontre `atX`. Le validateur le vérifie.
+
+Les missions livrées : Paris 10 vagues et 16 rencontres (portes cochères, fenêtres, camionnettes de pillards, une pause de pillards, des embuscades, le fourgon blindé), Marseille 8 vagues et 12 rencontres (parachutistes au-dessus du Vieux-Port, fenêtres du Panier, le hors-bord au quai), Tokyo 8 vagues et 11 rencontres (rideaux métalliques, bouches d’égout, monospace noir, parachutistes des toits, le drone de combat).
+
+### Boss de mi-parcours
+
+```json
+{"atX": 62, "boss": {"id": "speedboat", "health": 1, "name": "HORS-BORD DES CAÏDS"}}
+```
+
+Un boss de la bibliothèque (section 4), avec les mêmes champs que le boss final (`health`, `name`, `intro`, `rage`, `defeat`). Quand l’équipe atteint `atX`, l’écran se bloque autour d’elle, la barre de vie s’affiche et les vagues attendent ; à sa chute (il rapporte son `score`), le défilement repart, la flèche GO s’affiche et les renforts qu’il a lâchés s’enfuient. Il se place au moins 30 unités avant la sortie et hors de l’écran d’une vague (pas entre `atX - 10` et `atX + 5` d’une vague) ; trois au plus par mission. Les bonus ne se ramassent pas pendant un combat de boss : ne pas placer d’otage dans son arène. Paris : `armored-van` (x 215), Marseille : `speedboat` (x 62, là où le décor montre le Vieux-Port), Tokyo : `combat-drone` (x 176).
 
 ### Boss de mission
 
@@ -163,8 +216,9 @@ Les états lus par le moteur :
 | Acteur | Requis | Facultatifs |
 |---|---|---|
 | Héros | `idle` (immobile au sol), `run` (court), `jump` (en l’air), `crouch` (accroupi), `aimUp` (vise en haut), `jumpDown` (en l’air, vise en bas), `knife` (coup de couteau, joué pendant `knife.pose`), `throw` (lancer de grenade, joué pendant `grenade.pose`) | `crouchWalk` (avance accroupi, sinon `crouch`), `crouchShoot` (tire accroupi, sinon `crouch`), `aimDiagonal` (vise en haut en avançant, sinon `aimUp`) |
-| Ennemi | `idle`, `run`, `attack` (frappe, lancer, tir) | `aim` (visée d’un tireur, sinon `attack`), `hurt` (sous les balles, sinon l’image courante penche), `death` (joué pendant que le corps est projeté, sinon l’image courante) |
-| Boss | `idle` ; `walk` pour un marcheur | ceux que nomment ses attaques (`state`, `aimState`, `recoverState`) |
+| Ennemi | `idle`, `run`, `attack` (frappe, lancer, tir) | `aim` (visée d’un tireur, sinon `attack`), `hurt` (sous les balles, sinon l’image courante penche), `unaware` (inattentif, sinon `idle`), `surprised` (sursaut, sinon `idle`), `flee` (fuite, sinon `run`), `fall` (sous un parachute, sinon `idle`), `throw` (lancer de grenade, sinon `attack`), `death` (mort par balle), `deathExplosion`, `deathFire`, `deathKnife` (morts par explosion, feu, couteau, sinon `death`) ; sans aucun état de mort, l’image courante est projetée |
+| Boss | `idle` ; `walk` pour un marcheur | ceux que nomment ses attaques (`state`, `aimState`, `recoverState`) ; `wreck` (montré à sa chute) |
+| Véhicule de dépôt | `drive`, `open` | — |
 
 Un état qui n’est pas dans ce tableau est accepté et ignoré : une planche peut déjà contenir les poses que lira un lot à venir (les héros livrés ont déjà `hurt`, `down` et `victory`). Pour en ajouter un, il suffit d’ajouter les images à la planche et l’état au JSON ; le moteur le lira quand la mécanique correspondante existera.
 
@@ -176,8 +230,12 @@ Un état qui n’est pas dans ce tableau est accepté et ignoré : une planche p
 | Héros | `hand` | Main qui lâche la grenade, sur la **dernière** case de `throw`. |
 | Ennemi tireur | `muzzle` | Sur la première case de `attack`. Les balles partent à l’horizontale. |
 | Ennemi lanceur | `hand` | Main qui lâche le projectile, sur la première case de `attack`. |
+| Ennemi à grenades | `hand` | Main qui lâche la grenade, sur la première case de `throw` (sinon celle d’`attack`, sinon 0,4 ; 1,9). |
+| Véhicule de dépôt | `door` | Où descendent ses passagers, sur la case `open`. |
 | Boss | `smoke` | D’où sort la fumée sous la moitié de ses PV. |
 | Boss | ceux de ses attaques | `muzzles`, `rack`, `foot`, `walk.foot` (section 4). |
+
+Les six ennemis livrés ont chacun leur planche, `Art/enemies/<id>.png` (4 × 4 cases) : la première ligne reprend au pixel près leurs quatre anciennes cases, les trois suivantes ajoutent inattentif, sursaut, touché ou lancer, fuite et les morts (`docs/ART_LOT2B.md`) ; `pack_sheet.py hero tools/art/enemies/<id>.json` la refait.
 
 `tools/art/pack_sheet.py` recale une planche générée (pieds sur une même ligne, jambes sur le pivot) et affiche les bouts de canon. Pour un héros, `pack_sheet.py hero tools/art/heroes/<héros>.json` assemble ses planches générées en une seule (une taille commune fixée par une image de référence de chaque planche), mesure les `muzzle` (vers l’avant, le haut, le bas ou en diagonale selon la case) et la `hand`, et imprime les ancrages JSON ; voir `docs/ART_LOT1A.md`. `tools/art/measure_muzzles.py` mesure ceux de l’ancienne planche `Art/heroes.png`.
 
@@ -228,6 +286,17 @@ Champs communs :
 
 `projectile` : `bullet` (balle rouge), `molotov` (bouteille) ou `tracer` (traceur des héros).
 
+Blocs facultatifs, valables pour tout comportement (les ennemis livrés les utilisent) :
+
+| Bloc | Utilisation |
+|---|---|
+| `awareness` | Un ennemi placé inattentif (`unaware` d’une rencontre) joue `unaware` sans bouger ni attaquer ; il remarque un héros devant lui à moins de `sight` (8), ou à moins de `hearing` (2,5) de n’importe quel côté, ou quand il est touché, ou quand un allié à moins de `alarm` (5) le remarque ou tombe. Il sursaute alors `surprise` s (0,6 ; état `surprised` et le « ! » des règles) avant d’attaquer. |
+| `panic` | Sous `health` (fraction de ses PV ; 0 : jamais), ou quand `allies` alliés (0 : jamais) tombent à moins de `radius`, il s’enfuit loin du héros le plus proche pendant `time` s à `speed` fois sa vitesse (état `flee`), une seule fois ; puis il revient si `returns` (vrai par défaut). Dans un écran bloqué il reste dans l’écran et revient toujours. |
+| `grenade` | Lance une grenade en cloche (physique et image de la grenade des règles) vers un héros entre `minRange` et `range` (0 : jamais), toutes les `cooldown` s (multiplié selon la difficulté), la première après `first` s ; vitesse verticale `throwY`, vitesse horizontale choisie pour retomber sur le héros, au plus `maxX`. Elle explose à son `bounces`-ième rebond (0 : au premier contact avec le sol), au contact d’un héros ou au bout de `fuse` s, et retire `damage` aux héros à moins de `radius`. Pose `throw` pendant `pose` s. |
+| `cries` | Sons ou voix (prises `-a`, `-b`, `-c`) joués de temps en temps à sa chute (`Audio/Voices/cri-chute` pour les livrés). |
+
+La **mort** dépend de ce qui l’a touché : balle, explosion (grenade, roquette, spécial), feu (lance-flammes) ou couteau. L’état joué est `death`, `deathExplosion`, `deathFire` ou `deathKnife` (sinon `death`) et le mouvement du corps vient des règles (`deaths`, section 5 bis). Une arme dit la blessure qu’elle donne (`damageType`, section 5 ter).
+
 ### Créer un nouvel ennemi
 
 1. Générer sa planche (section 7) et la placer dans `Art/<mission>/`.
@@ -258,7 +327,7 @@ Exemple d’ennemi entièrement nouveau, un tireur qui utilise la planche des h�
 
 ## 4. Les boss
 
-Un boss est un comportement — `flyer` (vole et attaque en mouvement) ou `walker` (marche vers les héros et s’arrête pour chaque attaque) — et une liste d’attaques jouées à tour de rôle. Son dessin est tourné vers la **gauche** ; ses ancrages et sa zone touchée sont retournés avec lui. Voir `Content/bosses/macron-helicopter.json` et `mecha-shogun.json` pour deux exemples complets.
+Un boss est un comportement — `flyer` (vole et attaque en mouvement) ou `walker` (marche ou roule vers les héros et s’arrête pour chaque attaque) — et une liste d’attaques jouées à tour de rôle. Le même boss peut servir de boss final ou de boss de mi-parcours (section 1). Les mini-boss livrés : `armored-van` (marcheur sans secousse de pas : un fourgon qui roule, charge et lâche des pillards), `speedboat` (volant à fleur d’eau, sans rotor, dessiné derrière les héros avec `layer` 20) et `combat-drone` (volant). Son dessin est tourné vers la **gauche** ; ses ancrages et sa zone touchée sont retournés avec lui. Voir `Content/bosses/macron-helicopter.json` et `mecha-shogun.json` pour deux exemples complets.
 
 | Champ | Utilisation |
 |---|---|
@@ -266,6 +335,7 @@ Un boss est un comportement — `flyer` (vole et attaque en mouvement) ou `walke
 | `name`, `intro`, `rage`, `defeat` | Nom sur la barre de vie et annonces (une mission peut les remplacer). |
 | `health` | PV par difficulté pour un joueur, `healthPerExtraPlayer` en plus par joueur (0,65 = +65 %), puis × `boss.health` de la mission. |
 | `firstAttack` | Délai avant la première attaque. |
+| `score` | Points à sa chute (10 000 par défaut ; 5 000 pour les mini-boss livrés). |
 | `ragePace`, `rageDelay` | Sous la moitié de ses PV, le boss s’emballe : ses délais sont multipliés par `ragePace` (0,72) et sa prochaine attaque arrive au plus tard dans `rageDelay` s. |
 | `flash` | Le dessin blanchit sous les tirs (marcheur livré : oui ; hélicoptère : non). |
 | `shadow` | `{"x": largeur, "y": hauteur}` d’une ombre au sol, `0` pour aucune. |
@@ -273,7 +343,7 @@ Un boss est un comportement — `flyer` (vole et attaque en mouvement) ou `walke
 | `animations` | Section 2. |
 | `rotor` | Volant : `x`, `y`, `width`, `height` d’un rotor animé dessiné par le moteur, `speed` de rotation ; `width` 0 : aucun. |
 | `flight` | Volant : trajectoire `x = centre + sin(t) × min(sweep, demi-écran − sweepMargin)`, `y = altitude + sin(t × bobRate) × bob`, avec `t` qui avance à `speed` (par difficulté) ; `rageCatchUp` accélère la trajectoire quand il s’emballe. |
-| `walk` | Marcheur : `speed` (par difficulté), `stopDistance` (s’arrête à cette distance du héros), `margin` (reste à cette distance des bords de l’arène), `stepLength` (un pas, avec secousse `stepShake` et poussière à l’ancrage `foot`), `entry` (entre à cette distance du bord droit). |
+| `walk` | Marcheur : `speed` (par difficulté), `stopDistance` (s’arrête à cette distance du héros), `margin` (reste à cette distance des bords de l’arène), `stepLength` (un pas, avec secousse `stepShake` et poussière à l’ancrage `foot`), `entry` (entre à cette distance du bord droit ; négatif : arrive de hors de l’écran et entre en roulant). |
 | `hitbox` | `count` cercles de rayon `radius`, le premier en (`x`, `y`) depuis le pivot, les suivants décalés de (`stepX`, `stepY`). |
 | `death` | Chute : descend de `fall` u/s, tourne de `spin` °/s (dans le sens de son regard si `spinWithFacing`), explosions autour de `core` sur `spreadX` × `spreadY`. |
 | `missile` | Image des bombes et missiles (ci-dessous). |
@@ -285,6 +355,8 @@ Chaque attaque a un `type`, une annonce `announce`, un repos `cooldown` après e
 |---|---|---|
 | `gun` | Vise `aimTime` s (une mire de `sightWidth` marque le sol sous le héros, `aimHeight` au-dessus de ses pieds), puis tire pendant `duration` s une balle toutes les `interval` s depuis ses `muzzles` à tour de rôle, en balayant de ± `sweep` à la cadence `sweepRate`. | `aimTime`, `interval`, `speed` (par difficulté), `duration`, `sweep`, `sweepRate`, `aimHeight`, `sightWidth`, `muzzles` (ancrages), `damage` |
 | `bombs` | Marque `count` points au sol autour du héros (+`rageExtra` s’il s’emballe), espacés de `spacing`, puis lance un missile vers chacun depuis l’ancrage `rack` après `delay` s (+`stagger` par missile) ; vol de `flight` s en cloche de hauteur `arc`, explosion de rayon `blastRadius` sous `blastHeight`. `duration` 0 : les bombes partent tout de suite et le boss continue ; sinon il prend la pose `state` pendant `duration` s et lance après `launch` s (`smoke` : fumée au lancement). Les missiles peuvent être abattus. | `count`, `delay`, `flight` (par difficulté), `rageExtra`, `spacing`, `stagger`, `arc`, `blastRadius`, `blastHeight`, `marker` (largeur de la marque), `rack`, `duration`, `launch`, `smoke`, `damage` |
+| `charge` | Marcheur seulement. Fait rugir son moteur (`aimState`) `windup` s tourné vers un héros, puis fonce (`state`) à `speed` (par difficulté) jusqu’au bord opposé de l’arène ; les héros au sol sur son passage (à moins de `reach` de son centre, sous `clearance`) perdent `damage` : un saut par-dessus l’évite. Puis il souffle `recover` s (`recoverState`, secousse `shake`). | `windup`, `speed`, `damage`, `clearance`, `reach`, `recover`, `shake` |
+| `troops` | Prend la pose `state` pendant `duration` s et lâche `count` ennemis (par difficulté) de la liste `enemies`, à tour de rôle, un toutes les `interval` s (par difficulté) depuis l’ancrage `door`, tant qu’il en a moins de `maxAlive` en vie ; ils sautent à terre et courent `spread` unités vers l’équipe. À sa chute, ceux qui restent s’enfuient. | `enemies`, `count`, `interval`, `duration`, `door`, `spread`, `maxAlive` |
 | `stomp` | Lève le pied (`state`) pendant `windup` s, puis envoie une onde de choc de chaque côté depuis l’ancrage `foot` ; seuls les héros au sol (sous `waveHeight`) sont touchés à moins de `waveReach`. Il reprend son souffle `recover` s (`recoverState`) et recommence `repeat` fois (`rageRepeat` s’il s’emballe), relevant le pied en `repeatWindup` s. | `windup`, `repeatWindup`, `recover`, `repeat`, `rageRepeat`, `speed` (par difficulté, vitesse des ondes), `waveReach`, `waveHeight`, `shake`, `foot`, `damage` |
 
 `missile` : un rectangle d’une image, `x`, `y`, `width`, `height` en fractions de l’image depuis son coin **inférieur** gauche, affiché sur `size` unités de large ; `outline`, facultatif, liste de points (fractions du rectangle) qui détoure le missile pour cacher ce qui l’entoure dans l’image ; `hitRadius` et `tipRadius` (rayons touchés au centre et aux extrémités, à `hitLength` du centre). Les trois boss livrés prennent le missile dessiné sur `Art/macron-helicopter.png` ; une image à part, réduite au missile, convient aussi (rectangle `0, 0, 1, 1`, sans `outline`).
@@ -339,6 +411,9 @@ Les quatre héros sont dans `Content/heroes/` ; le menu en affiche un à quatre,
 | `go` | L’image de la flèche GO, `{"texture": "Art/go-sign"}`. |
 | `tally` | Le décompte de fin de mission : `hostage` (points par otage compté) et `perSecond` (points par seconde gagnée sur le `parTime` de la mission), par difficulté (`[1000, 1000, 1000, 1000]` et `[10, 10, 10, 10]`), et `icon`, la case qui représente les otages au HUD et au décompte. |
 
+| `deaths` | Comment tombe un ennemi selon sa blessure : `[{"damage": "bullet" \| "explosion" \| "fire" \| "knife", "launch": {"x": 1.6, "y": 2.4}, "spin": 0, "time": 1.3, "gravity": 16, "lie": true, "burn": false}]`. Le corps part à `launch` (x : en s’éloignant du coup), tourne de `spin` °/s, retombe sous `gravity` ; `lie` : il se pose et reste dans la rue ; `burn` : il flambe et fume. Il clignote et s’efface à la fin de `time`. Une blessure absente garde la courte culbute d’avant. |
+| `stage` | La mise en scène des rencontres : `alert` (la case du « ! » de surprise, `alertSize` unités), `alertSound`, `alertVoice` et `panicVoice` (voix criées par les ennemis, au plus une toutes les trois secondes), `parachute` (`open`, `folding`, `landed` : cases du parachute ouvert, se repliant, au sol ; `size` en unités, `speed` de descente, `sway` balancement, `height` au-dessus des pieds), `openings` (`[{"id": "door", "sprite": {…}, "height": 2.7, "time": 0.7}]` : ouvertures dessinées pour les entrées `door` et `window`, `height` unités de haut, ouvertes `time` s pendant que l’ennemi en sort). |
+
 ```json
 {"id": "beaucoup-de-grenades", "extends": "default", "grenades": {"start": [20, 20, 15, 10], "max": [30, 30, 20, 15]}, "supplies": [4, 0, 4, 1]}
 ```
@@ -366,6 +441,7 @@ Une caisse qui donne toujours la même arme, et des caisses plus serrées :
 | `projectile.sprite`, `frames`, `size`, `color` | La case dessinée (`{"texture", "columns", "rows", "cell"}`, obligatoire pour `flame` et `beam`), le nombre de cases consécutives jouées au fil de la vie, la hauteur en unités (pour un rayon, son épaisseur ; la case est étirée sur sa longueur), une teinte `RRGGBB`. Sans `sprite`, le moteur dessine le traceur du fusil, teinté par `color`. |
 | `explosion` | `radius` (0 : pas d’explosion), `damage` (0 : celui du projectile), `bossDamage`. Un projectile explosif éclate sur le premier ennemi touché, au sol et à la fin de sa vie : tous les ennemis dont le centre est à moins de `radius` sont touchés, le boss à portée reçoit `bossDamage` (un tir direct sur le boss lui retire `damage`). |
 | `recoil` | `shake` : secousse de l’écran à chaque tir ; `push` : vitesse (unités/s) à laquelle le tir repousse le héros, vite amortie. |
+| `damageType` | Facultatif : la blessure qu’elle donne, `bullet`, `explosion`, `fire` ou `knife` ; par défaut `fire` pour `flame`, `explosion` si elle explose, `bullet` sinon. Elle choisit la mort des ennemis (section 3). |
 | `flash`, `casings`, `sound` | Éclair de bouche `none`, `light` ou `heavy`, douilles éjectées, son du tir. |
 | `announce`, `voice` | Annonce affichée au ramassage (obligatoire avec des munitions) et voix facultative (`Audio/Voices/<ligne>`, prises `-a`, `-b`, `-c`). |
 | `icon`, `crate` | Le badge du HUD à côté du compteur et la caisse posée dans la rue (obligatoire avec des munitions), `{"texture", "columns", "rows", "cell"}`. |
@@ -418,6 +494,19 @@ Une nouvelle arme n’a besoin que de son JSON (et de ses images s’il en faut 
 
 Une variante par ville n’a besoin que de sa planche : `{"id": "baker", "extends": "civilian", "name": "BOULANGER", "animations": {"sheet": {"texture": "Art/hostages/baker"}}}`. Les planches font 4 × 3 cases de 340 px (attaché ×2, libéré, salut, joie, fouille du sac, cadeau tendu, pouce levé, course ×4) ; `tools/art/pack_sheet.py hero tools/art/hostages/<otage>.json` les recale et `docs/ART_LOT2A.md` donne les prompts.
 
+## 5 sexies. Les véhicules de dépôt
+
+`Content/carriers/<id>.json` : un véhicule qui amène les ennemis d’une rencontre (`truck` d’une rencontre). Il arrive d’un bord de l’écran à `speed`, ralentit sur ses `brake` dernières unités, s’arrête (son `sound`), laisse descendre ses passagers par son ancrage `door` toutes les `interval` s, attend `wait` s puis repart dans le même sens et disparaît hors de l’écran. `length` : sa longueur, pour qu’il démarre hors de l’écran. Ses `animations` sont tournées vers la droite, états `drive` (roues, `perStride` : avance avec la distance) et `open` (porte ouverte, avec l’ancrage `door`). C’est un décor : rien ne le touche.
+
+```json
+{"id": "rusty-van", "speed": 10, "brake": 4, "interval": 0.45, "wait": 0.9, "length": 4.4, "sound": "Audio/Sfx/camion-frein",
+ "animations": {"sheet": {"texture": "Art/carriers", "columns": 3, "rows": 2, "pivot": {"x": 0.5, "y": 0.02734375}, "cellHeight": 4.6545455}, "layer": 26,
+   "states": [{"name": "drive", "cells": [0, 1], "perStride": 1.2}, {"name": "open", "cells": [2]}],
+   "anchors": [{"name": "door", "cell": 2, "x": -0.25, "y": 0.45}]}}
+```
+
+`black-minivan` (Tokyo) prend la deuxième ligne de la même planche. Un nouveau véhicule peut en étendre un (`"extends": "rusty-van"`).
+
 ## 5 quinquies. Les difficultés
 
 `Content/difficulties/<id>.json` décrit chaque difficulté du menu, rangée par `order` puis `id` : les replays, le jeu en ligne et le classement la désignent par cette position (0 DÉTENTE, 1 ARCADE, 2 DIFFICILE, 3 LÉGENDE, 4 SLUG).
@@ -452,7 +541,6 @@ Ces champs existent déjà dans le schéma pour que les prochaines mécaniques s
 | `map.terrain` | `{"type": "platform" \| "slope" \| "pit", "x": 40, "width": 6, "height": 2, "toHeight": 3}` : relief le long du parcours. | — |
 | `map.props` | `{"id": "<prop>", "x": 52, "y": 0, "wave": 3}` : décor destructible, objectif de la vague `wave` si elle est donnée. | `Content/props/<id>.json` |
 | `map.vehicles` | `{"id": "<véhicule>", "x": 120}` : véhicule pilotable posé sur la carte. | `Content/vehicles/<id>.json` |
-| `encounters` | `{"atX": 90, "wave": 2, "spawns": [{"enemy": "<id>", "x": 95, "delay": 0.5, "entry": "door" \| "parachute" \| "truck"}]}` : rencontre scénarisée. | — |
 
 Les nouvelles bibliothèques suivront les règles de la section 0 (`id` = nom du fichier, `extends`, validation C# et Python).
 
@@ -471,8 +559,8 @@ python3 tools/validate_content.py
 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
-Le validateur lit la bibliothèque et les missions comme le jeu : `extends`, références d’armes, d’ennemis et de boss, images et sons présents, états d’animation requis par chaque comportement, ancrages, bornes de tous les nombres, otages placés dans l’écran de leur vague et récompenses connues des règles, emplacements réservés vides. Il refuse aussi qu’un nom propre à une mission apparaisse dans `Assets/Scripts`. Le jeu refait les mêmes contrôles au démarrage et refuse une mission invalide.
+Le validateur lit la bibliothèque et les missions comme le jeu : `extends`, références d’armes, d’ennemis et de boss, images et sons présents, états d’animation requis par chaque comportement, ancrages, bornes de tous les nombres, otages placés dans l’écran de leur vague et récompenses connues des règles, rencontres vues de l’équipe (entrées dans l’écran de la rencontre, camion, ouvertures connues des règles, mini-boss hors des écrans de vague), emplacements réservés vides. Il refuse aussi qu’un nom propre à une mission apparaisse dans `Assets/Scripts`. Le jeu refait les mêmes contrôles au démarrage et refuse une mission invalide.
 
-Dans Unity, jouer la mission avec un puis plusieurs joueurs dans plusieurs difficultés : vagues, sortie, raccords du décor, animations et boss. Pour l’ouvrir sans jouer les précédentes, saisir son code dans **CODE MISSION**. `AgentScripts/VerifyDataDriven.cs` montre comment charger une mission depuis du JSON et la faire finir par un bot.
+Dans Unity, jouer la mission avec un puis plusieurs joueurs dans plusieurs difficultés : vagues, sortie, raccords du décor, animations et boss. Pour l’ouvrir sans jouer les précédentes, saisir son code dans **CODE MISSION**. `AgentScripts/VerifyDataDriven.cs` montre comment charger une mission depuis du JSON et la faire finir par un bot ; `AgentScripts/VerifyLot2b.cs` fait de même avec une mission dont les rencontres (toutes les entrées, un véhicule et un mini-boss qui étendent ceux de la bibliothèque) sont écrites seulement en JSON.
 
 Proposer les JSON, les images et leurs `.meta` dans une pull request avec des captures. Une fois la proposition fusionnée, la compilation web suivante inclut la mission.

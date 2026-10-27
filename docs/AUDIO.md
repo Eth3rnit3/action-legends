@@ -26,16 +26,17 @@ python3 tools/audio/sakura.py
 
 ## Voix
 
-Huit annonces, trois prises chacune (`Voices/<annonce>-a|b|c.wav`) ; le jeu en tire une au hasard. Elles sont générées avec Gemini TTS (prises a et b : `gemini-2.5-pro-preview-tts`, voix Fenrir et Orus ; prise c : `gemini-3.1-flash-tts-preview`, voix Fenrir), puis compressées et réduites en 12 bits avec un court écho. Le résultat change à chaque génération : il faut réécouter chaque prise avant de la garder.
+Des annonces et des cris, trois prises chacun (`Voices/<ligne>-a|b|c.wav`) ; le jeu en tire une au hasard. Les annonces : bonus (`bonus-0` à `bonus-5`, `bonus-grenades`), armes à lettres (`weapon-h`, `-s`, `-f`, `-r`, `-l`), boss (`boss-alert`, `miniboss-alert`), victoire, et le « Merci ! » des otages (`hostage-merci`). Les cris des ennemis (lot 2b) : `cri-chute` à leur chute, `cri-surprise` quand ils repèrent l’équipe, `cri-panique` quand ils s’enfuient ; joués sur une source à part, ils ne coupent pas l’annonceur. Le texte de chaque ligne est dans `LINES` de `tools/audio/voices.py`. Elles sont générées avec Gemini TTS (prises a et b : `gemini-2.5-pro-preview-tts`, voix Fenrir et Orus ; prise c : `gemini-3.1-flash-tts-preview`, voix Fenrir), puis compressées et réduites en 12 bits avec un court écho. Le résultat change à chaque génération : il faut réécouter chaque prise avant de la garder.
 
 ```bash
 GEMINI_API_KEY=... python3 tools/audio/voices.py            # toutes les annonces
 GEMINI_API_KEY=... python3 tools/audio/voices.py bonus-2    # une seule
+GEMINI_API_KEY=... python3 tools/audio/voices.py weapon-l:bc # seulement les prises b et c
 ```
 
 ## Bruitages
 
-`Sfx/` contient des sons rétro générés à la manière de sfxr (oscillateur, glissement de hauteur, enveloppe, filtre, réduction de résolution). Le tir dépend de l’arme : pistolet sec pour l’arme de base, mitraille, laser pour le triple tir, départ de roquette ; l’hélicoptère tire au blaster. Impacts et explosions sont tirés au hasard parmi trois variantes. Le jeu joue aussi un son quand un joueur est touché, quand le boss est détruit, au ramassage d’un bonus, à l’arrivée d’une manette, sur les boutons du menu et au déploiement.
+`Sfx/` contient des sons rétro générés à la manière de sfxr (oscillateur, glissement de hauteur, enveloppe, filtre, réduction de résolution). Le tir dépend de l’arme : pistolet sec pour l’arme de base, mitraille, laser pour le triple tir, départ de roquette ; l’hélicoptère tire au blaster. Impacts et explosions sont tirés au hasard parmi trois variantes. Les rencontres ont leurs bruitages : sursaut d’un ennemi surpris (`surprise`), camionnette qui freine (`camion-frein`), parachute (`parachute`), porte (`porte`). Le jeu joue aussi un son quand un joueur est touché, quand le boss est détruit, au ramassage d’un bonus, à l’arrivée d’une manette, sur les boutons du menu et au déploiement.
 
 ```bash
 python3 tools/audio/sfx.py

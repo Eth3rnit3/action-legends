@@ -31,9 +31,21 @@ Le clavier contrôle uniquement le joueur 1. Pour jouer à plusieurs, brancher d
 
 Avancer vers la droite à travers douze assauts, puis affronter le boss en hélicoptère à Bastille. Le parcours est six fois plus long que celui de la version 0.4.0 ; à chaque assaut, l’écran se bloque jusqu’à la chute du dernier ennemi, puis une flèche **GO** clignote et le défilement reprend. Trois types d'ennemis : fonceur, lanceur de projectiles et costaud au bouclier. Les attaques spéciales se rechargent en cinq à huit secondes selon la difficulté. Les points de vie et les renforts dépendent de la difficulté ; les renforts sont partagés. En Détente, tous les trois assauts déployés, les héros encore debout reçoivent des soins et un renfort est ajouté ; en Arcade, cela arrive tous les quatre assauts. Difficile et Légende ne reçoivent pas ce réapprovisionnement. Il n'y a pas de tirs entre alliés.
 
-Ramasser les caisses pour obtenir une mitrailleuse, un triple tir, des roquettes, des soins, dix secondes de turbo ou des points. Les armes bonus ont des munitions limitées ; le fusil de base est illimité. Le chronomètre permet de comparer ses temps de parcours.
+Ramasser les caisses pour obtenir une arme, des soins, dix secondes de turbo ou des points. Le chronomètre permet de comparer ses temps de parcours.
 
-La fréquence des bonus, les munitions et la durée du turbo dépendent de la difficulté. Détente conserve le réglage de la version 0.4.3 : un bonus pour quinze ennemis et des caisses espacées de 72 unités. Les autres modes distribuent moins de ressources.
+**Les armes à lettres**, comme dans Metal Slug : chaque héros a son fusil, illimité ; les caisses à lettre donnent une arme aux munitions comptées, affichée dans le HUD par son badge et le nombre de tirs restants :
+
+| Caisse | Arme | Tir |
+|---|---|---|
+| **H** orange | Mitrailleuse lourde | rafale rapide, légère dispersion |
+| **S** bleue | Fusil à pompe | éventail de cinq plombs à courte portée, qui traversent les ennemis ; recul |
+| **F** rouge | Lance-flammes | jet de flammes court qui grossit et brûle tout ce qu'il traverse |
+| **R** verte | Lance-roquettes | roquettes à tête chercheuse qui explosent sur un ennemi, au sol ou en fin de course |
+| **L** violette | Laser | rayon continu qui traverse tout l'écran |
+
+Ramasser la même arme remplit ses munitions ; une arme vide, ou un héros qui tombe, revient au fusil de base. Toutes les visées marchent avec chaque arme : haut, diagonale, accroupi, bas en saut. Paris tire ses caisses d'armes d'une table commune (plus de mitrailleuses lourdes), Marseille donne surtout fusils à pompe et lance-flammes, Tokyo surtout des lasers. Les armes sont décrites dans `Assets/Resources/Content/weapons/` et chaque mission choisit lesquelles ses caisses donnent (voir le guide des niveaux).
+
+La fréquence des bonus, les munitions et la durée du turbo dépendent de la difficulté. Détente conserve le réglage de la version 0.4.3 : un bonus pour quinze ennemis et des caisses espacées de 72 unités. Les autres modes distribuent moins de ressources : moins de caisses et des armes aux munitions plus comptées (par exemple 120 tirs de mitrailleuse lourde en Détente, 66 en Légende). Ces réglages sont dans `Assets/Resources/Content/rules/default.json` et `Content/weapons/`.
 
 ## Deuxième mission : Mistral Gagnant
 

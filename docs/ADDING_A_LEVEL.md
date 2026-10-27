@@ -7,10 +7,11 @@ Tout ce qui fait un niveau d’**Action Legends** — sa carte, ses ennemis et l
 ```
 Assets/Resources/
   Levels/<mission>.json          une mission (schemaVersion 2), chargée automatiquement
+  Content/weapons/<id>.json      les armes des héros : fusils de base et armes à lettres (H, S, F, R, L…)
   Content/heroes/<id>.json       les héros jouables (un à quatre)
   Content/enemies/<id>.json      la bibliothèque des types d’ennemis
   Content/bosses/<id>.json       la bibliothèque des boss
-  Content/rules/<id>.json        règles de partie : grenades, bonus, flèche GO ("default" pour toutes les missions)
+  Content/rules/<id>.json        règles de partie : grenades, bonus, caisses d’armes, flèche GO ("default" pour toutes les missions)
   Art/<mission>/...              images (PNG) de la mission
   Audio/Music/...                musiques (WAV, OGG ou MP3)
 ```
@@ -57,6 +58,7 @@ Copier une mission de `Assets/Resources/Levels/`, la renommer avec son nouvel `i
 | `encounters` | Réservé (section 6) : laisser `[]` ou ne pas l’écrire. |
 | `boss` | Le boss final, voir plus bas. |
 | `rules` | Facultatif, `"default"` par défaut : identifiant de `Content/rules` (section 5 bis). Une mission peut ainsi donner plus ou moins de grenades, d’autres bonus ou une autre flèche GO. |
+| `weapons` | Facultatif : les armes que donnent les caisses d’armes de la mission et leurs proportions, `[{"weapon": "laser", "weight": 3}, {"weapon": "heavy-machinegun", "weight": 2}]`, à la place de la table des règles (section 5 ter). Marseille et Tokyo ont la leur. |
 
 ### Vagues
 
@@ -290,7 +292,7 @@ Les quatre héros sont dans `Content/heroes/` ; le menu en affiche un à quatre,
 |---|---|
 | `name`, `shortName`, `role`, `specialName` | Nom de la fiche, nom court du HUD, rôle et nom du spécial. |
 | `speed`, `jump` | Vitesse de course, vitesse verticale au saut. |
-| `fireRate`, `damage`, `recoilShake` | Délai entre deux tirs, dégâts du fusil, secousse à chaque tir. |
+| `weapon` | Son arme de base, un identifiant de `Content/weapons` **sans limite de munitions** (section 5 ter) : il commence chaque vie avec elle et la retrouve quand une arme à lettre est vide ou à sa mort. Cadence, dégâts et recul y sont réglés (les anciens champs `fireRate`, `damage`, `recoilShake` du héros sont refusés). |
 | `strideRate`, `bob` | Vitesse de la foulée (section 2) et balancement vertical en courant. |
 | `portraitCell`, `portraitFrame` | Case de la planche affichée dans la fiche du menu, et le carré de cette case qui y est montré : `{"x": 0.02, "y": 0, "size": 0.72}` en fractions de la case depuis son coin inférieur gauche (toute la case par défaut). |
 | `hitbox` | Où le touchent les tirs ennemis, debout : un cercle de rayon `radius` à `y` au-dessus des pieds (`{"y": 1, "radius": 0.53}`). |
@@ -307,13 +309,56 @@ Les quatre héros sont dans `Content/heroes/` ; le menu en affiche un à quatre,
 |---|---|
 | `grenades` | `start` et `max` : grenades au départ d’une vie et au plus, par difficulté ; `refillOnRespawn` (`true`) : un renfort repart avec au moins `start`. |
 | `grenade` | Le lancer : vitesse `throwX` (vers l’avant), `throwY` (vers le haut), `gravity`. Au sol elle rebondit `bounces` fois (vitesse verticale × `bounce`, horizontale × `friction`), puis explose ; elle explose aussi au contact d’un ennemi ou du boss, ou au bout de `fuse` s. L’explosion retire `damage` aux ennemis à moins de `radius` (plus leur `hitRadius`), `bossDamage` au boss qu’elle touche, et détruit les missiles du boss pris dedans si `destroysBombs`. `cooldown` entre deux lancers, pose `throw` pendant `pose` s, `throwSound`. `sprite` (la grenade, dessinée `size` unités de haut) et `icon` (le compteur du HUD) : `{"texture", "columns", "rows", "cell"}`. |
-| `bonuses` | Les bonus, désignés par leur position dans la liste : `{"id", "effect", "amount": [4 valeurs], "announce", "voice", "icon", "scale"}`. `effect` : `weapon` (`weapon` 1 mitrailleuse, 2 triple tir, 3 roquettes ; `amount` = munitions), `health` (points de vie), `turbo` (secondes), `score` (points), `grenades` (grenades, sans dépasser `grenades.max`). `voice` : chemin des trois prises `-a`, `-b`, `-c` de l’annonce, facultatif. `icon` : la case dessinée, `scale` sa taille (1,25 unité). |
+| `bonuses` | Les bonus, désignés par leur position dans la liste : `{"id", "effect", "amount": [4 valeurs], "announce", "voice", "icon", "scale"}`. `effect` : `health` (points de vie), `turbo` (secondes), `score` (points), `grenades` (grenades, sans dépasser `grenades.max`) ou `weapon`. Une caisse `weapon` donne l’arme `weapon` (identifiant de `Content/weapons`) ou, si `weapon` est vide, une arme tirée de la table `weapons` ; elle n’a pas d’`amount` (les munitions sont dans l’arme), et sa caisse, son annonce et sa voix sont celles de l’arme sauf si le bonus les donne. `voice` : chemin des trois prises `-a`, `-b`, `-c` de l’annonce, facultatif. `icon` : la case dessinée, `scale` sa taille (1,25 unité). |
 | `supplies`, `drops` | Les bonus des caisses posées le long du parcours, puis ceux que laissent les ennemis vaincus, à tour de rôle (indices dans `bonuses`). |
+| `firstSupply`, `supplySpacing`, `killsPerDrop` | Par difficulté : position de la première caisse, distance entre deux caisses, ennemis vaincus pour un bonus lâché (`[24, 35, 45, 55]`, `[72, 90, 110, 130]`, `[15, 22, 28, 35]`). |
+| `weapons` | La table des caisses d’armes qui ne nomment pas leur arme : `[{"weapon": "<id>", "weight": 3}, …]`. Sur toute suite de tirages aussi longue que la somme des poids, chaque arme sort `weight` fois, réparties (tourniquet pondéré, le même sur toutes les machines). Une mission peut la remplacer par son propre champ `weapons`. Obligatoire dès qu’un bonus `weapon` ne nomme pas d’arme. |
 | `go` | L’image de la flèche GO, `{"texture": "Art/go-sign"}`. |
 
 ```json
-{"id": "beaucoup-de-grenades", "extends": "default", "grenades": {"start": [20, 20, 15, 10], "max": [30, 30, 20, 15]}, "supplies": [6, 0, 6, 3]}
+{"id": "beaucoup-de-grenades", "extends": "default", "grenades": {"start": [20, 20, 15, 10], "max": [30, 30, 20, 15]}, "supplies": [4, 0, 4, 1]}
 ```
+
+Une caisse qui donne toujours la même arme, et des caisses plus serrées :
+
+```json
+{"id": "que-des-roquettes", "extends": "default", "bonuses": [{"id": "roquettes", "effect": "weapon", "weapon": "rocket-launcher"}],
+ "supplies": [0], "drops": [0], "supplySpacing": [40, 50, 60, 70]}
+```
+
+## 5 ter. Les armes
+
+`Content/weapons/<id>.json` décrit chaque arme des héros. Le moteur ne connaît que quatre **projectiles génériques** ; une arme choisit le sien et le règle. Une arme **à munitions** (`ammo` ≥ 1) a une lettre et sort des caisses ; perdue à la mort du héros, elle revient à l’arme de base quand ses munitions sont épuisées, et ramasser la même arme les remplit à nouveau. Une arme **sans munitions** (`ammo` à 0 partout ou absent) ne s’épuise jamais : c’est l’arme de base d’un héros (`"weapon"` du héros). Les armes livrées : `rifle` et ses variantes par héros (`assault-rifle`, `heavy-rifle`, `carbine`, `battle-rifle`, par `extends`), `heavy-machinegun` (H), `shotgun` (S), `flamethrower` (F), `rocket-launcher` (R), `laser` (L).
+
+| Champ | Utilisation |
+|---|---|
+| `letter`, `name` | Lettre (une majuscule, obligatoire avec des munitions) et nom affiché (24 caractères ; le HUD montre le nom d’une arme sans munitions, le badge et le compteur des autres). |
+| `ammo` | Munitions par difficulté (une par tir, même pour plusieurs plombs ou un rayon), ou 0 partout : illimitée. |
+| `fireRate`, `damage` | Délai entre deux tirs (compté en pas de 1/60 s : 0,055 tire tous les 4 pas) et dégâts de chaque projectile. |
+| `projectile.type` | `bullet` : va tout droit. `flame` : idem, mais dessiné avec ses `frames` au fil de sa vie et grossissant de `growth`, ralenti par une `acceleration` négative. `rocket` : laisse une traînée de fumée, accélère de `acceleration`, et vire de `homing` degrés par seconde vers l’ennemi le plus proche à moins de 14 unités (le boss sinon). `beam` : un rayon instantané de `range` unités qui touche tout ce qu’il croise, affiché `life` s ; le sol l’arrête vers le bas. |
+| `projectile.pellets`, `spread`, `jitter` | Nombre de projectiles par tir, écart en degrés entre deux voisins (éventail), et dispersion de chaque tir jusqu’à `jitter` degrés selon un motif fixe (sans hasard : le même partout). |
+| `projectile.speed`, `life`, `acceleration` | Vitesse de départ (unités/s, jusqu’à 80), durée de vie (la portée en découle), variation de vitesse par seconde. |
+| `projectile.pierce`, `radius` | Ennemis traversés après le premier (`-1` : tous, chacun une seule fois) ; rayon du projectile ajouté à celui des ennemis (grandit avec `growth`). |
+| `projectile.sprite`, `frames`, `size`, `color` | La case dessinée (`{"texture", "columns", "rows", "cell"}`, obligatoire pour `flame` et `beam`), le nombre de cases consécutives jouées au fil de la vie, la hauteur en unités (pour un rayon, son épaisseur ; la case est étirée sur sa longueur), une teinte `RRGGBB`. Sans `sprite`, le moteur dessine le traceur du fusil, teinté par `color`. |
+| `explosion` | `radius` (0 : pas d’explosion), `damage` (0 : celui du projectile), `bossDamage`. Un projectile explosif éclate sur le premier ennemi touché, au sol et à la fin de sa vie : tous les ennemis dont le centre est à moins de `radius` sont touchés, le boss à portée reçoit `bossDamage` (un tir direct sur le boss lui retire `damage`). |
+| `recoil` | `shake` : secousse de l’écran à chaque tir ; `push` : vitesse (unités/s) à laquelle le tir repousse le héros, vite amortie. |
+| `flash`, `casings`, `sound` | Éclair de bouche `none`, `light` ou `heavy`, douilles éjectées, son du tir. |
+| `announce`, `voice` | Annonce affichée au ramassage (obligatoire avec des munitions) et voix facultative (`Audio/Voices/<ligne>`, prises `-a`, `-b`, `-c`). |
+| `icon`, `crate` | Le badge du HUD à côté du compteur et la caisse posée dans la rue (obligatoire avec des munitions), `{"texture", "columns", "rows", "cell"}`. |
+
+```json
+{
+  "id": "shotgun", "letter": "S", "name": "FUSIL À POMPE", "ammo": [30, 26, 22, 18], "fireRate": 0.55, "damage": 5,
+  "projectile": {"type": "bullet", "pellets": 5, "spread": 7, "speed": 28, "life": 0.24, "pierce": -1, "radius": 0.25,
+                 "sprite": {"texture": "Art/weapon-fx", "columns": 3, "rows": 2, "cell": 5}, "size": 1.1},
+  "recoil": {"shake": 0.18, "push": 6}, "flash": "heavy", "casings": true, "sound": "Audio/Sfx/tir-S-pompe",
+  "announce": "FUSIL À POMPE !",
+  "icon": {"texture": "Art/weapon-letters", "columns": 3, "rows": 2, "cell": 1},
+  "crate": {"texture": "Art/weapon-crates", "columns": 3, "rows": 2, "cell": 1}
+}
+```
+
+Une nouvelle arme n’a besoin que de son JSON (et de ses images s’il en faut de nouvelles) : l’ajouter à la table `weapons` des règles ou d’une mission, ou la nommer dans un bonus. Les planches `Art/weapon-crates.png` (caisses H, S, F, R, L et une caisse grise sans emblème), `Art/weapon-letters.png` (badges H, S, F, R, L et un badge fusil) et `Art/weapon-fx.png` (trois images de flamme, rayon, roquette, plomb) sont en 3 × 2 cases ; voir `docs/ART_LOT1B.md`. Le code peut aussi donner une arme à un héros par `GiveWeapon(joueur, "<id>")` : c’est par là que passeront les otages.
 
 ## 6. Emplacements réservés aux lots suivants
 
@@ -323,7 +368,7 @@ Ces champs existent déjà dans le schéma pour que les prochaines mécaniques s
 |---|---|---|
 | `map.terrain` | `{"type": "platform" \| "slope" \| "pit", "x": 40, "width": 6, "height": 2, "toHeight": 3}` : relief le long du parcours. | — |
 | `map.props` | `{"id": "<prop>", "x": 52, "y": 0, "wave": 3}` : décor destructible, objectif de la vague `wave` si elle est donnée. | `Content/props/<id>.json` |
-| `map.hostages` | `{"id": "<otage>", "x": 70, "y": 0, "reward": "<bonus ou arme>"}`. | `Content/hostages/<id>.json` |
+| `map.hostages` | `{"id": "<otage>", "x": 70, "y": 0, "reward": "<bonus ou arme>"}` ; une arme se donnera par `GiveWeapon`. | `Content/hostages/<id>.json` |
 | `map.vehicles` | `{"id": "<véhicule>", "x": 120}` : véhicule pilotable posé sur la carte. | `Content/vehicles/<id>.json` |
 | `encounters` | `{"atX": 90, "wave": 2, "spawns": [{"enemy": "<id>", "x": 95, "delay": 0.5, "entry": "door" \| "parachute" \| "truck"}]}` : rencontre scénarisée. | — |
 
@@ -344,7 +389,7 @@ python3 tools/validate_content.py
 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
-Le validateur lit la bibliothèque et les missions comme le jeu : `extends`, références d’ennemis et de boss, images et sons présents, états d’animation requis par chaque comportement, ancrages, bornes de tous les nombres, emplacements réservés vides. Il refuse aussi qu’un nom propre à une mission apparaisse dans `Assets/Scripts`. Le jeu refait les mêmes contrôles au démarrage et refuse une mission invalide.
+Le validateur lit la bibliothèque et les missions comme le jeu : `extends`, références d’armes, d’ennemis et de boss, images et sons présents, états d’animation requis par chaque comportement, ancrages, bornes de tous les nombres, emplacements réservés vides. Il refuse aussi qu’un nom propre à une mission apparaisse dans `Assets/Scripts`. Le jeu refait les mêmes contrôles au démarrage et refuse une mission invalide.
 
 Dans Unity, jouer la mission avec un puis plusieurs joueurs dans plusieurs difficultés : vagues, sortie, raccords du décor, animations et boss. Pour l’ouvrir sans jouer les précédentes, saisir son code dans **CODE MISSION**. `AgentScripts/VerifyDataDriven.cs` montre comment charger une mission depuis du JSON et la faire finir par un bot.
 

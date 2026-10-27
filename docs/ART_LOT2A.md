@@ -25,7 +25,7 @@ Chaque planche sort de Codex en 4 × 3 cases de 362 px (1448×1086). `tools/art/
 | 5–7 | Fouille son sac ; tend un cadeau ; pouce levé, mains vides | `give` (5, 6, 6, 7) |
 | 8–11 | Course comique | `run` (11 images/s) |
 
-La planche générique a été faite d'abord avec Image 1 = `Art/heroes/chuck-norris.png` (rendu et contours) et Image 2 = `Art/enemies.png` ; les trois variantes ensuite, en parallèle, avec Image 1 = la planche générique (mise en page, poses, échelle) et Image 2 = `Art/heroes/chuck-norris.png`. Les quatre sont sorties transparentes et en grille du premier coup. La consigne qui entoure chaque prompt demande à Codex de vérifier les coins transparents et la grille, d'appliquer au besoin la passe de détourage de `docs/MISSION_TOKYO.md`, et de régénérer une fois si la grille est fausse.
+La planche générique a été faite d'abord avec Image 1 = `Art/heroes/chuck-norris.png` (rendu et contours) et Image 2 = `ArtSources/enemies.png` (l’ancienne planche, hors `Resources` depuis l’allègement de la 0.8.0) ; les trois variantes ensuite, en parallèle, avec Image 1 = la planche générique (mise en page, poses, échelle) et Image 2 = `Art/heroes/chuck-norris.png`. Les quatre sont sorties transparentes et en grille du premier coup. La consigne qui entoure chaque prompt demande à Codex de vérifier les coins transparents et la grille, d'appliquer au besoin la passe de détourage de `docs/MISSION_TOKYO.md`, et de régénérer une fois si la grille est fausse.
 
 ### Otage générique
 

@@ -32,7 +32,7 @@ public static class VerifyDataDriven
       ""gun"": {""range"": 10, ""aimTime"": 0.3, ""cooldown"": 1.2, ""burst"": 2, ""burstInterval"": 0.15, ""pellets"": 2, ""spread"": -2, ""spreadStep"": 4,
                ""speed"": [10, 11, 12, 13], ""life"": 1, ""pose"": 0.2, ""damage"": 1, ""projectile"": ""bullet"", ""sound"": ""Audio/Sfx/tir-D-pistolet-sec""},
       ""animations"": {
-        ""sheet"": {""texture"": ""Art/heroes"", ""columns"": 4, ""rows"": 4, ""cropLeft"": 0.065, ""cropRight"": 0.025, ""pivot"": {""x"": 0.4, ""y"": 0.045}, ""cellHeight"": 2.5},
+        ""sheet"": {""texture"": ""Art/enemies/gunman-pistol"", ""columns"": 4, ""rows"": 4, ""cropLeft"": 0.065, ""cropRight"": 0.025, ""pivot"": {""x"": 0.4, ""y"": 0.045}, ""cellHeight"": 2.5},
         ""states"": [
           {""name"": ""idle"", ""cells"": [12, 13], ""fps"": 4},
           {""name"": ""run"", ""cells"": [13, 14, 15], ""perStride"": 0.5},

@@ -4,7 +4,7 @@ Le lot 2b met en scène les ennemis (rencontres placées, entrées par porte, fe
 
 | Fichier | Taille | Usage |
 |---|---|---|
-| `Art/enemies/<ennemi>.png` (six) | 1448×1448 (pillards) ou 1680×1448 (gangsters), 4 × 4 cases | Planche de chaque ennemi : ligne 1 = ses quatre anciennes cases **copiées au pixel près** depuis `Art/enemies.png` ou `Art/tokyo/enemies.png` (mêmes ancrages), lignes 2 à 4 = les douze nouvelles images |
+| `Art/enemies/<ennemi>.png` (six) | 1448×1448 (pillards) ou 1680×1448 (gangsters), 4 × 4 cases | Planche de chaque ennemi : ligne 1 = ses quatre anciennes cases **copiées au pixel près** depuis les anciennes planches `ArtSources/enemies.png` ou `ArtSources/tokyo/enemies.png` (mêmes ancrages ; hors `Resources` depuis l’allègement de la 0.8.0), lignes 2 à 4 = les douze nouvelles images |
 | `Art/bosses/armored-van.png` | 1920×1024, 3 × 2 cases | Fourgon blindé (mini-boss de Paris) |
 | `Art/bosses/speedboat.png` | 1920×1024, 3 × 2 cases | Hors-bord des caïds (mini-boss de Marseille) |
 | `Art/bosses/combat-drone.png` | 1920×1024, 3 × 2 cases | Drone de combat (mini-boss de Tokyo) |

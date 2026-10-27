@@ -1169,6 +1169,22 @@ def find_proper_nouns(root=ROOT):
     return hits
 
 
+def find_unused_art(root=ROOT):
+    """Images under Resources/Art that no mission, content file or engine script names: Unity ships every file under
+    Resources whether it is loaded or not, so sources, intermediate sheets and unused variants belong in Assets/ArtSources."""
+    resources = root / "Assets/Resources"
+    texts = [f.read_text(encoding="utf-8") for folder in ("Levels", "Content") for f in (resources / folder).rglob("*.json")]
+    texts += [f.read_text(encoding="utf-8") for f in (root / "Assets/Scripts").rglob("*.cs")]
+    names = set(re.findall(r'"(Art/[^"]+)"', "\n".join(texts)))
+    unused = []
+    for image in sorted((resources / "Art").rglob("*")):
+        if image.suffix.lower() in IMAGES:
+            name = image.relative_to(resources).with_suffix("").as_posix()
+            if name not in names:
+                unused.append(name)
+    return unused
+
+
 def main():
     resources = ROOT / "Assets/Resources"
     library, failures = load_library(resources)
@@ -1195,6 +1211,7 @@ def main():
         except (ValueError, OSError) as exc:
             failures.append(f"{file.name}: {exc}")
     failures.extend(f"Mission name in engine code: {hit}" for hit in find_proper_nouns())
+    failures.extend(f"Image never loaded, move it to Assets/ArtSources: {name}" for name in find_unused_art())
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1

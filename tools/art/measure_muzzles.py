@@ -1,4 +1,4 @@
-"""Locate the gun barrel tip in every hero frame of Art/heroes.png and print the "muzzle" anchors,
+"""Locate the gun barrel tip in every hero frame of Assets/ArtSources/heroes.png (the old 4 x 4 sheet) and print the "muzzle" anchors,
 in world units from the actor's feet, to paste in the "animations" of Resources/Content/heroes/*.json.
 The unit conversion mirrors the heroes' sheet settings (cell crop, pivot and cellHeight 2.2777777).
 usage: measure_muzzles.py [--preview OUT.png]   (needs Pillow)"""
@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from PIL import Image, ImageDraw
 
-ART = Path(__file__).resolve().parents[2] / 'Assets/Resources/Art'
+ART = Path(__file__).resolve().parents[2] / 'Assets/ArtSources'
 COLUMNS = 4
 
 

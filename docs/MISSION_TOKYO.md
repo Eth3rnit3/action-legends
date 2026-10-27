@@ -16,7 +16,7 @@ Les deux planches générées passent ensuite par `tools/art/pack_sheet.py` (Pil
 | `Art/tokyo/akihabara.png` | 2172×724 | Décor 2 |
 | `Art/tokyo/minato.png` | 2172×724 | Décor 3, arène du boss |
 | `Art/tokyo/sol.png` | 2172×724 | Chaussée mouillée : seuls les 20 % inférieurs sont répétés |
-| `Art/tokyo/enemies.png` | 1680×1086, transparent | Trois tireurs, quatre images chacun : attente, deux foulées, tir |
+| `ArtSources/tokyo/enemies.png` (dans `Resources` jusqu’à la 0.8.0) | 1680×1086, transparent | Trois tireurs, quatre images chacun : attente, deux foulées, tir |
 | `Art/tokyo/mecha-shogun.png` | 1680×1024, transparent | Boss, six images : attente, deux pas, piétinement, gatling, missiles |
 
 ## Musique

@@ -15,7 +15,7 @@ Presque tout tient dans les données existantes : rencontres, entrées, vagues b
 | `startSound` (attaque de boss) | Le souffle du taureau avant sa charge : une attaque n'avait qu'un son, au tir ou au départ. |
 | `projectile` (attaque `gun`) | Les parchemins de Nostradamus : le moteur ne savait dessiner qu'une balle rouge. |
 | `warning`, `impact`, `impactSound` (attaque `bombs`) | Les cercles de prophétie et leurs éclats : la marque au sol était une barre rouge et l'impact une explosion. |
-| `"mirror": true` (`tools/art/pack_sheet.py hero`) | La planche du taureau est dessinée tournée vers la droite, les boss vers la gauche : l'outil retourne chaque case (`Art/bosses/taureau.png`, tirée de `Art/saint-remy/taureaux.png` sans autre retouche). |
+| `"mirror": true` (`tools/art/pack_sheet.py hero`) | La planche du taureau est dessinée tournée vers la droite, les boss vers la gauche : l'outil retourne chaque case (`Art/bosses/taureau.png`, tirée de `ArtSources/saint-remy/taureaux.png` sans autre retouche). |
 
 ## Images
 
@@ -24,12 +24,12 @@ Les panoramas, les planches des Arlésiens, du taureau et de Nostradamus, les ac
 | Fichier | Taille | Usage |
 |---|---|---|
 | `Art/saint-remy/centre-ville.png`, `ruelles-favier.png`, `sortie-saint-remy.png`, `antiques.png`, `glanum.png`, `alpilles.png` | 2172×724 | Les six panoramas, dans cet ordre (226 u de fresque : la parallaxe défile à mi-vitesse sur les 407 u de caméra) |
-| `Art/saint-remy/place-eglise.png`, `glanum-alpilles.png` | 2172×724 | Variantes de décor de la PR, non utilisées : une septième pièce dépasserait ce que la parallaxe peut montrer sur un parcours de 420 u (voir `UpdatePanorama`) |
+| `ArtSources/saint-remy/place-eglise.png`, `glanum-alpilles.png` | 2171×724 | Variantes de décor de la PR, non utilisées (hors `Resources` pour ne pas alourdir l'export) : une septième pièce dépasserait ce que la parallaxe peut montrer sur un parcours de 420 u (voir `UpdatePanorama`) |
 | `Art/saint-remy/sol.png` | 2172×724 | Dalles de pierre : les 20 % inférieurs sont répétés |
 | `Art/saint-remy/accessoires.png` | 2048×1536, 4 × 3 | Accessoires posés dans la rue (`map.decor`) : table, chaise, parasol, ardoise, olivier en pot, caisse, tonneau, tonneau brisé, fontaine, colonne, muret, olivier |
-| `Art/saint-remy/enemies.png` | 2048×1536, 4 × 3 | Ligne 1 de chaque planche d'Arlésien, copiée au pixel près |
+| `ArtSources/saint-remy/enemies.png` | 2048×1536, 4 × 3 | Planche source : ligne 1 de chaque planche d'Arlésien, copiée au pixel près |
 | `Art/enemies/arlesien.png`, `arlesienne.png`, `arlesien-fouet.png` | 2048×2048, 4 × 4 cases de 512 | Planche de chaque Arlésien : ligne 1 de la PR, lignes 2 à 4 générées (inattentif ×2, sursaut, touché, fuite ×2, renversé, à terre, soufflé ×2, en feu, carbonisé) |
-| `Art/saint-remy/taureaux.png` → `Art/bosses/taureau.png` | 2048×1024, 4 × 2 | Taureau retourné vers la gauche : attente, deux galops, gratte le sol, charge, dérapage, cabré, couché (`wreck`) |
+| `ArtSources/saint-remy/taureaux.png` → `Art/bosses/taureau.png` | 2048×1024, 4 × 2 | Taureau retourné vers la gauche : attente, deux galops, gratte le sol, charge, dérapage, cabré, couché (`wreck`) |
 | `Art/saint-remy/nostradamus.png` | 2048×1024, 4 × 2 | Attente, deux pas, lancer, prophétie (grimoire), invocation (bras levés), touché, assis sur son grimoire (`wreck`) |
 | `Art/saint-remy/prophetie-fx.png` | 2048×1536, 4 × 3 | Cercle annoncé (4 images), parchemin (3 images + éclat), éclat de prophétie (4 images) ; l'étoile sert aussi de `missile` |
 | `Art/hostages/peintre.png` | 1360×1020, 4 × 3 cases de 340 | Otage local, le peintre (`Content/hostages/peintre.json`, qui étend `civilian`) |
@@ -51,7 +51,7 @@ Assemblage : `tools/art/pack_sheet.py hero tools/art/enemies/<ennemi>.json`, ave
 
 ### Arlésiens (poses supplémentaires)
 
-Image 1 = la ligne de l'ennemi découpée dans `Art/saint-remy/enemies.png` (2048×512), Image 2 = `Art/heroes/chuck-norris.png`. Prompt de l'Arlésien ; les deux autres ne changent que le personnage, les deux poses d'inattention, la quatrième case et l'objet qui tombe (tableau).
+Image 1 = la ligne de l'ennemi découpée dans `ArtSources/saint-remy/enemies.png` (2048×512), Image 2 = `Art/heroes/chuck-norris.png`. Prompt de l'Arlésien ; les deux autres ne changent que le personnage, les deux poses d'inattention, la quatrième case et l'objet qui tombe (tableau).
 
 ```text
 Use case: stylized-concept

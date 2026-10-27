@@ -9,7 +9,7 @@ Le lot 1a donne aux héros la prise en main de Metal Slug : accroupi, tir vers l
 | `Art/go-sign.png` | 1486×730, transparent | Flèche GO après chaque vague bloquée |
 | `Audio/Sfx/couteau.wav`, `Audio/Sfx/grenade-lancer.wav` | 22 kHz | Coup de couteau, lancer de grenade (`sfx.py`, ajoutés en fin de table pour ne pas changer les autres sons) |
 
-`Art/heroes.png` (l’ancienne planche 4 × 4) reste dans le projet : elle sert de référence d’identité aux prompts, et l’ennemi d’essai de `VerifyDataDriven` en est fait.
+`Assets/ArtSources/heroes.png` (l’ancienne planche 4 × 4, sortie de `Resources` à l’allègement de la 0.8.0 puisque le jeu ne la charge plus) reste dans le projet : elle sert de référence d’identité aux prompts.
 
 L’annonce vocale « Grenades ! » est prête dans `tools/audio/voices.py` (ligne `bonus-grenades`) mais n’a pas été générée : il faut une clé Gemini (`GEMINI_API_KEY=... python3 tools/audio/voices.py bonus-grenades`), puis ajouter `"voice": "Audio/Voices/bonus-grenades"` au bonus `grenades` de `Content/rules/default.json`. En attendant, le ramassage s’annonce par le texte GRENADES ! et le son des bonus.
 
@@ -33,7 +33,7 @@ Chaque héros est généré en deux planches de 4 × 3 (1448×1086), la seconde 
 
 La première planche B de Chuck avait un accroupi trop haut (tête à 76 % de la taille debout : les balles à hauteur de poitrine lui traversaient la tête) ; le prompt B ci-dessous exige une tête à 55 % et toutes les planches B ont été faites avec lui. En jeu, la tête d’un héros accroupi est vers 1,3 à 1,4 unité, juste sous les balles des tireurs (1,39 à 1,61).
 
-Codex reçoit les images de référence avec `-i` dans cet ordre : la ligne du héros découpée dans `Art/heroes.png` (Image 1), `Art/heroes.png` entier (Image 2) et, pour la planche B, sa planche A (Image 3). La consigne qui entoure le prompt lui demande de vérifier les coins transparents et la grille, d’appliquer au besoin la passe de détourage de `docs/MISSION_TOKYO.md`, et de régénérer une fois si la grille est fausse (la planche B d’Arnold a été régénérée puis détourée ; les autres sont sorties transparentes du premier coup).
+Codex reçoit les images de référence avec `-i` dans cet ordre : la ligne du héros découpée dans `ArtSources/heroes.png` (Image 1), `ArtSources/heroes.png` entier (Image 2) et, pour la planche B, sa planche A (Image 3). La consigne qui entoure le prompt lui demande de vérifier les coins transparents et la grille, d’appliquer au besoin la passe de détourage de `docs/MISSION_TOKYO.md`, et de régénérer une fois si la grille est fausse (la planche B d’Arnold a été régénérée puis détourée ; les autres sont sorties transparentes du premier coup).
 
 `<DESCRIPTION>` vaut, selon le héros :
 
@@ -83,7 +83,7 @@ Constraints: exact 4x3 orderly grid; exactly 12 sprites of the same character; n
 
 ## Grenades
 
-Références : `Art/bonus-icons.png` (Image 1) et `Art/heroes.png` (Image 2). Le fond n’est pas sorti transparent : Codex a fait la passe de détourage (« Remove ONLY the background… », voir `docs/MISSION_TOKYO.md`), puis effacé les alphas résiduels (1 à 5 sur 255).
+Références : `Art/bonus-icons.png` (Image 1) et `ArtSources/heroes.png` (Image 2). Le fond n’est pas sorti transparent : Codex a fait la passe de détourage (« Remove ONLY the background… », voir `docs/MISSION_TOKYO.md`), puis effacé les alphas résiduels (1 à 5 sur 255).
 
 ```text
 Use case: stylized-concept
@@ -100,7 +100,7 @@ Constraints: exactly 4 objects; no letters, labels, numbers, text, grid lines, b
 
 ## Flèche GO
 
-Références : `Art/action-legends-logo.png` (Image 1) et `Art/heroes.png` (Image 2). Même passe de détourage ; l’image a ensuite été recadrée sur son contenu (6 px de marge) pour `Art/go-sign.png`.
+Références : `Art/action-legends-logo.png` (Image 1) et `ArtSources/heroes.png` (Image 2). Même passe de détourage ; l’image a ensuite été recadrée sur son contenu (6 px de marge) pour `Art/go-sign.png`.
 
 ```text
 Use case: stylized-concept

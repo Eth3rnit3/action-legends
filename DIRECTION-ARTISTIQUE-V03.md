@@ -4,10 +4,10 @@ Création avec le générateur d’images intégré. Les illustrations sont int�
 
 ## Fichiers livrés
 
-- `Assets/Resources/Art/menu-logo.png` : titre illustré transparent.
+- `Assets/ArtSources/menu-logo.png` : titre illustré transparent (remplacé par `Art/action-legends-logo.png`, sorti de `Resources` en 0.8.0).
 - `Assets/Resources/Art/menu-card.png` : cadre métallique utilisé par les fiches de héros et la mission.
 - `Assets/ArtSources/route-master.png` : fresque continue originale.
-- `Assets/Resources/Art/route-01.png`, `route-02.png`, `route-03.png` : boulevard, quais de Seine et Bastille.
+- `Assets/Resources/Art/route-01.png`, `route-02.png` et `Assets/ArtSources/route-03.png` (plus affiché depuis 0.8.0) : boulevard, quais de Seine et Bastille.
 - `Assets/Resources/Art/arcade-fx.png` : 24 images d’animation, flammes de bouche, impacts, explosions et poussière.
 
 Les dimensions reçues diffèrent parfois des dimensions souhaitées. Le moteur calcule le découpage à partir des dimensions réelles. La transparence des effets est contrôlée dans Unity et leurs bords s’estompent légèrement à l’affichage pour éviter les rectangles visibles.

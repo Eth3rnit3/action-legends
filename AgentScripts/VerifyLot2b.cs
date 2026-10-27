@@ -313,7 +313,7 @@ public static class VerifyLot2b
 
     // An enemy with only idle, run and attack, placed off guard: every new state falls back on an old one.
     const string PlainEnemy=@"{""id"": ""test-plain"", ""extends"": ""looter-thrower"", ""panic"": {""health"": 0.5, ""time"": 1}, ""cries"": [],
-      ""animations"": {""sheet"": {""texture"": ""Art/enemies"", ""columns"": 4, ""rows"": 3}, ""states"": [{""name"": ""idle"", ""cells"": [4]}, {""name"": ""run"", ""cells"": [5, 6], ""perStride"": 0.7}, {""name"": ""attack"", ""cells"": [7]}],
+      ""animations"": {""sheet"": {""texture"": ""Art/enemies/looter-thrower"", ""columns"": 4, ""rows"": 4}, ""states"": [{""name"": ""idle"", ""cells"": [4]}, {""name"": ""run"", ""cells"": [5, 6], ""perStride"": 0.7}, {""name"": ""attack"", ""cells"": [7]}],
         ""anchors"": [{""name"": ""hand"", ""cell"": 7, ""x"": -0.62, ""y"": 1.9}]}}";
     static void Plain(List<string> checks)
     {

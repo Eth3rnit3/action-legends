@@ -3,7 +3,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
-from validate_content import (ROOT, find_proper_nouns, load_library, merge, validate_boss, validate_enemy, validate_hero,
+from validate_content import (ROOT, find_proper_nouns, find_unused_art, load_library, merge, validate_boss, validate_enemy, validate_hero,
                               validate_mission, validate_rules, validate_weapon, validate_difficulty,
                               validate_hostage, validate_carrier)
 
@@ -618,6 +618,22 @@ class EngineCodeTests(unittest.TestCase):
             hits = find_proper_nouns(Path(folder))
             self.assertEqual(len(hits), 2)
             self.assertFalse(any("Paname" in h.split(": ")[-1] for h in hits))
+
+
+class ShippedArtTests(unittest.TestCase):
+    def test_every_resources_image_is_loaded(self):
+        self.assertEqual(find_unused_art(), [])
+
+    def test_unused_images_are_detected(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for sub in ("Assets/Scripts", "Assets/Resources/Levels", "Assets/Resources/Content/enemies", "Assets/Resources/Art/city"):
+                (root / sub).mkdir(parents=True)
+            (root / "Assets/Resources/Levels/m.json").write_text('{"map": {"backgrounds": ["Art/city/street"]}}', encoding="utf-8")
+            (root / "Assets/Scripts/Menu.cs").write_text('class M{string logo="Art/logo";}', encoding="utf-8")
+            for name in ("city/street", "city/street-variant", "logo", "sheet-source"):
+                (root / f"Assets/Resources/Art/{name}.png").write_bytes(b"")
+            self.assertEqual(find_unused_art(root), ["Art/city/street-variant", "Art/sheet-source"])
 
 
 if __name__ == "__main__":

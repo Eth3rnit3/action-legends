@@ -18,7 +18,8 @@ public static class VerifyUpgrade
             var master=new Texture2D(2,2,TextureFormat.RGBA32,false);ImageConversion.LoadImage(master,System.IO.File.ReadAllBytes("Assets/ArtSources/route-master.png"));var original=master.GetPixels32();bool exact=true;int offset=0;
             for(int n=1;n<=3;n++)
             {
-                var part=Resources.Load<Texture2D>("Art/route-"+n.ToString("00"));var pixels=part.GetPixels32();
+                // route-03 is no longer shown (Paris uses the first two pieces), so it lives with the sources since 0.8.0.
+                var part=Resources.Load<Texture2D>("Art/route-"+n.ToString("00"));if(!part)part=UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/ArtSources/route-"+n.ToString("00")+".png");var pixels=part.GetPixels32();
                 for(int y=0;y<part.height&&exact;y++)for(int x=0;x<part.width;x++)if(!pixels[y*part.width+x].Equals(original[y*master.width+offset+x])){exact=false;break;}
                 offset+=part.width;
             }

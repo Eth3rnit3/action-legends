@@ -126,7 +126,7 @@ namespace Paname
         }
         void SpawnPlayer(int i,float x)
         {
-            var p=new Player{position=new Vector2(x,0),hero=Mod(slots[i].hero,HeroCount),hp=MaxPlayerHealth,invulnerable=2,grenades=Rules.grenades.start[DifficultyIndex]};var hero=p.Definition;p.weapon=hero.Weapon;
+            var p=new Player{position=new Vector2(x,0),hero=Mod(slots[i].hero,HeroCount),hp=MaxPlayerHealth,invulnerable=2,lives=Level.livesPerPlayer?Level.lives:0,grenades=Rules.grenades.start[DifficultyIndex]};var hero=p.Definition;p.weapon=hero.Weapon;
             p.root=Actor(actors,hero.animations,hero.animations.states[hero.idle].cells[0],PlayerColors[i],true);p.root.name="J"+(i+1)+" • "+hero.name;
             p.illustrated=p.root.Find("Illustration").GetComponent<SpriteRenderer>();
             p.renderers=p.root.GetComponentsInChildren<SpriteRenderer>();players[i]=p;SyncPlayer(i);
@@ -136,7 +136,7 @@ namespace Paname
             if(OnlineRound())return;
             ResetActors();Score=carriedScore;carriedScore=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;screenLocked=false;goFromX=-1;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
             for(int i=0;i<4;i++)if(slots[i].joined)SpawnPlayer(i,2+i*1.3f);
-            PlaceHostages();StartReplay();
+            PlaceHostages();ResetContinue();StartReplay();
             phase=Phase.Playing;Announce(CurrentMission.intro);Sound(startClip);if(musicOut){musicOut.Stop();musicOut.clip=musicClip;}
         }
         public void ReturnToLobby(){if(OnlineReturn())return;phase=Phase.Lobby;cameraX=CurrentMission.cameraMin;BuildLobbyActors();}
@@ -213,6 +213,8 @@ namespace Paname
         public void TickSimulation(float dt,PlayerCommand[] commands)
         {
             if(phase!=Phase.Playing)return;
+            // CONTINUE? holds the whole mission until the team answers or the countdown ends.
+            if(continueClock>0){TickContinue(dt,commands);return;}
             SimulationTime+=dt;announcementTimer=Mathf.Max(0,announcementTimer-dt);shake=Mathf.Max(0,shake-dt*2);
             cameraX=Mathf.Max(cameraX,CameraTarget());
             float rear=Mathf.Max(.5f,cameraX-SimHalfWidth+.7f);
@@ -224,7 +226,8 @@ namespace Paname
                 if(p.hp<=0)
                 {
                     p.downTimer-=dt;
-                    if(p.downTimer<=0&&Reserves>0){Reserves--;p.hp=MaxPlayerHealth;p.position=new Vector2(Mathf.Clamp(LeaderX()-1,1,CurrentMission.length-1),0);p.vertical=0;p.invulnerable=Level.respawn.invulnerable;p.root.gameObject.SetActive(true);Disarm(p);if(Rules.grenades.refillOnRespawn)p.grenades=Mathf.Max(p.grenades,Rules.grenades.start[DifficultyIndex]);}
+                    // Back from the team's lives, or from his own when every hero has his.
+                    if(p.downTimer<=0&&(Level.livesPerPlayer?p.lives>0:Reserves>0)){if(Level.livesPerPlayer)p.lives--;else Reserves--;Revive(p,rear,Level.respawn.inPlace);}
                     else {p.root.gameObject.SetActive(false);continue;}
                 }
                 PlayerCommand input=i<commands.Length?commands[i]:default;
@@ -250,7 +253,7 @@ namespace Paname
             }
             TickBoss(dt);if(!bossStarted)UpdateWaves(dt);UpdateEnemies(dt);UpdateShots(dt);TickGrenades(dt);effects.Tick(dt);TickBonuses(dt);TickHostages(dt);
             bool alive=false;foreach(var p in players)if(p!=null&&p.hp>0)alive=true;
-            if(!alive&&Reserves==0){phase=Phase.Lost;Announce("ON REMET ÇA ?");}
+            if(!alive&&!SpareLives)OutOfLives();
         }
         void Special(Player p)
         {
@@ -493,11 +496,11 @@ namespace Paname
             GUI.matrix=Matrix4x4.TRS(new Vector3(ox,oy,0),Quaternion.identity,Vector3.one*scale);
             if(DrawOnlineBlocker())return;
             if(phase==Phase.Lobby){DrawLobby();return;}
-            DrawHUD();DrawBossHUD();DrawOnlineBanner();
+            DrawHUD();DrawBossHUD();DrawOnlineBanner();DrawContinue();
             if(phase==Phase.Paused)Overlay("ON SOUFFLE UN PEU.","PAUSE",()=>phase=Phase.Playing,"REPRENDRE");
             if(phase==Phase.Won&&DrawTally()){}
-            else if(phase==Phase.Won)Overlay(CurrentMission.winTitle,"TEMPS "+Clock(SimulationTime)+"  ·  "+Score.ToString("N0")+" POINTS"+(HostagesFreed>0?"  ·  "+HostagesFreed+" OTAGES LIBÉRÉS":""),NextMissionDefinition!=null?NextMission:(Action)ReturnToLobby,NextMissionDefinition!=null?"MISSION SUIVANTE  »":"CHOISIR LES HÉROS");
-            if(phase==Phase.Lost)Overlay("ÇA SE JOUE À UN POIL.","PLUS DE RENFORTS  ·  "+Score.ToString("N0")+" POINTS",BeginRound,"REJOUER");
+            else if(phase==Phase.Won)Overlay(CurrentMission.winTitle,"TEMPS "+Clock(SimulationTime)+"  ·  "+Score.ToString("N0")+" POINTS"+(HostagesFreed>0?"  ·  "+HostagesFreed+" OTAGES LIBÉRÉS":"")+ContinueNote,NextMissionDefinition!=null?NextMission:(Action)ReturnToLobby,NextMissionDefinition!=null?"MISSION SUIVANTE  »":"CHOISIR LES HÉROS");
+            if(phase==Phase.Lost)Overlay("ÇA SE JOUE À UN POIL.","PLUS DE RENFORTS  ·  "+Score.ToString("N0")+" POINTS"+ContinueNote,BeginRound,"REJOUER");
             DrawPublishRow();
         }
         readonly Dictionary<ulong,GUIStyle> labelStyles=new Dictionary<ulong,GUIStyle>();

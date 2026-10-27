@@ -1,0 +1,33 @@
+{
+  "id": "slug",
+  "order": 4,
+  "name": "SLUG",
+  "tagline": "MORT EN UN COUP, 3 VIES PAR JOUEUR, PUIS CONTINUE ?",
+  "column": 1,
+  "health": 1,
+  "lives": 2,
+  "livesPerPlayer": true,
+  "damageTaken": 1,
+  "enemyHealth": 1.8,
+  "enemyCount": 1.2,
+  "enemySpeed": 1.12,
+  "enemyCadence": 0.85,
+  "gunmanAim": 0.92,
+  "hurtInvulnerable": 0.75,
+  "waveReward": {
+    "every": 0,
+    "lives": 0,
+    "health": 0
+  },
+  "respawn": {
+    "delay": 1.2,
+    "invulnerable": 2.5,
+    "inPlace": true
+  },
+  "continues": {
+    "enabled": true,
+    "seconds": 10,
+    "grace": 1,
+    "lives": 2
+  }
+}

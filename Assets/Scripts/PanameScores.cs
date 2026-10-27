@@ -25,7 +25,7 @@ namespace Paname
         [Serializable] sealed class ScoreMessage {public string type,board,message;public int ok;public BoardEntry[] entries;}
         [Serializable] sealed class PublishRequest {public string board;public ReplayRecord record;}
         [Serializable] sealed class FetchRequest {public string board,version;}
-        enum Publish { None, Broken, Checking, Ready, Sending, Sent, Better, Failed, Invalid, Unavailable }
+        enum Publish { None, Broken, Checking, Ready, Sending, Sent, Better, Failed, Invalid, Unavailable, Continued }
         const int BoardSize=10,BoardChecks=25;
         PanameGame verifier;
         BoardEntry verifyingEntry;
@@ -43,6 +43,8 @@ namespace Paname
             if(Online&&!IsHost){publish=Publish.None;return;}
             if(replayBroken.Length>0){publish=Publish.Broken;publishNote=replayBroken;return;}
             if(record.score<=0){publish=Publish.None;return;}
+            // Only runs without a continue are ranked: a continued run would buy its score with extra credits.
+            if(record.continues>0){publish=Publish.Continued;return;}
             if(!ScoresAvailable){publish=Publish.Unavailable;return;}
             // Check our own replay first: what this browser cannot reproduce, nobody else will.
             verifier??=CreateVerifier(missions);verifyingEntry=null;
@@ -70,6 +72,7 @@ namespace Paname
             {
                 if(entry.verdict=="ok"&&++shown>=BoardSize)return;
                 if(entry.verdict.Length>0)continue;
+                if(entry.replay.continues>0){entry.verdict="ko";continue;}
                 if(boardChecks>=BoardChecks)return;
                 verifier??=CreateVerifier(missions);
                 if(verifier.BeginVerify(entry.replay)){verifyingEntry=entry;return;}
@@ -132,6 +135,7 @@ namespace Paname
                 case Publish.Failed:if(Button(x,y,w,h,"ÉCHEC DE LA PUBLICATION : RÉESSAYER",C("6A3A32")))PublishScore();break;
                 case Publish.Broken:Label(x-100,y,w+200,h,"SCORE NON PUBLIABLE : "+publishNote+".",13,Cream,true,TextAnchor.MiddleCenter);break;
                 case Publish.Invalid:Label(x-100,y,w+200,h,"CE REPLAY NE SE REJOUE PAS À L'IDENTIQUE : SCORE NON PUBLIABLE.",13,Coral,true,TextAnchor.MiddleCenter);break;
+                case Publish.Continued:Label(x-100,y,w+200,h,"PARTIE CONTINUÉE ("+LastReplay.continues+") : SEULES LES PARTIES SANS CONTINUE SONT CLASSÉES.",13,Cream,true,TextAnchor.MiddleCenter);break;
                 case Publish.Unavailable:Label(x-100,y,w+200,h,"LE CLASSEMENT MONDIAL EST DISPONIBLE DANS LA VERSION NAVIGATEUR.",13,Cream,true,TextAnchor.MiddleCenter);break;
             }
             if(publish==Publish.Ready)Label(x-100,y+42,w+200,18,"Ton pseudo et ta partie seront publiés sur des relais Nostr publics.",11,C("9AAFB2"),false,TextAnchor.MiddleCenter);

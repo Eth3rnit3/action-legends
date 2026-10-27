@@ -313,8 +313,8 @@ namespace Paname
             void Mix(int v){h=unchecked((h^v)*16777619);}
             void MixF(float v)=>Mix(BitConverter.SingleToInt32Bits(v));
             Mix(Score);Mix(Wave);Mix(Reserves);Mix(kills);Mix(enemies.Count);Mix(shots.Count);Mix(bossHealth);Mix((int)phase);
-            foreach(var p in players)if(p!=null){MixF(p.position.x);MixF(p.position.y);Mix(p.hp);Mix(p.weapon.hash);Mix(p.ammo);Mix(p.grenades);Mix(p.rescued);}
-            Mix(thrown.Count);Mix(HostagesFreed);foreach(var o in hostages){Mix(o.state);MixF(o.position.x);}
+            foreach(var p in players)if(p!=null){MixF(p.position.x);MixF(p.position.y);Mix(p.hp);Mix(p.weapon.hash);Mix(p.ammo);Mix(p.grenades);Mix(p.rescued);if(Level.livesPerPlayer)Mix(p.lives);}
+            Mix(thrown.Count);Mix(HostagesFreed);if(Level.continues.enabled){Mix(Continues);MixF(continueClock);}foreach(var o in hostages){Mix(o.state);MixF(o.position.x);}
             foreach(var e in enemies){MixF(e.position.x);Mix(e.hp);}
             return h;
         }

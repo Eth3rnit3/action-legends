@@ -13,6 +13,8 @@ namespace Paname
         public int v=1;
         public string version,mission;
         public int difficulty,score,ticks,hash;
+        // CONTINUE? answered yes during the run (difficulties with continues); 0 in older records.
+        public int continues;
         public float time;
         public bool won;
         public int[] heroes=new int[4];
@@ -90,7 +92,7 @@ namespace Paname
             if(!recording||phase==Phase.Playing||phase==Phase.Paused)return;
             recording=false;FlushRun();replayCount=0;
             var record=pendingRecord;record.runs=replayRuns.ToString();record.ticks=replayTicks;
-            record.score=Score-replayStartScore;record.time=SimulationTime;record.won=phase==Phase.Won;record.hash=StateHash();
+            record.score=Score-replayStartScore;record.time=SimulationTime;record.won=phase==Phase.Won;record.hash=StateHash();record.continues=Continues;
             LastReplay=record;OnReplayFinished(record);
         }
 
@@ -159,7 +161,7 @@ namespace Paname
                 {
                     var record=verifying;verifying=null;
                     bool ended=phase==Phase.Won||phase==Phase.Lost;
-                    return ended&&verifyRun>=verifyRuns.Count-1&&verifyTicks==record.ticks&&Score==record.score&&StateHash()==record.hash&&(phase==Phase.Won)==record.won;
+                    return ended&&verifyRun>=verifyRuns.Count-1&&verifyTicks==record.ticks&&Score==record.score&&StateHash()==record.hash&&(phase==Phase.Won)==record.won&&Continues==record.continues;
                 }
                 var run=verifyRuns[verifyRun];
                 for(int i=0;i<4;i++)frameInputs[i]=Command(run.moves[i],run.flags[i]);

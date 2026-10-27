@@ -40,15 +40,28 @@
     "sweep": 5.5,
     "sweepMargin": 3,
     "altitude": 0.6,
-    "bob": 0.1,
-    "bobRate": 3
+    "bob": 0.08,
+    "bobRate": 3,
+    "roll": 2.5,
+    "rollRate": 1.7,
+    "wake": {
+      "sprite": {
+        "texture": "Art/bosses/speedboat-wake",
+        "columns": 4,
+        "rows": 1
+      },
+      "frames": 4,
+      "fps": 8,
+      "size": 5.6,
+      "y": 0.85
+    }
   },
   "hitbox": {
     "x": -1.8,
-    "y": 1.2,
+    "y": -0.2,
     "stepX": 1.2,
     "stepY": 0.1,
-    "radius": 1.0,
+    "radius": 1.1,
     "count": 4
   },
   "death": {

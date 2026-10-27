@@ -173,13 +173,15 @@ Chaque apparition :
 
 Une fenêtre à `fromY` 2 (les missions livrées) reste à portée d’un héros qui saute, vise en haut ou lance une grenade ; plus haut, l’ennemi n’est atteint qu’en visant en haut. Pour que l’équipe voie chaque entrée, `x` (et `fromX`, et le `x` d’un camion) doit être dans l’écran de la rencontre : de `atX - 15` à `atX + 2,5` pour une rencontre de vague, de `atX - 7` à `atX + 12` pour une rencontre `atX`. Le validateur le vérifie.
 
-Les missions livrées : Paris 10 vagues et 16 rencontres (portes cochères, fenêtres, camionnettes de pillards, une pause de pillards, des embuscades, le fourgon blindé), Marseille 8 vagues et 12 rencontres (parachutistes au-dessus du Vieux-Port, fenêtres du Panier, le hors-bord au quai), Saint-Rémy 9 vagues et 15 rencontres (Arlésiens qui sortent de derrière les tonneaux, les oliviers et les colonnes, fenêtres à volets, camionnette, le taureau sur la route), Tokyo 8 vagues et 11 rencontres (rideaux métalliques, bouches d’égout, monospace noir, parachutistes des toits, le drone de combat).
+Les missions livrées : Paris 10 vagues et 16 rencontres (portes cochères, fenêtres, camionnettes de pillards, une pause de pillards, des embuscades, le fourgon blindé), Marseille 8 vagues et 12 rencontres (parachutistes au-dessus du Vieux-Port, fenêtres du Panier, le hors-bord sur l’eau du Vieux-Port), Saint-Rémy 9 vagues et 15 rencontres (Arlésiens qui sortent de derrière les tonneaux, les oliviers et les colonnes, fenêtres à volets, camionnette, le taureau sur la route), Tokyo 8 vagues et 11 rencontres (rideaux métalliques, bouches d’égout, monospace noir, parachutistes des toits, le drone de combat).
 
 ### Boss de mi-parcours
 
 ```json
-{"atX": 62, "boss": {"id": "speedboat", "health": 1, "name": "HORS-BORD DES CAÏDS"}}
+{"atX": 30, "boss": {"id": "speedboat", "health": 1, "lane": {"left": -7, "right": -1, "y": 1.9}}}
 ```
+
+`lane` (facultatif, boss volant seulement, mi-parcours ou final) le garde dans une bande de l’arène : il va et vient de `left` à `right` (en unités depuis le centre de l’arène, de -10 à 10, au moins 1 d’écart) sur la ligne `y` (sa ligne de flottaison ou de vol, de 0 à 12), au lieu de balayer tout l’écran à l’`altitude` de sa fiche. Le hors-bord de Marseille navigue ainsi sur l’eau visible derrière le quai : mesurer la zone sur une capture de l’arène (le panorama ne bouge pas pendant le combat) et vérifier que la zone touchée (`hitbox`) descend jusqu’aux tirs droits des héros (vers `y` = 1,5).
 
 Un boss de la bibliothèque (section 4), avec les mêmes champs que le boss final (`health`, `name`, `intro`, `rage`, `defeat`). Quand l’équipe atteint `atX`, l’écran se bloque autour d’elle, la barre de vie s’affiche et les vagues attendent ; à sa chute (il rapporte son `score`), le défilement repart, la flèche GO s’affiche et les renforts qu’il a lâchés s’enfuient. Il se place au moins 30 unités avant la sortie et hors de l’écran d’une vague (pas entre `atX - 10` et `atX + 5` d’une vague) ; trois au plus par mission. Les bonus ne se ramassent pas pendant un combat de boss : ne pas placer d’otage dans son arène. Paris : `armored-van` (x 215), Marseille : `speedboat` (x 62, là où le décor montre le Vieux-Port), Saint-Rémy : `taureau` (x 196, sur la route qui sort de la ville), Tokyo : `combat-drone` (x 176).
 
@@ -365,7 +367,7 @@ Un boss est un comportement — `flyer` (vole et attaque en mouvement) ou `walke
 | `smokeSize` | Taille de la fumée émise à l’ancrage `smoke` sous la moitié des PV. |
 | `animations` | Section 2. |
 | `rotor` | Volant : `x`, `y`, `width`, `height` d’un rotor animé dessiné par le moteur, `speed` de rotation ; `width` 0 : aucun. |
-| `flight` | Volant : trajectoire `x = centre + sin(t) × min(sweep, demi-écran − sweepMargin)`, `y = altitude + sin(t × bobRate) × bob`, avec `t` qui avance à `speed` (par difficulté) ; `rageCatchUp` accélère la trajectoire quand il s’emballe. |
+| `flight` | Volant : trajectoire `x = centre + sin(t) × min(sweep, demi-écran − sweepMargin)`, `y = altitude + sin(t × bobRate) × bob`, avec `t` qui avance à `speed` (par difficulté) ; `rageCatchUp` accélère la trajectoire quand il s’emballe. Dessin seulement : `roll` (degrés, 0 à 20) et `rollRate` font tanguer l’image (un bateau), et `wake` (comme `projectile`, section des attaques : `sprite`, `frames`, `fps`, `size`, `y`) boucle une écume derrière la coque, cachée à sa chute. Un `lane` de la mission (boss de mi-parcours) remplace le balayage et l’altitude. |
 | `walk` | Marcheur : `speed` (par difficulté), `stopDistance` (s’arrête à cette distance du héros), `margin` (reste à cette distance des bords de l’arène), `stepLength` (un pas, avec secousse `stepShake` et poussière à l’ancrage `foot`), `entry` (entre à cette distance du bord droit ; négatif : arrive de hors de l’écran et entre en roulant). |
 | `hitbox` | `count` cercles de rayon `radius`, le premier en (`x`, `y`) depuis le pivot, les suivants décalés de (`stepX`, `stepY`). |
 | `death` | Chute : descend de `fall` u/s, tourne de `spin` °/s (dans le sens de son regard si `spinWithFacing`), explosions autour de `core` sur `spreadX` × `spreadY`. |

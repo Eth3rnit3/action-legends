@@ -20,6 +20,8 @@ namespace Paname
         public bool enabled=true;
         public string id,name,intro,rage,defeat;
         public float health=1;
+        // A flyer kept to a strip of the arena (water, sky): it sweeps from left to right of the arena centre on the line y.
+        public MissionLane lane=new MissionLane();
         [NonSerialized] public BossDefinition definition;
         // The library boss and the texts it lends where the mission sets none.
         public void Resolve(string label)
@@ -29,8 +31,12 @@ namespace Paname
             if(string.IsNullOrWhiteSpace(rage))rage=b.rage;if(string.IsNullOrWhiteSpace(defeat))defeat=b.defeat;
             if(name.Length>30||intro.Length>80||rage.Length>80||defeat.Length>80)throw new ArgumentException(label+" : textes du boss trop longs");
             if(!(health>=.25f&&health<=4))throw new ArgumentException(label+" : health doit être entre 0.25 et 4");
+            lane??=new MissionLane();
+            if(lane.Set&&(b.walker||!(lane.left>=-10&&lane.right<=10&&lane.right-lane.left>=1&&lane.y>=0&&lane.y<=12)))
+                throw new ArgumentException(label+" : lane pour un boss volant, left et right de -10 à 10 (au moins 1 d'écart), y de 0 à 12");
         }
     }
+    [Serializable] public sealed class MissionLane {public float left,right,y;public bool Set=>right>left;}
     // Reserved for later work: terrain, props and vehicles must stay empty until the engine reads them (see docs/ADDING_A_LEVEL.md).
     // Encounters (lot 2b) are read: see EncounterSpawn and MissionEncounter below.
     [Serializable] public sealed class MapTerrain {public string type;public float x,width,height,toHeight;}

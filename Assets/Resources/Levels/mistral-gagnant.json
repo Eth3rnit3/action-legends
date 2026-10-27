@@ -276,12 +276,17 @@
       ]
     },
     {
-      "atX": 62,
+      "atX": 30,
       "wave": -1,
       "spawns": [],
       "boss": {
         "id": "speedboat",
-        "health": 1
+        "health": 1,
+        "lane": {
+          "left": -7,
+          "right": -1,
+          "y": 1.9
+        }
       }
     },
     {

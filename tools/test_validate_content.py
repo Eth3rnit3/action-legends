@@ -194,6 +194,24 @@ class MissionValidationTests(unittest.TestCase):
             with self.subTest(change=change):
                 self.assertTrue(self.rejected(change))
 
+    def test_boss_lane(self):
+        marseille = json.loads((RESOURCES / "Levels/mistral-gagnant.json").read_text(encoding="utf-8"))
+        boat = next(c for c in marseille["encounters"] if c.get("boss", {}).get("id") == "speedboat")
+        self.assertTrue(boat["boss"]["lane"]["right"] > boat["boss"]["lane"]["left"])
+        lane = {"left": -7, "right": -1, "y": 1.9}
+        self.assertFalse(self.rejected(lambda d: d["boss"].update(lane=lane)))
+        self.assertFalse(self.rejected(lambda d: d["encounters"].append({"atX": 300, "boss": {"id": "speedboat", "lane": lane}})))
+        changes = (
+            lambda d: d["boss"].update(lane=dict(lane, right=-6.5)),
+            lambda d: d["boss"].update(lane=dict(lane, left=-11)),
+            lambda d: d["boss"].update(lane=dict(lane, y=13)),
+            lambda d: d["boss"].update(lane="water"),
+            lambda d: d["encounters"].append({"atX": 300, "boss": {"id": "armored-van", "lane": lane}}),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                self.assertTrue(self.rejected(change))
+
     def test_map_framing(self):
         self.assertFalse(self.rejected(lambda d: d["map"].update(horizon=0.1, groundBand=0.12, groundTop=-1.1, groundFade=0.5)))
         changes = (
@@ -463,6 +481,23 @@ class LibraryValidationTests(unittest.TestCase):
         walker = content("bosses", "mecha-shogun")
         walker["animations"]["states"] = [s for s in walker["animations"]["states"] if s["name"] != "walk"]
         self.assertTrue(validate_boss(walker, RESOURCES))
+
+    def test_boat_roll_and_wake(self):
+        boat = content("bosses", "speedboat")
+        self.assertEqual(validate_boss(boat, RESOURCES, LIBRARY["enemies"]), [])
+        self.assertTrue(boat["flight"]["wake"]["sprite"]["texture"])
+        changes = (
+            lambda d: d["flight"].update(roll=25),
+            lambda d: d["flight"].update(rollRate=-1),
+            lambda d: d["flight"]["wake"]["sprite"].update(texture="Art/missing"),
+            lambda d: d["flight"]["wake"].update(frames=5),
+            lambda d: d["flight"]["wake"].update(size=0),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                data = copy.deepcopy(boat)
+                change(data)
+                self.assertTrue(validate_boss(data, RESOURCES, LIBRARY["enemies"]))
 
     def test_mid_bosses_and_new_moves(self):
         enemies = LIBRARY["enemies"]

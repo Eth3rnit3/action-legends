@@ -14,6 +14,7 @@ Générées avec le générateur d’images intégré de Codex CLI, en prenant `
 | `Art/marseille/panier.png` | 2172×724 | Décor 2 |
 | `Art/marseille/canebiere.png` | 2172×724 | Décor 3 |
 | `ArtSources/marseille-sol.png` | 2172×724 | Ancienne chaussée répétée devant les acteurs ; depuis 0.8.0 la bande de premier plan reprend le bas de `panier.png` (`map.groundBand`), dont le pavé raccorde |
+| `Art/bosses/speedboat-wake.png` | 2048×512, 4 × 1, transparent | Écume du hors-bord (`flight.wake`, 4 images en boucle, derrière la coque) |
 | `Art/marseille/news-helicopter.png` | 2161×728, transparent | Boss |
 
 ## Musique
@@ -86,4 +87,39 @@ Style/medium: Original premium hand-painted pixel-art arcade sprite, refined 199
 Composition/framing: Preserve the source helicopter's EXACT silhouette, scale, position, proportions and orientation within the 3:1 frame. It faces LEFT; cockpit remains on the left; two gun barrels remain under the nose in exactly the same place; bomb racks remain under the belly; skids and tail rotor remain; NO main rotor blades because the game animates them. Keep the same surrounding transparent margins and do not crop any extremity.
 Text (verbatim): "DIRECT"
 Constraints: Change only the livery, fictional cockpit anchor, roof dish, and side broadcast camera. Preserve every other geometric invariant. True transparent alpha background around the complete helicopter silhouette. No scene, no ground, no sky, no glow, no smoke, no effects, no drop shadow, no UI, no watermark, no real person, no real channel logo, no copied game logo.
+```
+
+### speedboat-wake
+
+Hors-bord sur l’eau (0.8.0) : il naviguait sur le quai, au niveau des héros. La rencontre passe de `atX` 62 à 30 : à 62, l’arène ne montre que 3 à 4 unités d’eau à gauche (le marché aux poissons occupe le reste du panorama `vieux-port`), à 30 elle en montre une douzaine. Son `lane` (-7 à -1 du centre de l’arène, ligne de flottaison `y` 1,9, juste derrière le bord du quai à 1,7) a été mesuré sur une capture de l’arène ; sa `hitbox` descend sous la ligne d’eau pour que les tirs droits et en diagonale des héros sur le quai le touchent. Références : `Art/bosses/speedboat.png`, `Art/marseille/vieux-port.png`, `Art/arcade-fx.png`.
+
+```text
+Use case: stylized-concept
+Asset type: production-ready transparent 2D game-effect flipbook for a looping run-and-gun arcade animation
+
+Input images:
+- Image 1 (speedboat.png): scale, palette, crisp dark outlines, and premium hand-painted pixel-art rendering reference; the speedboat faces LEFT, so orient the wake for leftward travel. Do not include the boat or people.
+- Image 2 (vieux-port.png): color reference for deep-blue Mediterranean harbour water and warm sun glints; use only to make the foam coloration feel natural on that water. Do not render any water or scenery.
+- Image 3 (arcade-fx.png): reference for the game's refined 1990s hand-painted arcade effect sprites, deliberate pixel clusters, highlights, shading, and animation-sheet discipline.
+
+Primary request:
+Create ONE precise sprite sheet containing exactly FOUR animation frames arranged as exactly 4 columns × 1 row, four equal square cells, left-to-right chronological order. The final composition is 2048 × 512 pixels, implying four 512 × 512 cells. No borders, separators, grid lines, registration marks, or cell backgrounds.
+
+Each cell contains the same side-view white sea-foam WAKE at water level from a speedboat moving LEFT:
+- a bright curling bow-spray splash at the LEFT end;
+- a long, low horizontal band of churning white and pale-cyan foam across the middle;
+- a broader frothy propeller wash at the RIGHT end with a few small airborne spray droplets.
+The four frames are successive moments of one seamless looping animation. Shift foam ripples, individual spray droplets, bubbles, and crest highlights slightly from frame to frame, while keeping the wake's overall silhouette, footprint, scale, waterline, and placement extremely stable. Frame 4 must transition cleanly back to frame 1. No camera movement and no size pulsing.
+
+Exact layout and scale:
+In every 512 × 512 cell, the wake spans approximately 92% of the cell width and is centered horizontally. Its waterline/flat lower foam baseline lies at approximately 62% of cell height measured from the top (around y=317 within each cell). Foam rises no more than roughly 22% of cell height above that baseline, except the left bow spray may rise slightly higher; foam dips no more than roughly 6% below the baseline. Keep all marks, droplets, antialiasing, glow, and pixels strictly inside their own cell, with generous transparent margins, especially at every outer canvas edge. All four wakes share identical alignment.
+
+Style/medium:
+Original premium hand-painted pixel-art arcade effect, refined 1990s run-and-gun craftsmanship, cohesive with the references. Dense, deliberate pixel clusters; crisp readable silhouette and controlled dark blue edge accents; white foam, pale cyan, light teal, and soft blue-violet shadowing; tiny warm-white sun glints; energetic but clean production sprite. Preserve visibly pixel-art construction rather than smooth vector art, painterly concept art, 3D, or photorealism.
+
+Scene/backdrop:
+TRUE fully transparent background everywhere outside the foam. Render no environment at all: no water surface, no sea, no sky, no harbour, no horizon, no ground, no shadow plane, no colored matte. Empty pixels must have genuine alpha 0. All four canvas corners must be fully transparent. Output must preserve a real RGBA alpha channel, not black, white, colored, or checkerboard transparency simulation.
+
+Constraints:
+Exactly one image; exactly four frames; exactly 4 columns × 1 row; equal cells; no fifth frame; no cropped effects; no overlap between cells; no boat; no motor; no people; no weapons; no text; no letters; no numbers; no UI; no watermark; no logos; no grid lines; no opaque cell backgrounds.
 ```

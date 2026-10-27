@@ -89,14 +89,18 @@ public static class VerifyDataDriven
     // Recorded again in lot 2b: the missions are restaged with fewer horde enemies and placed encounters (doors, windows,
     // parachutes, vans, camps off guard, a mid-mission boss), enemies may panic and lob grenades, shots fly past an enemy
     // not yet in play off screen, and the state hash mixes each enemy's mode, the arrivals waiting and the vans.
+    // Marseille's three runs recorded again in 0.8.0: its speedboat sails the Vieux-Port (a boss lane at x 30 instead of
+    // the quay at 62, hitbox under its waterline), and a flyer now starts at the start of its path instead of keeping the
+    // previous round's position for the tick it spawns in (Paris and Tokyo are unchanged: they no longer depend on the
+    // run before them, which is why Marseille's new runs had shifted Tokyo's).
     // A lot that changes gameplay on purpose records them again and says so.
     // m: the position among the three missions these runs were recorded on (Saint-Remy has since come before Tokyo).
     static readonly string[] OldIds={"panique-a-paname","mistral-gagnant","tokyo-neon"};
     static int OldIndex(PanameGame g,int m)=>Array.FindIndex((MissionDefinition[])Get(g,"missions"),x=>x.id==OldIds[m]);
     static readonly (int m,int d,int[] h,bool inv,int ticks,int score,int hash)[] Legacy={
-        (0,0,new[]{0,1,2,3},false,6372,99380,-1992666955),(1,1,new[]{2,3,-1,-1},false,7328,70600,1013089371),(2,0,new[]{3,2,1,0},false,5340,96800,-482492511),
-        (2,3,new[]{1,-1,-1,-1},false,889,2650,-896010580),(0,2,new[]{0,-1,-1,-1},false,724,1000,1274428369),(1,3,new[]{1,0,3,2},false,1264,22300,-1637653415),
-        (2,1,new[]{0,1,-1,-1},false,5524,67120,-2113353877),(0,1,new[]{2,-1,3,-1},false,5589,37200,404526836),(1,0,new[]{0,1,2,3},true,5330,106060,1038239749)};
+        (0,0,new[]{0,1,2,3},false,6372,99380,-1992666955),(1,1,new[]{2,3,-1,-1},false,5750,55400,57852828),(2,0,new[]{3,2,1,0},false,5340,96800,-482492511),
+        (2,3,new[]{1,-1,-1,-1},false,889,2650,-896010580),(0,2,new[]{0,-1,-1,-1},false,724,1000,1274428369),(1,3,new[]{1,0,3,2},false,1420,12100,1556413813),
+        (2,1,new[]{0,1,-1,-1},false,5524,67120,-2113353877),(0,1,new[]{2,-1,3,-1},false,5589,37200,404526836),(1,0,new[]{0,1,2,3},true,5332,107010,657360258)};
     static readonly string[] ProperNouns={"Paris","Parisien","Macron","Bastille","Seine","Eiffel","Haussmann","Marseille","Marseillaise","Mistral","Pastis","Canebière","Tokyo","Shogun","Sakura","Shibuya","Akihabara","Chuck","Norris","Arnold","Jean-Claude","JCVD","Sylvester","macron-helicopter","mecha-shogun","news-helicopter","route-0","Saint-Rémy","Saint-Remy","Provence","Provençal","Nostradamus","Arlésien","Arlésienne","arlesien","arlesienne","Farandole","Alpilles","Glanum","Favier","Camargue","taureau","prophetie-en-provence"};
 
     public static object Main(string captures)

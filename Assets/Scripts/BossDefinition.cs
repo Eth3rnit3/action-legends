@@ -56,7 +56,8 @@ namespace Paname
     }
     [Serializable] public sealed class BossRotor {public float x,y,width,height,speed;}
     // Flyer path: x sweeps sin(t) around the arena centre, y bobs around altitude; t runs at speed per difficulty.
-    [Serializable] public sealed class BossFlight {public float[] speed;public float rageCatchUp,sweep,sweepMargin,altitude,bob,bobRate;}
+    // Drawing only: the art rolls by roll degrees at rollRate, and a boat's wake loops at its waterline.
+    [Serializable] public sealed class BossFlight {public float[] speed;public float rageCatchUp,sweep,sweepMargin,altitude,bob,bobRate,roll,rollRate;public BossSprite wake=new BossSprite();}
     // Walker: walks toward the nearest hero until stopDistance, one footfall every stepLength.
     [Serializable] public sealed class BossWalk {public float[] speed;public float stopDistance,margin,stepLength,stepShake,entry;public string foot;}
     // count circles of radius, from (x, y) by (stepX, stepY), facing the way the art is drawn.
@@ -101,6 +102,7 @@ namespace Paname
             {
                 var f=flight;Content.PerDifficulty(f.speed,.05f,20,label+".flight.speed");Content.Range(f.rageCatchUp,0,5,label+".flight.rageCatchUp");Content.Range(f.sweep,0,20,label+".flight.sweep");
                 Content.Range(f.sweepMargin,0,20,label+".flight.sweepMargin");Content.Range(f.altitude,0,12,label+".flight.altitude");Content.Range(f.bob,0,5,label+".flight.bob");Content.Range(f.bobRate,0,20,label+".flight.bobRate");
+                Content.Range(f.roll,0,20,label+".flight.roll");Content.Range(f.rollRate,0,20,label+".flight.rollRate");f.wake??=new BossSprite();f.wake.Validate(label+".flight.wake");
                 Content.Range(rotor.width,0,20,label+".rotor.width");Content.Range(rotor.height,0,2,label+".rotor.height");Content.Range(rotor.speed,0,500,label+".rotor.speed");
             }
             var h=hitbox;if(h.count<1||h.count>12)throw new ArgumentException(label+" : hitbox.count entre 1 et 12");Content.Range(h.radius,.1f,10,label+".hitbox.radius");

@@ -636,6 +636,24 @@ def validate_boss_sprite(art, resources, label, errors):
     return True
 
 
+def validate_lane(entry, library, label, errors):
+    """MissionBoss.lane: a flyer kept between left and right of the arena centre, on the line y; absent or right <= left means none."""
+    lane = entry.get("lane")
+    if lane is None:
+        return
+    if not isinstance(lane, dict):
+        errors.append(f"{label}.lane: object required")
+        return
+    left, right, y = (errors.number(lane, key, low, high, label + ".lane") for key, low, high in (("left", -10, 10), ("right", -10, 10), ("y", 0, 12)))
+    if left is None or right is None or right <= left:
+        return
+    if right - left < 1:
+        errors.append(f"{label}.lane: right at least 1 unit beyond left")
+    boss = library["bosses"].get(entry.get("id"))
+    if isinstance(boss, dict) and boss.get("behavior") == "walker":
+        errors.append(f"{label}.lane: only for a flyer")
+
+
 def validate_boss(data, resources, enemies=None):
     errors = Errors()
     label = f"boss {data.get('id')}"
@@ -671,8 +689,10 @@ def validate_boss(data, resources, enemies=None):
     else:
         flight, fl = obj(data, "flight"), label + ".flight"
         errors.per_difficulty(flight, "speed", .05, 20, fl)
-        for key, low, high in (("rageCatchUp", 0, 5), ("sweep", 0, 20), ("sweepMargin", 0, 20), ("altitude", 0, 12), ("bob", 0, 5), ("bobRate", 0, 20)):
+        for key, low, high in (("rageCatchUp", 0, 5), ("sweep", 0, 20), ("sweepMargin", 0, 20), ("altitude", 0, 12), ("bob", 0, 5), ("bobRate", 0, 20),
+                               ("roll", 0, 20), ("rollRate", 0, 20)):
             errors.number(flight, key, low, high, fl)
+        validate_boss_sprite(flight.get("wake"), resources, fl + ".wake", errors)
         rotor = obj(data, "rotor")
         errors.number(rotor, "width", 0, 20, label + ".rotor")
         errors.number(rotor, "height", 0, 2, label + ".rotor")
@@ -970,6 +990,7 @@ def validate_mission(data, resources, library=None):
             health = boss.get("health", 1)
             if isinstance(health, bool) or not isinstance(health, (int, float)) or not math.isfinite(health) or not .25 <= health <= 4:
                 errors.append("boss.health must be between .25 and 4")
+            validate_lane(boss, library, "boss", errors)
             errors.resource(data.get("bossMusic"), "Audio/", SOUNDS, resources, "bossMusic")
     waves = data.get("waves")
     if not isinstance(waves, list) or not 1 <= len(waves) <= 20:
@@ -1065,6 +1086,7 @@ def validate_encounters(encounters, waves, data, length, exit_x, rules, library,
             for key, limit in {"name": 30, "intro": 80, "rage": 80, "defeat": 80}.items():
                 errors.text(boss, key, limit, label + ".boss", required=False)
             errors.number(boss, "health", .25, 4, label + ".boss", 1)
+            validate_lane(boss, library, label + ".boss", errors)
             for w in waves:
                 if isinstance(w, dict) and isinstance(w.get("atX"), (int, float)) and w["atX"] - 10 < at < w["atX"] + 5:
                     errors.append(f"{label}: a mid-mission boss stands outside a wave's screen (atX - 10 to atX + 5, {w['atX']})")

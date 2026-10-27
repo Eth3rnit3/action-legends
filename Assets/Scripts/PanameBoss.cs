@@ -13,7 +13,7 @@ namespace Paname
         }
         readonly List<BossBomb> bossBombs=new List<BossBomb>();
         Transform bossRoot,bossRotor,bossSight;
-        SpriteRenderer bossRenderer;
+        SpriteRenderer bossRenderer,bossWake;
         Vector2 bossPosition,bossAim;
         // bossAttack: index of the current move in the boss's list; bossPhase: what it is doing in it.
         int bossHealth,bossMaxHealth,bossAttack,bossPhase,bossVolley,bossBarrel,bossCell,bossState=-1;
@@ -34,7 +34,7 @@ namespace Paname
         {
             bossBombs.Clear();ResetShockwaves();bossRoot=null;bossRotor=null;bossSight=null;bossRenderer=null;
             bossStarted=false;bossDefeated=false;bossEnraged=false;bossHealth=0;bossTime=0;bossDeathClock=0;bossBarrel=0;bossPhase=BossIdle;bossState=-1;bossStateTime=0;
-            bossEntry=null;midBoss=false;bossTroops=0;bossTroop=0;
+            bossEntry=null;midBoss=false;bossTroops=0;bossTroop=0;bossWake=null;
         }
         void SpawnBoss()=>SpawnBoss(null);
         // mid: an encounter's boss; the street keeps its enemies and the waves wait for its defeat.
@@ -53,6 +53,12 @@ namespace Paname
             bossRenderer=bossRoot.gameObject.AddComponent<SpriteRenderer>();bossRenderer.sprite=set.Sprite(bossCell);bossRenderer.sortingOrder=set.layer;
             if(boss.flash&&ArcadeEffects.ActorMaterial)bossRenderer.sharedMaterial=ArcadeEffects.ActorMaterial;
             if(boss.shadow.x>0)Shape(bossRoot,"Ombre du boss",0,.04f,boss.shadow.x,boss.shadow.y,new Color(.04f,.06f,.12f,.35f),10,true);
+            // A boat's foam at its waterline, behind the hull: only the spray around it shows.
+            if(!boss.walker&&boss.flight.wake.Drawn)
+            {
+                var w=boss.flight.wake;var wake=new GameObject("Sillage").transform;wake.SetParent(bossRoot,false);wake.localPosition=new Vector3(0,w.y,0);wake.localScale=Vector3.one*w.size;
+                bossWake=wake.gameObject.AddComponent<SpriteRenderer>();bossWake.sprite=w.Frame(0);bossWake.sortingOrder=set.layer-1;
+            }
             var r=boss.rotor;
             if(!boss.walker&&r.width>0)
             {
@@ -61,6 +67,9 @@ namespace Paname
             }
             // A walker comes in from the right edge of the arena.
             if(boss.walker){bossPosition=new Vector2(bossArenaX+ArenaHalfWidth-boss.walk.entry,0);bossRoot.position=bossPosition;}
+            // A flyer starts where its path starts: a mid-mission boss spawns after TickBoss, and the rest of that tick (shots,
+            // specials) used to read the previous round's position.
+            else{var lane=BossEntry.lane;bossPosition=lane!=null&&lane.Set?new Vector2(bossArenaX+(lane.left+lane.right)*.5f,lane.y):new Vector2(bossArenaX,boss.flight.altitude);bossRoot.position=bossPosition;}
         }
         Player BossTarget()
         {
@@ -109,7 +118,10 @@ namespace Paname
             // The phase stays continuous when the boss enters its faster second phase.
             if(bossEnraged)movementTime+=bossRageTime*f.rageCatchUp;
             if(bossEnraged)bossRageTime+=dt;
-            bossPosition=new Vector2(bossArenaX+Mathf.Sin(movementTime)*Mathf.Min(f.sweep,ArenaHalfWidth-f.sweepMargin),f.altitude+Mathf.Sin(movementTime*f.bobRate)*f.bob);
+            // A lane keeps it to a strip of the arena (a boat on the water); the free path is left exactly as it was computed.
+            var lane=BossEntry.lane;
+            if(lane!=null&&lane.Set)bossPosition=new Vector2(bossArenaX+(lane.left+lane.right)*.5f+Mathf.Sin(movementTime)*(lane.right-lane.left)*.5f,lane.y+Mathf.Sin(movementTime*f.bobRate)*f.bob);
+            else bossPosition=new Vector2(bossArenaX+Mathf.Sin(movementTime)*Mathf.Min(f.sweep,ArenaHalfWidth-f.sweepMargin),f.altitude+Mathf.Sin(movementTime*f.bobRate)*f.bob);
             bossRoot.position=bossPosition;
             var target=BossTarget();if(target==null)return;
             bossRoot.localScale=new Vector3(target.position.x<bossPosition.x?1:-1,1,1);
@@ -126,6 +138,11 @@ namespace Paname
             var set=Boss.animations;if(bossState<0)bossState=Boss.idle;
             bossCell=set.Cell(bossState,bossStateTime,Boss.walker?bossStride/Boss.walk.stepLength:bossTime);bossStateTime+=dt;
             if(bossRenderer){bossRenderer.sprite=set.Sprite(bossCell);ArcadeEffects.HitFlash(bossRenderer,bossFlash>0?1:0,flashProperties);}
+            if(!Boss.walker&&bossRoot)
+            {
+                var f=Boss.flight;if(f.roll>0)bossRoot.localRotation=Quaternion.Euler(0,0,Mathf.Sin(bossTime*f.rollRate)*f.roll);
+                if(bossWake)bossWake.sprite=f.wake.Frame(bossTime);
+            }
         }
         BossAttack BombAttack=>bossAttack<Boss.attacks.Length&&Boss.attacks[bossAttack].kind==1?Boss.attacks[bossAttack]:Boss.FirstBombs;
         Vector2 BossBombRack()=>BossPoint(BombAttack.rack);
@@ -208,7 +225,7 @@ namespace Paname
             bossHealth=Mathf.Max(0,bossHealth-amount);bossFlash=.065f;
             if(!bossEnraged&&bossHealth>0&&bossHealth<=bossMaxHealth/2){bossEnraged=true;bossRageTime=0;bossTimer=Mathf.Min(bossTimer,Boss.rageDelay);Announce(BossEntry.rage);}
             if(bossHealth>0)return;
-            bossDefeated=true;bossDeathClock=2.5f;bossExplosionTimer=0;Score+=Boss.score;
+            bossDefeated=true;bossDeathClock=2.5f;bossExplosionTimer=0;Score+=Boss.score;if(bossWake)bossWake.enabled=false;
             // A boss with a "wreck" state shows it as it goes down.
             int wreck=Boss.animations.Find("wreck");if(wreck>=0&&bossRenderer){bossCell=Boss.animations.states[wreck].cells[0];bossRenderer.sprite=Boss.animations.Sprite(bossCell);}
             if(bossSight)bossSight.gameObject.SetActive(false);

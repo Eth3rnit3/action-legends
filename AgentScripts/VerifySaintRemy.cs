@@ -253,12 +253,17 @@ public static class VerifySaintRemy
         Check(g.IsUnlocked(tokyo)&&g.NextMissionDefinition.id=="tokyo-neon"&&g.NextMissionDefinition.code=="SAKURA","Gagner Saint-Rémy débloque Tokyo et révèle SAKURA",checks);
         g.NextMission();Check(g.MissionIndex==tokyo&&g.phase==PanameGame.Phase.Playing,"Saint-Rémy enchaîne sur Tokyo",checks);
         g.ReturnToLobby();
-        // A browser that had unlocked Tokyo before Saint-Remy existed: Tokyo stays open, Saint-Remy waits for Marseille or its code.
+        // A browser that had unlocked Tokyo (0.7.0: only Tokyo's key is stored): Tokyo stays open, and Saint-Remy,
+        // inserted before it, opens too, as does every mission before a mission already unlocked.
         foreach(var m in original)PlayerPrefs.DeleteKey("action-legends.unlocked."+m.id);
         PlayerPrefs.SetInt("action-legends.unlocked.tokyo-neon",1);Call(g,"LoadMission",0);
-        Check(g.IsUnlocked(tokyo)&&!g.IsUnlocked(sr)&&g.UnlockedCount==2,"Un Tokyo déjà débloqué le reste (Saint-Rémy reste à débloquer)",checks);
-        g.SelectMission(1);Check(g.MissionIndex==tokyo,"Les flèches passent de Paris à Tokyo sans s'arrêter sur les missions fermées",checks);
-        Check(g.EnterMissionCode("farandole")&&g.MissionIndex==sr&&g.IsUnlocked(sr),"Le code FARANDOLE ouvre et sélectionne Saint-Rémy",checks);
+        Check(g.IsUnlocked(tokyo)&&g.IsUnlocked(sr)&&g.IsUnlocked(1)&&g.UnlockedCount==4,"Un Tokyo déjà débloqué le reste et ouvre Saint-Rémy, insérée avant lui",checks);
+        g.SelectMission(1);g.SelectMission(1);Check(g.MissionIndex==sr,"Les flèches s'arrêtent sur Saint-Rémy entre Marseille et Tokyo",checks);
+        foreach(var m in original)PlayerPrefs.DeleteKey("action-legends.unlocked."+m.id);
+        PlayerPrefs.SetInt("action-legends.unlocked."+Id,1);Call(g,"LoadMission",0);
+        Check(g.IsUnlocked(sr)&&g.IsUnlocked(1)&&!g.IsUnlocked(tokyo)&&g.UnlockedCount==3,"Saint-Rémy débloquée ouvre Marseille mais pas Tokyo, qui vient après",checks);
+        foreach(var m in original)PlayerPrefs.DeleteKey("action-legends.unlocked."+m.id);Call(g,"LoadMission",0);
+        Check(g.EnterMissionCode("farandole")&&g.MissionIndex==sr&&g.IsUnlocked(sr)&&g.IsUnlocked(1)&&!g.IsUnlocked(tokyo),"Le code FARANDOLE ouvre et sélectionne Saint-Rémy (et Marseille avant elle)",checks);
         Check(g.EnterMissionCode("SAKURA")&&g.MissionIndex==tokyo,"Le code SAKURA sélectionne toujours Tokyo, à sa nouvelle place",checks);
         Call(g,"LoadMission",0);foreach(var m in original)PlayerPrefs.DeleteKey("action-legends.unlocked."+m.id);
     }

@@ -5,7 +5,7 @@ using static Paname.PanameArt;
 namespace Paname
 {
     // Missions follow each other in catalog order. Winning one unlocks the next in this browser and
-    // reveals its code; typing that code in the lobby unlocks it anywhere else.
+    // reveals its code; typing that code in the lobby unlocks it, and every mission before it, anywhere else.
     public sealed partial class PanameGame
     {
         const string UnlockKey="action-legends.unlocked.";
@@ -17,7 +17,14 @@ namespace Paname
         // later: the lobby ignores its keys briefly so that Enter does not also deploy the team.
         bool LobbyKeysBlocked=>codeEntry||boardOpen||Time.unscaledTime<codeClosedAt+.35f;
         void CloseCodeEntry(){codeEntry=false;codeClosedAt=Time.unscaledTime;}
-        public bool IsUnlocked(int index)=>index==0||PlayerPrefs.GetInt(UnlockKey+missions[index].id,0)==1;
+        // A mission is open once it or any mission after it in the catalog is unlocked: a mission
+        // inserted earlier in the campaign opens for players who already reached a later one.
+        public bool IsUnlocked(int index)
+        {
+            if(index==0)return true;
+            for(int i=index;i<MissionCount;i++)if(PlayerPrefs.GetInt(UnlockKey+missions[i].id,0)==1)return true;
+            return false;
+        }
         public int UnlockedCount{get{int n=0;for(int i=0;i<MissionCount;i++)if(IsUnlocked(i))n++;return n;}}
         public MissionDefinition NextMissionDefinition=>missions!=null&&missionIndex+1<missions.Length?missions[missionIndex+1]:null;
         void Unlock(int index)

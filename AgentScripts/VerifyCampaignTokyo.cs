@@ -37,8 +37,11 @@ public static class VerifyCampaignTokyo
         g.SelectMission(1);Check(g.MissionIndex==0,"Les flèches sautent les missions verrouillées",checks);
         Check(!g.EnterMissionCode("NOPE")&&g.MissionIndex==0,"Un code inconnu est refusé",checks);
         Check(g.EnterMissionCode("sakura")&&g.MissionIndex==tokyo&&g.IsUnlocked(tokyo),"Le code SAKURA ouvre et sélectionne Tokyo",checks);
-        g.SelectMission(1);Check(g.MissionIndex==0,"Les flèches passent de Tokyo à Paris sans s'arrêter sur Marseille ni Saint-Rémy",checks);
-        g.SelectMission(-1);Check(g.MissionIndex==tokyo,"Tokyo reste accessible avec les flèches",checks);
+        // Since 0.8.0 a mission is open when it or a later one is unlocked: Tokyo's code opens the whole campaign.
+        Check(g.IsUnlocked(1)&&g.IsUnlocked(2)&&g.UnlockedCount==4,"Le code de la dernière mission ouvre aussi les missions précédentes",checks);
+        g.SelectMission(1);Check(g.MissionIndex==0,"Les flèches passent de Tokyo à Paris",checks);
+        g.SelectMission(1);Check(g.MissionIndex==1,"Puis de Paris à Marseille, désormais ouverte",checks);
+        g.SelectMission(-1);g.SelectMission(-1);Check(g.MissionIndex==tokyo,"Tokyo reste accessible avec les flèches",checks);
 
         for(int i=0;i<4;i++)g.slots[i].joined=i==0;
         g.SetDifficulty(1);

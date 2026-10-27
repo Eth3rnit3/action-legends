@@ -1,0 +1,109 @@
+{
+ "output": "looter-shield.png",
+ "columns": 4,
+ "rows": 4,
+ "cell": [
+  362,
+  362
+ ],
+ "feet": 16.29,
+ "pivotX": 0.4,
+ "ppu": 158.93,
+ "height": 2,
+ "heightFrom": [
+  "O",
+  8
+ ],
+ "margins": [
+  27,
+  12
+ ],
+ "defringe": true,
+ "sources": {
+  "O": {
+   "image": "enemies.png",
+   "grid": [
+    4,
+    3
+   ],
+   "exact": true
+  },
+  "N": {
+   "image": "looter-shield-new.png",
+   "grid": [
+    4,
+    3
+   ],
+   "reference": 1
+  }
+ },
+ "frames": [
+  [
+   "O",
+   8
+  ],
+  [
+   "O",
+   9
+  ],
+  [
+   "O",
+   10
+  ],
+  [
+   "O",
+   11
+  ],
+  [
+   "N",
+   0
+  ],
+  [
+   "N",
+   1
+  ],
+  [
+   "N",
+   2
+  ],
+  [
+   "N",
+   3
+  ],
+  [
+   "N",
+   4
+  ],
+  [
+   "N",
+   5
+  ],
+  [
+   "N",
+   6,
+   0,
+   0.97
+  ],
+  [
+   "N",
+   7
+  ],
+  [
+   "N",
+   8
+  ],
+  [
+   "N",
+   9
+  ],
+  [
+   "N",
+   10
+  ],
+  [
+   "N",
+   11
+  ]
+ ],
+ "anchors": {}
+}

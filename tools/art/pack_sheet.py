@@ -10,7 +10,7 @@ usage: pack_sheet.py enemies IN.png OUT.png   (4 x 3 grid -> 4 x 3 cells of 420 
        pack_sheet.py mecha IN.png OUT.png     (3 x 2 grid -> 3 x 2 cells of 560 x 512)
        pack_sheet.py hero SPEC.json [PREVIEW.png]
 The hero mode assembles several generated sheets of one character into one sheet (see hero(),
-tools/art/heroes/*.json and tools/art/hostages/*.json): each source is scaled so that its reference
+tools/art/heroes/*.json, tools/art/hostages/*.json and tools/art/enemies/*.json): each source is scaled so that its reference
 frame stands as tall as the character should in the game, and the "muzzle" and "hand" anchors are
 measured on the packed cells. "defringe": true recolours the half-transparent edge pixels with their
 nearest opaque neighbour, for generated images whose edges keep a tint of the removed background.
@@ -168,7 +168,8 @@ def defringe(crop):
 
 def hero(spec_path, preview=None):
     """SPEC: {"output", "columns", "rows", "cell": [w, h], "feet", "pivotX", "ppu", "height",
-    "sources": {"A": {"image", "grid": [cols, rows], "reference": frame}}, "frames": [["A", frame, dx?], ...],
+    "sources": {"A": {"image", "grid": [cols, rows], "reference": frame, "scale"?}, "O": {"image", "grid", "exact": true}},
+    "frames": [["A", frame, dx?, scale?], ...], "heightFrom"?: ["O", frame], "margins"?: [left px, right px],
     "anchors": {"muzzle": {"cell": direction}, "hand": {"cell": "hand"}}}. Paths are relative to SPEC."""
     spec_path = Path(spec_path)
     spec = json.loads(spec_path.read_text())
@@ -177,15 +178,27 @@ def hero(spec_path, preview=None):
     cw, ch = spec["cell"]
     feet, ppu = spec["feet"], spec["ppu"]
     px, py = spec["pivotX"] * cw, ch - feet
-    sources = {}
+    sources, exact = {}, {}
     for key, source in spec["sources"].items():
         a = np.array(Image.open(base / source["image"]).convert("RGBA"))
+        if source.get("exact"):
+            # Cells copied pixel for pixel (an existing sheet of the same cell size): their anchors stay valid.
+            gc, gr = source["grid"]
+            gh, gw = a.shape[0] // gr, a.shape[1] // gc
+            exact[key] = {r * gc + c: a[r * gh:(r + 1) * gh, c * gw:(c + 1) * gw] for r in range(gr) for c in range(gc)}
+            continue
         a[a[..., 3] < 10] = 0
         found = pieces(a, *source["grid"])
         gc = source["grid"][0]
         ref = found[divmod(source["reference"], gc)]
         ys = np.nonzero(ref[..., 3] > 40)[0]
-        k = spec["height"] * ppu / (ys.max() - ys.min())
+        height = spec["height"]
+        if "heightFrom" in spec:
+            # As tall as a frame of an exact source, so new frames match the old ones.
+            hk, hf = spec["heightFrom"]
+            hy = np.nonzero(exact[hk][hf][..., 3] > 40)[0]
+            height = (hy.max() - hy.min()) / ppu
+        k = height * ppu / (ys.max() - ys.min()) * source.get("scale", 1)
         print(f"source {key}: {len(found)} frames, scale {k:.3f}")
         sources[key] = ({r * gc + c: f for (r, c), f in found.items()}, k)
     if spec.get("defringe"):
@@ -193,9 +206,19 @@ def hero(spec_path, preview=None):
             for frame, crop in found.items():
                 found[frame] = defringe(crop)
     sheet = np.zeros((rows * ch, cols * cw, 4), np.uint8)
+    left, right = spec.get("margins", [2, 3])
     for index, entry in enumerate(spec["frames"]):
         key, frame = entry[0], entry[1]
+        if key in exact:
+            row, col = divmod(index, cols)
+            cell = exact[key][frame]
+            if cell.shape[:2] != (ch, cw):
+                raise SystemExit(f"exact cell {key}{frame} is {cell.shape[1]} x {cell.shape[0]}, not {cw} x {ch}")
+            sheet[row * ch:(row + 1) * ch, col * cw:(col + 1) * cw] = cell
+            continue
         found, k = sources[key]
+        # A fourth value scales one frame (a body lying flat is wider than the cell).
+        k *= entry[3] if len(entry) > 3 else 1
         if frame not in found:
             print(f"  warning: frame {key}{frame} not found")
             continue
@@ -208,8 +231,10 @@ def hero(spec_path, preview=None):
         row, col = divmod(index, cols)
         ox = int(round(col * cw + px - (legs.min() + legs.max()) / 2 + (entry[2] if len(entry) > 2 else 0)))
         oy = int(round(row * ch + py - 1 - bottom))
-        ox = max(ox, col * cw + 2 - xs.min())
-        ox = min(ox, (col + 1) * cw - 3 - xs.max())
+        if xs.max() - xs.min() > cw - left - right:
+            print(f"  warning: cell {index} ({key}{frame}) is {xs.max() - xs.min() - (cw - left - right)} px too wide")
+        ox = max(ox, col * cw + left - xs.min())
+        ox = min(ox, (col + 1) * cw - right - xs.max())
         if oy + top < row * ch:
             print(f"  warning: cell {index} ({key}{frame}) clipped at the top by {row * ch - oy - top} px")
         x0, y0 = max(ox, col * cw), max(oy, row * ch)

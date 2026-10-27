@@ -1,0 +1,55 @@
+{
+ "output": "combat-drone.png",
+ "columns": 3,
+ "rows": 2,
+ "cell": [
+  640,
+  512
+ ],
+ "feet": 14,
+ "pivotX": 0.5,
+ "ppu": 110,
+ "height": 2.3,
+ "margins": [
+  3,
+  3
+ ],
+ "defringe": true,
+ "sources": {
+  "A": {
+   "image": "combat-drone-src.png",
+   "grid": [
+    3,
+    2
+   ],
+   "reference": 0
+  }
+ },
+ "frames": [
+  [
+   "A",
+   0
+  ],
+  [
+   "A",
+   1
+  ],
+  [
+   "A",
+   2
+  ],
+  [
+   "A",
+   3
+  ],
+  [
+   "A",
+   4
+  ],
+  [
+   "A",
+   5
+  ]
+ ],
+ "anchors": {}
+}

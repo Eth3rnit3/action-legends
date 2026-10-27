@@ -1,6 +1,6 @@
 # Action Legends — guide de jeu
 
-Prototype Unity 2D — version 0.7.0 : quatre héros sélectionnables et coopération locale sur un même écran. Trois missions qui s’enchaînent : Paris, Marseille, puis Tokyo.
+Prototype Unity 2D — version 0.7.0 : quatre héros sélectionnables et coopération locale sur un même écran. Quatre missions qui s’enchaînent : Paris, Marseille, Saint-Rémy-de-Provence, puis Tokyo.
 
 ## Jouer
 
@@ -49,21 +49,25 @@ Ramasser les caisses pour obtenir une arme, des soins, dix secondes de turbo ou 
 | **R** verte | Lance-roquettes | roquettes à tête chercheuse qui explosent sur un ennemi, au sol ou en fin de course |
 | **L** violette | Laser | rayon continu qui traverse tout l'écran |
 
-Ramasser la même arme remplit ses munitions ; une arme vide, ou un héros qui tombe, revient au fusil de base. Toutes les visées marchent avec chaque arme : haut, diagonale, accroupi, bas en saut. Paris tire ses caisses d'armes d'une table commune (plus de mitrailleuses lourdes), Marseille donne surtout fusils à pompe et lance-flammes, Tokyo surtout des lasers. Les armes sont décrites dans `Assets/Resources/Content/weapons/` et chaque mission choisit lesquelles ses caisses donnent (voir le guide des niveaux).
+Ramasser la même arme remplit ses munitions ; une arme vide, ou un héros qui tombe, revient au fusil de base. Toutes les visées marchent avec chaque arme : haut, diagonale, accroupi, bas en saut. Paris tire ses caisses d'armes d'une table commune (plus de mitrailleuses lourdes), Marseille donne surtout fusils à pompe et lance-flammes, Saint-Rémy surtout des fusils à pompe, Tokyo surtout des lasers. Les armes sont décrites dans `Assets/Resources/Content/weapons/` et chaque mission choisit lesquelles ses caisses donnent (voir le guide des niveaux).
 
-La fréquence des bonus, les munitions et la durée du turbo dépendent de la difficulté. Détente donne un bonus pour quinze ennemis et, depuis l'arrivée des otages, une caisse toutes les 150 unités (72 auparavant). Les autres modes distribuent moins de ressources : moins de caisses et des armes aux munitions plus comptées (par exemple 120 tirs de mitrailleuse lourde en Détente, 66 en Légende). Ces réglages sont dans `Assets/Resources/Content/rules/` (`default.json`, et `pow.json` que jouent les trois missions) et `Content/weapons/`.
+La fréquence des bonus, les munitions et la durée du turbo dépendent de la difficulté. Détente donne un bonus pour quinze ennemis et, depuis l'arrivée des otages, une caisse toutes les 150 unités (72 auparavant). Les autres modes distribuent moins de ressources : moins de caisses et des armes aux munitions plus comptées (par exemple 120 tirs de mitrailleuse lourde en Détente, 66 en Légende). Ces réglages sont dans `Assets/Resources/Content/rules/` (`default.json`, et `pow.json` que jouent les quatre missions) et `Content/weapons/`.
 
 ## Deuxième mission : Mistral Gagnant
 
 Marseille en 2026 : huit assauts du Vieux-Port à la Canebière en passant par le Panier, le hors-bord des caïds au Vieux-Port, puis l'hélicoptère d'une chaîne d'info en continu au pied de Notre-Dame-de-la-Garde. Musique arcade sur La Coupo Santo. Détails dans [docs/MISSION_MARSEILLE.md](docs/MISSION_MARSEILLE.md).
 
-## Troisième mission : Tokyo Néon
+## Troisième mission : Prophétie en Provence
+
+Saint-Rémy-de-Provence : neuf assauts de la place de la République aux Alpilles, par les ruelles, la place Favier, les Antiques et Glanum. Les Arlésiens défendent la ville : l'Arlésien frappe du poing, l'Arlésienne pique de son parapluie, l'Arlésien au fouet frappe de plus loin — garder ses distances ne suffit pas. Ils sortent de derrière les tonneaux, les oliviers et les colonnes, ou font la sieste au bord de la route. À la sortie de la ville, un taureau de Camargue charge d'un bord à l'autre de l'écran : sauter par-dessus l'évite. Au pied des Alpilles, Nostradamus lance des parchemins, annonce ses prophéties par des cercles dorés au sol (sortir du cercle ou sauter avant l'impact) et appelle les Arlésiens à la rescousse. Neuf otages, dont des peintres de Provence. Musique : la Farandole en 8 bits. Code : **FARANDOLE**. Détails dans [docs/MISSION_SAINT_REMY.md](docs/MISSION_SAINT_REMY.md).
+
+## Quatrième mission : Tokyo Néon
 
 Tokyo de nuit : huit assauts de Shibuya à la tour de Tokyo en passant par Akihabara, et un drone de combat au carrefour. Tous les ennemis sont armés — pistolet, mitraillette, fusil à pompe. Ils s’arrêtent pour viser, puis tirent à hauteur de poitrine : sauter au bon moment évite la balle, passer derrière eux aussi. Le boss, le Mécha Shogun, marche vers l’équipe et alterne rafale de gatling, piétinement qui lance deux ondes de choc à sauter, et salve de missiles. Musique arcade sur Sakura Sakura. Détails dans [docs/MISSION_TOKYO.md](docs/MISSION_TOKYO.md).
 
 ## Campagne et codes
 
-Les missions s’enchaînent. Au départ, seule Panique à Paname est ouverte. Une mission gagnée débloque la suivante dans ce navigateur, et l’écran de victoire affiche son code ; **MISSION SUIVANTE** (ou Entrée / Start) la lance aussitôt avec les mêmes héros et le score acquis. Au menu, **CODE MISSION** permet de saisir un code pour rejoindre directement une mission, par exemple sur un autre ordinateur. Les flèches du menu ne parcourent que les missions débloquées. En ligne, seul l’hôte choisit la mission et saisit les codes.
+Les missions s’enchaînent : Paris, Marseille (code PASTIS), Saint-Rémy (FARANDOLE), Tokyo (SAKURA). Au départ, seule Panique à Paname est ouverte ; une mission déjà débloquée dans ce navigateur le reste, même quand une nouvelle mission s'intercale avant elle. Une mission gagnée débloque la suivante dans ce navigateur, et l’écran de victoire affiche son code ; **MISSION SUIVANTE** (ou Entrée / Start) la lance aussitôt avec les mêmes héros et le score acquis. Au menu, **CODE MISSION** permet de saisir un code pour rejoindre directement une mission, par exemple sur un autre ordinateur. Les flèches du menu ne parcourent que les missions débloquées. En ligne, seul l’hôte choisit la mission et saisit les codes.
 
 ## Classement mondial
 

@@ -47,21 +47,21 @@ Copier une mission de `Assets/Resources/Levels/`, la renommer avec son nouvel `i
 |---|---|
 | `schemaVersion` | `2`. |
 | `id` | Identifiant unique, identique au nom du fichier. |
-| `order` | Facultatif, `1` par défaut. Position dans la campagne (0 à 999) ; à égalité, ordre des `id`. Les missions s’enchaînent dans cet ordre et la première est toujours ouverte. |
+| `order` | Facultatif, `1` par défaut. Position dans la campagne (0 à 999) ; à égalité, ordre des `id`. Les missions s’enchaînent dans cet ordre et la première est toujours ouverte. Livrées : Paris (1), Marseille (2), Saint-Rémy (3), Tokyo (4). Insérer une mission ne ferme rien : les déblocages, les replays et le classement désignent une mission par son `id`. |
 | `code` | Facultatif. 4 à 10 lettres majuscules ou chiffres, unique. Révélé quand la mission précédente est gagnée ; le saisir dans **CODE MISSION** ouvre la mission. |
 | `title`, `location` | Nom et lieu affichés dans la fiche de mission (45 caractères au plus). |
 | `intro`, `exitLabel`, `winTitle` | Annonce de départ, nom de la sortie (« PASSAGE LIBRE » quand les vagues sont finies), titre de victoire. |
 | `music`, `bossMusic` | Musique de la mission et du combat final. `bossMusic` n’est demandé que s’il y a un boss. |
 | `map` | La carte, voir plus bas. |
 | `enemies` | Un à huit identifiants de `Content/enemies`. Les vagues désignent les ennemis par leur position dans cette liste (0, 1, 2…). |
-| `extraEnemy` | Facultatif : `{"enemy": 1, "every": 4, "fromDifficulty": 1}` remplace un ennemi sur `every` par l’ennemi `enemy` de la liste à partir de la difficulté `fromDifficulty` (0 = DÉTENTE). `enemy` à `-1`, ou champ absent : rien. Les trois missions livrées utilisent la règle ci-dessus. |
+| `extraEnemy` | Facultatif : `{"enemy": 1, "every": 4, "fromDifficulty": 1}` remplace un ennemi sur `every` par l’ennemi `enemy` de la liste à partir de la difficulté `fromDifficulty` (0 = DÉTENTE). `enemy` à `-1`, ou champ absent : rien. Les quatre missions livrées utilisent cette règle (Saint-Rémy avec `"enemy": 2`, l’Arlésien au fouet). |
 | `length`, `exitX` | Longueur du parcours et position de sortie. Le boss apparaît quand l’équipe atteint `exitX - 18`. |
 | `cameraMin`, `cameraMax` | Bornes horizontales de la caméra. |
 | `waves` | Une à vingt vagues triées par `atX`. |
 | `encounters` | Facultatif : les rencontres mises en scène (ennemis placés, entrées, mini-boss), voir plus bas. |
 | `boss` | Le boss final, voir plus bas. |
-| `rules` | Facultatif, `"default"` par défaut : identifiant de `Content/rules` (section 5 bis). Une mission peut ainsi donner plus ou moins de grenades, d’autres bonus, moins de caisses ou une autre flèche GO. Les trois missions livrées jouent `pow` : `default` avec deux fois moins de caisses sur le parcours, puisque les otages donnent aussi des bonus. |
-| `parTime` | Facultatif, `0` par défaut : temps de référence en secondes. Au décompte de fin de mission, chaque seconde gagnée sur lui rapporte `tally.perSecond` points (règles, section 5 bis). Paris 300, Marseille 240, Tokyo 220. |
+| `rules` | Facultatif, `"default"` par défaut : identifiant de `Content/rules` (section 5 bis). Une mission peut ainsi donner plus ou moins de grenades, d’autres bonus, moins de caisses ou une autre flèche GO. Les quatre missions livrées jouent `pow` : `default` avec deux fois moins de caisses sur le parcours, puisque les otages donnent aussi des bonus. |
+| `parTime` | Facultatif, `0` par défaut : temps de référence en secondes. Au décompte de fin de mission, chaque seconde gagnée sur lui rapporte `tally.perSecond` points (règles, section 5 bis). Paris 300, Marseille 240, Saint-Rémy 280, Tokyo 220. |
 | `weapons` | Facultatif : les armes que donnent les caisses d’armes de la mission et leurs proportions, `[{"weapon": "laser", "weight": 3}, {"weapon": "heavy-machinegun", "weight": 2}]`, à la place de la table des règles (section 5 ter). Marseille et Tokyo ont la leur. |
 
 ### Vagues
@@ -79,6 +79,10 @@ La vague démarre quand l’équipe arrive à 9 unités de `atX`. `baseEnemies` 
   "backgrounds": ["Art/tokyo/shibuya", "Art/marseille/panier", "Art/canal-panorama"],
   "ground": "Art/marseille/sol",
   "terrain": [], "props": [], "vehicles": [],
+  "decor": [
+    {"sprite": {"texture": "Art/saint-remy/accessoires", "columns": 4, "rows": 3, "cell": 6}, "x": 79, "y": -0.4, "height": 1.85},
+    {"sprite": {"texture": "Art/saint-remy/accessoires", "columns": 4, "rows": 3, "cell": 11}, "x": 178, "y": -0.74, "height": 4.4, "flip": true}
+  ],
   "hostages": [
     {"id": "baker", "x": 34, "y": 0},
     {"id": "baker", "x": 49, "y": 0, "wave": 1, "reward": "weapon"},
@@ -90,6 +94,7 @@ La vague démarre quand l’équipe arrive à 9 unités de `atX`. `baseEnemies` 
 - `backgrounds` : une à huit images de décor, dans l’ordre de gauche à droite. Chacune est affichée sur 13 unités de hauteur, la ligne de sol à 80 % de sa hauteur depuis le haut ; les portions sont accolées, et une portion large (plus de deux fois plus large que haute) se fond sur 1,5 unité dans la précédente. Le moteur fait défiler la fresque en parallaxe pour couvrir tout le parcours, quel que soit le format d’écran. Les images ne contiennent ni personnages ni interface ; un panorama découpé sans perte donne des raccords exacts (Paris).
 - `ground` : image dont les 20 % du bas sont répétés le long de la rue, devant le décor.
 - `hostages` : les otages de la mission (voir plus bas).
+- `decor` : facultatif, jusqu’à 120 accessoires dessinés dans la rue, devant le décor : un tonneau, une fontaine, une terrasse de café. Ils ne font que se voir (rien ne les touche, ils ne gênent personne). Chacun est une case d’une planche (`sprite`, comme une icône : `{"texture", "columns", "rows", "cell"}`) affichée sur `height` unités de haut (la hauteur de la case), le milieu du bas de la case posé en (`x`, `y`) ; un `y` négatif enfonce dans la rue un dessin qui n’atteint pas le bas de sa case (le tonneau de Saint-Rémy finit à 17 % du bas de la sienne : `y` = −0,17 × `height`). `flip` le retourne, `front` le dessine devant les personnages (derrière par défaut). Un ennemi peut en sortir : une entrée `door` dont `fromX` est celui de l’accessoire et `"opening": "none"`.
 - `terrain`, `props`, `vehicles` : réservés (section 6), à laisser vides.
 
 Une carte peut réutiliser les décors d’autres missions.
@@ -150,7 +155,7 @@ Chaque apparition :
 
 Une fenêtre à `fromY` 2 (les missions livrées) reste à portée d’un héros qui saute, vise en haut ou lance une grenade ; plus haut, l’ennemi n’est atteint qu’en visant en haut. Pour que l’équipe voie chaque entrée, `x` (et `fromX`, et le `x` d’un camion) doit être dans l’écran de la rencontre : de `atX - 15` à `atX + 2,5` pour une rencontre de vague, de `atX - 7` à `atX + 12` pour une rencontre `atX`. Le validateur le vérifie.
 
-Les missions livrées : Paris 10 vagues et 16 rencontres (portes cochères, fenêtres, camionnettes de pillards, une pause de pillards, des embuscades, le fourgon blindé), Marseille 8 vagues et 12 rencontres (parachutistes au-dessus du Vieux-Port, fenêtres du Panier, le hors-bord au quai), Tokyo 8 vagues et 11 rencontres (rideaux métalliques, bouches d’égout, monospace noir, parachutistes des toits, le drone de combat).
+Les missions livrées : Paris 10 vagues et 16 rencontres (portes cochères, fenêtres, camionnettes de pillards, une pause de pillards, des embuscades, le fourgon blindé), Marseille 8 vagues et 12 rencontres (parachutistes au-dessus du Vieux-Port, fenêtres du Panier, le hors-bord au quai), Saint-Rémy 9 vagues et 15 rencontres (Arlésiens qui sortent de derrière les tonneaux, les oliviers et les colonnes, fenêtres à volets, camionnette, le taureau sur la route), Tokyo 8 vagues et 11 rencontres (rideaux métalliques, bouches d’égout, monospace noir, parachutistes des toits, le drone de combat).
 
 ### Boss de mi-parcours
 
@@ -158,7 +163,7 @@ Les missions livrées : Paris 10 vagues et 16 rencontres (portes cochères, fen�
 {"atX": 62, "boss": {"id": "speedboat", "health": 1, "name": "HORS-BORD DES CAÏDS"}}
 ```
 
-Un boss de la bibliothèque (section 4), avec les mêmes champs que le boss final (`health`, `name`, `intro`, `rage`, `defeat`). Quand l’équipe atteint `atX`, l’écran se bloque autour d’elle, la barre de vie s’affiche et les vagues attendent ; à sa chute (il rapporte son `score`), le défilement repart, la flèche GO s’affiche et les renforts qu’il a lâchés s’enfuient. Il se place au moins 30 unités avant la sortie et hors de l’écran d’une vague (pas entre `atX - 10` et `atX + 5` d’une vague) ; trois au plus par mission. Les bonus ne se ramassent pas pendant un combat de boss : ne pas placer d’otage dans son arène. Paris : `armored-van` (x 215), Marseille : `speedboat` (x 62, là où le décor montre le Vieux-Port), Tokyo : `combat-drone` (x 176).
+Un boss de la bibliothèque (section 4), avec les mêmes champs que le boss final (`health`, `name`, `intro`, `rage`, `defeat`). Quand l’équipe atteint `atX`, l’écran se bloque autour d’elle, la barre de vie s’affiche et les vagues attendent ; à sa chute (il rapporte son `score`), le défilement repart, la flèche GO s’affiche et les renforts qu’il a lâchés s’enfuient. Il se place au moins 30 unités avant la sortie et hors de l’écran d’une vague (pas entre `atX - 10` et `atX + 5` d’une vague) ; trois au plus par mission. Les bonus ne se ramassent pas pendant un combat de boss : ne pas placer d’otage dans son arène. Paris : `armored-van` (x 215), Marseille : `speedboat` (x 62, là où le décor montre le Vieux-Port), Saint-Rémy : `taureau` (x 196, sur la route qui sort de la ville), Tokyo : `combat-drone` (x 176).
 
 ### Boss de mission
 
@@ -235,7 +240,7 @@ Un état qui n’est pas dans ce tableau est accepté et ignoré : une planche p
 | Boss | `smoke` | D’où sort la fumée sous la moitié de ses PV. |
 | Boss | ceux de ses attaques | `muzzles`, `rack`, `foot`, `walk.foot` (section 4). |
 
-Les six ennemis livrés ont chacun leur planche, `Art/enemies/<id>.png` (4 × 4 cases) : la première ligne reprend au pixel près leurs quatre anciennes cases, les trois suivantes ajoutent inattentif, sursaut, touché ou lancer, fuite et les morts (`docs/ART_LOT2B.md`) ; `pack_sheet.py hero tools/art/enemies/<id>.json` la refait.
+Les neuf ennemis livrés ont chacun leur planche, `Art/enemies/<id>.png` (4 × 4 cases) : la première ligne reprend au pixel près leurs quatre anciennes cases (pour les Arlésiens, leur ligne de `Art/saint-remy/enemies.png`), les trois suivantes ajoutent inattentif, sursaut, touché ou lancer, fuite et les morts (`docs/ART_LOT2B.md`, `docs/MISSION_SAINT_REMY.md`) ; `pack_sheet.py hero tools/art/enemies/<id>.json` la refait. Les planches des Arlésiens ont des cases de 512 px : `pivot` (0,4 ; 0,0527344), `cellHeight` 2,88 (3,2 pour l’Arlésien au fouet, dessiné plus petit).
 
 `tools/art/pack_sheet.py` recale une planche générée (pieds sur une même ligne, jambes sur le pivot) et affiche les bouts de canon. Pour un héros, `pack_sheet.py hero tools/art/heroes/<héros>.json` assemble ses planches générées en une seule (une taille commune fixée par une image de référence de chaque planche), mesure les `muzzle` (vers l’avant, le haut, le bas ou en diagonale selon la case) et la `hand`, et imprime les ancrages JSON ; voir `docs/ART_LOT1A.md`. `tools/art/measure_muzzles.py` mesure ceux de l’ancienne planche `Art/heroes.png`.
 
@@ -278,7 +283,7 @@ Champs communs :
 | `attackPose` | Durée de la pose `attack` après une frappe ou un lancer. |
 | `strideRate` | Vitesse de sa foulée (section 2). |
 
-`melee` : `reach` (portée), `height` (un héros sauté plus haut n’est pas touché), `cooldown` (multiplié selon la difficulté), `damage`.
+`melee` : `reach` (portée), `height` (un héros sauté plus haut n’est pas touché), `cooldown` (multiplié selon la difficulté), `damage`, et `sound`, facultatif, joué à chaque coup. Un ennemi au contact frappe dès qu’un héros est à moins de `reach` et s’arrête à `keepDistance` : un `keepDistance` proche de `reach` en fait un ennemi qui frappe à distance (l’Arlésien au fouet de Saint-Rémy : `keepDistance` 1,8, `reach` 2,2, le claquement du fouet en `sound`).
 
 `throw` : `range` (portée de lancer), `cooldown`, `aimHeight` (hauteur visée au-dessus des pieds du héros), `speed` (par difficulté), `damage`, `projectile`.
 
@@ -327,7 +332,7 @@ Exemple d’ennemi entièrement nouveau, un tireur qui utilise la planche des h�
 
 ## 4. Les boss
 
-Un boss est un comportement — `flyer` (vole et attaque en mouvement) ou `walker` (marche ou roule vers les héros et s’arrête pour chaque attaque) — et une liste d’attaques jouées à tour de rôle. Le même boss peut servir de boss final ou de boss de mi-parcours (section 1). Les mini-boss livrés : `armored-van` (marcheur sans secousse de pas : un fourgon qui roule, charge et lâche des pillards), `speedboat` (volant à fleur d’eau, sans rotor, dessiné derrière les héros avec `layer` 20) et `combat-drone` (volant). Son dessin est tourné vers la **gauche** ; ses ancrages et sa zone touchée sont retournés avec lui. Voir `Content/bosses/macron-helicopter.json` et `mecha-shogun.json` pour deux exemples complets.
+Un boss est un comportement — `flyer` (vole et attaque en mouvement) ou `walker` (marche ou roule vers les héros et s’arrête pour chaque attaque) — et une liste d’attaques jouées à tour de rôle. Le même boss peut servir de boss final ou de boss de mi-parcours (section 1). Les mini-boss livrés : `armored-van` (marcheur sans secousse de pas : un fourgon qui roule, charge et lâche des pillards), `speedboat` (volant à fleur d’eau, sans rotor, dessiné derrière les héros avec `layer` 20), `combat-drone` (volant) et `taureau` (marcheur qui gratte le sol, charge et se cabre pour piétiner). Boss finals : `macron-helicopter` et `le-direct` (volants), `mecha-shogun` et `nostradamus` (marcheurs ; le devin de Saint-Rémy lance des parchemins dessinés, annonce ses prophéties par des cercles au sol puis les frappe, et appelle des Arlésiens). Son dessin est tourné vers la **gauche** ; ses ancrages et sa zone touchée sont retournés avec lui. Voir `Content/bosses/macron-helicopter.json` et `mecha-shogun.json` pour deux exemples complets.
 
 | Champ | Utilisation |
 |---|---|
@@ -349,7 +354,7 @@ Un boss est un comportement — `flyer` (vole et attaque en mouvement) ou `walke
 | `missile` | Image des bombes et missiles (ci-dessous). |
 | `attacks` | Une à douze attaques. |
 
-Chaque attaque a un `type`, une annonce `announce`, un repos `cooldown` après elle (multiplié selon la difficulté et, s’il s’emballe, par `ragePace`, sauf si `rageCooldown` donne la valeur à utiliser alors) et, facultatifs, les états d’animation `state`, `aimState`, `recoverState` et un `sound`.
+Chaque attaque a un `type`, une annonce `announce`, un repos `cooldown` après elle (multiplié selon la difficulté et, s’il s’emballe, par `ragePace`, sauf si `rageCooldown` donne la valeur à utiliser alors) et, facultatifs, les états d’animation `state`, `aimState`, `recoverState`, un `sound` (chaque tir d’un `gun`, le lancer des `bombs`, le départ d’une `charge`) et un `startSound`, joué quand l’attaque commence (le souffle du taureau avant sa charge).
 
 | `type` | Déroulé | Champs |
 |---|---|---|
@@ -358,6 +363,16 @@ Chaque attaque a un `type`, une annonce `announce`, un repos `cooldown` après e
 | `charge` | Marcheur seulement. Fait rugir son moteur (`aimState`) `windup` s tourné vers un héros, puis fonce (`state`) à `speed` (par difficulté) jusqu’au bord opposé de l’arène ; les héros au sol sur son passage (à moins de `reach` de son centre, sous `clearance`) perdent `damage` : un saut par-dessus l’évite. Puis il souffle `recover` s (`recoverState`, secousse `shake`). | `windup`, `speed`, `damage`, `clearance`, `reach`, `recover`, `shake` |
 | `troops` | Prend la pose `state` pendant `duration` s et lâche `count` ennemis (par difficulté) de la liste `enemies`, à tour de rôle, un toutes les `interval` s (par difficulté) depuis l’ancrage `door`, tant qu’il en a moins de `maxAlive` en vie ; ils sautent à terre et courent `spread` unités vers l’équipe. À sa chute, ceux qui restent s’enfuient. | `enemies`, `count`, `interval`, `duration`, `door`, `spread`, `maxAlive` |
 | `stomp` | Lève le pied (`state`) pendant `windup` s, puis envoie une onde de choc de chaque côté depuis l’ancrage `foot` ; seuls les héros au sol (sous `waveHeight`) sont touchés à moins de `waveReach`. Il reprend son souffle `recover` s (`recoverState`) et recommence `repeat` fois (`rageRepeat` s’il s’emballe), relevant le pied en `repeatWindup` s. | `windup`, `repeatWindup`, `recover`, `repeat`, `rageRepeat`, `speed` (par difficulté, vitesse des ondes), `waveReach`, `waveHeight`, `shake`, `foot`, `damage` |
+
+**Attaques dessinées.** Trois blocs facultatifs remplacent les dessins du moteur par des cases d’une planche ; ils ne changent rien d’autre (trajectoires, dégâts, portée) :
+
+| Bloc | Attaque | Remplace |
+|---|---|---|
+| `projectile` | `gun` | la balle rouge : chaque tir est dessiné, tourné dans le sens de sa course, sans flamme de bouche |
+| `warning` | `bombs` | la barre rouge qui marque chaque point d’impact : l’image clignote au sol pendant le `delay` |
+| `impact` | `bombs` | l’explosion : l’image est jouée une fois à l’impact (le `impactSound` de l’attaque, sinon le bruit d’explosion) |
+
+Chacun s’écrit `{"sprite": {"texture", "columns", "rows", "cell"}, "frames": 4, "fps": 8, "size": 2.8, "y": 0.05}` : `frames` cases à partir de `cell` (de gauche à droite puis de haut en bas), jouées à `fps` images par seconde (en boucle pour `projectile` et `warning`, une fois pour `impact`), affichées sur `size` unités de haut, le centre à `y` au-dessus de la rue (pour `warning` et `impact`). Sans `sprite.texture`, le bloc est absent. Nostradamus (`Content/bosses/nostradamus.json`) : parchemins (`Art/saint-remy/prophetie-fx`, cases 4 à 6), cercles annoncés (cases 0 à 3) et éclats de prophétie (cases 8 à 11), avec une étoile filante comme `missile`.
 
 `missile` : un rectangle d’une image, `x`, `y`, `width`, `height` en fractions de l’image depuis son coin **inférieur** gauche, affiché sur `size` unités de large ; `outline`, facultatif, liste de points (fractions du rectangle) qui détoure le missile pour cacher ce qui l’entoure dans l’image ; `hitRadius` et `tipRadius` (rayons touchés au centre et aux extrémités, à `hitLength` du centre). Les trois boss livrés prennent le missile dessiné sur `Art/macron-helicopter.png` ; une image à part, réduite au missile, convient aussi (rectangle `0, 0, 1, 1`, sans `outline`).
 
@@ -376,6 +391,8 @@ Exemple de boss existant re-paramétré : il garde l’image, le rotor, la traje
      "flight": [0.8, 0.8, 0.8, 0.8], "arc": 1, "blastRadius": 1.2, "blastHeight": 1, "damage": 1, "marker": 2.4, "rack": "rack", "cooldown": 1}]
 }
 ```
+
+Une planche de boss dessinée tournée vers la droite (le taureau de Saint-Rémy) se retourne avec `tools/art/pack_sheet.py hero` et `"mirror": true` sur sa source, qui retourne chaque case sur place (`tools/art/bosses/taureau.json`).
 
 Un nouveau boss volant reprend la mise en page de l’hélicoptère : vue de profil tournée vers la gauche, sans pales de rotor principal si le moteur dessine le rotor. Un nouveau marcheur suit celle du mécha : une case par pose (attente, deux pas, pied levé, tir, lance-missiles), même ligne de pieds ; `pack_sheet.py mecha` la met en place. Un comportement de boss autre que voler ou marcher demande une modification du moteur.
 
@@ -462,7 +479,7 @@ Une nouvelle arme n’a besoin que de son JSON (et de ses images s’il en faut 
 
 ## 5 quater. Les otages
 
-`Content/hostages/<id>.json` décrit un otage : comment on le libère, ses quatre états et ce qu’il donne. Le moteur fait le reste (attaché → remerciement → don → fuite). Les otages livrés : `civilian` (générique) et ses variantes par ville, qui l’étendent avec leur seule planche : `baker` (Paris), `boules-player` (Marseille), `office-worker` (Tokyo).
+`Content/hostages/<id>.json` décrit un otage : comment on le libère, ses quatre états et ce qu’il donne. Le moteur fait le reste (attaché → remerciement → don → fuite). Les otages livrés : `civilian` (générique) et ses variantes par ville, qui l’étendent avec leur seule planche : `baker` (Paris), `boules-player` (Marseille), `peintre` (Saint-Rémy), `office-worker` (Tokyo).
 
 | Champ | Utilisation |
 |---|---|
@@ -561,6 +578,6 @@ python3 -m unittest discover -s tools -p 'test_*.py'
 
 Le validateur lit la bibliothèque et les missions comme le jeu : `extends`, références d’armes, d’ennemis et de boss, images et sons présents, états d’animation requis par chaque comportement, ancrages, bornes de tous les nombres, otages placés dans l’écran de leur vague et récompenses connues des règles, rencontres vues de l’équipe (entrées dans l’écran de la rencontre, camion, ouvertures connues des règles, mini-boss hors des écrans de vague), emplacements réservés vides. Il refuse aussi qu’un nom propre à une mission apparaisse dans `Assets/Scripts`. Le jeu refait les mêmes contrôles au démarrage et refuse une mission invalide.
 
-Dans Unity, jouer la mission avec un puis plusieurs joueurs dans plusieurs difficultés : vagues, sortie, raccords du décor, animations et boss. Pour l’ouvrir sans jouer les précédentes, saisir son code dans **CODE MISSION**. `AgentScripts/VerifyDataDriven.cs` montre comment charger une mission depuis du JSON et la faire finir par un bot ; `AgentScripts/VerifyLot2b.cs` fait de même avec une mission dont les rencontres (toutes les entrées, un véhicule et un mini-boss qui étendent ceux de la bibliothèque) sont écrites seulement en JSON.
+Dans Unity, jouer la mission avec un puis plusieurs joueurs dans plusieurs difficultés : vagues, sortie, raccords du décor, animations et boss. Pour l’ouvrir sans jouer les précédentes, saisir son code dans **CODE MISSION**. `AgentScripts/VerifyDataDriven.cs` montre comment charger une mission depuis du JSON et la faire finir par un bot ; `AgentScripts/VerifySaintRemy.cs` vérifie une mission livrée de bout en bout (décors, ennemis, mini-boss, boss, campagne, bots dans chaque difficulté) ; `AgentScripts/VerifyLot2b.cs` fait de même avec une mission dont les rencontres (toutes les entrées, un véhicule et un mini-boss qui étendent ceux de la bibliothèque) sont écrites seulement en JSON.
 
 Proposer les JSON, les images et leurs `.meta` dans une pull request avec des captures. Une fois la proposition fusionnée, la compilation web suivante inclut la mission.

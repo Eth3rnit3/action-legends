@@ -1,0 +1,10 @@
+{
+  "id": "baker",
+  "extends": "civilian",
+  "name": "BOULANGER",
+  "animations": {
+    "sheet": {
+      "texture": "Art/hostages/baker"
+    }
+  }
+}

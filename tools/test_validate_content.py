@@ -4,7 +4,8 @@ import tempfile
 import unittest
 from pathlib import Path
 from validate_content import (ROOT, find_proper_nouns, load_library, merge, validate_boss, validate_enemy, validate_hero,
-                              validate_mission, validate_rules, validate_weapon, validate_difficulty)
+                              validate_mission, validate_rules, validate_weapon, validate_difficulty,
+                              validate_hostage)
 
 RESOURCES = ROOT / "Assets/Resources"
 LIBRARY, LIBRARY_ERRORS = load_library(RESOURCES)
@@ -122,12 +123,32 @@ class MissionValidationTests(unittest.TestCase):
                 self.assertTrue(self.rejected(lambda d: d.update(extraEnemy=extra)))
 
     def test_reserved_slots_must_stay_empty(self):
-        for key in ("terrain", "props", "hostages", "vehicles"):
+        for key in ("terrain", "props", "vehicles"):
             with self.subTest(key=key):
                 self.assertTrue(self.rejected(lambda d: d["map"].update({key: [{"id": "x", "x": 10}]})))
                 self.assertFalse(self.rejected(lambda d: d["map"].pop(key)))
         self.assertTrue(self.rejected(lambda d: d.update(encounters=[{"atX": 20}])))
         self.assertFalse(self.rejected(lambda d: d.pop("encounters")))
+
+    def test_hostage_placements(self):
+        self.assertTrue(6 <= len(self.data["map"]["hostages"]) <= 10)
+        self.assertTrue(any(h.get("wave", -1) >= 0 for h in self.data["map"]["hostages"]))
+        self.assertFalse(self.rejected(lambda d: d["map"].update(hostages=[])))
+        changes = (
+            lambda d: d["map"]["hostages"].append({"id": "nobody", "x": 30}),
+            lambda d: d["map"]["hostages"].append({"id": "civilian", "x": 600}),
+            lambda d: d["map"]["hostages"].append({"id": "civilian", "x": 30, "wave": 40}),
+            # Wave 1 locks the screen around atX 52: a hostage far from it would be off screen.
+            lambda d: d["map"]["hostages"].append({"id": "civilian", "x": 90, "wave": 1}),
+            lambda d: d["map"]["hostages"].append({"id": "civilian", "x": 30, "reward": "jackpot"}),
+            lambda d: d["map"]["hostages"].append({"id": "civilian", "x": 30, "weapon": "rifle"}),
+            lambda d: d["map"]["hostages"].append({"id": "civilian", "x": 30, "reward": "health", "weapon": "laser"}),
+            lambda d: d.update(parTime=-5),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                self.assertTrue(self.rejected(change))
+        self.assertFalse(self.rejected(lambda d: d["map"]["hostages"].append({"id": "civilian", "x": 30, "weapon": "laser"})))
 
 
 class LibraryValidationTests(unittest.TestCase):
@@ -136,7 +157,8 @@ class LibraryValidationTests(unittest.TestCase):
         self.assertEqual(sorted(LIBRARY["heroes"]), ["arnold", "chuck-norris", "jean-claude", "sylvester"])
         self.assertEqual(len(LIBRARY["enemies"]), 6)
         self.assertEqual(sorted(LIBRARY["bosses"]), ["le-direct", "macron-helicopter", "mecha-shogun"])
-        self.assertEqual(sorted(LIBRARY["rules"]), ["default"])
+        self.assertEqual(sorted(LIBRARY["rules"]), ["default", "pow"])
+        self.assertEqual(sorted(LIBRARY["hostages"]), ["baker", "boules-player", "civilian", "office-worker"])
 
     def test_extends_merges_objects_and_replaces_lists(self):
         direct = LIBRARY["bosses"]["le-direct"]
@@ -380,6 +402,45 @@ class LibraryValidationTests(unittest.TestCase):
         library, errors = load_library(RESOURCES, {"difficulties": [dict(base, id="test-easy", order=9, name="TEST", column=0)]})
         self.assertEqual(errors, [])
         self.assertIn("test-easy", library["difficulties"])
+
+    def test_hostages(self):
+        base = content("hostages", "civilian")
+        self.assertEqual(validate_hostage(base, RESOURCES), [])
+        self.assertEqual(LIBRARY["hostages"]["baker"]["animations"]["sheet"]["texture"], "Art/hostages/baker")
+        self.assertEqual(LIBRARY["hostages"]["baker"]["rewards"], base["rewards"])
+        changes = (
+            lambda d: d.update(release="wish"),
+            lambda d: d.update(hits=0),
+            lambda d: d.update(rewards=[]),
+            lambda d: d.update(rewards=[{"weight": 1}]),
+            lambda d: d.update(rewards=[{"weapon": "nowhere"}]),
+            lambda d: d.update(giveAt=5),
+            lambda d: d.update(sound="Audio/Sfx/nothing"),
+            lambda d: d["animations"].update(states=[s for s in d["animations"]["states"] if s["name"] != "run"]),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                data = copy.deepcopy(base)
+                change(data)
+                self.assertTrue(validate_hostage(data, RESOURCES))
+        # A hostage written only in data, with a reward the mission's rules do not have.
+        new = {"id": "test-pow", "extends": "civilian", "name": "TEST", "release": "touch", "rewards": [{"bonus": "turbo"}]}
+        library, errors = load_library(RESOURCES, {"hostages": [new]})
+        self.assertEqual(errors, [])
+        mission = json.loads((RESOURCES / "Levels/tokyo-neon.json").read_text(encoding="utf-8"))
+        mission["map"]["hostages"] = [{"id": "test-pow", "x": 40}]
+        self.assertEqual(validate_mission(mission, RESOURCES, library), [])
+        library["hostages"]["test-pow"]["rewards"] = [{"bonus": "jackpot"}]
+        self.assertTrue(validate_mission(mission, RESOURCES, library))
+
+    def test_tally_rules(self):
+        rules = content("rules", "default")
+        self.assertEqual(validate_rules(rules, RESOURCES), [])
+        for change in (lambda d: d.pop("tally"), lambda d: d["tally"].update(hostage=[1, 2]), lambda d: d["tally"].update(perSecond=[-1, 0, 0, 0])):
+            with self.subTest(change=change):
+                data = copy.deepcopy(rules)
+                change(data)
+                self.assertTrue(validate_rules(data, RESOURCES))
 
 
 class EngineCodeTests(unittest.TestCase):

@@ -1,0 +1,10 @@
+{
+  "id": "office-worker",
+  "extends": "civilian",
+  "name": "EMPLOYÉ DE BUREAU",
+  "animations": {
+    "sheet": {
+      "texture": "Art/hostages/office-worker"
+    }
+  }
+}

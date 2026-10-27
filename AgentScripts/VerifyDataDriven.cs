@@ -83,11 +83,14 @@ public static class VerifyDataDriven
     // grenades), and again in lot 1b: weapon crates now give the lettered weapons of Content/weapons (heavy machine gun,
     // shotgun, flame thrower, rockets that home and explode anywhere, laser) drawn from a weighted table instead of the
     // machine gun, triple shot and rockets in turn, and the state hash mixes the weapon's id hash instead of its old index.
+    // Recorded again in lot 2a: the missions place hostages (Content/hostages) whose rewards drop as bonuses, play the
+    // pow rules with half as many crates on the route, pay an end-of-mission tally (hostages and time under parTime), and
+    // the state hash mixes the hostages and each hero's count. Moving the difficulties into data changed nothing.
     // A lot that changes gameplay on purpose records them again and says so.
     static readonly (int m,int d,int[] h,bool inv,int ticks,int score,int hash)[] Legacy={
-        (0,0,new[]{0,1,2,3},false,7180,168200,413947412),(1,1,new[]{2,3,-1,-1},false,3955,42400,-471109190),(2,0,new[]{3,2,1,0},false,7158,133550,1927838300),
-        (2,3,new[]{1,-1,-1,-1},false,569,1100,226595055),(0,2,new[]{0,-1,-1,-1},false,724,2000,-156924533),(1,3,new[]{1,0,3,2},false,1003,23600,-666926990),
-        (2,1,new[]{0,1,-1,-1},false,4718,41800,1814998279),(0,1,new[]{2,-1,3,-1},false,2805,26600,-1833939736),(1,0,new[]{0,1,2,3},true,5993,163750,-446113515)};
+        (0,0,new[]{0,1,2,3},false,7259,174390,-1611210223),(1,1,new[]{2,3,-1,-1},false,3967,42150,880078358),(2,0,new[]{3,2,1,0},false,7156,127850,521265174),
+        (2,3,new[]{1,-1,-1,-1},false,569,1100,636452319),(0,2,new[]{0,-1,-1,-1},false,724,2000,-21657285),(1,3,new[]{1,0,3,2},false,983,23000,1355612567),
+        (2,1,new[]{0,1,-1,-1},false,5242,46550,-301953046),(0,1,new[]{2,-1,3,-1},false,2887,25300,761850465),(1,0,new[]{0,1,2,3},true,6062,154930,1024031687)};
     static readonly string[] ProperNouns={"Paris","Parisien","Macron","Bastille","Seine","Eiffel","Haussmann","Marseille","Marseillaise","Mistral","Pastis","Canebière","Tokyo","Shogun","Sakura","Shibuya","Akihabara","Chuck","Norris","Arnold","Jean-Claude","JCVD","Sylvester","macron-helicopter","mecha-shogun","news-helicopter","route-0"};
 
     public static object Main(string captures)
@@ -278,7 +281,7 @@ public static class VerifyDataDriven
             int hash=(int)Call(g,"StateHash");bool ok=ticks==run.ticks&&g.Score==run.score&&hash==run.hash;if(!ok)fails.Add("run");
             results.Add(g.CurrentMission.id+" d"+run.d+" ×"+Array.FindAll(run.h,x=>x>=0).Length+(ok?" =":" ≠ "+ticks+"/"+g.Score+"/"+hash));
         }
-        Check(Clean(),"Neuf parties de bot enregistrées (lot 1b) finissent au même pas, au même score et au même état ("+string.Join(" ; ",results)+")",checks);
+        Check(Clean(),"Neuf parties de bot enregistrées (lot 2a) finissent au même pas, au même score et au même état ("+string.Join(" ; ",results)+")",checks);
     }
 
     static void Capture(PanameGame g,string path)

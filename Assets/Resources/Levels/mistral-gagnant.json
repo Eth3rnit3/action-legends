@@ -19,7 +19,58 @@
     "ground": "Art/marseille/sol",
     "terrain": [],
     "props": [],
-    "hostages": [],
+    "hostages": [
+      {
+        "id": "boules-player",
+        "x": 30,
+        "y": 0
+      },
+      {
+        "id": "boules-player",
+        "x": 43,
+        "y": 0,
+        "wave": 1,
+        "reward": "weapon"
+      },
+      {
+        "id": "boules-player",
+        "x": 95,
+        "y": 0,
+        "reward": "grenades"
+      },
+      {
+        "id": "boules-player",
+        "x": 109,
+        "y": 0,
+        "wave": 3,
+        "reward": "health"
+      },
+      {
+        "id": "civilian",
+        "x": 160,
+        "y": 0
+      },
+      {
+        "id": "boules-player",
+        "x": 208,
+        "y": 0,
+        "wave": 6,
+        "weapon": "flamethrower"
+      },
+      {
+        "id": "civilian",
+        "x": 262,
+        "y": 0,
+        "reward": "score"
+      },
+      {
+        "id": "boules-player",
+        "x": 307,
+        "y": 0,
+        "wave": 9,
+        "reward": "weapon"
+      }
+    ],
     "vehicles": []
   },
   "enemies": [
@@ -36,6 +87,8 @@
   "exitX": 357,
   "cameraMin": 7,
   "cameraMax": 354,
+  "rules": "pow",
+  "parTime": 240,
   "waves": [
     {
       "atX": 14,

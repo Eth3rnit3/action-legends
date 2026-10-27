@@ -19,7 +19,58 @@
     "ground": "Art/tokyo/sol",
     "terrain": [],
     "props": [],
-    "hostages": [],
+    "hostages": [
+      {
+        "id": "office-worker",
+        "x": 30,
+        "y": 0
+      },
+      {
+        "id": "office-worker",
+        "x": 42,
+        "y": 0,
+        "wave": 1,
+        "reward": "weapon"
+      },
+      {
+        "id": "civilian",
+        "x": 92,
+        "y": 0,
+        "reward": "grenades"
+      },
+      {
+        "id": "office-worker",
+        "x": 106,
+        "y": 0,
+        "wave": 3,
+        "reward": "health"
+      },
+      {
+        "id": "office-worker",
+        "x": 158,
+        "y": 0
+      },
+      {
+        "id": "office-worker",
+        "x": 202,
+        "y": 0,
+        "wave": 6,
+        "weapon": "laser"
+      },
+      {
+        "id": "office-worker",
+        "x": 255,
+        "y": 0,
+        "reward": "score"
+      },
+      {
+        "id": "civilian",
+        "x": 266,
+        "y": 0,
+        "wave": 8,
+        "reward": "grenades"
+      }
+    ],
     "vehicles": []
   },
   "enemies": [
@@ -36,6 +87,8 @@
   "exitX": 327,
   "cameraMin": 7,
   "cameraMax": 324,
+  "rules": "pow",
+  "parTime": 220,
   "waves": [
     {
       "atX": 14,

@@ -29,7 +29,7 @@ namespace Paname
         void WinMission()
         {
             // A replay checked for the leaderboard must not unlock missions for the viewer.
-            phase=Phase.Won;Announce("MISSION ACCOMPLIE !");Speak(winVoice);if(!headless)Unlock(missionIndex+1);
+            TallyMission();phase=Phase.Won;Announce("MISSION ACCOMPLIE !");Speak(winVoice);if(!headless)Unlock(missionIndex+1);
         }
         // The team keeps its heroes and score; online, the host's restart message carries both to the guests.
         public void NextMission()

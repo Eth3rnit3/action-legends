@@ -1,0 +1,96 @@
+{
+  "id": "civilian",
+  "name": "OTAGE",
+  "release": "both",
+  "hits": 1,
+  "touchRadius": 0.9,
+  "thanks": 1.3,
+  "give": 0.9,
+  "giveAt": 0.5,
+  "hitbox": {
+    "y": 0.7,
+    "radius": 0.6
+  },
+  "run": {
+    "speed": 7.5,
+    "direction": -1
+  },
+  "sound": "Audio/Sfx/otage-libere",
+  "rewards": [
+    {
+      "bonus": "weapon",
+      "weight": 2
+    },
+    {
+      "bonus": "grenades",
+      "weight": 2
+    },
+    {
+      "bonus": "health",
+      "weight": 1
+    },
+    {
+      "bonus": "score",
+      "weight": 1
+    }
+  ],
+  "animations": {
+    "sheet": {
+      "texture": "Art/hostages/civilian",
+      "columns": 4,
+      "rows": 3,
+      "pivot": {
+        "x": 0.45,
+        "y": 0.0352941
+      },
+      "cellHeight": 3.1481481
+    },
+    "states": [
+      {
+        "name": "tied",
+        "cells": [
+          0,
+          0,
+          1,
+          0
+        ],
+        "fps": 3
+      },
+      {
+        "name": "thanks",
+        "cells": [
+          2,
+          3,
+          3,
+          3,
+          4,
+          4
+        ],
+        "fps": 4.6,
+        "loop": false
+      },
+      {
+        "name": "give",
+        "cells": [
+          5,
+          6,
+          6,
+          7
+        ],
+        "fps": 4.5,
+        "loop": false
+      },
+      {
+        "name": "run",
+        "cells": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "fps": 11
+      }
+    ],
+    "layer": 28
+  }
+}

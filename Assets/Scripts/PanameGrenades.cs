@@ -58,6 +58,7 @@ namespace Paname
             Sound(explosionClips);shake=Mathf.Max(shake,.3f);
             for(int k=enemies.Count-1;k>=0;k--){var e=enemies[k];if(Vector2.Distance(e.position+Vector2.up,at)<g.radius+e.type.hitRadius)HitEnemy(k,g.damage,e.position.x>=at.x?1:-1,true);}
             if(BossActive&&BossWithin(at,g.radius))DamageBoss(g.bossDamage);
+            BlastFreesHostages(at,g.radius);
             if(g.destroysBombs&&BossActive)for(int i=bossBombs.Count-1;i>=0;i--)if(bossBombs[i].launched&&Vector2.Distance(bossBombs[i].position,at)<g.radius)RemoveBossBomb(i,false);
         }
     }

@@ -1,0 +1,10 @@
+{
+  "id": "boules-player",
+  "extends": "civilian",
+  "name": "BOULISTE",
+  "animations": {
+    "sheet": {
+      "texture": "Art/hostages/boules-player"
+    }
+  }
+}

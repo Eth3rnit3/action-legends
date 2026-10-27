@@ -226,7 +226,7 @@ namespace Paname
         public static void Path(string path,string prefix,string label){if(string.IsNullOrEmpty(path)||!path.StartsWith(prefix,StringComparison.Ordinal)||path.Contains("..")||path.Contains(":")||path.Contains("\\"))throw new ArgumentException("Chemin invalide pour "+label);}
         public static void Require<T>(string path,string label) where T:UnityEngine.Object{if(!Resources.Load<T>(path))throw new ArgumentException(label+" manquant : "+path);}
     }
-    // Weapons, heroes, enemies, bosses, rules and difficulties shared by every mission, one JSON per entry under Resources/Content/<kind>/.
+    // Weapons, heroes, enemies, bosses, hostages, rules and difficulties shared by every mission, one JSON per entry under Resources/Content/<kind>/.
     // An entry may name a parent with "extends": the parent is read first, then the entry's own fields replace its values.
     public static class ContentLibrary
     {
@@ -237,6 +237,7 @@ namespace Paname
         static readonly Dictionary<string,BossDefinition> bosses=new Dictionary<string,BossDefinition>();
         static readonly Dictionary<string,GameRules> rules=new Dictionary<string,GameRules>();
         static readonly Dictionary<string,WeaponDefinition> weapons=new Dictionary<string,WeaponDefinition>();
+        static readonly Dictionary<string,HostageDefinition> hostages=new Dictionary<string,HostageDefinition>();
         static readonly Dictionary<string,string> sources=new Dictionary<string,string>();
         static bool loaded;
         public static HeroDefinition[] Heroes{get{Load();return heroes;}}
@@ -244,14 +245,15 @@ namespace Paname
         public static EnemyDefinition Enemy(string id){Load();if(id!=null&&enemies.TryGetValue(id,out var e))return e;throw new ArgumentException("Ennemi inconnu : "+id);}
         public static BossDefinition Boss(string id){Load();if(id!=null&&bosses.TryGetValue(id,out var b))return b;throw new ArgumentException("Boss inconnu : "+id);}
         public static GameRules Rules(string id){Load();if(id!=null&&rules.TryGetValue(id,out var r))return r;throw new ArgumentException("Règles inconnues : "+id);}
+        public static HostageDefinition Hostage(string id){Load();if(id!=null&&hostages.TryGetValue(id,out var h))return h;throw new ArgumentException("Otage inconnu : "+id);}
         public static WeaponDefinition Weapon(string id){Load();return FindWeapon(id)??throw new ArgumentException("Arme inconnue : "+id);}
         // While loading too: heroes, rules and missions resolve their weapons through it.
         public static WeaponDefinition FindWeapon(string id)=>id!=null&&weapons.TryGetValue(id,out var w)?w:null;
         public static void Load()
         {
             if(loaded)return;
-            sources.Clear();enemies.Clear();bosses.Clear();rules.Clear();weapons.Clear();
-            var weaponTexts=Read("weapons");var heroTexts=Read("heroes");var enemyTexts=Read("enemies");var bossTexts=Read("bosses");var ruleTexts=Read("rules");var difficultyTexts=Read("difficulties");
+            sources.Clear();enemies.Clear();bosses.Clear();rules.Clear();weapons.Clear();hostages.Clear();
+            var weaponTexts=Read("weapons");var heroTexts=Read("heroes");var enemyTexts=Read("enemies");var bossTexts=Read("bosses");var ruleTexts=Read("rules");var difficultyTexts=Read("difficulties");var hostageTexts=Read("hostages");
             // Weapons first: heroes and rules name them.
             foreach(var text in weaponTexts){var weapon=Parse<WeaponDefinition>("weapons",text);weapon.Validate();weapons[weapon.id]=weapon;}
             var list=new List<HeroDefinition>();var ids=new HashSet<string>();
@@ -260,6 +262,7 @@ namespace Paname
             if(list.Count<1||list.Count>4)throw new ArgumentException("Un à quatre héros sont requis dans Resources/Content/heroes");
             foreach(var text in enemyTexts){var enemy=Parse<EnemyDefinition>("enemies",text);enemy.Validate();enemies[enemy.id]=enemy;}
             foreach(var text in bossTexts){var boss=Parse<BossDefinition>("bosses",text);boss.Validate();bosses[boss.id]=boss;}
+            foreach(var text in hostageTexts){var hostage=Parse<HostageDefinition>("hostages",text);hostage.Validate();hostages[hostage.id]=hostage;}
             foreach(var text in ruleTexts){var set=Parse<GameRules>("rules",text);set.Validate();rules[set.id]=set;}
             if(!rules.ContainsKey("default"))throw new ArgumentException("Resources/Content/rules/default.json est requis");
             var levels=new List<DifficultyDefinition>();
@@ -294,6 +297,7 @@ namespace Paname
         public static BossDefinition AddBoss(string json){Load();var b=Parse<BossDefinition>("bosses",json);b.Validate();bosses[b.id]=b;sources["bosses/"+b.id]=json;return b;}
         public static GameRules AddRules(string json){Load();var r=Parse<GameRules>("rules",json);r.Validate();rules[r.id]=r;sources["rules/"+r.id]=json;return r;}
         public static WeaponDefinition AddWeapon(string json){Load();var w=Parse<WeaponDefinition>("weapons",json);w.Validate();weapons[w.id]=w;sources["weapons/"+w.id]=json;return w;}
+        public static HostageDefinition AddHostage(string json){Load();var h=Parse<HostageDefinition>("hostages",json);h.Validate();hostages[h.id]=h;sources["hostages/"+h.id]=json;return h;}
         public static void Reload(){loaded=false;Load();}
     }
 }

@@ -18,7 +18,64 @@
     "ground": "Art/paris",
     "terrain": [],
     "props": [],
-    "hostages": [],
+    "hostages": [
+      {
+        "id": "baker",
+        "x": 34,
+        "y": 0
+      },
+      {
+        "id": "baker",
+        "x": 49,
+        "y": 0,
+        "wave": 1,
+        "reward": "weapon"
+      },
+      {
+        "id": "civilian",
+        "x": 108,
+        "y": 0,
+        "reward": "grenades"
+      },
+      {
+        "id": "baker",
+        "x": 124,
+        "y": 0,
+        "wave": 3,
+        "reward": "health"
+      },
+      {
+        "id": "baker",
+        "x": 185,
+        "y": 0
+      },
+      {
+        "id": "civilian",
+        "x": 238,
+        "y": 0,
+        "wave": 6,
+        "weapon": "heavy-machinegun"
+      },
+      {
+        "id": "baker",
+        "x": 300,
+        "y": 0,
+        "reward": "score"
+      },
+      {
+        "id": "baker",
+        "x": 352,
+        "y": 0,
+        "wave": 9,
+        "reward": "weapon"
+      },
+      {
+        "id": "civilian",
+        "x": 412,
+        "y": 0,
+        "reward": "grenades"
+      }
+    ],
     "vehicles": []
   },
   "enemies": [
@@ -35,6 +92,8 @@
   "exitX": 477,
   "cameraMin": 7,
   "cameraMax": 474,
+  "rules": "pow",
+  "parTime": 300,
   "waves": [
     {
       "atX": 14,

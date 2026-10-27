@@ -63,6 +63,8 @@ namespace Paname
         [NonSerialized] public WeaponDefinition gun;
         public bool Draws=>kind==0&&gun==null;
     }
+    // The end-of-mission tally, per difficulty: points for each hostage a hero still counts, and for each second under the mission's parTime.
+    [Serializable] public sealed class TallyRules {public int[] hostage,perSecond;public SpriteCell icon=new SpriteCell();}
     // One line of a weapons table: weapon crates that do not name their weapon give these, weight times in every sum of weights.
     [Serializable] public sealed class WeaponChance {public string weapon;public int weight=1;[NonSerialized] public WeaponDefinition gun;}
     // Rules every mission plays by unless it names other ones: grenades, bonuses, weapon crates and the GO sign.
@@ -81,6 +83,7 @@ namespace Paname
         // What weapon crates that name no weapon give, and in which proportions (a mission may replace it with its own "weapons").
         public WeaponChance[] weapons;
         public SpriteCell go=new SpriteCell();
+        public TallyRules tally=new TallyRules();
         public void Validate()
         {
             string label="Règles "+id;
@@ -118,6 +121,7 @@ namespace Paname
             Content.PerDifficulty(firstSupply,5,500,label+".firstSupply");Content.PerDifficulty(supplySpacing,10,500,label+".supplySpacing");Content.PerDifficulty(killsPerDrop,1,500,label+".killsPerDrop");
             Table(weapons,label+".weapons",Array.Exists(bonuses,b=>b.Draws));
             go.Validate(label+".go");
+            Content.PerDifficulty(tally.hostage,0,100000,label+".tally.hostage");Content.PerDifficulty(tally.perSecond,0,10000,label+".tally.perSecond");tally.icon.Validate(label+".tally.icon");
         }
         // Also checks a mission's own table; required when some weapon crate draws from it.
         public static void Table(WeaponChance[] table,string label,bool required)

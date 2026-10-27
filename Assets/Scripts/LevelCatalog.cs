@@ -22,10 +22,16 @@ namespace Paname
         public float health=1;
         [NonSerialized] public BossDefinition definition;
     }
-    // Reserved for later work: every list must stay empty until the engine reads it (see docs/ADDING_A_LEVEL.md).
+    // Reserved for later work: terrain, props and vehicles must stay empty until the engine reads them (see docs/ADDING_A_LEVEL.md).
     [Serializable] public sealed class MapTerrain {public string type;public float x,width,height,toHeight;}
     [Serializable] public sealed class MapProp {public string id;public float x,y;public int wave=-1;}
-    [Serializable] public sealed class MapHostage {public string id,reward;public float x,y;}
+    // A hostage of the library tied at x (y above the street); reward / weapon replace his own table of rewards; with a
+    // wave, he only appears when that wave starts, inside its locked screen.
+    [Serializable] public sealed class MapHostage
+    {
+        public string id,reward,weapon;public float x,y;public int wave=-1;
+        [NonSerialized] public HostageDefinition definition;[NonSerialized] public int bonus=-1;[NonSerialized] public WeaponDefinition gun;
+    }
     [Serializable] public sealed class MapVehicle {public string id;public float x;}
     [Serializable] public sealed class EncounterSpawn {public string enemy,entry;public float x,delay;}
     [Serializable] public sealed class MissionEncounter {public float atX;public int wave=-1;public EncounterSpawn[] spawns;}
@@ -54,6 +60,8 @@ namespace Paname
         public MissionBoss boss=new MissionBoss();
         // Library rules (grenades, bonuses, GO sign) the mission plays by.
         public string rules="default";
+        // Seconds under which the end-of-mission tally gives a time bonus (rules' tally.perSecond); 0: none.
+        public float parTime;
         // Optional: the weapons this mission's weapon crates give and their weights, instead of the rules' table.
         public WeaponChance[] weapons;
         [NonSerialized] public EnemyDefinition[] roster;
@@ -65,6 +73,31 @@ namespace Paname
             if(mission==null)throw new ArgumentException("Mission JSON vide");mission.Validate();return mission;
         }
         static void Reserved(Array list,string field){if(list!=null&&list.Length>0)throw new ArgumentException(field+" est réservé à un lot à venir : laisser la liste vide");}
+        // Hostages are checked against the mission's rules: their rewards name its bonuses.
+        void ValidateHostages()
+        {
+            if(!(parTime>=0&&parTime<=3600))throw new ArgumentException("parTime entre 0 et 3600 secondes");
+            var list=map.hostages??new MapHostage[0];map.hostages=list;
+            if(list.Length>40)throw new ArgumentException("map.hostages : 40 otages au plus");
+            foreach(var h in list)
+            {
+                if(h==null)throw new ArgumentException("map.hostages : otage vide");
+                string label="map.hostages "+h.id+" à x "+h.x;
+                h.definition=ContentLibrary.Hostage(h.id);
+                if(!(h.x>=1&&h.x<=length-1&&h.y>=0&&h.y<=10))throw new ArgumentException(label+" : x dans la mission, y entre 0 et 10");
+                if(h.wave<-1||h.wave>=waves.Length)throw new ArgumentException(label+" : wave de -1 au nombre de vagues");
+                // A wave's hostage must stand inside the screen that the wave locks.
+                if(h.wave>=0&&!(h.x>=waves[h.wave].atX-14&&h.x<=waves[h.wave].atX+2))throw new ArgumentException(label+" : un otage de vague se place entre atX - 14 et atX + 2 ("+waves[h.wave].atX+")");
+                foreach(var w in h.definition.rewards)if(HostageDefinition.BonusIndex(ruleSet,w.bonus,w.weapon)<0)throw new ArgumentException(label+" : la récompense "+(w.bonus??w.weapon)+" n'est pas un bonus des règles "+ruleSet.id);
+                h.bonus=-1;h.gun=null;
+                if(!string.IsNullOrEmpty(h.reward)||!string.IsNullOrEmpty(h.weapon))
+                {
+                    HostageDefinition.CheckReward(h.reward,h.weapon,label);
+                    h.bonus=HostageDefinition.BonusIndex(ruleSet,h.reward,h.weapon);if(h.bonus<0)throw new ArgumentException(label+" : récompense inconnue des règles "+ruleSet.id);
+                    if(!string.IsNullOrEmpty(h.weapon))h.gun=ContentLibrary.FindWeapon(h.weapon);
+                }
+            }
+        }
         public void Validate()
         {
             if(schemaVersion!=Schema)throw new ArgumentException("schemaVersion doit être "+Schema);
@@ -79,7 +112,7 @@ namespace Paname
             if(map.backgrounds==null||map.backgrounds.Length<1||map.backgrounds.Length>8)throw new ArgumentException("map.backgrounds : une à huit images sont requises");
             foreach(var path in map.backgrounds){Content.Path(path,"Art/","map.backgrounds");Content.Require<Texture2D>(path,"Image");}
             Content.Path(map.ground,"Art/","map.ground");Content.Require<Texture2D>(map.ground,"Sol");
-            Reserved(map.terrain,"map.terrain");Reserved(map.props,"map.props");Reserved(map.hostages,"map.hostages");Reserved(map.vehicles,"map.vehicles");Reserved(encounters,"encounters");
+            Reserved(map.terrain,"map.terrain");Reserved(map.props,"map.props");Reserved(map.vehicles,"map.vehicles");Reserved(encounters,"encounters");
             if(enemies==null||enemies.Length<1||enemies.Length>8)throw new ArgumentException("enemies : un à huit identifiants d'ennemis");
             roster=new EnemyDefinition[enemies.Length];for(int i=0;i<enemies.Length;i++)roster[i]=ContentLibrary.Enemy(enemies[i]);
             if(waves==null||waves.Length<1||waves.Length>20)throw new ArgumentException("Une à vingt vagues sont requises");
@@ -93,6 +126,7 @@ namespace Paname
             }
             ruleSet=ContentLibrary.Rules(string.IsNullOrEmpty(rules)?"default":rules);
             GameRules.Table(weapons,"weapons",false);weaponTable=weapons!=null&&weapons.Length>0?weapons:ruleSet.weapons;
+            ValidateHostages();
             extraEnemy??=new MissionExtraEnemy();
             if(extraEnemy.enemy<-1||extraEnemy.enemy>=enemies.Length||extraEnemy.every<1||extraEnemy.every>30||extraEnemy.fromDifficulty<0||extraEnemy.fromDifficulty>3)throw new ArgumentException("extraEnemy : enemy de -1 à la taille du roster, every de 1 à 30, fromDifficulty de 0 à 3");
             boss??=new MissionBoss();

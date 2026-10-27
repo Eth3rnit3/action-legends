@@ -15,10 +15,12 @@ namespace Paname
         {
             pickups.Clear();kills=0;combo=0;comboClock=0;nextSupply=0;ResetWeaponDraws();
         }
-        void SpawnPickup(Vector2 position,int kind)
+        void SpawnPickup(Vector2 position,int kind)=>DropPickup(position,kind,null);
+        // preset: the weapon a crate holds when its giver chose it (a hostage's reward).
+        void DropPickup(Vector2 position,int kind,WeaponDefinition preset)
         {
             if(pickups.Count>=20)return;
-            var bonus=Rules.bonuses[kind];var gun=bonus.kind==0?bonus.gun??DrawWeapon():null;
+            var bonus=Rules.bonuses[kind];var gun=bonus.kind==0?preset??bonus.gun??DrawWeapon():null;
             var root=new GameObject("Bonus • "+(gun!=null?gun.id:bonus.id)).transform;root.SetParent(actors,false);position.y=.65f;root.position=position;
             // A weapon crate shows the weapon it holds unless the bonus draws its own icon.
             var icon=gun!=null&&string.IsNullOrEmpty(bonus.icon?.texture)?gun.crate:bonus.icon;

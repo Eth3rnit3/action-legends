@@ -1,0 +1,10 @@
+{
+  "id": "pow",
+  "extends": "default",
+  "supplySpacing": [
+    150,
+    180,
+    220,
+    260
+  ]
+}

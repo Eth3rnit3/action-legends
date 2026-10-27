@@ -16,7 +16,9 @@ public static class VerifyMissions
             Check(UnityEditor.PlayerSettings.productName=="Action Legends","Le jeu s'appelle Action Legends",checks);
             Check(g.CurrentMission.id=="panique-a-paname"&&g.CurrentMission.title=="Panique à Paname","Panique à Paname est une mission du catalogue",checks);
             var added=JsonUtility.FromJson<MissionDefinition>(JsonUtility.ToJson(original[0]));added.id="test-mission";added.title="Mission de vérification";added.length=40;added.exitX=37;added.cameraMax=34;
-            added.waves=new[]{new MissionWave{atX=12,baseEnemies=1,enemiesPerPlayer=0,maxAlive=1,spawnInterval=.2f,enemyPattern=new[]{0}}};added.Validate();
+            added.waves=new[]{new MissionWave{atX=12,baseEnemies=1,enemiesPerPlayer=0,maxAlive=1,spawnInterval=.2f,enemyPattern=new[]{0}}};
+            // Paris's hostages stand beyond the shorter test mission.
+            added.map.hostages=new MapHostage[0];added.Validate();
             missionsField.SetValue(g,new[]{original[0],added});g.phase=PanameGame.Phase.Lobby;PlayerPrefs.SetInt("action-legends.unlocked.test-mission",1);g.SelectMission(1);
             Check(g.MissionCount==2&&g.CurrentMission.id=="test-mission","Une mission supplémentaire devient sélectionnable",checks);
             for(int i=0;i<4;i++)g.slots[i].joined=i==0;g.BeginRound();var commands=new PlayerCommand[4];commands[0]=new PlayerCommand{move=1,fire=true};

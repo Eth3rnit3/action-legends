@@ -183,5 +183,25 @@
   ],
   "go": {
     "texture": "Art/go-sign"
+  },
+  "tally": {
+    "hostage": [
+      1000,
+      1000,
+      1000,
+      1000
+    ],
+    "perSecond": [
+      10,
+      10,
+      10,
+      10
+    ],
+    "icon": {
+      "texture": "Art/hostages/civilian",
+      "columns": 4,
+      "rows": 3,
+      "cell": 4
+    }
   }
 }

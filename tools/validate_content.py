@@ -28,7 +28,9 @@ LEGACY_HERO_WEAPON = ("fireRate", "damage", "recoilShake")
 ENEMY_BEHAVIORS = ("melee", "thrower", "gunman")
 BOSS_BEHAVIORS = ("flyer", "walker")
 ATTACKS = ("gun", "bombs", "stomp")
-RESERVED_MAP = ("terrain", "props", "hostages", "vehicles")
+RESERVED_MAP = ("terrain", "props", "vehicles")
+HOSTAGE_RELEASES = ("shot", "touch", "both")
+HOSTAGE_STATES = ("tied", "thanks", "give", "run")
 # Words that belong to one mission's content and must never be written in the engine's code.
 PROPER_NOUNS = ("Paris", "Parisien", "Macron", "Bastille", "Seine", "Eiffel", "Haussmann", "Marseille", "Marseillaise",
                 "Mistral", "Pastis", "Canebière", "Tokyo", "Shogun", "Sakura", "Shibuya", "Akihabara", "Chuck", "Norris",
@@ -398,6 +400,69 @@ def validate_rules(data, resources, weapons=None):
     draws = any(isinstance(b, dict) and b.get("effect") == "weapon" and not b.get("weapon") for b in bonuses)
     validate_table(data.get("weapons"), weapons, label + ".weapons", draws, errors)
     validate_cell(data.get("go"), resources, label + ".go", errors)
+    tally = obj(data, "tally")
+    errors.per_difficulty(tally, "hostage", 0, 100000, label + ".tally", True)
+    errors.per_difficulty(tally, "perSecond", 0, 10000, label + ".tally", True)
+    validate_cell(tally.get("icon"), resources, label + ".tally.icon", errors)
+    return errors
+
+
+def check_reward(bonus, weapon, weapons, label, errors):
+    """HostageDefinition.CheckReward: a bonus id, or a weapon with ammunition (a crate holding it)."""
+    if not bonus and not weapon:
+        errors.append(f"{label}: bonus or weapon required")
+    elif weapon:
+        if weapon not in weapons:
+            errors.append(f"{label}.weapon: unknown weapon {weapon} (Content/weapons/<id>.json)")
+        elif unlimited(weapons[weapon]):
+            errors.append(f"{label}.weapon: {weapon} has no ammunition to give")
+
+
+def reward_bonus(rules, bonus, weapon):
+    """HostageDefinition.BonusIndex: the rules' bonus a reward names, or their first weapon bonus for a weapon; None if absent."""
+    for i, b in enumerate(rules.get("bonuses") or []):
+        if not isinstance(b, dict):
+            continue
+        if (b.get("id") == bonus) if bonus else b.get("effect") == "weapon":
+            return None if weapon and b.get("effect") != "weapon" else i
+    return None
+
+
+def validate_hostage(data, resources, weapons=None):
+    errors = Errors()
+    label = f"hostage {data.get('id')}"
+    weapons = weapon_library(resources) if weapons is None else weapons
+    errors.text(data, "name", 24, label)
+    if data.get("release", "both") not in HOSTAGE_RELEASES:
+        errors.append(f"{label}.release: one of {', '.join(HOSTAGE_RELEASES)}")
+    errors.number(data, "hits", 1, 50, label, 1, True)
+    errors.number(data, "touchRadius", .2, 5, label, .9)
+    errors.number(data, "thanks", 0, 10, label, 1.2)
+    give = errors.number(data, "give", 0, 10, label, .8)
+    errors.number(data, "giveAt", 0, give if give is not None else 10, label, .45)
+    hitbox = obj(data, "hitbox")
+    errors.number(hitbox, "y", 0, 5, label + ".hitbox", .7)
+    errors.number(hitbox, "radius", .1, 3, label + ".hitbox", .6)
+    run = obj(data, "run")
+    errors.number(run, "speed", .5, 30, label + ".run", 7)
+    errors.number(run, "direction", -1, 1, label + ".run", -1, True)
+    rewards = data.get("rewards")
+    if not isinstance(rewards, list) or not 1 <= len(rewards) <= 16:
+        errors.append(f"{label}.rewards: one to sixteen rewards")
+        rewards = []
+    for i, reward in enumerate(rewards):
+        rl = f"{label}.rewards[{i}]"
+        if not isinstance(reward, dict):
+            errors.append(f"{rl}: object required")
+            continue
+        errors.number(reward, "weight", 1, 100, rl, 1, True)
+        check_reward(reward.get("bonus"), reward.get("weapon"), weapons, rl, errors)
+    if data.get("sound") not in (None, ""):
+        errors.resource(data.get("sound"), "Audio/", SOUNDS, resources, label + ".sound")
+    voice = data.get("voice")
+    if voice not in (None, ""):
+        errors.resource(voice + "-a" if isinstance(voice, str) else voice, "Audio/", SOUNDS, resources, label + ".voice")
+    validate_animations(data.get("animations"), resources, label, HOSTAGE_STATES, errors)
     return errors
 
 
@@ -608,8 +673,8 @@ def validate_difficulty(data, resources):
 
 # Weapons first: heroes and rules name them.
 VALIDATORS = {"weapons": validate_weapon, "heroes": validate_hero, "enemies": validate_enemy, "bosses": validate_boss, "rules": validate_rules,
-              "difficulties": validate_difficulty}
-NEEDS_WEAPONS = ("heroes", "rules")
+              "difficulties": validate_difficulty, "hostages": validate_hostage}
+NEEDS_WEAPONS = ("heroes", "rules", "hostages")
 
 
 def load_library(resources, extra=None, kinds=None):
@@ -718,6 +783,7 @@ def validate_mission(data, resources, library=None):
     if rules not in library["rules"]:
         errors.append(f"rules: unknown rules {rules} (Content/rules/{rules}.json)")
     validate_table(data.get("weapons"), library["weapons"], "weapons", False, errors)
+    errors.number(data, "parTime", 0, 3600, "mission", 0)
     enemies = data.get("enemies")
     roster = 0
     if not isinstance(enemies, list) or not 1 <= len(enemies) <= 8:
@@ -775,7 +841,42 @@ def validate_mission(data, resources, library=None):
             errors.append(f"wave {i}: enemyPattern must use enemy types 0 to {roster - 1}")
         if not isinstance(wave.get("lock", True), bool):
             errors.append(f"wave {i}: lock must be true or false")
+    validate_map_hostages(game_map.get("hostages"), waves, length, library.get("rules", {}).get(rules), library, errors)
     return errors
+
+
+def validate_map_hostages(hostages, waves, length, rules, library, errors):
+    """MissionDefinition.ValidateHostages: placements, their wave's locked screen and rewards the mission's rules know."""
+    if hostages in (None, []):
+        return
+    if not isinstance(hostages, list) or len(hostages) > 40:
+        errors.append("map.hostages: a list of at most 40 hostages")
+        return
+    for i, place in enumerate(hostages):
+        label = f"map.hostages[{i}]"
+        if not isinstance(place, dict):
+            errors.append(f"{label}: object required")
+            continue
+        kind = library["hostages"].get(place.get("id"))
+        if kind is None:
+            errors.append(f"{label}.id: unknown hostage {place.get('id')} (Content/hostages/<id>.json)")
+        x = errors.number(place, "x", 1, (length or 500) - 1, label)
+        errors.number(place, "y", 0, 10, label)
+        wave = errors.number(place, "wave", -1, len(waves) - 1, label, -1, True)
+        if wave is not None and wave >= 0 and x is not None and isinstance(waves[wave], dict):
+            at = waves[wave].get("atX", 0)
+            if isinstance(at, (int, float)) and not at - 14 <= x <= at + 2:
+                errors.append(f"{label}: a wave's hostage stands between atX - 14 and atX + 2 ({at})")
+        if rules is None:
+            continue
+        for j, reward in enumerate((kind or {}).get("rewards") or []):
+            if isinstance(reward, dict) and reward_bonus(rules, reward.get("bonus"), reward.get("weapon")) is None:
+                errors.append(f"{label}: reward {reward.get('bonus') or reward.get('weapon')} of {place.get('id')} is not a bonus of rules {rules.get('id')}")
+        bonus, weapon = place.get("reward"), place.get("weapon")
+        if bonus or weapon:
+            check_reward(bonus, weapon, library["weapons"], label, errors)
+            if reward_bonus(rules, bonus, weapon) is None:
+                errors.append(f"{label}: reward {bonus or weapon} is not a bonus of rules {rules.get('id')}")
 
 
 def find_proper_nouns(root=ROOT):

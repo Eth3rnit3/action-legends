@@ -8,7 +8,7 @@ Parcours de nuit de 330 unités en neuf vagues : Shibuya, puis Akihabara, puis l
 
 Générées avec le générateur d’images intégré de Codex CLI, en prenant `canal-panorama.png` et `marseille/vieux-port.png` comme références pour les décors, `enemies.png`, `heroes.png` et `macron-helicopter.png` pour les personnages. Le gang, ses enseignes et le robot sont inventés.
 
-Les deux planches générées passent ensuite par `tools/art/pack_sheet.py` (Pillow, NumPy et SciPy) : chaque image est replacée pour que les pieds tombent sur la ligne de sol du moteur et le milieu des jambes sur le pivot, et le script affiche les bouts de canon reportés dans le JSON (`muzzle`) et dans `PanameMecha.cs`.
+Les deux planches générées passent ensuite par `tools/art/pack_sheet.py` (Pillow, NumPy et SciPy) : chaque image est replacée pour que les pieds tombent sur la ligne de sol du moteur et le milieu des jambes sur le pivot, et le script affiche les bouts de canon, reportés en ancrages `muzzle` dans `Assets/Resources/Content/enemies/gunman-*.json`, et les points du mécha (canon, lance-missiles, pied) dans `Content/bosses/mecha-shogun.json`.
 
 | Fichier | Taille | Usage |
 |---|---|---|

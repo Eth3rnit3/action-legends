@@ -71,7 +71,7 @@ Les dossiers `Library`, `Temp`, `Logs` et `obj` sont des fichiers de travail Uni
 
 ## Missions et navigateur
 
-Le nom du jeu est Action Legends. Les missions sont chargées depuis les JSON de `Assets/Resources/Levels` ; de nouvelles missions apparaissent automatiquement dans le menu après compilation. Voir le [README](README.md) pour la version navigateur et les contributions.
+Le nom du jeu est Action Legends. Les missions sont chargées depuis les JSON de `Assets/Resources/Levels`, et leurs héros, ennemis et boss depuis la bibliothèque `Assets/Resources/Content` ; de nouvelles missions apparaissent automatiquement dans le menu après compilation. Voir [docs/ADDING_A_LEVEL.md](docs/ADDING_A_LEVEL.md). Voir le [README](README.md) pour la version navigateur et les contributions.
 
 ## Difficultés et boss — version 0.5.0
 

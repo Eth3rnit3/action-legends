@@ -23,7 +23,7 @@ Ouvrir ensuite `http://127.0.0.1:8765`. Le petit serveur sert uniquement des fic
 
 ## Faire évoluer le jeu
 
-Une mission est un JSON dans `Assets/Resources/Levels/`. Le jeu détecte toutes les missions de ce dossier lors de la compilation et les présente dans le menu. Les paramètres, vagues et décors de **Panique à Paname** sont déjà séparés du moteur.
+Une mission est un JSON dans `Assets/Resources/Levels/`. Le jeu détecte toutes les missions de ce dossier lors de la compilation et les présente dans le menu. Héros, ennemis, boss et leurs animations forment une bibliothèque de JSON dans `Assets/Resources/Content/`, que les missions désignent par identifiant : un niveau complet, avec un nouvel ennemi, un nouveau boss et sa carte, s’ajoute sans toucher au code.
 
 - [Ajouter une mission](docs/ADDING_A_LEVEL.md).
 - [Contribuer au code ou aux visuels](CONTRIBUTING.md).
@@ -40,7 +40,7 @@ python3 tools/validate_content.py
 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
-La vérification contrôle le format, les images référencées, la sortie, l’ordre des vagues et les ennemis disponibles. La compilation Unity valide ensuite le code et les ressources.
+La vérification contrôle les missions et la bibliothèque : format, références d’ennemis et de boss, images et sons présents, états d’animation et ancrages requis, bornes des nombres, sortie et ordre des vagues. Elle refuse aussi un nom propre à une mission dans le code du moteur. Le jeu refait les mêmes contrôles au démarrage.
 
 ## Portée actuelle
 

@@ -317,6 +317,9 @@ namespace Paname
             Mix(thrown.Count);Mix(HostagesFreed);if(Level.continues.enabled){Mix(Continues);MixF(continueClock);}foreach(var o in hostages){Mix(o.state);MixF(o.position.x);}
             foreach(var e in enemies){MixF(e.position.x);Mix(e.hp);Mix(e.mode);}
             Mix(arrivals.Count);foreach(var c in carriers)MixF(c.x);
+            // Charges and salvos of the specials, only while there are some: games without them keep their hashes.
+            if(rushes.Count>0){Mix(rushes.Count);foreach(var r in rushes){MixF(r.position.x);Mix(r.struck.Count);}}
+            foreach(var p in players)if(p!=null&&(p.dash>0||p.salvo>0)){MixF(p.dash);Mix(p.salvo);}
             return h;
         }
         void ReportStatus()

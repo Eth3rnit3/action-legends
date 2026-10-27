@@ -16,7 +16,11 @@ SOUNDS = (".wav", ".ogg", ".mp3")
 SCHEMA = 2
 ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 LOOKS = ("tracer", "molotov", "bullet")
-HERO_SPECIALS = ("blast", "volley")
+# Generic specials (HeroSpecial): blast, volley, and since lot 3H an ally that charges (summon), the hero's own charge (dash)
+# and shots in several directions (salvo).
+HERO_SPECIALS = ("blast", "volley", "summon", "dash", "salvo")
+ALLY_FROMS = ("edge", "behind")
+MAX_HEROES = 99
 # Hero states the engine reads (HeroDefinition.Required), the ones it fires from, and the optional ones.
 HERO_STATES = ("idle", "run", "jump", "crouch", "aimUp", "jumpDown", "knife", "throw")
 HERO_FIRING = ("idle", "run", "jump", "crouch", "crouchWalk", "crouchShoot", "aimUp", "aimDiagonal", "jumpDown")
@@ -39,7 +43,8 @@ PROPER_NOUNS = ("Paris", "Parisien", "Macron", "Bastille", "Seine", "Eiffel", "H
                 "Mistral", "Pastis", "Canebière", "Tokyo", "Shogun", "Sakura", "Shibuya", "Akihabara", "Chuck", "Norris",
                 "Arnold", "Jean-Claude", "JCVD", "Sylvester", "macron-helicopter", "mecha-shogun", "news-helicopter", "route-0",
                 "Saint-Rémy", "Saint-Remy", "Provence", "Provençal", "Nostradamus", "Arlésien", "Arlésienne", "arlesien", "arlesienne",
-                "Farandole", "Alpilles", "Glanum", "Favier", "Camargue", "taureau", "prophetie-en-provence")
+                "Farandole", "Alpilles", "Glanum", "Favier", "Camargue", "taureau", "prophetie-en-provence",
+                "Fernandel", "Marguerite", "Bardot", "Brigitte", "Jeanne", "jeanne-d-arc", "brigitte-bardot")
 
 
 class Errors(list):
@@ -169,6 +174,94 @@ def unlimited(weapon):
     return not ammo or all(v == 0 for v in ammo)
 
 
+def png_size(path):
+    """Width and height of a PNG from its header (no imaging library needed)."""
+    with open(path, "rb") as f:
+        head = f.read(24)
+    return int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big")
+
+
+def cell_aspect(anim, resources):
+    sheet = obj(anim, "sheet")
+    path = resources / (str(sheet.get("texture")) + ".png")
+    columns, rows = sheet.get("columns", 1), sheet.get("rows", 1)
+    if not path.is_file() or not isinstance(columns, int) or not isinstance(rows, int) or columns < 1 or rows < 1:
+        return 1
+    w, h = png_size(path)
+    return (w / columns) / (h / rows)
+
+
+def validate_special(special, resources, sl, errors):
+    """HeroSpecial.Validate: the numbers each kind of special reads."""
+    kind = special.get("type")
+    if kind not in HERO_SPECIALS:
+        errors.append(f"{sl}.type: one of {', '.join(HERO_SPECIALS)}")
+    errors.number(special, "cooldown", .5, 60, sl)
+    errors.number(special, "cooldownPerDifficulty", 0, 20, sl)
+    errors.number(special, "pose", 0, 5, sl)
+    errors.number(special, "damage", 1, 100, sl, 0, True)
+    errors.number(special, "bossDamage", 0, 500, sl, 0, True)
+    if special.get("sound") not in (None, ""):
+        errors.resource(special.get("sound"), "Audio/", SOUNDS, resources, sl + ".sound")
+    voice = special.get("voice")
+    if voice not in (None, ""):
+        if not isinstance(voice, str) or not any((resources / (voice + s + ext)).is_file() for s in ("", "-a") for ext in SOUNDS):
+            errors.resource(voice + "-a" if isinstance(voice, str) else voice, "Audio/", SOUNDS, resources, sl + ".voice")
+    if special.get("wound") not in (None, "") and special.get("wound") not in WOUNDS:
+        errors.append(f"{sl}.wound: one of {', '.join(WOUNDS)}")
+    if kind == "blast":
+        errors.number(special, "radius", .5, 15, sl)
+        errors.number(special, "bossReach", 0, 10, sl)
+        errors.number(special, "invulnerable", 0, 5, sl)
+        errors.number(special, "leap", 0, 30, sl)
+    elif kind == "volley":
+        errors.number(special, "speed", 1, 60, sl)
+        errors.number(special, "spread", 0, 10, sl)
+        errors.number(special, "shots", 1, 15, sl, 0, True)
+    elif kind == "summon":
+        errors.number(special, "delay", 0, 3, sl)
+        ally, al = obj(special, "ally"), sl + ".ally"
+        if ally.get("from", "edge") not in ALLY_FROMS:
+            errors.append(f"{al}.from: one of {', '.join(ALLY_FROMS)}")
+        errors.number(ally, "speed", 1, 60, al)
+        errors.number(ally, "reach", .2, 6, al)
+        errors.number(ally, "height", .2, 6, al)
+        errors.number(ally, "y", 0, 10, al)
+        errors.number(ally, "life", .5, 12, al, 6)
+        errors.number(ally, "margin", 0, 10, al, 2)
+        if ally.get("sound") not in (None, ""):
+            errors.resource(ally.get("sound"), "Audio/", SOUNDS, resources, al + ".sound")
+        validate_animations(ally.get("animations"), resources, al, ("run",), errors)
+    elif kind == "dash":
+        errors.number(special, "speed", 1, 60, sl)
+        errors.number(special, "time", .05, 3, sl)
+        errors.number(special, "radius", .2, 6, sl)
+        errors.number(special, "invulnerable", 0, 5, sl)
+    elif kind == "salvo":
+        errors.number(special, "speed", 1, 60, sl)
+        errors.number(special, "spread", 0, 45, sl)
+        errors.number(special, "shots", 1, 15, sl, 0, True)
+        bursts = errors.number(special, "bursts", 1, 20, sl, 1, True)
+        interval = errors.number(special, "interval", 0, 2, sl)
+        if bursts and bursts > 1 and interval is not None and interval < .02:
+            errors.append(f"{sl}.interval: at least 0.02 s between two bursts")
+        directions = special.get("directions")
+        if not isinstance(directions, list) or not 1 <= len(directions) <= 8:
+            errors.append(f"{sl}.directions: one to eight directions")
+        else:
+            for i, d in enumerate(directions):
+                if not isinstance(d, dict):
+                    errors.append(f"{sl}.directions[{i}]: object required")
+                    continue
+                errors.number(d, "angle", -360, 360, f"{sl}.directions[{i}]")
+                if d.get("anchor") is not None and not isinstance(d.get("anchor"), str):
+                    errors.append(f"{sl}.directions[{i}].anchor: anchor name")
+    if kind in ("summon", "dash"):
+        errors.number(special, "trailEvery", .02, 2, sl, .12)
+        validate_boss_sprite(special.get("trail"), resources, sl + ".trail", errors)
+        validate_boss_sprite(special.get("impact"), resources, sl + ".impact", errors)
+
+
 def validate_hero(data, resources, weapons=None):
     errors = Errors()
     label = f"hero {data.get('id')}"
@@ -188,24 +281,7 @@ def validate_hero(data, resources, weapons=None):
         errors.append(f"{label}.weapon: unknown weapon {weapon} (Content/weapons/<id>.json)")
     elif not unlimited(weapons[weapon]):
         errors.append(f"{label}.weapon: a hero's own weapon must not run out (ammo 0)")
-    special = obj(data, "special")
-    kind = special.get("type")
-    if kind not in HERO_SPECIALS:
-        errors.append(f"{label}.special.type: one of {', '.join(HERO_SPECIALS)}")
-    sl = label + ".special"
-    errors.number(special, "cooldown", .5, 60, sl)
-    errors.number(special, "cooldownPerDifficulty", 0, 20, sl)
-    errors.number(special, "damage", 1, 100, sl, 0, True)
-    if kind == "blast":
-        errors.number(special, "radius", .5, 15, sl)
-        errors.number(special, "bossReach", 0, 10, sl)
-        errors.number(special, "invulnerable", 0, 5, sl)
-        errors.number(special, "leap", 0, 30, sl)
-        errors.number(special, "bossDamage", 0, 500, sl, 0, True)
-    elif kind == "volley":
-        errors.number(special, "speed", 1, 60, sl)
-        errors.number(special, "spread", 0, 10, sl)
-        errors.number(special, "shots", 1, 15, sl, 0, True)
+    validate_special(obj(data, "special"), resources, label + ".special", errors)
     hitbox = obj(data, "hitbox")
     errors.number(hitbox, "y", .1, 5, label + ".hitbox", 1)
     errors.number(hitbox, "radius", .1, 3, label + ".hitbox", .53)
@@ -226,7 +302,9 @@ def validate_hero(data, resources, weapons=None):
         frame = obj(data, "portraitFrame") if "portraitFrame" in data else {"size": 1}
         fx, fy = errors.number(frame, "x", 0, 1, label + ".portraitFrame"), errors.number(frame, "y", 0, 1, label + ".portraitFrame")
         size = errors.number(frame, "size", .05, 1, label + ".portraitFrame", 1)
-        if None not in (fx, fy, size) and (fx + size > 1.0001 or fy + size > 1.0001):
+        # size is a fraction of the cell's width; the square is as many pixels tall (a cell wider than tall keeps it square).
+        aspect = cell_aspect(data.get("animations"), resources)
+        if None not in (fx, fy, size) and (fx + size > 1.0001 or fy + size * aspect > 1.0001):
             errors.append(f"{label}.portraitFrame: must stay inside the cell")
         for state in HERO_FIRING:
             for cell in info["states"].get(state, {}).get("cells", []) or []:
@@ -890,8 +968,9 @@ def load_library(resources, extra=None, kinds=None):
             library[kind][entry_id] = data
     if kinds is not None:
         return library, errors
-    if not 1 <= len(library["heroes"]) <= 4:
-        errors.append("Content/heroes: one to four heroes are required")
+    # As many heroes as there are files: the menu has one card per player, each scrolls through all of them.
+    if not 1 <= len(library["heroes"]) <= MAX_HEROES:
+        errors.append(f"Content/heroes: one to {MAX_HEROES} heroes are required")
     if "default" not in library["rules"]:
         errors.append("Content/rules/default.json is required")
     if not 1 <= len(library["difficulties"]) <= 6:

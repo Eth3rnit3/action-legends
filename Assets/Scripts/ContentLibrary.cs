@@ -80,14 +80,79 @@ namespace Paname
             if(layer<-100||layer>100)throw new ArgumentException(label+" : layer entre -100 et 100");
         }
     }
+    // The hero's special attack, one of the engine's generic kinds:
+    // "blast": strikes everything around the hero; "volley": a fan of explosive shots;
+    // "summon": after delay, an ally (ally) charges across the screen from its edge (or from behind the hero) and tramples
+    // every enemy it touches once; "dash": the hero rushes forward at speed for time seconds, invulnerable, knocking down
+    // every enemy within radius once; "salvo": bursts volleys of shots in several directions at once, every interval seconds.
+    // pose: seconds the hero holds his "special" state (if his sheet has one) without shooting; sound and voice play at the press.
+    // A summon or a dash hurts the boss once (bossDamage); wound (bullet, explosion, fire, knife) decides how enemies fall.
     [Serializable] public sealed class HeroSpecial
     {
-        // "blast": strikes everything around the hero; "volley": a fan of explosive shots.
-        public string type;
-        public float cooldown,cooldownPerDifficulty,radius,bossReach,invulnerable,leap,speed,spread;
-        public int damage,bossDamage,shots;
+        public string type,sound,voice,wound;
+        public float cooldown,cooldownPerDifficulty,radius,bossReach,invulnerable,leap,speed,spread,pose,delay,time,interval,trailEvery=.12f;
+        public int damage,bossDamage,shots,bursts=1;
         public bool explosive;
-        public static readonly string[] Types={"blast","volley"};
+        public SalvoDirection[] directions;
+        public HeroAlly ally=new HeroAlly();
+        // Drawn only: puffs left behind a charge (every trailEvery seconds) and a flash on each enemy it strikes.
+        public BossSprite trail=new BossSprite(),impact=new BossSprite();
+        public static readonly string[] Types={"blast","volley","summon","dash","salvo"};
+        public const int Blast=0,Volley=1,Summon=2,Dash=3,Salvo=4;
+        [NonSerialized] public int kind,woundKind;
+        [NonSerialized] AudioClip clip;
+        public AudioClip Clip=>string.IsNullOrEmpty(sound)?null:clip?clip:(clip=Resources.Load<AudioClip>(sound));
+        // How long the hero is busy after the press: the pose, the whole charge, every burst of the salvo.
+        public float Busy=>Mathf.Max(pose,kind==Dash?time:kind==Salvo?(bursts-1)*interval:0);
+        public void Validate(string label)
+        {
+            kind=Array.IndexOf(Types,type);if(kind<0)throw new ArgumentException(label+".type doit être blast, volley, summon, dash ou salvo");
+            Content.Range(cooldown,.5f,60,label+".cooldown");Content.Range(cooldownPerDifficulty,0,20,label+".cooldownPerDifficulty");Content.Range(pose,0,5,label+".pose");
+            if(damage<1||damage>100)throw new ArgumentException(label+" : damage entre 1 et 100");
+            if(bossDamage<0||bossDamage>500)throw new ArgumentException(label+" : bossDamage entre 0 et 500");
+            if(!string.IsNullOrEmpty(sound)){Content.Path(sound,"Audio/",label+".sound");Content.Require<AudioClip>(sound,label+" : son");}
+            // A voice line recorded in takes (path-a, path-b...) like the bonuses' announcements.
+            if(!string.IsNullOrEmpty(voice)){Content.Path(voice,"Audio/",label+".voice");if(!Resources.Load<AudioClip>(voice)&&!Resources.Load<AudioClip>(voice+"-a"))throw new ArgumentException(label+" : voix manquante "+voice);}
+            woundKind=string.IsNullOrEmpty(wound)?Wounds.Explosion:Wounds.Parse(wound,label+".wound");
+            if(kind==Blast){Content.Range(radius,.5f,15,label+".radius");Content.Range(bossReach,0,10,label+".bossReach");Content.Range(invulnerable,0,5,label+".invulnerable");Content.Range(leap,0,30,label+".leap");}
+            else if(kind==Volley){Content.Range(speed,1,60,label+".speed");Content.Range(spread,0,10,label+".spread");if(shots<1||shots>15)throw new ArgumentException(label+" : shots entre 1 et 15");}
+            else if(kind==Summon){Content.Range(delay,0,3,label+".delay");ally.Validate(label+".ally");}
+            else if(kind==Dash){Content.Range(speed,1,60,label+".speed");Content.Range(time,.05f,3,label+".time");Content.Range(radius,.2f,6,label+".radius");Content.Range(invulnerable,0,5,label+".invulnerable");}
+            else
+            {
+                Content.Range(speed,1,60,label+".speed");Content.Range(spread,0,45,label+".spread");Content.Range(interval,0,2,label+".interval");
+                if(shots<1||shots>15)throw new ArgumentException(label+" : shots entre 1 et 15 par direction");
+                if(bursts<1||bursts>20)throw new ArgumentException(label+" : bursts entre 1 et 20");
+                if(bursts>1&&interval<.02f)throw new ArgumentException(label+" : interval d'au moins 0,02 s entre deux salves");
+                if(directions==null||directions.Length<1||directions.Length>8)throw new ArgumentException(label+" : une à huit directions");
+                foreach(var d in directions)if(d==null||!(Mathf.Abs(d.angle)<=360))throw new ArgumentException(label+".directions : angle entre -360 et 360 degrés");
+            }
+            if(kind==Summon||kind==Dash){Content.Range(trailEvery,.02f,2,label+".trailEvery");trail.Validate(label+".trail");impact.Validate(label+".impact");}
+        }
+    }
+    // One direction of a salvo: angle in degrees from where the hero faces (0 ahead, 180 behind, 90 up); its shots leave
+    // from the anchor of that name on the hero's special image, else from the middle of his body.
+    [Serializable] public sealed class SalvoDirection {public float angle;public string anchor;}
+    // What a summon sends: an animated ally ("run" state, perStride images per unit run) that charges at speed from the screen's
+    // edge behind the hero ("edge") or from margin units behind him ("behind"), y above the street, until it has crossed the
+    // screen or after life seconds. It tramples what it touches within reach units ahead and behind its middle, up to height.
+    [Serializable] public sealed class HeroAlly
+    {
+        public string from="edge",sound;
+        public float speed,reach,height,y,life=6,margin=2;
+        public AnimationSet animations=new AnimationSet();
+        public static readonly string[] Froms={"edge","behind"};
+        [NonSerialized] public int run;
+        [NonSerialized] AudioClip clip;
+        public AudioClip Clip=>string.IsNullOrEmpty(sound)?null:clip?clip:(clip=Resources.Load<AudioClip>(sound));
+        public void Validate(string label)
+        {
+            if(Array.IndexOf(Froms,from)<0)throw new ArgumentException(label+".from doit être edge ou behind");
+            Content.Range(speed,1,60,label+".speed");Content.Range(reach,.2f,6,label+".reach");Content.Range(height,.2f,6,label+".height");
+            Content.Range(y,0,10,label+".y");Content.Range(life,.5f,12,label+".life");Content.Range(margin,0,10,label+".margin");
+            if(!string.IsNullOrEmpty(sound)){Content.Path(sound,"Audio/",label+".sound");Content.Require<AudioClip>(sound,label+" : son");}
+            animations.Validate(label,"run");run=animations.Find("run");
+        }
     }
     // Where enemy shots hit the hero: a circle y above the feet. Crouched, the circle is lower and the hero slower,
     // so shots fired at chest height fly over.
@@ -114,12 +179,15 @@ namespace Paname
         public AnimationSet animations=new AnimationSet();
         // States the engine reads; the optional ones fall back to a near pose: crouchWalk and crouchShoot to crouch, aimDiagonal to aimUp.
         public static readonly string[] Required={"idle","run","jump","crouch","aimUp","jumpDown","knife","throw"};
-        [NonSerialized] public int idle,run,jumping,crouching,crouchWalk,crouchShoot,aimUp,aimDiagonal,jumpDown,stab,throwing;
+        // specialPose: the optional "special" state, shown while the special's pose lasts.
+        [NonSerialized] public int idle,run,jumping,crouching,crouchWalk,crouchShoot,aimUp,aimDiagonal,jumpDown,stab,throwing,specialPose;
         [NonSerialized] public Vector2[] muzzles;
         // Where a thrown grenade leaves the hand, in the last image of the throw.
         [NonSerialized] public Vector2 hand;
         [NonSerialized] public bool blast;
         [NonSerialized] public WeaponDefinition Weapon;
+        // Width over height of a cell of the sheet (1 for the square cells of most heroes).
+        public float PortraitAspect{get{var t=animations.Texture;return t?t.width/(float)animations.sheet.columns/(t.height/(float)animations.sheet.rows):1;}}
         public void Validate()
         {
             string label="Héros "+id;
@@ -129,12 +197,7 @@ namespace Paname
             if(damage!=0||fireRate!=0||recoilShake!=0)throw new ArgumentException(label+" : damage, fireRate et recoilShake se règlent dans son arme (weapon, Content/weapons)");
             Weapon=ContentLibrary.FindWeapon(weapon);if(Weapon==null)throw new ArgumentException(label+" : weapon inconnue "+weapon+" (Content/weapons/<id>.json)");
             if(!Weapon.Unlimited)throw new ArgumentException(label+" : son arme de base ne doit pas manquer de munitions (ammo à 0)");
-            int type=Array.IndexOf(HeroSpecial.Types,special.type);if(type<0)throw new ArgumentException(label+" : special.type doit être blast ou volley");
-            blast=type==0;var s=special;
-            Content.Range(s.cooldown,.5f,60,label+".special.cooldown");Content.Range(s.cooldownPerDifficulty,0,20,label+".special.cooldownPerDifficulty");
-            if(s.damage<1||s.damage>100)throw new ArgumentException(label+" : special.damage entre 1 et 100");
-            if(blast){Content.Range(s.radius,.5f,15,label+".special.radius");Content.Range(s.bossReach,0,10,label+".special.bossReach");Content.Range(s.invulnerable,0,5,label+".special.invulnerable");Content.Range(s.leap,0,30,label+".special.leap");if(s.bossDamage<0||s.bossDamage>500)throw new ArgumentException(label+" : special.bossDamage entre 0 et 500");}
-            else{Content.Range(s.speed,1,60,label+".special.speed");Content.Range(s.spread,0,10,label+".special.spread");if(s.shots<1||s.shots>15)throw new ArgumentException(label+" : special.shots entre 1 et 15");}
+            special.Validate(label+".special");blast=special.kind==HeroSpecial.Blast;
             Content.Range(hitbox.y,.1f,5,label+".hitbox.y");Content.Range(hitbox.radius,.1f,3,label+".hitbox.radius");
             Content.Range(crouch.speed,0,30,label+".crouch.speed");Content.Range(crouch.y,.05f,5,label+".crouch.y");Content.Range(crouch.radius,.1f,3,label+".crouch.radius");
             var k=knife;Content.Range(k.reach,.1f,5,label+".knife.reach");Content.Range(k.height,0,5,label+".knife.height");Content.Range(k.cooldown,.02f,3,label+".knife.cooldown");Content.Range(k.pose,0,2,label+".knife.pose");
@@ -142,9 +205,10 @@ namespace Paname
             Content.Path(k.sound,"Audio/",label+".knife.sound");Content.Require<AudioClip>(k.sound,label+" : son du couteau");
             animations.Validate(label,Required);
             if(portraitCell<0||portraitCell>=animations.CellCount)throw new ArgumentException(label+" : portraitCell hors de la planche");
-            var f=portraitFrame;if(!(f.size>.05f&&f.x>=0&&f.y>=0&&f.x+f.size<=1.0001f&&f.y+f.size<=1.0001f))throw new ArgumentException(label+" : portraitFrame dans la case (x, y, size entre 0 et 1)");
+            // size is a fraction of the cell's width; the square is as tall in pixels, so a cell taller or wider than square keeps it square.
+            var f=portraitFrame;if(!(f.size>.05f&&f.x>=0&&f.y>=0&&f.x+f.size<=1.0001f&&f.y+f.size*PortraitAspect<=1.0001f))throw new ArgumentException(label+" : portraitFrame dans la case (x, y, size entre 0 et 1)");
             var a=animations;idle=a.Find("idle");run=a.Find("run");jumping=a.Find("jump");crouching=a.Find("crouch");crouchWalk=a.Find("crouchWalk",crouching);crouchShoot=a.Find("crouchShoot",crouching);
-            aimUp=a.Find("aimUp");aimDiagonal=a.Find("aimDiagonal",aimUp);jumpDown=a.Find("jumpDown");stab=a.Find("knife");throwing=a.Find("throw");
+            aimUp=a.Find("aimUp");aimDiagonal=a.Find("aimDiagonal",aimUp);jumpDown=a.Find("jumpDown");stab=a.Find("knife");throwing=a.Find("throw");specialPose=a.Find("special");
             // Shots leave from the image shown, so every pose the hero fires from needs its barrel tip; the knife and the throw do not fire.
             foreach(var state in new[]{idle,run,jumping,crouching,crouchWalk,crouchShoot,aimUp,aimDiagonal,jumpDown})foreach(int cell in a.states[state].cells)if(!a.HasAnchor("muzzle",cell))throw new ArgumentException(label+" : ancrage muzzle manquant pour l'image "+cell);
             muzzles=a.Points("muzzle");
@@ -266,7 +330,10 @@ namespace Paname
         static readonly Dictionary<string,CarrierDefinition> carriers=new Dictionary<string,CarrierDefinition>();
         static readonly Dictionary<string,string> sources=new Dictionary<string,string>();
         static bool loaded;
+        public const int MaxHeroes=99;
         public static HeroDefinition[] Heroes{get{Load();return heroes;}}
+        // Index of a hero in the list by id, or -1: replays name their heroes, so adding one never breaks them.
+        public static int HeroIndex(string id){Load();return Array.FindIndex(heroes,h=>h.id==id);}
         public static DifficultyDefinition[] Difficulties{get{Load();return difficulties;}}
         public static EnemyDefinition Enemy(string id){Load();if(id!=null&&enemies.TryGetValue(id,out var e))return e;throw new ArgumentException("Ennemi inconnu : "+id);}
         public static BossDefinition Boss(string id){Load();if(id!=null&&bosses.TryGetValue(id,out var b))return b;throw new ArgumentException("Boss inconnu : "+id);}
@@ -288,7 +355,8 @@ namespace Paname
             var list=new List<HeroDefinition>();var ids=new HashSet<string>();
             foreach(var text in heroTexts){var hero=Parse<HeroDefinition>("heroes",text);hero.Validate();if(!ids.Add(hero.id))throw new ArgumentException("Héros dupliqué : "+hero.id);list.Add(hero);}
             list.Sort((a,b)=>a.order!=b.order?a.order.CompareTo(b.order):string.CompareOrdinal(a.id,b.id));
-            if(list.Count<1||list.Count>4)throw new ArgumentException("Un à quatre héros sont requis dans Resources/Content/heroes");
+            // As many heroes as there are files: each player picks one on his card of the menu, two players may pick the same.
+            if(list.Count<1||list.Count>MaxHeroes)throw new ArgumentException("Un à "+MaxHeroes+" héros sont requis dans Resources/Content/heroes");
             foreach(var text in enemyTexts){var enemy=Parse<EnemyDefinition>("enemies",text);enemy.Validate();enemies[enemy.id]=enemy;}
             foreach(var text in bossTexts){var boss=Parse<BossDefinition>("bosses",text);boss.Validate();bosses[boss.id]=boss;}
             foreach(var text in hostageTexts){var hostage=Parse<HostageDefinition>("hostages",text);hostage.Validate();hostages[hostage.id]=hostage;}
@@ -329,6 +397,14 @@ namespace Paname
         public static WeaponDefinition AddWeapon(string json){Load();var w=Parse<WeaponDefinition>("weapons",json);w.Validate();weapons[w.id]=w;sources["weapons/"+w.id]=json;return w;}
         public static CarrierDefinition AddCarrier(string json){Load();var c=Parse<CarrierDefinition>("carriers",json);c.Validate();carriers[c.id]=c;sources["carriers/"+c.id]=json;return c;}
         public static HostageDefinition AddHostage(string json){Load();var h=Parse<HostageDefinition>("hostages",json);h.Validate();hostages[h.id]=h;sources["hostages/"+h.id]=json;return h;}
+        // For tests: adds a hero written as JSON (it may extend a shipped one), in its place by order; Reload() forgets it.
+        public static HeroDefinition AddHero(string json)
+        {
+            Load();var h=Parse<HeroDefinition>("heroes",json);h.Validate();sources["heroes/"+h.id]=json;
+            var list=new List<HeroDefinition>(heroes);list.RemoveAll(x=>x.id==h.id);list.Add(h);
+            list.Sort((a,b)=>a.order!=b.order?a.order.CompareTo(b.order):string.CompareOrdinal(a.id,b.id));
+            if(list.Count>MaxHeroes)throw new ArgumentException("Un à "+MaxHeroes+" héros sont requis");heroes=list.ToArray();return h;
+        }
         public static void Reload(){loaded=false;Load();}
     }
 }

@@ -101,7 +101,7 @@ public static class VerifyDataDriven
         (0,0,new[]{0,1,2,3},false,6372,99380,-1992666955),(1,1,new[]{2,3,-1,-1},false,5750,55400,57852828),(2,0,new[]{3,2,1,0},false,5340,96800,-482492511),
         (2,3,new[]{1,-1,-1,-1},false,889,2650,-896010580),(0,2,new[]{0,-1,-1,-1},false,724,1000,1274428369),(1,3,new[]{1,0,3,2},false,1420,12100,1556413813),
         (2,1,new[]{0,1,-1,-1},false,5524,67120,-2113353877),(0,1,new[]{2,-1,3,-1},false,5589,37200,404526836),(1,0,new[]{0,1,2,3},true,5332,107010,657360258)};
-    static readonly string[] ProperNouns={"Paris","Parisien","Macron","Bastille","Seine","Eiffel","Haussmann","Marseille","Marseillaise","Mistral","Pastis","Canebière","Tokyo","Shogun","Sakura","Shibuya","Akihabara","Chuck","Norris","Arnold","Jean-Claude","JCVD","Sylvester","macron-helicopter","mecha-shogun","news-helicopter","route-0","Saint-Rémy","Saint-Remy","Provence","Provençal","Nostradamus","Arlésien","Arlésienne","arlesien","arlesienne","Farandole","Alpilles","Glanum","Favier","Camargue","taureau","prophetie-en-provence"};
+    static readonly string[] ProperNouns={"Paris","Parisien","Macron","Bastille","Seine","Eiffel","Haussmann","Marseille","Marseillaise","Mistral","Pastis","Canebière","Tokyo","Shogun","Sakura","Shibuya","Akihabara","Chuck","Norris","Arnold","Jean-Claude","JCVD","Sylvester","macron-helicopter","mecha-shogun","news-helicopter","route-0","Saint-Rémy","Saint-Remy","Provence","Provençal","Nostradamus","Arlésien","Arlésienne","arlesien","arlesienne","Farandole","Alpilles","Glanum","Favier","Camargue","taureau","prophetie-en-provence","Fernandel","Marguerite","Bardot","Brigitte","Jeanne","jeanne-d-arc","brigitte-bardot"};
 
     public static object Main(string captures)
     {
@@ -133,7 +133,8 @@ public static class VerifyDataDriven
         // The numbers of the three missions that existed before the content library (later missions have none to keep).
         var missions=Array.ConvertAll(OldIds,id=>Array.Find(catalog,x=>x.id==id));
         // Heroes: same order, names, speeds, fire rates, damage, jump, recoil, specials and barrel tips per frame.
-        var heroes=ContentLibrary.Heroes;fails.Clear();Expect(heroes.Length==4);
+        // Since lot 3H more heroes follow them (order 4 on): the first four are the original ones, in their order.
+        var heroes=ContentLibrary.Heroes;fails.Clear();Expect(heroes.Length>=4);
         for(int i=0;i<heroes.Length&&i<4;i++)
         {
             var h=heroes[i];where=h.id;var s=h.special;

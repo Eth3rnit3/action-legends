@@ -73,6 +73,8 @@ namespace Paname
             public int ammo,shots,animState=-1,grenades;
             // rescued: hostages freed since this hero last fell.
             public int rescued,lives; public float boost,boostMax=1,animTime,grenadeTimer,knifePose,throwPose,kick;
+            // The special's pose, a dash under way and the bursts of a salvo still to fire (PanameSpecials.cs).
+            public float specialPose,dash,salvoTimer; public int salvo;
             // The weapon in hand (Content/weapons), with ammo rounds left unless it is unlimited; shots counts what it has fired.
             public WeaponDefinition weapon;
             public int hp=6,hero,facing=1; public bool moving,aimUp,aimDown,crouching; public Transform root; public SpriteRenderer illustrated; public SpriteRenderer[] renderers;
@@ -114,7 +116,7 @@ namespace Paname
             audioOut=gameObject.AddComponent<AudioSource>();audioOut.volume=.2f;
             projectileRoot=new GameObject("Projectiles • pool").transform;projectileRoot.SetParent(transform,false);
             effects=new ArcadeEffects(transform);
-            foreach(var hero in Heroes)hero.animations.Prewarm();
+            foreach(var hero in Heroes){hero.animations.Prewarm();if(hero.special.kind==HeroSpecial.Summon)hero.special.ally.animations.Prewarm();}
             foreach(var mission in missions)foreach(var enemy in mission.roster)enemy.animations.Prewarm();
             for(int row=0;row<4;row++)for(int frame=0;frame<6;frame++)ArcadeEffects.Frame(row,frame);
             LoadSoundtrack();BuildLobbyActors();
@@ -124,7 +126,7 @@ namespace Paname
         {
             for(int i=actors.childCount-1;i>=0;i--){var child=actors.GetChild(i).gameObject;child.SetActive(false);Destroy(child);}
             foreach(var shot in shots){shot.active=false;shot.root.gameObject.SetActive(false);}
-            Array.Clear(players,0,4);enemies.Clear();shots.Clear();thrown.Clear();effects?.Clear();ResetBonuses();ResetBoss();ResetHostages();ResetEncounters();
+            Array.Clear(players,0,4);enemies.Clear();shots.Clear();thrown.Clear();rushes.Clear();effects?.Clear();ResetBonuses();ResetBoss();ResetHostages();ResetEncounters();
         }
         void BuildLobbyActors()
         {
@@ -229,7 +231,7 @@ namespace Paname
             {
                 var p=players[i];if(p==null)continue;
                 p.invulnerable=Mathf.Max(0,p.invulnerable-dt);p.specialTimer=Mathf.Max(0,p.specialTimer-dt);p.fireTimer-=dt;p.recoil=Mathf.Max(0,p.recoil-dt);p.flash=Mathf.Max(0,p.flash-dt);p.dust-=dt;p.boost=Mathf.Max(0,p.boost-dt);
-                p.grenadeTimer-=dt;p.knifePose=Mathf.Max(0,p.knifePose-dt);p.throwPose=Mathf.Max(0,p.throwPose-dt);
+                p.grenadeTimer-=dt;p.knifePose=Mathf.Max(0,p.knifePose-dt);p.throwPose=Mathf.Max(0,p.throwPose-dt);p.specialPose=Mathf.Max(0,p.specialPose-dt);
                 if(p.hp<=0)
                 {
                     p.downTimer-=dt;
@@ -238,7 +240,8 @@ namespace Paname
                     else {p.root.gameObject.SetActive(false);continue;}
                 }
                 PlayerCommand input=i<commands.Length?commands[i]:default;
-                float move=Mathf.Clamp(input.move,-1,1);p.moving=Mathf.Abs(move)>.1f;if(Mathf.Abs(move)>.1f)p.facing=move>0?1:-1;
+                // A dash carries the hero forward whatever the stick says.
+                float move=p.dash>0?0:Mathf.Clamp(input.move,-1,1);p.moving=Mathf.Abs(move)>.1f;if(Mathf.Abs(move)>.1f)p.facing=move>0?1:-1;
                 var hero=p.Definition;bool grounded=p.position.y<=.001f;
                 // Down crouches on the ground (slower, lower) and aims straight down in the air; up wins over it.
                 p.crouching=input.down&&!input.aimUp&&grounded&&!input.jump;
@@ -246,45 +249,31 @@ namespace Paname
                 else{p.position.x+=move*hero.speed*(p.boost>0?1.35f:1)*dt;p.walk+=Mathf.Abs(move)*dt*hero.strideRate;}
                 // A heavy weapon's recoil pushes the hero back for a moment.
                 if(p.kick!=0){p.position.x+=p.kick*dt;p.kick=Mathf.Abs(p.kick)<.05f?0:Mathf.Lerp(p.kick,0,Mathf.Min(1,dt*14));}
+                if(p.dash>0){float step=Mathf.Min(p.dash,dt);p.dash-=step;p.position.x+=p.facing*hero.special.speed*step;}
                 p.position.x=Mathf.Clamp(p.position.x,rear,BossActive?bossArenaX+ArenaHalfWidth-1:screenLocked?lockX+SimHalfWidth-1:CurrentMission.length);p.aimUp=input.aimUp;
                 if(input.jump&&grounded)p.vertical=hero.jump;
                 p.vertical-=29*dt;p.position.y+=p.vertical*dt;if(p.position.y<0){p.position.y=0;p.vertical=0;}
                 p.aimDown=input.down&&!input.aimUp&&p.position.y>.1f;
                 AnimateHero(p,dt);
                 // An enemy at arm's length in front takes the knife instead of a bullet; the knife and the throw poses do not shoot.
-                if(input.fire&&p.fireTimer<=0&&p.knifePose<=0&&p.throwPose<=0){int victim=KnifeTarget(p);if(victim>=0)Stab(p,victim);else FirePlayer(p);}
-                if(input.grenade&&p.grenadeTimer<=0&&p.grenades>0)ThrowGrenade(p);
-                if(input.special&&p.specialTimer<=0&&p.knifePose<=0&&p.throwPose<=0)Special(p);
+                // Neither during the special's pose, whose image has no barrel.
+                bool free=p.specialPose<=0;
+                if(input.fire&&free&&p.fireTimer<=0&&p.knifePose<=0&&p.throwPose<=0){int victim=KnifeTarget(p);if(victim>=0)Stab(p,victim);else FirePlayer(p);}
+                if(input.grenade&&free&&p.grenadeTimer<=0&&p.grenades>0)ThrowGrenade(p);
+                if(input.special&&free&&p.specialTimer<=0&&p.knifePose<=0&&p.throwPose<=0)Special(p);
+                if(p.salvo>0)TickSalvo(p,dt);
                 if(p.moving&&p.position.y<.03f&&p.dust<=0){effects.Play(3,p.position+new Vector2(-p.facing*.28f,.1f),.42f,.3f,1,new Vector2(-p.facing*.18f,.2f));p.dust=.19f;}
                 SyncPlayer(i);
             }
-            TickBoss(dt);if(!bossStarted)UpdateWaves(dt);TickEncounters(dt);UpdateEnemies(dt);UpdateShots(dt);TickGrenades(dt);effects.Tick(dt);TickBonuses(dt);TickHostages(dt);
+            TickRushes(dt);TickBoss(dt);if(!bossStarted)UpdateWaves(dt);TickEncounters(dt);UpdateEnemies(dt);UpdateShots(dt);TickGrenades(dt);effects.Tick(dt);TickBonuses(dt);TickHostages(dt);
             bool alive=false;foreach(var p in players)if(p!=null&&p.hp>0)alive=true;
             if(!alive&&!SpareLives)OutOfLives();
-        }
-        void Special(Player p)
-        {
-            var s=p.Definition.special;p.specialTimer=s.cooldown+DifficultyIndex*s.cooldownPerDifficulty;shake=.35f;Sound(explosionClips);
-            if(p.Definition.blast)
-            {
-                effects.Play(1,p.position+new Vector2(p.facing*.7f,1),2.8f,.25f,p.facing);
-                effects.Play(3,p.position+Vector2.up*.3f,1.8f,.4f);
-                for(int e=enemies.Count-1;e>=0;e--)if(Vector2.Distance(p.position,enemies[e].position)<s.radius)HitEnemy(e,s.damage,p.facing,Wounds.Explosion);
-                BlastFreesHostages(p.position+Vector2.up,s.radius);
-                if(BossActive&&Vector2.Distance(p.position+Vector2.up,bossPosition)<s.radius+s.bossReach)DamageBoss(s.bossDamage);
-                p.invulnerable=s.invulnerable;if(s.leap>0)p.vertical=s.leap;
-            }
-            else
-            {
-                Vector2 aim=AimDirection(p),side=new Vector2(-aim.y,aim.x),muzzle=MuzzlePoint(p);
-                for(int j=0;j<s.shots;j++)Shoot(ShotLook.Tracer,muzzle,aim*s.speed+side*(j-(s.shots-1)*.5f)*s.spread,s.damage,s.explosive,true);
-                effects.Muzzle(muzzle,aim,true);
-            }
         }
         // The hero's state follows the simulation, and so does the gun drawn in it: shots leave from the cell being shown.
         static int HeroState(Player p)
         {
             var h=p.Definition;bool airborne=p.position.y>.1f;
+            if(p.specialPose>0&&h.specialPose>=0)return h.specialPose;
             if(p.knifePose>0)return h.stab;if(p.throwPose>0)return h.throwing;
             if(p.aimDown)return h.jumpDown;if(p.aimUp)return p.moving?h.aimDiagonal:h.aimUp;if(airborne)return h.jumping;
             if(p.crouching)return p.moving?h.crouchWalk:p.recoil>0?h.crouchShoot:h.crouching;
@@ -424,7 +413,7 @@ namespace Paname
         {
             if(bossDefeated||p.invulnerable>0||p.hp<=0)return;p.hp-=amount*Level.damageTaken;p.invulnerable=Level.hurtInvulnerable;p.flash=.075f;shake=.15f;effects.Impact(p.position+Vector2.up,-p.facing);Sound(playerHitClip);
             // A hero who falls loses the weapon in hand and comes back with the hero's own.
-            if(p.hp<=0){p.downTimer=Level.respawn.delay;p.rescued=0;p.root.gameObject.SetActive(false);Disarm(p);}
+            if(p.hp<=0){p.downTimer=Level.respawn.delay;p.rescued=0;p.root.gameObject.SetActive(false);Disarm(p);p.dash=0;p.salvo=0;p.specialPose=0;}
         }
         static ShotLook Look(string look)=>look=="molotov"?ShotLook.Molotov:look=="tracer"?ShotLook.Tracer:ShotLook.Bullet;
         static readonly Color TracerHalo=new Color(1,.45f,.08f,.65f);
@@ -546,12 +535,13 @@ namespace Paname
             bool clicked=GUI.Button(rect,text,new GUIStyle(style){normal={background=null,textColor=dark?Ink:Cream},hover={textColor=dark?Ink:Gold},active={textColor=Coral},padding=new RectOffset(6,6,3,3)});
             if(clicked)Sound(selectClip);return clicked;
         }
-        // The whole cell of the hero's sheet named by portraitCell.
+        // The part of the cell named by portraitCell that portraitFrame frames.
         void Portrait(float x,float y,int hero,float size=1)
         {
             var h=Heroes[hero];var set=h.animations;var art=set.Texture;if(!art)return;
             int columns=set.sheet.columns,rows=set.sheet.rows,cell=h.portraitCell;var f=h.portraitFrame;
-            GUI.DrawTextureWithTexCoords(new Rect(x-11*size,y-13*size,190*size,190*size),art,new Rect((cell%columns+f.x)/columns,(rows-1-cell/columns+f.y)/rows,f.size/columns,f.size/rows));
+            // A square of the cell: size of its width across, as many pixels up.
+            GUI.DrawTextureWithTexCoords(new Rect(x-11*size,y-13*size,190*size,190*size),art,new Rect((cell%columns+f.x)/columns,(rows-1-cell/columns+f.y)/rows,f.size/columns,f.size*h.PortraitAspect/rows));
         }
         void DrawHUD()
         {

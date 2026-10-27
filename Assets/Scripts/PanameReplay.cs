@@ -18,6 +18,8 @@ namespace Paname
         public float time;
         public bool won;
         public int[] heroes=new int[4];
+        // The heroes' ids (Content/heroes), read before the positions in heroes: a hero added later moves positions, not ids.
+        public string[] heroIds;
         public string[] names=new string[4];
         // Runs of identical ticks: "count*move.flags,move.flags,..;" per joined slot, with "Lmask:" when players leave.
         public string runs;
@@ -69,7 +71,8 @@ namespace Paname
             for(int i=0;i<4;i++){localJump[i]=false;localSpecial[i]=false;localGrenade[i]=false;}
             recording=!headless;LastReplay=null;publish=Publish.None;verifyingOwn=false;
             var record=new ReplayRecord{version=Application.version,mission=CurrentMission.id,difficulty=SelectedDifficulty};
-            for(int i=0;i<4;i++){record.heroes[i]=slots[i].joined?slots[i].hero:-1;record.names[i]=slots[i].joined&&Online?playerNames[i]??"":"";}
+            record.heroIds=new string[4];
+            for(int i=0;i<4;i++){record.heroes[i]=slots[i].joined?slots[i].hero:-1;record.heroIds[i]=slots[i].joined?Heroes[Mod(slots[i].hero,HeroCount)].id:"";record.names[i]=slots[i].joined&&Online?playerNames[i]??"":"";}
             pendingRecord=record;
         }
         ReplayRecord pendingRecord;
@@ -123,7 +126,14 @@ namespace Paname
             int index=Array.FindIndex(missions,m=>m.id==record.mission);
             if(index<0||record.difficulty<0||record.difficulty>=DifficultyCount)return false;
             int joined=0;
-            for(int i=0;i<4;i++){slots[i].joined=record.heroes[i]>=0;slots[i].pad=null;if(slots[i].joined){slots[i].hero=Mathf.Clamp(record.heroes[i],0,HeroCount-1);joined++;}}
+            bool named=record.heroIds!=null&&record.heroIds.Length==4;
+            for(int i=0;i<4;i++)
+            {
+                slots[i].joined=record.heroes[i]>=0;slots[i].pad=null;if(!slots[i].joined)continue;
+                // A hero unknown to this build: the record cannot be replayed here.
+                int hero=named?ContentLibrary.HeroIndex(record.heroIds[i]):Mathf.Clamp(record.heroes[i],0,HeroCount-1);if(hero<0)return false;
+                slots[i].hero=hero;joined++;
+            }
             if(joined==0||!ParseRuns(record.runs,record.heroes))return false;
             SelectedDifficulty=record.difficulty;missionIndex=index;
             carriedScore=0;phase=Phase.Lobby;BeginRound();

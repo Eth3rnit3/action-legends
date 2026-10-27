@@ -38,6 +38,7 @@ Assets/Resources/
 - Les nombres sont en **unités du monde** : un personnage mesure environ 2 unités, l’écran 20,6 × 11,6 unités, le sol est à `y = 0`. Les durées sont en secondes.
 - Les valeurs **par difficulté** sont des listes de quatre nombres, les colonnes DÉTENTE, ARCADE, DIFFICILE, LÉGENDE. Une difficulté du menu (section 5 quinquies) dit quelle colonne elle lit : SLUG lit celle d’ARCADE, et une nouvelle difficulté n’allonge aucune liste. Certaines valeurs livrées ont des décimales étranges (`0.45000002`, `2.3999999`) : elles reproduisent au bit près les anciens réglages du moteur, pour que les replays du classement restent valides. Une nouvelle entrée peut utiliser des valeurs rondes.
 - Les textes affichés sont en français ; ceux du HUD en MAJUSCULES. La police du jeu web ne contient que les caractères jusqu’à U+00FF : pas de « → », d’emoji ni de guillemets typographiques dans les textes affichés.
+- Les **annonces** (`intro` d’une mission, `announce` d’une rencontre, d’une arme ou d’un bonus, `intro`, `rage`, `defeat` et `announce` des attaques d’un boss) sont validées et gardées en données, mais le HUD n’affiche plus de bandeau d’annonce depuis la version 0.5.1 (HUD épuré) : seules les voix associées (`voice`) s’entendent. Les écrire quand même : elles servent de référence et reviendraient si un bandeau est rétabli.
 
 ## 1. La mission
 
@@ -47,9 +48,10 @@ Copier une mission de `Assets/Resources/Levels/`, la renommer avec son nouvel `i
 |---|---|
 | `schemaVersion` | `2`. |
 | `id` | Identifiant unique, identique au nom du fichier. |
-| `order` | Facultatif, `1` par défaut. Position dans la campagne (0 à 999) ; à égalité, ordre des `id`. Les missions s’enchaînent dans cet ordre et la première est toujours ouverte. Livrées : Paris (1), Marseille (2), Saint-Rémy (3), Tokyo (4). Insérer une mission ne ferme rien : les déblocages, les replays et le classement désignent une mission par son `id`. |
-| `code` | Facultatif. 4 à 10 lettres majuscules ou chiffres, unique. Révélé quand la mission précédente est gagnée ; le saisir dans **CODE MISSION** ouvre la mission. |
+| `order` | Facultatif, `1` par défaut. Position dans la campagne (0 à 999) ; à égalité, ordre des `id`. Les missions s’enchaînent dans cet ordre et la première est toujours ouverte. Livrées : Paris (1), Marseille (2), Saint-Rémy (3), Tokyo (4). Une mission est ouverte dès qu’elle-même ou une mission placée après elle est débloquée : insérer une mission ne ferme rien (les déblocages, les replays et le classement désignent une mission par son `id`), et une mission insérée avant une mission déjà atteinte s’ouvre d’elle-même (Saint-Rémy pour qui avait débloqué Tokyo en 0.7.0). |
+| `code` | Facultatif. 4 à 10 lettres majuscules ou chiffres, unique. Révélé quand la mission précédente est gagnée ; le saisir dans **CODE MISSION** ouvre la mission, et donc celles qui la précèdent. |
 | `title`, `location` | Nom et lieu affichés dans la fiche de mission (45 caractères au plus). |
+| `logo` | Facultatif : image (`Art/…`) affichée dans la fiche de mission du menu à la place du titre, le lieu en dessous ; un logo large d’environ 3 × 1 s’y lit le mieux. Saint-Rémy : `Art/saint-remy/mission-logo`. |
 | `intro`, `exitLabel`, `winTitle` | Annonce de départ, nom de la sortie (« PASSAGE LIBRE » quand les vagues sont finies), titre de victoire. |
 | `music`, `bossMusic` | Musique de la mission et du combat final. `bossMusic` n’est demandé que s’il y a un boss. |
 | `map` | La carte, voir plus bas. |
@@ -62,7 +64,7 @@ Copier une mission de `Assets/Resources/Levels/`, la renommer avec son nouvel `i
 | `boss` | Le boss final, voir plus bas. |
 | `rules` | Facultatif, `"default"` par défaut : identifiant de `Content/rules` (section 5 bis). Une mission peut ainsi donner plus ou moins de grenades, d’autres bonus, moins de caisses ou une autre flèche GO. Les quatre missions livrées jouent `pow` : `default` avec deux fois moins de caisses sur le parcours, puisque les otages donnent aussi des bonus. |
 | `parTime` | Facultatif, `0` par défaut : temps de référence en secondes. Au décompte de fin de mission, chaque seconde gagnée sur lui rapporte `tally.perSecond` points (règles, section 5 bis). Paris 300, Marseille 240, Saint-Rémy 280, Tokyo 220. |
-| `weapons` | Facultatif : les armes que donnent les caisses d’armes de la mission et leurs proportions, `[{"weapon": "laser", "weight": 3}, {"weapon": "heavy-machinegun", "weight": 2}]`, à la place de la table des règles (section 5 ter). Marseille et Tokyo ont la leur. |
+| `weapons` | Facultatif : les armes que donnent les caisses d’armes de la mission et leurs proportions, `[{"weapon": "laser", "weight": 3}, {"weapon": "heavy-machinegun", "weight": 2}]`, à la place de la table des règles (section 5 ter). Marseille, Saint-Rémy et Tokyo ont la leur. |
 
 ### Vagues
 
@@ -73,6 +75,8 @@ Copier une mission de `Assets/Resources/Levels/`, la renommer avec son nouvel `i
 La vague démarre quand l’équipe arrive à 9 unités de `atX`. `baseEnemies` peut valoir 0 : la vague n’est alors faite que de ses rencontres. Elle compte `baseEnemies + joueurs × enemiesPerPlayer` ennemis (davantage selon la difficulté) ; `maxAlive` limite les ennemis présents à la fois, `spawnInterval` espace les apparitions. `enemyPattern` est répété dans l’ordre. Avec `lock` (vrai par défaut), l’écran se bloque, les ennemis entrent par les bords et la vague ne finit qu’à la chute du dernier, puis une flèche **GO** relance le défilement ; `"lock": false` laisse l’équipe courir et finit la vague quand tous ses ennemis sont apparus. Dans les deux cas, la vague attend aussi les ennemis placés de ses rencontres (`"wave"`, ci-dessous).
 
 ### Carte
+
+Exemple (positions à adapter aux vagues de la mission : un otage de vague se place près du `atX` de sa vague, voir « Otages ») :
 
 ```json
 "map": {
@@ -111,11 +115,11 @@ Chaque élément de `map.hostages` attache un otage de `Content/hostages` (secti
 | `reward` | Facultatif : l’`id` d’un bonus des règles de la mission (`"grenades"`, `"health"`, `"score"`, `"weapon"` pour une arme tirée de la table). Sans `reward` ni `weapon`, l’otage tire sa récompense de sa propre table. |
 | `weapon` | Facultatif : une arme à munitions de `Content/weapons`, donnée dans sa caisse. |
 
-Un otage se libère quand un héros tire sur ses liens ou le touche (selon son `release`) ; seul un otage visible à l’écran peut être libéré. Libéré, il salue, lâche sa récompense devant lui (un bonus à ramasser, comme une caisse) puis s’enfuit hors de l’écran : dans une vague bloquée, il donne toujours sa récompense dans l’écran avant de partir. Le héros qui l’a libéré le compte (HUD, sous sa fiche) ; il perd son compte s’il tombe. À la victoire, le **décompte de fin de mission** paie chaque otage encore compté et l’avance sur `parTime`. Les missions livrées placent 8 ou 9 otages, dont quatre dans des vagues.
+Un otage se libère quand un héros tire sur ses liens ou le touche (selon son `release`) ; seul un otage visible à l’écran peut être libéré. Libéré, il salue, lâche sa récompense devant lui (un bonus à ramasser, comme une caisse) puis s’enfuit hors de l’écran : dans une vague bloquée, il donne toujours sa récompense dans l’écran avant de partir. Le héros qui l’a libéré le compte (HUD, sous sa fiche) ; il perd son compte s’il tombe. À la victoire, le **décompte de fin de mission** paie chaque otage encore compté et l’avance sur `parTime`. Les missions livrées placent 8 ou 9 otages, dont quatre ou cinq dans des vagues.
 
 ### Rencontres
 
-Une rencontre place des ennemis précis, qui font leur entrée là où l’équipe les voit arriver. Elle démarre quand l’équipe atteint `atX`, ou avec une vague (`"wave"`), ou quand cette vague est vaincue (`"on": "clear"`). Les ennemis d’une rencontre de vague s’ajoutent à sa horde : la vague ne finit qu’à leur chute.
+Une rencontre place des ennemis précis, qui font leur entrée là où l’équipe les voit arriver. Elle démarre quand l’équipe atteint `atX`, ou avec une vague (`"wave"`), ou quand cette vague est vaincue (`"on": "clear"`). Les ennemis d’une rencontre de vague s’ajoutent à sa horde : la vague ne finit qu’à leur chute. Exemple (les `x` sont à adapter aux vagues de la mission, voir les règles de placement plus bas) :
 
 ```json
 "encounters": [
@@ -137,7 +141,7 @@ Une rencontre place des ennemis précis, qui font leur entrée là où l’équi
 | `atX` | Rencontre sans vague : elle démarre quand l’équipe atteint `atX`. |
 | `wave`, `on` | Rencontre d’une vague (indice dans `waves`) : `"start"` (défaut) au départ de la vague, `"clear"` quand elle est vaincue. |
 | `lock` | L’écran se bloque jusqu’à la chute de ses ennemis (une vague bloquée le tient déjà). |
-| `announce` | Facultatif : annonce affichée au départ (40 caractères). |
+| `announce` | Facultatif : annonce du départ (40 caractères ; non affichée par le HUD actuel, voir section 0). |
 | `truck` | Un véhicule de `Content/carriers` (section 5 sexies) qui arrive du côté `side` (`right` par défaut) et s’arrête le centre en `x` ; les apparitions `"entry": "truck"` en descendent. |
 | `spawns` | Une à seize apparitions (ci-dessous). |
 | `boss` | Un boss de mi-parcours (ci-dessous) ; il se déclenche seul, sans `wave`, `spawns`, `lock` ni `truck`. |
@@ -374,7 +378,7 @@ Chaque attaque a un `type`, une annonce `announce`, un repos `cooldown` après e
 
 Chacun s’écrit `{"sprite": {"texture", "columns", "rows", "cell"}, "frames": 4, "fps": 8, "size": 2.8, "y": 0.05}` : `frames` cases à partir de `cell` (de gauche à droite puis de haut en bas), jouées à `fps` images par seconde (en boucle pour `projectile` et `warning`, une fois pour `impact`), affichées sur `size` unités de haut, le centre à `y` au-dessus de la rue (pour `warning` et `impact`). Sans `sprite.texture`, le bloc est absent. Nostradamus (`Content/bosses/nostradamus.json`) : parchemins (`Art/saint-remy/prophetie-fx`, cases 4 à 6), cercles annoncés (cases 0 à 3) et éclats de prophétie (cases 8 à 11), avec une étoile filante comme `missile`.
 
-`missile` : un rectangle d’une image, `x`, `y`, `width`, `height` en fractions de l’image depuis son coin **inférieur** gauche, affiché sur `size` unités de large ; `outline`, facultatif, liste de points (fractions du rectangle) qui détoure le missile pour cacher ce qui l’entoure dans l’image ; `hitRadius` et `tipRadius` (rayons touchés au centre et aux extrémités, à `hitLength` du centre). Les trois boss livrés prennent le missile dessiné sur `Art/macron-helicopter.png` ; une image à part, réduite au missile, convient aussi (rectangle `0, 0, 1, 1`, sans `outline`).
+`missile` : un rectangle d’une image, `x`, `y`, `width`, `height` en fractions de l’image depuis son coin **inférieur** gauche, affiché sur `size` unités de large ; `outline`, facultatif, liste de points (fractions du rectangle) qui détoure le missile pour cacher ce qui l’entoure dans l’image ; `hitRadius` et `tipRadius` (rayons touchés au centre et aux extrémités, à `hitLength` du centre). L’hélico, Le Direct, le Mécha Shogun et le drone prennent le missile dessiné sur `Art/macron-helicopter.png`, le hors-bord une grenade de `Art/grenades.png`, Nostradamus une étoile de `Art/saint-remy/prophetie-fx.png` (le fourgon et le taureau n’en lancent pas) ; une image à part, réduite au missile, convient aussi (rectangle `0, 0, 1, 1`, sans `outline`).
 
 Exemple de boss existant re-paramétré : il garde l’image, le rotor, la trajectoire et la zone touchée du Direct, et change ses PV, sa vitesse, son altitude et ses trois attaques (`AgentScripts/VerifyDataDriven.cs`) :
 
@@ -435,11 +439,11 @@ Les quatre héros sont dans `Content/heroes/` ; le menu en affiche un à quatre,
 {"id": "beaucoup-de-grenades", "extends": "default", "grenades": {"start": [20, 20, 15, 10], "max": [30, 30, 20, 15]}, "supplies": [4, 0, 4, 1]}
 ```
 
-Une caisse qui donne toujours la même arme, et des caisses plus serrées :
+Des caisses d’armes qui ne donnent que des roquettes, et plus serrées :
 
 ```json
-{"id": "que-des-roquettes", "extends": "default", "bonuses": [{"id": "roquettes", "effect": "weapon", "weapon": "rocket-launcher"}],
- "supplies": [0], "drops": [0], "supplySpacing": [40, 50, 60, 70]}
+{"id": "que-des-roquettes", "extends": "default", "weapons": [{"weapon": "rocket-launcher", "weight": 1}],
+ "supplySpacing": [40, 50, 60, 70]}
 ```
 
 ## 5 ter. Les armes
@@ -460,7 +464,7 @@ Une caisse qui donne toujours la même arme, et des caisses plus serrées :
 | `recoil` | `shake` : secousse de l’écran à chaque tir ; `push` : vitesse (unités/s) à laquelle le tir repousse le héros, vite amortie. |
 | `damageType` | Facultatif : la blessure qu’elle donne, `bullet`, `explosion`, `fire` ou `knife` ; par défaut `fire` pour `flame`, `explosion` si elle explose, `bullet` sinon. Elle choisit la mort des ennemis (section 3). |
 | `flash`, `casings`, `sound` | Éclair de bouche `none`, `light` ou `heavy`, douilles éjectées, son du tir. |
-| `announce`, `voice` | Annonce affichée au ramassage (obligatoire avec des munitions) et voix facultative (`Audio/Voices/<ligne>`, prises `-a`, `-b`, `-c`). |
+| `announce`, `voice` | Annonce du ramassage (obligatoire avec des munitions ; non affichée par le HUD actuel, voir section 0) et voix facultative (`Audio/Voices/<ligne>`, prises `-a`, `-b`, `-c`). |
 | `icon`, `crate` | Le badge du HUD à côté du compteur et la caisse posée dans la rue (obligatoire avec des munitions), `{"texture", "columns", "rows", "cell"}`. |
 
 ```json
@@ -511,19 +515,6 @@ Une nouvelle arme n’a besoin que de son JSON (et de ses images s’il en faut 
 
 Une variante par ville n’a besoin que de sa planche : `{"id": "baker", "extends": "civilian", "name": "BOULANGER", "animations": {"sheet": {"texture": "Art/hostages/baker"}}}`. Les planches font 4 × 3 cases de 340 px (attaché ×2, libéré, salut, joie, fouille du sac, cadeau tendu, pouce levé, course ×4) ; `tools/art/pack_sheet.py hero tools/art/hostages/<otage>.json` les recale et `docs/ART_LOT2A.md` donne les prompts.
 
-## 5 sexies. Les véhicules de dépôt
-
-`Content/carriers/<id>.json` : un véhicule qui amène les ennemis d’une rencontre (`truck` d’une rencontre). Il arrive d’un bord de l’écran à `speed`, ralentit sur ses `brake` dernières unités, s’arrête (son `sound`), laisse descendre ses passagers par son ancrage `door` toutes les `interval` s, attend `wait` s puis repart dans le même sens et disparaît hors de l’écran. `length` : sa longueur, pour qu’il démarre hors de l’écran. Ses `animations` sont tournées vers la droite, états `drive` (roues, `perStride` : avance avec la distance) et `open` (porte ouverte, avec l’ancrage `door`). C’est un décor : rien ne le touche.
-
-```json
-{"id": "rusty-van", "speed": 10, "brake": 4, "interval": 0.45, "wait": 0.9, "length": 4.4, "sound": "Audio/Sfx/camion-frein",
- "animations": {"sheet": {"texture": "Art/carriers", "columns": 3, "rows": 2, "pivot": {"x": 0.5, "y": 0.02734375}, "cellHeight": 4.6545455}, "layer": 26,
-   "states": [{"name": "drive", "cells": [0, 1], "perStride": 1.2}, {"name": "open", "cells": [2]}],
-   "anchors": [{"name": "door", "cell": 2, "x": -0.25, "y": 0.45}]}}
-```
-
-`black-minivan` (Tokyo) prend la deuxième ligne de la même planche. Un nouveau véhicule peut en étendre un (`"extends": "rusty-van"`).
-
 ## 5 quinquies. Les difficultés
 
 `Content/difficulties/<id>.json` décrit chaque difficulté du menu, rangée par `order` puis `id` : les replays, le jeu en ligne et le classement la désignent par cette position (0 DÉTENTE, 1 ARCADE, 2 DIFFICILE, 3 LÉGENDE, 4 SLUG).
@@ -548,6 +539,19 @@ Une variante par ville n’a besoin que de sa planche : `{"id": "baker", "extend
 ```
 
 Les quatre premières reprennent au bit près les anciennes règles du code (`0.84000003` pour la visée en DIFFICILE).
+
+## 5 sexies. Les véhicules de dépôt
+
+`Content/carriers/<id>.json` : un véhicule qui amène les ennemis d’une rencontre (`truck` d’une rencontre). Il arrive d’un bord de l’écran à `speed`, ralentit sur ses `brake` dernières unités, s’arrête (son `sound`), laisse descendre ses passagers par son ancrage `door` toutes les `interval` s, attend `wait` s puis repart dans le même sens et disparaît hors de l’écran. `length` : sa longueur, pour qu’il démarre hors de l’écran. Ses `animations` sont tournées vers la droite, états `drive` (roues, `perStride` : avance avec la distance) et `open` (porte ouverte, avec l’ancrage `door`). C’est un décor : rien ne le touche.
+
+```json
+{"id": "rusty-van", "speed": 10, "brake": 4, "interval": 0.45, "wait": 0.9, "length": 4.4, "sound": "Audio/Sfx/camion-frein",
+ "animations": {"sheet": {"texture": "Art/carriers", "columns": 3, "rows": 2, "pivot": {"x": 0.5, "y": 0.02734375}, "cellHeight": 4.6545455}, "layer": 26,
+   "states": [{"name": "drive", "cells": [0, 1], "perStride": 1.2}, {"name": "open", "cells": [2]}],
+   "anchors": [{"name": "door", "cell": 2, "x": -0.25, "y": 0.45}]}}
+```
+
+`black-minivan` (Tokyo) prend la deuxième ligne de la même planche. Un nouveau véhicule peut en étendre un (`"extends": "rusty-van"`).
 
 ## 6. Emplacements réservés aux lots suivants
 

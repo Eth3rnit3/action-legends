@@ -17,7 +17,7 @@ Sur certains réseaux très fermés (entreprise, certains forfaits mobiles), la 
 
 - [Trystero](https://github.com/dmotz/trystero) (licence MIT, inclus dans `Assets/WebGLTemplates/ActionLegends/trystero.js`) met les navigateurs en relation par des relais Nostr publics, puis les connecte directement en WebRTC. Le code de la partie sert aussi de mot de passe de mise en relation.
 - `net.js` est un simple tuyau entre Trystero et Unity ; `Assets/Plugins/WebGL/ActionLegendsNet.jslib` fait le pont côté Unity.
-- `Assets/Scripts/PanameOnline.cs` porte le protocole. L’hôte rassemble à chaque pas de 1/60 s les commandes de tous les joueurs (déplacement, tir, visée, sauts et spéciaux comptés pour n’en perdre aucun) et diffuse ces « images de commandes ». Chaque navigateur exécute la même simulation à partir d’elles.
+- `Assets/Scripts/PanameOnline.cs` porte le protocole. L’hôte rassemble à chaque pas de 1/60 s les commandes de tous les joueurs (déplacement, tir, visée haut et bas, sauts, spéciaux et grenades comptés pour n’en perdre aucun) et diffuse ces « images de commandes ». Chaque navigateur exécute la même simulation à partir d’elles.
 - Aucun état de jeu n’est envoyé : un nouveau héros, ennemi, bonus ou boss fonctionne en ligne sans code réseau supplémentaire.
 - Toutes les secondes, chaque navigateur calcule une empreinte de l’état (score, positions, points de vie…). L’hôte les compare ; une différence affiche « Désynchronisation détectée ».
 - Les joueurs doivent avoir exactement la même version du jeu (contrôlée à la connexion).
@@ -32,4 +32,4 @@ La simulation (`TickSimulation` et tout ce qu’elle appelle) doit donner exacte
 - ne lire aucune entrée directement : passer par `PlayerCommand`, qui est la seule donnée échangée ;
 - pas d’ordre d’itération non garanti (`Dictionary`, `HashSet`) pour une décision de jeu.
 
-Les effets visuels et sonores peuvent ignorer ces règles tant qu’ils n’influencent pas la partie. Une nouvelle commande de joueur s’ajoute dans `PlayerCommand`, puis dans les drapeaux échangés par `PanameOnline.cs`.
+Les effets visuels et sonores peuvent ignorer ces règles tant qu’ils n’influencent pas la partie. Une nouvelle commande de joueur s’ajoute dans `PlayerCommand`, `LocalControls`, puis dans les bits partagés par le replay et le jeu en ligne (`HeldMask`, `FlagMask`, `HeldFlags`, `Command` dans `PanameReplay.cs`) ; une commande d’appui (comme saut, spécial ou grenade) a aussi son compteur dans le message d’entrée en ligne (`GuestInput`, `ParseInput` dans `PanameOnline.cs`).

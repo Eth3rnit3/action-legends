@@ -2,7 +2,7 @@
 
 Mission définie dans `Assets/Resources/Levels/mistral-gagnant.json`. Elle suit Panique à Paname dans le menu (`order: 2`) et n’utilise aucun code propre : décors, sol, musiques et boss passent par les champs du JSON décrits dans [ADDING_A_LEVEL.md](ADDING_A_LEVEL.md).
 
-Parcours de 360 unités en dix vagues : le Vieux-Port avec surtout des fonceurs, le Panier avec plus de lanceurs, puis la Canebière avec des costauds au bouclier, avant l’hélicoptère d’une chaîne d’info en continu fictive au pied de Notre-Dame-de-la-Garde. Ce boss garde les attaques de l’hélicoptère de Paris, avec 1,2 fois ses points de vie.
+Parcours de 360 unités en huit vagues : le Vieux-Port avec surtout des fonceurs, le Panier avec plus de lanceurs, puis la Canebière avec des costauds au bouclier, avant l’hélicoptère d’une chaîne d’info en continu fictive au pied de Notre-Dame-de-la-Garde. Ce boss garde les attaques de l’hélicoptère de Paris, avec 1,2 fois ses points de vie.
 
 ## Images
 

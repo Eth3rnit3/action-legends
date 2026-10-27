@@ -1,8 +1,8 @@
-# Mission 03 — Tokyo Néon
+# Mission 04 — Tokyo Néon
 
-Mission définie dans `Assets/Resources/Levels/tokyo-neon.json`. Elle suit Prophétie en Provence (`order: 4` ; elle suivait Mistral Gagnant avant l’arrivée de Saint-Rémy) et se débloque en terminant Saint-Rémy ou avec le code **SAKURA** dans le menu ; un navigateur qui l’avait déjà débloquée la garde.
+Mission définie dans `Assets/Resources/Levels/tokyo-neon.json`. Elle suit Prophétie en Provence (`order: 4` ; elle suivait Mistral Gagnant avant l’arrivée de Saint-Rémy) et se débloque en terminant Saint-Rémy ou avec le code **SAKURA** dans le menu ; un navigateur qui l’avait déjà débloquée la garde (et y trouve aussi Saint-Rémy ouverte).
 
-Parcours de nuit de 330 unités en neuf vagues : Shibuya, puis Akihabara, puis le quartier de Minato jusqu’au pied de la tour de Tokyo. C’est la première mission où **tous les ennemis sont armés** : un gang de rue fictif équipé de pistolets, de mitraillettes et de fusils à pompe. Ils visent un court instant, figés dans leur pose de tir, puis tirent à hauteur de poitrine : un saut esquive la balle. Le boss est le **Mécha Shogun**, un robot géant au sol qui marche vers les héros et alterne trois attaques : rafale de gatling en balayage, piétinement qui envoie deux ondes de choc à sauter, et salve de missiles à esquiver ou détruire. Il a 1,3 fois les points de vie de l’hélicoptère.
+Parcours de nuit de 330 unités en huit vagues : Shibuya, puis Akihabara, puis le quartier de Minato jusqu’au pied de la tour de Tokyo. C’est la première mission où **tous les ennemis sont armés** : un gang de rue fictif équipé de pistolets, de mitraillettes et de fusils à pompe. Ils visent un court instant, figés dans leur pose de tir, puis tirent à hauteur de poitrine : un saut esquive la balle. Le boss est le **Mécha Shogun**, un robot géant au sol qui marche vers les héros et alterne trois attaques : rafale de gatling en balayage, piétinement qui envoie deux ondes de choc à sauter, et salve de missiles à esquiver ou détruire. Il a 1,3 fois les points de vie de l’hélicoptère.
 
 ## Images
 

@@ -134,6 +134,16 @@ SOUNDS = {
                                             gen('square', 1047, 1047, .07, duty=.25, punch=.2, sustain=.03),
                                             gen('square', 1319, 1319, .07, duty=.25, punch=.2, sustain=.03),
                                             gen('square', 1568, 1568, .22, duty=.25, punch=.2, sustain=.08, vib=(12, .02))]),
+    # Staged encounters (lot 2b), last again: an enemy's surprise, a truck braking then driving off, a parachute opening, a door.
+    'surprise': lambda: np.concatenate([gen('square', 880, 1320, .05, duty=.25, punch=.4, sustain=.01),
+                                        gen('square', 1320, 1980, .09, duty=.25, punch=.4, sustain=.03, vib=(30, .03))]),
+    'camion-frein': lambda: np.concatenate([layer((1, gen('saw', 70, 55, .45, attack=.02, sustain=.3, lp=900, crush=(11025, 8))),
+                                                  (.45, gen('square', 2300, 1900, .4, attack=.05, sustain=.25, duty=.1, vib=(20, .02), hp=1500))),
+                                            gen('noise', 600, 200, .25, sustain=.05, lp=1800, crush=(11025, 8))]),
+    'parachute': lambda: layer((1, gen('noise', 1200, 3000, .3, attack=.06, sustain=.05, curve=.7, lp=4000, crush=(11025, 8))),
+                               (.5, gen('noise', 300, 150, .35, attack=.02, punch=.6, lp=900))),
+    'porte': lambda: np.concatenate([gen('square', 180, 260, .16, duty=.4, vib=(18, .25), attack=.02, lp=1500),
+                                     gen('noise', 900, 120, .18, sustain=.01, punch=1, lp=2500, crush=(11025, 7))]),
 }
 
 if __name__ == '__main__':

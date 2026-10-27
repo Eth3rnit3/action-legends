@@ -45,5 +45,6 @@
     "columns": 3,
     "rows": 2,
     "cell": 1
-  }
+  },
+  "voice": "Audio/Voices/weapon-s"
 }

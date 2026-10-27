@@ -26,7 +26,7 @@
   "casings": true,
   "sound": "Audio/Sfx/tir-H-lourde",
   "announce": "MITRAILLEUSE LOURDE !",
-  "voice": "Audio/Voices/bonus-0",
+  "voice": "Audio/Voices/weapon-h",
   "icon": {
     "texture": "Art/weapon-letters",
     "columns": 3,

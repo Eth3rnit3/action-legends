@@ -37,7 +37,7 @@
   "casings": false,
   "sound": "Audio/Sfx/roquette-depart",
   "announce": "LANCE-ROQUETTES !",
-  "voice": "Audio/Voices/bonus-2",
+  "voice": "Audio/Voices/weapon-r",
   "icon": {
     "texture": "Art/weapon-letters",
     "columns": 3,

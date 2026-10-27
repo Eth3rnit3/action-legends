@@ -9,6 +9,8 @@ namespace Paname
         public int baseEnemies=7,enemiesPerPlayer=3,maxAlive=10;
         public float spawnInterval=.65f;
         public int[] enemyPattern={0,1,2};
+        // A locked wave holds the screen until its last enemy falls; "lock": false lets the team run on.
+        public bool @lock=true;
     }
     // Engine behaviours an enemy row can use; the first three are the looters of Panique à Paname.
     public enum EnemyRole { Rusher, Thrower, Shield, Pistol, Smg, Shotgun }

@@ -33,11 +33,14 @@ Exemple de vague :
   "enemiesPerPlayer": 3,
   "maxAlive": 10,
   "spawnInterval": 0.65,
-  "enemyPattern": [0, 1, 2]
+  "enemyPattern": [0, 1, 2],
+  "lock": true
 }
 ```
 
 Le total de la vague vaut `baseEnemies + nombre de joueurs × enemiesPerPlayer`. `maxAlive` limite le nombre d’ennemis présents simultanément ; `spawnInterval` est l’intervalle entre les apparitions.
+
+`lock` est facultatif et vaut `true` par défaut : quand l’équipe atteint la vague, l’écran se bloque, les ennemis entrent par les bords et la vague ne se termine qu’à la chute du dernier, avant que la flèche **GO** ne rende le défilement. Avec `"lock": false`, la caméra continue de suivre l’équipe et la vague se termine dès que tous ses ennemis sont apparus : de quoi alterner combats imposés et passages en course.
 
 Les nombres de `enemyPattern` désignent les types d’ennemis de la mission, dans l’ordre de `enemies`. Par défaut, `0` : fonceur, `1` : lanceur et `2` : costaud au bouclier. À partir de la difficulté Arcade, un ennemi sur quatre est le type `1`.
 

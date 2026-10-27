@@ -48,6 +48,8 @@ public static class VerifyCampaignTokyo
             for(int n=0;n<60*4;n++){g.TickSimulation(1f/60,commands);if(hero.hp<full){taken+=full-hero.hp;hero.hp=full;}}
             Check(taken>0,"Le "+missions[2].enemies[kind].role+" touche un héros immobile ("+taken+" touches en 4 s)",checks);
         }
+        // A hero that only runs right cannot clear locked waves: this run looks at the gunmen, VerifyWaveLock at the locks.
+        foreach(var wave in missions[2].waves)wave.@lock=false;
         g.BeginRound();var p=players[0];int max=p.hp;
         int hits=0,hostile=0,aiming=0;bool captured=false;var seenRoles=new HashSet<EnemyRole>();
         for(int n=0;n<60*240&&!g.BossActive&&g.phase==PanameGame.Phase.Playing;n++)
@@ -63,6 +65,7 @@ public static class VerifyCampaignTokyo
         Check(aiming>0,"Les tireurs visent avant de tirer",checks);
         Check(hostile>0&&hits>0,"Les ennemis tirent des balles qui touchent le joueur ("+hits+" touches)",checks);
         Check(g.BossActive&&g.Wave==missions[2].waves.Length,"Le boss arrive après les neuf vagues",checks);
+        foreach(var wave in missions[2].waves)wave.@lock=true;
 
         var renderer=(SpriteRenderer)Get(g,"bossRenderer");
         Check(renderer&&renderer.sprite&&renderer.sprite.texture==Resources.Load<Texture2D>("Art/tokyo/mecha-shogun"),"Le boss est le Mécha Shogun dessiné",checks);

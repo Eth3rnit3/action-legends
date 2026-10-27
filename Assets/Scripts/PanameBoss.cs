@@ -31,7 +31,7 @@ namespace Paname
         }
         void SpawnBoss()
         {
-            bossStarted=true;bossArenaX=cameraX;
+            bossStarted=true;screenLocked=false;bossArenaX=cameraX;
             var boss=CurrentMission.boss;
             bossMaxHealth=Mathf.RoundToInt((DifficultyIndex==0?300:DifficultyIndex==1?560:DifficultyIndex==2?800:1100)*(1+.65f*(JoinedCount-1))*boss.health);
             bossHealth=bossMaxHealth;bossTimer=.8f;bossAttack=0;bossVolley=0;bossTime=0;

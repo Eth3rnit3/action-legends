@@ -68,7 +68,9 @@ namespace Paname
         Font font;
         float spawnTimer,announcementTimer,shake;
         int pending;
-        bool waveLive;
+        bool waveLive,screenLocked;
+        // lockX: where the camera holds during a locked wave; goFromX: where it stood when the last one was cleared, for the GO arrow.
+        float lockX,goFromX=-1;
         string announcement="";
         float cameraX=7;
         AudioSource audioOut;
@@ -133,7 +135,7 @@ namespace Paname
         public void BeginRound()
         {
             if(OnlineRound())return;
-            ResetActors();Score=carriedScore;carriedScore=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
+            ResetActors();Score=carriedScore;carriedScore=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;screenLocked=false;goFromX=-1;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
             for(int i=0;i<4;i++)if(slots[i].joined)SpawnPlayer(i,2+i*1.3f);
             StartReplay();
             phase=Phase.Playing;Announce(CurrentMission.intro);Sound(startClip);if(musicOut){musicOut.Stop();musicOut.clip=musicClip;}
@@ -213,7 +215,7 @@ namespace Paname
         {
             if(phase!=Phase.Playing)return;
             SimulationTime+=dt;announcementTimer=Mathf.Max(0,announcementTimer-dt);shake=Mathf.Max(0,shake-dt*2);
-            cameraX=Mathf.Max(cameraX,bossStarted?bossArenaX:Mathf.Clamp(LeaderX()+2.5f,CurrentMission.cameraMin,CurrentMission.cameraMax));
+            cameraX=Mathf.Max(cameraX,CameraTarget());
             float rear=Mathf.Max(.5f,cameraX-SimHalfWidth+.7f);
             for(int i=0;i<4;i++)
             {
@@ -228,7 +230,7 @@ namespace Paname
                 PlayerCommand input=i<commands.Length?commands[i]:default;
                 float move=Mathf.Clamp(input.move,-1,1);p.moving=Mathf.Abs(move)>.1f;if(Mathf.Abs(move)>.1f)p.facing=move>0?1:-1;
                 p.position.x+=move*Speed[p.hero]*(p.boost>0?1.35f:1)*dt;p.walk+=Mathf.Abs(move)*dt*13;
-                p.position.x=Mathf.Clamp(p.position.x,rear,BossActive?bossArenaX+ArenaHalfWidth-1:CurrentMission.length);p.aimUp=input.aimUp;
+                p.position.x=Mathf.Clamp(p.position.x,rear,BossActive?bossArenaX+ArenaHalfWidth-1:screenLocked?lockX+SimHalfWidth-1:CurrentMission.length);p.aimUp=input.aimUp;
                 if(input.jump&&p.position.y<=.001f)p.vertical=p.hero==2?12.8f:11;
                 p.vertical-=29*dt;p.position.y+=p.vertical*dt;if(p.position.y<0){p.position.y=0;p.vertical=0;}
                 if(input.fire&&p.fireTimer<=0)FirePlayer(p);
@@ -282,6 +284,8 @@ namespace Paname
             float alpha=p.invulnerable>0&&Mathf.Sin(SimulationTime*35)>0?.45f:1;
             foreach(var r in p.renderers){var c=r.color;c.a=alpha;r.color=c;}
         }
+        // The boss arena and locked waves hold the camera; otherwise it follows the leading hero.
+        float CameraTarget()=>bossStarted?bossArenaX:screenLocked?lockX:Mathf.Clamp(LeaderX()+2.5f,CurrentMission.cameraMin,CurrentMission.cameraMax);
         float LeaderX(){float x=2;foreach(var p in players)if(p!=null&&p.hp>0)x=Mathf.Max(x,p.position.x);return x;}
         void Announce(string text){announcement=text;announcementTimer=2.5f;}
         void UpdateWaves(float dt)
@@ -289,18 +293,20 @@ namespace Paname
             if(Wave>=CurrentMission.waves.Length)return;
             var wave=CurrentMission.waves[Wave];
             float gate=wave.atX;
-            if(!waveLive&&LeaderX()>gate-9){waveLive=true;pending=Mathf.CeilToInt((wave.baseEnemies+JoinedCount*wave.enemiesPerPlayer)*CountFactors[DifficultyIndex]);spawnTimer=.05f;Announce("VAGUE "+(Wave+1)+"  /  "+CurrentMission.waves.Length);}
+            if(!waveLive&&LeaderX()>gate-9){waveLive=true;pending=Mathf.CeilToInt((wave.baseEnemies+JoinedCount*wave.enemiesPerPlayer)*CountFactors[DifficultyIndex]);spawnTimer=.05f;if(wave.@lock){lockX=cameraX=Mathf.Max(cameraX,CameraTarget());screenLocked=true;}Announce("VAGUE "+(Wave+1)+"  /  "+CurrentMission.waves.Length);}
             if(!waveLive)return;
             spawnTimer-=dt;
             if(pending>0&&spawnTimer<=0&&enemies.Count<Mathf.Min(42,Mathf.CeilToInt(wave.maxAlive*CountFactors[DifficultyIndex])))
             {
-                float x=Mathf.Clamp(LeaderX()+(pending%5==0?-6.5f:9+(pending%3)*1.3f),.5f,CurrentMission.length);
+                // A locked wave enters from the edges of the screen; a free one appears around the leading hero.
+                float x=Mathf.Clamp(screenLocked?lockX+(pending%5==0?-SimHalfWidth-1.5f:SimHalfWidth+1.5f+(pending%3)*1.3f):LeaderX()+(pending%5==0?-6.5f:9+(pending%3)*1.3f),.5f,CurrentMission.length);
                 // From Arcade up, every fourth enemy is the mission's type 1.
                 SpawnEnemy(x,DifficultyIndex>0&&pending%4==0&&CurrentMission.enemies.Length>1?1:wave.enemyPattern[pending%wave.enemyPattern.Length]);pending--;spawnTimer=wave.spawnInterval*AttackFactors[DifficultyIndex];
             }
-            if(pending==0)
+            // A free wave is over once it has all appeared; a locked one when its last enemy falls.
+            if(pending==0&&(!screenLocked||enemies.Count==0))
             {
-                Wave++;waveLive=false;if((DifficultyIndex==0&&Wave%3==0)||(DifficultyIndex==1&&Wave%4==0)){Reserves++;foreach(var p in players)if(p!=null&&p.hp>0)p.hp=Mathf.Min(MaxPlayerHealth,p.hp+(DifficultyIndex==0?2:1));}
+                Wave++;waveLive=false;if(screenLocked){screenLocked=false;goFromX=cameraX;}if((DifficultyIndex==0&&Wave%3==0)||(DifficultyIndex==1&&Wave%4==0)){Reserves++;foreach(var p in players)if(p!=null&&p.hp>0)p.hp=Mathf.Min(MaxPlayerHealth,p.hp+(DifficultyIndex==0?2:1));}
                 Announce(Wave==CurrentMission.waves.Length?"PASSAGE LIBRE  »  "+CurrentMission.exitLabel+" !":"CONTINUEZ !  »");Score+=500;
             }
         }
@@ -324,6 +330,7 @@ namespace Paname
                 foreach(var p in players)if(p!=null&&p.hp>0){float distance=Mathf.Abs(p.position.x-e.position.x);if(distance<best){best=distance;target=p;}}
                 if(target==null)continue;
                 e.flash=Mathf.Max(0,e.flash-dt);e.stagger=Mathf.Max(0,e.stagger-dt);
+                float lastX=e.position.x;
                 e.position.x=Mathf.Clamp(e.position.x+e.knockback*dt,.2f,CurrentMission.length+1);e.knockback=Mathf.Lerp(e.knockback,0,Mathf.Min(1,dt*14));
                 int role=(int)e.Role;bool shooting=e.windup>0||e.burst>0;
                 // A gunman keeps the direction it aimed in until its shots are fired, so players can get behind it.
@@ -332,6 +339,8 @@ namespace Paname
                 // An enemy holds its strike, throw or aim pose briefly instead of running through it.
                 bool walking=best>RoleDistance[role]&&e.stagger<=0&&e.attackPose<=0&&!shooting;
                 if(walking){e.position.x+=e.facing*RoleSpeed[role]*SpeedFactors[DifficultyIndex]*dt;e.walk+=dt*11;}
+                // While the screen is locked, an enemy that has walked in stays in view, so none is left to hunt off screen.
+                if(screenLocked&&Mathf.Abs(lastX-lockX)<=SimHalfWidth-.6f)e.position.x=Mathf.Clamp(e.position.x,lockX-SimHalfWidth+.6f,lockX+SimHalfWidth-.6f);
                 if(e.type.Armed&&e.stagger<=0)TickGunman(e,best,dt);
                 if(e.Role==EnemyRole.Thrower&&best<RoleRange[role]&&e.attackTimer<=0&&e.stagger<=0)
                 {
@@ -438,8 +447,7 @@ namespace Paname
         }
         void UpdateCamera(float dt)
         {
-            float target=phase==Phase.Lobby?CurrentMission.cameraMin:Mathf.Clamp(LeaderX()+2.5f,CurrentMission.cameraMin,CurrentMission.cameraMax);
-            if(bossStarted&&phase!=Phase.Lobby)target=bossArenaX;
+            float target=phase==Phase.Lobby?CurrentMission.cameraMin:CameraTarget();
             if(phase!=Phase.Lobby)target=Mathf.Max(cameraX,target);
             cameraX=phase==Phase.Lobby?Mathf.Lerp(cameraX,target,1-Mathf.Exp(-dt*5)):target;
             UpdatePanorama(cameraX,gameCamera.orthographicSize*gameCamera.aspect,CurrentMission.cameraMin,CurrentMission.cameraMax);
@@ -511,6 +519,7 @@ namespace Paname
             }
             Label(22,88,230,28,Score.ToString("00000000"),20,Gold,true);
             Label(520,88,240,28,Clock(SimulationTime),17,Cream,true,TextAnchor.MiddleCenter);
+            DrawGo();
             Panel(1206,94,7,7,Cream);Panel(1203,103,13,8,Cream);
             Label(1223,87,48,29,"×"+Reserves,18,Cream,true);
             if(JoinedCount>1)for(int i=0;i<4;i++)
@@ -521,6 +530,13 @@ namespace Paname
                 if(Online)Label((v.x-ox)/scale-60,(Screen.height-v.y-oy)/scale-12,120,23,PlayerTag(i),13,PlayerColors[i],true,TextAnchor.MiddleCenter);
                 else Label((v.x-ox)/scale-14,(Screen.height-v.y-oy)/scale-9,28,18,(i+1).ToString(),12,PlayerColors[i],true,TextAnchor.MiddleCenter);
             }
+        }
+        // After a locked wave, a blinking GO points the way until the team has moved on.
+        void DrawGo()
+        {
+            if(phase!=Phase.Playing||goFromX<0||screenLocked||bossStarted||cameraX>=goFromX+8||Mathf.Repeat(Time.unscaledTime,.7f)>.45f)return;
+            Label(1004,244,200,90,"GO",64,Ink,true,TextAnchor.MiddleRight);Label(1000,240,200,90,"GO",64,Gold,true,TextAnchor.MiddleRight);
+            for(int i=0;i<9;i++){float h=72-i*8;Panel(1214+i*5,289-h*.5f,5,h,Gold);}
         }
         void Overlay(string title,string subtitle,Action action,string button)
         {

@@ -28,6 +28,14 @@ class MissionValidationTests(unittest.TestCase):
                 data = copy.deepcopy(self.data)
                 data["length"] = value
                 self.assertTrue(validate_mission(data, self.resources))
+    def test_wave_lock_must_be_boolean(self):
+        for value in (True, False):
+            self.data["waves"][0]["lock"] = value
+            self.assertEqual(validate_mission(self.data, self.resources), [])
+        for value in (1, "false", None):
+            with self.subTest(value=value):
+                self.data["waves"][0]["lock"] = value
+                self.assertTrue(validate_mission(self.data, self.resources))
     def test_empty_wave_list_is_rejected(self):
         self.data["waves"] = []
         self.assertTrue(validate_mission(self.data, self.resources))

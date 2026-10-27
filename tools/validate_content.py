@@ -142,6 +142,8 @@ def validate_mission(data, resources):
         pattern = wave.get("enemyPattern")
         if not isinstance(pattern, list) or not 1 <= len(pattern) <= 30 or any(type(v) is not int or not 0 <= v < roster for v in pattern):
             errors.append(f"wave {i}: enemyPattern must use enemy types 0 to {roster - 1}")
+        if not isinstance(wave.get("lock", True), bool):
+            errors.append(f"wave {i}: lock must be true or false")
     return errors
 
 

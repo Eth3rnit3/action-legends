@@ -14,14 +14,18 @@ Le joueur 1 peut jouer immédiatement au clavier. Sans manette, un seul joueur r
 |---|---|---|
 | Déplacement | Q ou A / D | Stick gauche ou croix directionnelle |
 | Viser vers le haut | W, Z ou flèche haut | Stick / croix vers le haut |
+| S'accroupir ; en saut, viser vers le bas | S ou flèche bas | Stick / croix vers le bas |
 | Saut | Espace | A / croix |
-| Tir | J | X / carré ou gâchette droite |
+| Tir (couteau au contact) | J | X / carré ou gâchette droite |
+| Grenade | L | B / rond |
 | Attaque spéciale | K | Y / triangle ou bouton supérieur droit |
 | Pause | Échap | Start / Options |
 | Choisir le héros, au menu | Clic sur une carte, ← / → ou Q / E | Croix gauche / droite |
 | Démarrer, au menu | Entrée | Start / Options |
 
 Le clavier contrôle uniquement le joueur 1. Pour jouer à plusieurs, brancher des manettes.
+
+**Accroupi**, le héros avance lentement et tire plus bas ; les balles tirées à hauteur de poitrine (les tireurs de Tokyo) lui passent au-dessus, mais pas les coups de près, les bouteilles ni les explosions. **En l'air**, bas + tir tire droit vers le bas. Avec le bouton de tir, un ennemi **au contact** devant le héros prend un coup de **couteau** (plus de dégâts, sans projectile). Les **grenades** partent en cloche, rebondissent une fois et explosent à l'impact sur un ennemi ou au sol : elles blessent tout ce qui est dans le rayon, boss compris, et détruisent les missiles du boss pris dedans. Le stock (affiché sous la vie, ×10) dépend de la difficulté : 10 au départ en Détente et Arcade, 8 en Difficile, 6 en Légende, avec un maximum de 20, 15, 12 et 10 ; il est rendu à chaque renfort, et les caisses vertes aux deux grenades en redonnent. Ces valeurs sont dans `Assets/Resources/Content/rules/default.json`.
 
 ## Première mission : Panique à Paname
 

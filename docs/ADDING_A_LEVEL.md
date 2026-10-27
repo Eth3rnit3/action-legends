@@ -10,6 +10,7 @@ Assets/Resources/
   Content/heroes/<id>.json       les héros jouables (un à quatre)
   Content/enemies/<id>.json      la bibliothèque des types d’ennemis
   Content/bosses/<id>.json       la bibliothèque des boss
+  Content/rules/<id>.json        règles de partie : grenades, bonus, flèche GO ("default" pour toutes les missions)
   Art/<mission>/...              images (PNG) de la mission
   Audio/Music/...                musiques (WAV, OGG ou MP3)
 ```
@@ -55,6 +56,7 @@ Copier une mission de `Assets/Resources/Levels/`, la renommer avec son nouvel `i
 | `waves` | Une à vingt vagues triées par `atX`. |
 | `encounters` | Réservé (section 6) : laisser `[]` ou ne pas l’écrire. |
 | `boss` | Le boss final, voir plus bas. |
+| `rules` | Facultatif, `"default"` par défaut : identifiant de `Content/rules` (section 5 bis). Une mission peut ainsi donner plus ou moins de grenades, d’autres bonus ou une autre flèche GO. |
 
 ### Vagues
 
@@ -135,23 +137,24 @@ Les états lus par le moteur :
 
 | Acteur | Requis | Facultatifs |
 |---|---|---|
-| Héros | `idle` (immobile au sol), `run` (court), `jump` (en l’air) | — |
+| Héros | `idle` (immobile au sol), `run` (court), `jump` (en l’air), `crouch` (accroupi), `aimUp` (vise en haut), `jumpDown` (en l’air, vise en bas), `knife` (coup de couteau, joué pendant `knife.pose`), `throw` (lancer de grenade, joué pendant `grenade.pose`) | `crouchWalk` (avance accroupi, sinon `crouch`), `crouchShoot` (tire accroupi, sinon `crouch`), `aimDiagonal` (vise en haut en avançant, sinon `aimUp`) |
 | Ennemi | `idle`, `run`, `attack` (frappe, lancer, tir) | `aim` (visée d’un tireur, sinon `attack`), `hurt` (sous les balles, sinon l’image courante penche), `death` (joué pendant que le corps est projeté, sinon l’image courante) |
 | Boss | `idle` ; `walk` pour un marcheur | ceux que nomment ses attaques (`state`, `aimState`, `recoverState`) |
 
-Un état qui n’est pas dans ce tableau est accepté et ignoré : une planche peut déjà contenir les poses que lira un lot à venir (accroupi, couteau, grenade, morts variées). Pour en ajouter un, il suffit d’ajouter les images à la planche et l’état au JSON ; le moteur le lira quand la mécanique correspondante existera.
+Un état qui n’est pas dans ce tableau est accepté et ignoré : une planche peut déjà contenir les poses que lira un lot à venir (les héros livrés ont déjà `hurt`, `down` et `victory`). Pour en ajouter un, il suffit d’ajouter les images à la planche et l’état au JSON ; le moteur le lira quand la mécanique correspondante existera.
 
 **Les ancrages (`anchors`).** Des points dessinés sur une case : `{"name": "muzzle", "cell": 7, "x": 1.18, "y": 1.39}`, en unités du monde depuis le pivot, dans le sens du dessin. Sans `cell` (ou `-1`), le point vaut pour toutes les cases ; un point propre à une case l’emporte. Les noms lus :
 
 | Acteur | Ancrage | Où |
 |---|---|---|
-| Héros | `muzzle` | Bout du canon, **sur chaque case** de `idle`, `run` et `jump` : les tirs partent de l’arme dessinée. |
+| Héros | `muzzle` | Bout du canon, **sur chaque case** des états d’où il tire : `idle`, `run`, `jump`, `crouch`, `crouchWalk`, `crouchShoot`, `aimUp`, `aimDiagonal`, `jumpDown`. Les tirs partent de l’arme dessinée ; pendant `knife` et `throw`, il ne tire pas. |
+| Héros | `hand` | Main qui lâche la grenade, sur la **dernière** case de `throw`. |
 | Ennemi tireur | `muzzle` | Sur la première case de `attack`. Les balles partent à l’horizontale. |
 | Ennemi lanceur | `hand` | Main qui lâche le projectile, sur la première case de `attack`. |
 | Boss | `smoke` | D’où sort la fumée sous la moitié de ses PV. |
 | Boss | ceux de ses attaques | `muzzles`, `rack`, `foot`, `walk.foot` (section 4). |
 
-`tools/art/pack_sheet.py` recale une planche générée (pieds sur une même ligne, jambes sur le pivot) et affiche les bouts de canon ; `tools/art/measure_muzzles.py` mesure ceux de `Art/heroes.png` et imprime les ancrages au format JSON.
+`tools/art/pack_sheet.py` recale une planche générée (pieds sur une même ligne, jambes sur le pivot) et affiche les bouts de canon. Pour un héros, `pack_sheet.py hero tools/art/heroes/<héros>.json` assemble ses planches générées en une seule (une taille commune fixée par une image de référence de chaque planche), mesure les `muzzle` (vers l’avant, le haut, le bas ou en diagonale selon la case) et la `hand`, et imprime les ancrages JSON ; voir `docs/ART_LOT1A.md`. `tools/art/measure_muzzles.py` mesure ceux de l’ancienne planche `Art/heroes.png`.
 
 ## 3. Les ennemis
 
@@ -289,9 +292,28 @@ Les quatre héros sont dans `Content/heroes/` ; le menu en affiche un à quatre,
 | `speed`, `jump` | Vitesse de course, vitesse verticale au saut. |
 | `fireRate`, `damage`, `recoilShake` | Délai entre deux tirs, dégâts du fusil, secousse à chaque tir. |
 | `strideRate`, `bob` | Vitesse de la foulée (section 2) et balancement vertical en courant. |
-| `portraitCell` | Case de la planche affichée dans la fiche du menu. |
+| `portraitCell`, `portraitFrame` | Case de la planche affichée dans la fiche du menu, et le carré de cette case qui y est montré : `{"x": 0.02, "y": 0, "size": 0.72}` en fractions de la case depuis son coin inférieur gauche (toute la case par défaut). |
+| `hitbox` | Où le touchent les tirs ennemis, debout : un cercle de rayon `radius` à `y` au-dessus des pieds (`{"y": 1, "radius": 0.53}`). |
+| `crouch` | Accroupi : vitesse `speed`, et le cercle touché `y`, `radius` (`{"speed": 3.6, "y": 0.55, "radius": 0.45}` : les balles tirées à hauteur de poitrine passent au-dessus). |
+| `knife` | Avec le bouton de tir, un ennemi à moins de `reach` devant le héros (qui est à moins de `height` du sol) reçoit `damage` au couteau au lieu d’une balle ; `cooldown` avant le coup suivant, pose `knife` pendant `pose` s, son `sound`. |
 | `special` | `type` `blast` : frappe tout ce qui est à moins de `radius` (`damage`), le boss à moins de `radius + bossReach` (`bossDamage`), rend invulnérable `invulnerable` s et fait bondir de `leap` (0 : non). `type` `volley` : `shots` tirs en éventail à `speed`, écartés de `spread`, `damage` chacun, explosifs si `explosive`. Recharge : `cooldown + difficulté × cooldownPerDifficulty` s. |
-| `animations` | États `idle`, `run`, `jump` et un `muzzle` sur chacune de leurs cases. |
+| `animations` | Les états de la section 2, un `muzzle` sur chaque case d’où il tire et une `hand` sur la dernière case de `throw`. |
+
+## 5 bis. Les règles de partie
+
+`Content/rules/default.json` fixe ce qui ne dépend ni d’un héros ni d’un ennemi ; une mission peut en nommer une autre avec `"rules"`, qui peut étendre `default` (`"extends": "default"`) et n’en changer qu’une partie.
+
+| Champ | Utilisation |
+|---|---|
+| `grenades` | `start` et `max` : grenades au départ d’une vie et au plus, par difficulté ; `refillOnRespawn` (`true`) : un renfort repart avec au moins `start`. |
+| `grenade` | Le lancer : vitesse `throwX` (vers l’avant), `throwY` (vers le haut), `gravity`. Au sol elle rebondit `bounces` fois (vitesse verticale × `bounce`, horizontale × `friction`), puis explose ; elle explose aussi au contact d’un ennemi ou du boss, ou au bout de `fuse` s. L’explosion retire `damage` aux ennemis à moins de `radius` (plus leur `hitRadius`), `bossDamage` au boss qu’elle touche, et détruit les missiles du boss pris dedans si `destroysBombs`. `cooldown` entre deux lancers, pose `throw` pendant `pose` s, `throwSound`. `sprite` (la grenade, dessinée `size` unités de haut) et `icon` (le compteur du HUD) : `{"texture", "columns", "rows", "cell"}`. |
+| `bonuses` | Les bonus, désignés par leur position dans la liste : `{"id", "effect", "amount": [4 valeurs], "announce", "voice", "icon", "scale"}`. `effect` : `weapon` (`weapon` 1 mitrailleuse, 2 triple tir, 3 roquettes ; `amount` = munitions), `health` (points de vie), `turbo` (secondes), `score` (points), `grenades` (grenades, sans dépasser `grenades.max`). `voice` : chemin des trois prises `-a`, `-b`, `-c` de l’annonce, facultatif. `icon` : la case dessinée, `scale` sa taille (1,25 unité). |
+| `supplies`, `drops` | Les bonus des caisses posées le long du parcours, puis ceux que laissent les ennemis vaincus, à tour de rôle (indices dans `bonuses`). |
+| `go` | L’image de la flèche GO, `{"texture": "Art/go-sign"}`. |
+
+```json
+{"id": "beaucoup-de-grenades", "extends": "default", "grenades": {"start": [20, 20, 15, 10], "max": [30, 30, 20, 15]}, "supplies": [6, 0, 6, 3]}
+```
 
 ## 6. Emplacements réservés aux lots suivants
 

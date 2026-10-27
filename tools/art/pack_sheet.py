@@ -12,7 +12,8 @@ usage: pack_sheet.py enemies IN.png OUT.png   (4 x 3 grid -> 4 x 3 cells of 420 
 The hero mode assembles several generated sheets of one character into one sheet (see hero(),
 tools/art/heroes/*.json, tools/art/hostages/*.json and tools/art/enemies/*.json): each source is scaled so that its reference
 frame stands as tall as the character should in the game, and the "muzzle" and "hand" anchors are
-measured on the packed cells. "defringe": true recolours the half-transparent edge pixels with their
+measured on the packed cells. "mirror": true on a source flips each of its cells left to right first (a boss
+drawn facing right; the game draws bosses facing left). "defringe": true recolours the half-transparent edge pixels with their
 nearest opaque neighbour, for generated images whose edges keep a tint of the removed background.
 Requires Pillow, NumPy and SciPy."""
 import json
@@ -166,9 +167,19 @@ def defringe(crop):
     return out
 
 
+def mirror_cells(a, cols, rows):
+    """Each cell of a grid flipped left to right in place: a sheet drawn facing right becomes one facing left (bosses)."""
+    h, w = a.shape[0] // rows, a.shape[1] // cols
+    out = a.copy()
+    for r in range(rows):
+        for c in range(cols):
+            out[r * h:(r + 1) * h, c * w:(c + 1) * w] = a[r * h:(r + 1) * h, c * w:(c + 1) * w][:, ::-1]
+    return out
+
+
 def hero(spec_path, preview=None):
     """SPEC: {"output", "columns", "rows", "cell": [w, h], "feet", "pivotX", "ppu", "height",
-    "sources": {"A": {"image", "grid": [cols, rows], "reference": frame, "scale"?}, "O": {"image", "grid", "exact": true}},
+    "sources": {"A": {"image", "grid": [cols, rows], "reference": frame, "scale"?, "mirror"?}, "O": {"image", "grid", "exact": true}},
     "frames": [["A", frame, dx?, scale?], ...], "heightFrom"?: ["O", frame], "margins"?: [left px, right px],
     "anchors": {"muzzle": {"cell": direction}, "hand": {"cell": "hand"}}}. Paths are relative to SPEC."""
     spec_path = Path(spec_path)
@@ -181,6 +192,8 @@ def hero(spec_path, preview=None):
     sources, exact = {}, {}
     for key, source in spec["sources"].items():
         a = np.array(Image.open(base / source["image"]).convert("RGBA"))
+        if source.get("mirror"):
+            a = mirror_cells(a, *source["grid"])
         if source.get("exact"):
             # Cells copied pixel for pixel (an existing sheet of the same cell size): their anchors stay valid.
             gc, gr = source["grid"]

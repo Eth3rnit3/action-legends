@@ -154,7 +154,13 @@ namespace Paname
     }
     public enum EnemyBehavior { Melee, Thrower, Gunman }
     // Hits a hero within reach, below a height (a jump clears it). Every unarmed enemy strikes up close.
-    [Serializable] public sealed class EnemyMelee {public float reach,height,cooldown;public int damage;}
+    // sound: optional, played at each strike (a whip's crack).
+    [Serializable] public sealed class EnemyMelee
+    {
+        public float reach,height,cooldown;public int damage;public string sound;
+        [NonSerialized] AudioClip clip;
+        public AudioClip Clip=>string.IsNullOrEmpty(sound)?null:clip?clip:(clip=Resources.Load<AudioClip>(sound));
+    }
     [Serializable] public sealed class EnemyThrow {public float range,cooldown,aimHeight;public float[] speed;public int damage;public string projectile;}
     [Serializable] public sealed class EnemyGun
     {
@@ -212,7 +218,7 @@ namespace Paname
             cryClips=null;
             // The grenade leaves the hand of the throw pose, else of the attack pose.
             int pose=animations.states[attack].cells[0],lob=animations.states[throwing].cells[0];grenadeHand=animations.HasAnchor("hand",lob)?animations.Points("hand")[lob]:animations.HasAnchor("hand",pose)?animations.Points("hand")[pose]:new Vector2(.4f,1.9f);
-            if(!Armed){var m=melee;Content.Range(m.reach,.1f,5,label+".melee.reach");Content.Range(m.height,0,5,label+".melee.height");Content.Range(m.cooldown,.05f,20,label+".melee.cooldown");if(m.damage<1||m.damage>10)throw new ArgumentException(label+" : melee.damage entre 1 et 10");}
+            if(!Armed){var m=melee;Content.Range(m.reach,.1f,5,label+".melee.reach");Content.Range(m.height,0,5,label+".melee.height");Content.Range(m.cooldown,.05f,20,label+".melee.cooldown");if(m.damage<1||m.damage>10)throw new ArgumentException(label+" : melee.damage entre 1 et 10");if(!string.IsNullOrEmpty(m.sound)){Content.Path(m.sound,"Audio/",label+".melee.sound");Content.Require<AudioClip>(m.sound,label+" : son de melee");}}
             if(kind==EnemyBehavior.Thrower)
             {
                 var t=@throw;Content.Range(t.range,.5f,30,label+".throw.range");Content.Range(t.cooldown,.1f,20,label+".throw.cooldown");Content.Range(t.aimHeight,0,5,label+".throw.aimHeight");

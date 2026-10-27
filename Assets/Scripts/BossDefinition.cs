@@ -6,10 +6,12 @@ namespace Paname
     // "bombs" drops missiles on the heroes from its rack, at once or after a launch pose; "stomp" raises
     // a foot and sends a shockwave each way; "charge" revs up (aimState) then rushes across the arena (state), hurting heroes
     // in its way below clearance (a jump clears it); "troops" lets enemies out of its door anchor, count of them, one every
-    // interval. Values in arrays are per difficulty.
+    // interval. Values in arrays are per difficulty. startSound plays as the move begins (a roar, a warning); a gun's projectile
+    // and a bombs move's warning marks and impacts can be drawn from a sheet instead of the engine's bullet, bar and explosion.
     [Serializable] public sealed class BossAttack
     {
-        public string type,announce,state,aimState,recoverState,sound,rack,foot,door;
+        public string type,announce,state,aimState,recoverState,sound,rack,foot,door,startSound,impactSound;
+        public BossSprite projectile=new BossSprite(),warning=new BossSprite(),impact=new BossSprite();
         public string[] muzzles,enemies;
         public float clearance,reach=1.5f,spread=3;
         public int maxAlive=4;
@@ -21,7 +23,26 @@ namespace Paname
         public bool smoke;
         public static readonly string[] Types={"gun","bombs","stomp","charge","troops"};
         [NonSerialized] public int kind;
-        [NonSerialized] public AudioClip clip;
+        [NonSerialized] public AudioClip clip,startClip,impactClip;
+    }
+    // Art of a boss move cut from a sheet: frames cells from sprite.cell on, played at fps (looping, or once for an impact),
+    // drawn size world units tall with its centre y above the street.
+    [Serializable] public sealed class BossSprite
+    {
+        public SpriteCell sprite=new SpriteCell();
+        public int frames=1;
+        public float fps=12,size=1,y;
+        [NonSerialized] Sprite[] all;
+        public bool Drawn=>sprite!=null&&!string.IsNullOrEmpty(sprite.texture);
+        public float Duration=>frames/fps;
+        public Sprite Frame(float time)=>sprite.At(frames>1?(int)(time*fps)%frames:0);
+        public Sprite[] All{get{if(all==null){all=new Sprite[frames];for(int i=0;i<frames;i++)all[i]=sprite.At(i);}return all;}}
+        public void Validate(string label)
+        {
+            if(!Drawn)return;sprite.Validate(label+".sprite");
+            if(frames<1||frames>16||sprite.cell+frames>sprite.columns*sprite.rows)throw new ArgumentException(label+" : frames de 1 à 16, dans la grille");
+            Content.Range(fps,.5f,60,label+".fps");Content.Range(size,.1f,10,label+".size");Content.Range(y,-3,10,label+".y");all=null;
+        }
     }
     // Missile art: a rectangle of an image in fractions (origin bottom-left, as in Unity), drawn size world units wide,
     // with an optional outline (fractions of the rectangle) that hides whatever surrounds it in the image.
@@ -93,7 +114,12 @@ namespace Paname
                 string l=label+" : attaque "+a.type;Content.Text(a.announce,80,l+".announce");
                 Content.Range(a.cooldown,0,20,l+".cooldown");if(a.rageCooldown!=-1)Content.Range(a.rageCooldown,0,20,l+".rageCooldown");
                 foreach(var state in new[]{a.state,a.aimState,a.recoverState})if(!string.IsNullOrEmpty(state)&&animations.Find(state)<0)throw new ArgumentException(l+" : état "+state+" absent des animations");
-                if(!string.IsNullOrEmpty(a.sound)){Content.Path(a.sound,"Audio/",l+".sound");Content.Require<AudioClip>(a.sound,l+" : son");}
+                foreach(var (sound,field) in new[]{(a.sound,"sound"),(a.startSound,"startSound"),(a.impactSound,"impactSound")})
+                    if(!string.IsNullOrEmpty(sound)){Content.Path(sound,"Audio/",l+"."+field);Content.Require<AudioClip>(sound,l+" : son "+field);}
+                a.startClip=null;a.impactClip=null;
+                a.projectile.Validate(l+".projectile");a.warning.Validate(l+".warning");a.impact.Validate(l+".impact");
+                if(a.kind!=0&&a.projectile.Drawn)throw new ArgumentException(l+" : projectile ne sert qu'à une attaque gun");
+                if(a.kind!=1&&(a.warning.Drawn||a.impact.Drawn||!string.IsNullOrEmpty(a.impactSound)))throw new ArgumentException(l+" : warning, impact et impactSound ne servent qu'à une attaque bombs");
                 if(a.kind==0)
                 {
                     Content.PerDifficulty(a.aimTime,0,10,l+".aimTime");Content.PerDifficulty(a.interval,.02f,5,l+".interval");Content.PerDifficulty(a.speed,1,60,l+".speed");

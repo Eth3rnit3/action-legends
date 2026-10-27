@@ -581,6 +581,8 @@ def validate_enemy(data, resources):
         errors.number(melee, "height", 0, 5, label + ".melee")
         errors.number(melee, "cooldown", .05, 20, label + ".melee")
         errors.number(melee, "damage", 1, 10, label + ".melee", 0, True)
+        if melee.get("sound"):
+            errors.resource(melee["sound"], "Audio/", SOUNDS, resources, label + ".melee.sound")
     if behavior == "thrower":
         throw, tl = obj(data, "throw"), label + ".throw"
         errors.number(throw, "range", .5, 30, tl)
@@ -609,6 +611,27 @@ def validate_enemy(data, resources):
         if pose is not None and not has_anchor(info, "muzzle", pose):
             errors.append(f"{label}: a muzzle anchor is required on the attack cell")
     return errors
+
+
+def validate_boss_sprite(art, resources, label, errors):
+    """BossSprite.Validate: frames cells of a sheet from sprite.cell on; absent (or without a texture) means not drawn."""
+    if art is None:
+        return False
+    if not isinstance(art, dict):
+        errors.append(f"{label}: object required")
+        return False
+    cell = art.get("sprite")
+    if not isinstance(cell, dict) or not cell.get("texture"):
+        return False
+    validate_cell(cell, resources, label + ".sprite", errors)
+    frames = errors.number(art, "frames", 1, 16, label, 1, True)
+    columns, rows, first = cell.get("columns", 1), cell.get("rows", 1), cell.get("cell", 0)
+    if frames and all(isinstance(v, int) for v in (columns, rows, first)) and first + frames > columns * rows:
+        errors.append(f"{label}.frames: the frames must stay inside the grid")
+    errors.number(art, "fps", .5, 60, label, 12)
+    errors.number(art, "size", .1, 10, label, 1)
+    errors.number(art, "y", -3, 10, label, 0)
+    return True
 
 
 def validate_boss(data, resources, enemies=None):
@@ -678,8 +701,14 @@ def validate_boss(data, resources, enemies=None):
         for key in ("state", "aimState", "recoverState"):
             if attack.get(key) and attack[key] not in states:
                 errors.append(f"{al}.{key}: state {attack[key]} is not in the animations")
-        if attack.get("sound"):
-            errors.resource(attack["sound"], "Audio/", SOUNDS, resources, al + ".sound")
+        for key in ("sound", "startSound", "impactSound"):
+            if attack.get(key):
+                errors.resource(attack[key], "Audio/", SOUNDS, resources, f"{al}.{key}")
+        drawn = {key: validate_boss_sprite(attack.get(key), resources, f"{al}.{key}", errors) for key in ("projectile", "warning", "impact")}
+        if kind != "gun" and drawn["projectile"]:
+            errors.append(f"{al}.projectile: only for a gun attack")
+        if kind != "bombs" and (drawn["warning"] or drawn["impact"] or attack.get("impactSound")):
+            errors.append(f"{al}: warning, impact and impactSound are only for a bombs attack")
         if kind == "gun":
             errors.per_difficulty(attack, "aimTime", 0, 10, al)
             errors.per_difficulty(attack, "interval", .02, 5, al)
@@ -896,6 +925,7 @@ def validate_mission(data, resources, library=None):
     for key in RESERVED_MAP:
         if game_map.get(key) not in (None, []):
             errors.append(f"map.{key} is reserved for a later batch: leave the list empty")
+    validate_decor(game_map.get("decor", []), data.get("length", 80), resources, errors)
     rules = data.get("rules", "default")
     if rules not in library["rules"]:
         errors.append(f"rules: unknown rules {rules} (Content/rules/{rules}.json)")
@@ -961,6 +991,26 @@ def validate_mission(data, resources, library=None):
     validate_map_hostages(game_map.get("hostages"), waves, length, library.get("rules", {}).get(rules), library, errors)
     validate_encounters(data.get("encounters"), waves, data, length, exit_x, library.get("rules", {}).get(rules), library, errors)
     return errors
+
+
+def validate_decor(decor, length, resources, errors):
+    """MissionDefinition.Validate: street scenery, drawn only, the bottom centre of a sheet's cell at (x, y)."""
+    if not isinstance(decor, list) or len(decor) > 120:
+        errors.append("map.decor: a list of at most 120 items")
+        return
+    span = length if isinstance(length, (int, float)) and not isinstance(length, bool) else 80
+    for i, item in enumerate(decor):
+        label = f"map.decor[{i}]"
+        if not isinstance(item, dict):
+            errors.append(f"{label}: object required")
+            continue
+        validate_cell(item.get("sprite"), resources, label + ".sprite", errors)
+        errors.number(item, "x", -10, span + 10, label)
+        errors.number(item, "y", -3, 8, label, 0)
+        errors.number(item, "height", .2, 12, label, 2)
+        for key in ("flip", "front"):
+            if not isinstance(item.get(key, False), bool):
+                errors.append(f"{label}.{key}: true or false")
 
 
 def validate_encounters(encounters, waves, data, length, exit_x, rules, library, errors):

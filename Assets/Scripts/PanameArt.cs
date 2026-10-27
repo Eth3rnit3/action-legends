@@ -93,6 +93,14 @@ namespace Paname
                 var go=new GameObject("Chaussée • premier plan");go.transform.SetParent(root,false);go.transform.localPosition=new Vector3(x,0,0);
                 var r=go.AddComponent<SpriteRenderer>();r.sprite=road;r.sortingOrder=-35;if(material)r.sharedMaterial=material;
             }
+            // Street scenery: behind the actors (a fountain an enemy steps out from), or in front of them.
+            if(map.decor!=null)foreach(var d in map.decor)
+            {
+                var sprite=d.sprite.Sprite;if(!sprite)continue;
+                var go=new GameObject("Décor posé • "+d.sprite.texture+" "+d.sprite.cell);go.transform.SetParent(root,false);
+                go.transform.localPosition=new Vector3(d.x,d.y+d.height*.5f,0);go.transform.localScale=new Vector3(d.flip?-d.height:d.height,d.height,1);
+                var r=go.AddComponent<SpriteRenderer>();r.sprite=sprite;r.sortingOrder=d.front?70:22;
+            }
         }
         // A hero or an enemy: a ground shadow, its illustrated sprite and, for heroes, the player's colour mark.
         public static Transform Actor(Transform parent,AnimationSet animations,int cell,Color accent,bool hero)

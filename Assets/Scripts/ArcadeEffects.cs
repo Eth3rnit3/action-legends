@@ -89,6 +89,14 @@ namespace Paname
             e.go.name="Chute de l'ennemi";e.go.transform.position=source.transform.position;e.go.transform.localScale=source.transform.lossyScale;e.go.transform.localRotation=Quaternion.identity;
             e.renderer.sprite=e.frames!=null?e.frames[0]:source.sprite;e.renderer.sharedMaterial=NormalMaterial;e.renderer.color=Color.white;e.renderer.sortingOrder=44;
         }
+        // A sheet's frames played once over duration, fading at the end: the drawn impact of a boss move.
+        public void Flipbook(Sprite[] frames,Vector2 at,float size,float duration,int layer=75)
+        {
+            if(frames==null||frames.Length==0||!frames[0])return;var e=Acquire();if(e==null)return;
+            e.row=-4;e.age=0;e.duration=duration;e.velocity=Vector2.zero;e.casing=false;e.spin=0;e.rotation=0;e.frames=frames;e.fps=frames.Length/duration;
+            e.go.name="Impact dessiné";e.go.transform.position=at;e.go.transform.localScale=Vector3.one*size;e.go.transform.localRotation=Quaternion.identity;
+            e.renderer.sprite=frames[0];e.renderer.sharedMaterial=NormalMaterial;e.renderer.color=Color.white;e.renderer.sortingOrder=layer;
+        }
         public void Casing(Vector2 position,int direction)
         {
             Debris(position,new Vector2(-direction*(1.2f+(float)rng.NextDouble()),2+(float)rng.NextDouble()*2),Gold,.055f,.62f);
@@ -121,6 +129,11 @@ namespace Paname
                     e.velocity+=Vector2.down*13*dt;e.rotation+=e.spin*dt;e.go.transform.localRotation=Quaternion.Euler(0,0,e.rotation);
                     if(e.row==-2){var c=e.renderer.color;c.a=1-Mathf.Pow(e.age/e.duration,2);e.renderer.color=c;if(e.frames!=null)e.renderer.sprite=e.frames[Mathf.Min(e.frames.Length-1,(int)(e.age*(e.fps>0?e.fps:e.frames.Length/e.duration)))];}
                     if(e.casing&&e.go.transform.position.y<.015f){var p=e.go.transform.position;p.y=.015f;e.go.transform.position=p;e.velocity=new Vector2(e.velocity.x*.6f,Mathf.Abs(e.velocity.y)*.3f);e.spin*=.5f;}
+                }
+                else if(e.row==-4)
+                {
+                    e.renderer.sprite=e.frames[Mathf.Min(e.frames.Length-1,(int)(e.age*e.fps))];
+                    float t=e.age/e.duration;e.renderer.color=new Color(1,1,1,t<.75f?1:1-(t-.75f)/.25f);
                 }
                 else
                 {

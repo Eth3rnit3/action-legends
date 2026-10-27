@@ -43,6 +43,9 @@ namespace Paname
         [NonSerialized] public HostageDefinition definition;[NonSerialized] public int bonus=-1;[NonSerialized] public WeaponDefinition gun;
     }
     [Serializable] public sealed class MapVehicle {public string id;public float x;}
+    // Scenery standing in the street, drawn only: a cell of a sheet height units tall, the bottom centre of the cell at (x, y)
+    // (y below 0 sinks a drawing that does not reach the bottom of its cell), mirrored with flip, in front of the actors with front.
+    [Serializable] public sealed class MapDecor {public SpriteCell sprite=new SpriteCell();public float x,y,height=2;public bool flip,front;}
     // One enemy of an encounter: a library enemy that comes delay seconds after the encounter starts and takes its place at (x, y),
     // y above the street for a ledge, a window or a roof it holds. entry: none (already there, off screen ahead of the team),
     // walk (from the side of the screen, side left or right, else the side away from the team), door and window (out of an
@@ -76,6 +79,7 @@ namespace Paname
         public MapProp[] props;
         public MapHostage[] hostages;
         public MapVehicle[] vehicles;
+        public MapDecor[] decor;
     }
     [Serializable] public sealed class MissionDefinition
     {
@@ -209,6 +213,13 @@ namespace Paname
             foreach(var path in map.backgrounds){Content.Path(path,"Art/","map.backgrounds");Content.Require<Texture2D>(path,"Image");}
             Content.Path(map.ground,"Art/","map.ground");Content.Require<Texture2D>(map.ground,"Sol");
             Reserved(map.terrain,"map.terrain");Reserved(map.props,"map.props");Reserved(map.vehicles,"map.vehicles");
+            map.decor??=new MapDecor[0];if(map.decor.Length>120)throw new ArgumentException("map.decor : 120 éléments au plus");
+            for(int i=0;i<map.decor.Length;i++)
+            {
+                var d=map.decor[i];string label="map.decor["+i+"]";if(d==null)throw new ArgumentException(label+" : élément vide");
+                d.sprite.Validate(label+".sprite");
+                if(!(d.x>=-10&&d.x<=length+10&&d.y>=-3&&d.y<=8&&d.height>=.2f&&d.height<=12))throw new ArgumentException(label+" : x dans la mission, y de -3 à 8, height de 0.2 à 12");
+            }
             if(enemies==null||enemies.Length<1||enemies.Length>8)throw new ArgumentException("enemies : un à huit identifiants d'ennemis");
             roster=new EnemyDefinition[enemies.Length];for(int i=0;i<enemies.Length;i++)roster[i]=ContentLibrary.Enemy(enemies[i]);
             if(waves==null||waves.Length<1||waves.Length>20)throw new ArgumentException("Une à vingt vagues sont requises");

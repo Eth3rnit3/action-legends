@@ -135,18 +135,26 @@ namespace Paname
             var root=new GameObject("Bombe du boss").transform;root.SetParent(actors,false);
             var renderer=root.gameObject.AddComponent<SpriteRenderer>();renderer.sprite=Boss.MissileSprite();renderer.sortingOrder=Boss.missile.layer;
             root.gameObject.SetActive(false);
-            var marker=Shape(actors,"Danger au sol",x,.05f,attack.marker,.1f,Coral,43);
+            // The impact mark: a red bar, or the move's drawn warning (a glowing circle) under the heroes' feet.
+            Transform marker;var w=attack.warning;
+            if(w.Drawn)
+            {
+                marker=new GameObject("Zone annoncée").transform;marker.SetParent(actors,false);marker.position=new Vector2(x,w.y);marker.localScale=Vector3.one*w.size;
+                var look=marker.gameObject.AddComponent<SpriteRenderer>();look.sprite=w.Frame(0);look.sortingOrder=26;
+            }
+            else marker=Shape(actors,"Danger au sol",x,.05f,attack.marker,.1f,Coral,43);
             // Keep the impact mark at x, then visibly release each missile from the rack.
             var rack=BossPoint(attack.rack);
             bossBombs.Add(new BossBomb{root=root,marker=marker,warning=marker.GetComponent<SpriteRenderer>(),position=rack,origin=rack,attack=attack,delay=attack.delay[DifficultyIndex]*BossAttackPace+bossBombs.Count*attack.stagger});
         }
         void RemoveBossBomb(int index,bool explosion)
         {
-            var bomb=bossBombs[index];
-            effects.Play(explosion?1:3,bomb.position,explosion?2.8f:1.1f,explosion?.35f:.25f);
+            var bomb=bossBombs[index];var a=bomb.attack;
+            if(explosion&&a.impact.Drawn)effects.Flipbook(a.impact.All,new Vector2(bomb.position.x,a.impact.y),a.impact.size,a.impact.Duration);
+            else effects.Play(explosion?1:3,bomb.position,explosion?2.8f:1.1f,explosion?.35f:.25f);
             if(explosion)
             {
-                Sound(explosionClips);shake=.25f;var a=bomb.attack;
+                var clip=AttackClip(a.impactSound,ref a.impactClip);if(clip)Sound(clip);else Sound(explosionClips);shake=.25f;
                 foreach(var p in players)if(p!=null&&p.hp>0&&Mathf.Abs(p.position.x-bomb.position.x)<a.blastRadius&&p.position.y<a.blastHeight)Damage(p,a.damage);
             }
             bomb.root.gameObject.SetActive(false);bomb.marker.gameObject.SetActive(false);Destroy(bomb.root.gameObject);Destroy(bomb.marker.gameObject);bossBombs.RemoveAt(index);
@@ -156,7 +164,8 @@ namespace Paname
             for(int i=bossBombs.Count-1;i>=0;i--)
             {
                 var bomb=bossBombs[i];bomb.age+=dt;
-                if(bomb.warning)bomb.warning.color=new Color(1,.3f,.15f,.35f+.65f*Mathf.Abs(Mathf.Sin(bomb.age*14)));
+                if(bomb.warning&&bomb.attack.warning.Drawn){bomb.warning.sprite=bomb.attack.warning.Frame(bomb.age);bomb.warning.color=new Color(1,1,1,.55f+.45f*Mathf.Abs(Mathf.Sin(bomb.age*9)));}
+                else if(bomb.warning)bomb.warning.color=new Color(1,.3f,.15f,.35f+.65f*Mathf.Abs(Mathf.Sin(bomb.age*14)));
                 if(bomb.age<bomb.delay)continue;
                 if(!bomb.launched){bomb.launched=true;bomb.origin=BossPoint(bomb.attack.rack);bomb.flight=0;bomb.root.gameObject.SetActive(true);}
                 bomb.flight+=dt;

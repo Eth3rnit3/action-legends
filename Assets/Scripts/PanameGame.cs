@@ -94,6 +94,8 @@ namespace Paname
             public Vector2 position,velocity,heading; public float life=1.8f,age,blast,length; public int damage,pierce,blastDamage,blastBoss,serial; public ShotLook look; public bool hostile,active,blastAnywhere; public Transform root;
             // Heroes' weapons: the weapon that fired it and its owner (a beam follows the barrel); struck: enemies it has passed through.
             public WeaponDefinition weapon; public Player owner; public SpriteRenderer sprite,halo;
+            // A boss's drawn projectile (Sprite look, hostile): its frames play as it flies.
+            public BossSprite drawn;
             public readonly List<Enemy> struck=new List<Enemy>();
             public bool Hostile=>hostile;
         }
@@ -375,7 +377,7 @@ namespace Paname
                     e.attackTimer=t.cooldown*AttackFactor;e.attackPose=type.attackPose;
                 }
                 var m=type.melee;
-                if(!type.Armed&&!e.perched&&best<m.reach&&target.position.y-e.position.y<m.height&&e.attackTimer<=0&&e.stagger<=0){Damage(target,m.damage);e.attackTimer=m.cooldown*AttackFactor;e.attackPose=type.attackPose;}
+                if(!type.Armed&&!e.perched&&best<m.reach&&target.position.y-e.position.y<m.height&&e.attackTimer<=0&&e.stagger<=0){Damage(target,m.damage);Sound(m.Clip);e.attackTimer=m.cooldown*AttackFactor;e.attackPose=type.attackPose;}
                 // A lobbed grenade, between the shots: it lands where the hero stood.
                 var g=type.grenade;
                 if(g.Enabled&&e.grenadeTimer<=0&&e.stagger<=0&&e.windup<=0&&e.burst<=0&&e.attackPose<=0&&best>=g.minRange&&best<=g.range){LobGrenade(e,target);e.grenadeTimer=g.cooldown*AttackFactor;e.attackPose=e.throwPose=g.pose;}
@@ -444,7 +446,7 @@ namespace Paname
                 shotPool.Add(s);
             }
             s.active=true;s.serial=++shotSerial;s.root.gameObject.SetActive(true);s.position=pos;s.velocity=velocity;s.damage=damage;s.life=1.25f;s.age=0;s.hostile=!friendly;s.root.position=pos;
-            s.weapon=null;s.owner=null;s.pierce=0;s.struck.Clear();s.blast=heavy&&friendly?2.5f:0;s.blastDamage=damage;s.blastBoss=0;s.blastAnywhere=false;if(s.halo)s.halo.color=TracerHalo;
+            s.weapon=null;s.drawn=null;s.owner=null;s.pierce=0;s.struck.Clear();s.blast=heavy&&friendly?2.5f:0;s.blastDamage=damage;s.blastBoss=0;s.blastAnywhere=false;if(s.halo)s.halo.color=TracerHalo;
             s.root.localRotation=Quaternion.Euler(0,0,Mathf.Atan2(velocity.y,velocity.x)*Mathf.Rad2Deg);s.root.localScale=Vector3.one*(heavy||look==ShotLook.Molotov?1.5f:1);
             shots.Add(s);return s;
         }
@@ -481,7 +483,7 @@ namespace Paname
                 // A weapon's explosive goes off on the ground and at the end of its flight too.
                 bool grounded=s.weapon==null||!s.weapon.projectile.Beam?s.position.y<(s.blastAnywhere&&s.blast>0?0:-.3f):false;
                 if(!hit&&s.blastAnywhere&&s.blast>0&&(grounded||s.life<=0)){Blast(new Vector2(s.position.x,Mathf.Max(s.position.y,.25f)),s.blast,s.blastDamage,s.blastBoss,direction,true);hit=true;}
-                if(hit||s.life<=0||grounded){s.active=false;s.root.gameObject.SetActive(false);shots.RemoveAt(i);}else{s.root.position=s.position;if(s.weapon!=null)DrawWeaponShot(s,dt);}
+                if(hit||s.life<=0||grounded){s.active=false;s.root.gameObject.SetActive(false);shots.RemoveAt(i);}else{s.root.position=s.position;if(s.weapon!=null)DrawWeaponShot(s,dt);else if(s.drawn!=null)s.sprite.sprite=s.drawn.Frame(s.age);}
             }
         }
         // wound: Wounds.Bullet, Explosion, Fire or Knife; it decides how the enemy falls.

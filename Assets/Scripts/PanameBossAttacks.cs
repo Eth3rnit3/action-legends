@@ -66,8 +66,11 @@ namespace Paname
                     Vector2 muzzle=BossPoint(a.muzzles[bossBarrel++%a.muzzles.Length]);
                     Vector2 sweep=bossAim+Vector2.right*(Mathf.Sin((a.duration-bossTimer)*a.sweepRate)*a.sweep);
                     Vector2 aim=(sweep-muzzle).normalized;
-                    Shoot(ShotLook.Bullet,muzzle,aim*a.speed[DifficultyIndex],a.damage);
-                    effects.Muzzle(muzzle,aim,true);Sound(BossClip(a));bossShotTimer=a.interval[DifficultyIndex]*pace;
+                    // A drawn projectile (a thrown scroll, a spell) flies like a bullet, without a muzzle flash.
+                    var bullet=Shoot(a.projectile.Drawn?ShotLook.Sprite:ShotLook.Bullet,muzzle,aim*a.speed[DifficultyIndex],a.damage);
+                    if(a.projectile.Drawn){if(bullet!=null){bullet.drawn=a.projectile;bullet.sprite.sprite=a.projectile.Frame(0);bullet.sprite.color=Color.white;bullet.root.localScale=Vector3.one*a.projectile.size;}}
+                    else effects.Muzzle(muzzle,aim,true);
+                    Sound(BossClip(a));bossShotTimer=a.interval[DifficultyIndex]*pace;
                 }
                 if(bossTimer<=0)EndBossAttack(a);
             }
@@ -120,7 +123,7 @@ namespace Paname
             else if(a.kind==3){bossPhase=BossWindup;bossTimer=a.windup*pace;bossCharge=target.position.x<bossPosition.x?-1:1;bossRoot.localScale=new Vector3(-bossCharge,1,1);}
             else if(a.kind==4){bossPhase=BossFire;bossTimer=a.duration*pace;bossShotTimer=0;bossTroops=a.count[DifficultyIndex];}
             else{bossPhase=BossWindup;bossTimer=a.windup*pace;bossStomps=bossEnraged?a.rageRepeat:a.repeat;}
-            Announce(a.announce);
+            Announce(a.announce);Sound(AttackClip(a.startSound,ref a.startClip));
         }
         // The rest before the next move: rageCooldown, when given, replaces the faster pace of an enraged boss.
         void EndBossAttack(BossAttack a){bossPhase=BossIdle;bossTimer=(a.rageCooldown>=0&&bossEnraged?a.rageCooldown:a.cooldown)*AttackFactor*(a.rageCooldown>=0?1:BossAttackPace);}
@@ -166,7 +169,8 @@ namespace Paname
             }
             if(bossTimer<=0)EndBossAttack(a);
         }
-        AudioClip BossClip(BossAttack a)=>string.IsNullOrEmpty(a.sound)?null:a.clip?a.clip:(a.clip=Resources.Load<AudioClip>(a.sound));
+        AudioClip BossClip(BossAttack a)=>AttackClip(a.sound,ref a.clip);
+        static AudioClip AttackClip(string path,ref AudioClip clip)=>string.IsNullOrEmpty(path)?null:clip?clip:(clip=Resources.Load<AudioClip>(path));
         void TickShockwaves(float dt)
         {
             shockwaveDust-=dt;bool dust=shockwaveDust<=0;if(dust)shockwaveDust=.06f;

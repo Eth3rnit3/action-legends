@@ -9,9 +9,11 @@ y .045, cropLeft .065), the centre for the mecha. Prints the barrel tips to writ
 usage: pack_sheet.py enemies IN.png OUT.png   (4 x 3 grid -> 4 x 3 cells of 420 x 362)
        pack_sheet.py mecha IN.png OUT.png     (3 x 2 grid -> 3 x 2 cells of 560 x 512)
        pack_sheet.py hero SPEC.json [PREVIEW.png]
-The hero mode assembles several generated sheets of one hero into one sheet (see hero() and
-tools/art/heroes/*.json): each source is scaled so that its reference frame stands as tall as the
-hero should in the game, and the "muzzle" and "hand" anchors are measured on the packed cells.
+The hero mode assembles several generated sheets of one character into one sheet (see hero(),
+tools/art/heroes/*.json and tools/art/hostages/*.json): each source is scaled so that its reference
+frame stands as tall as the character should in the game, and the "muzzle" and "hand" anchors are
+measured on the packed cells. "defringe": true recolours the half-transparent edge pixels with their
+nearest opaque neighbour, for generated images whose edges keep a tint of the removed background.
 Requires Pillow, NumPy and SciPy."""
 import json
 import sys
@@ -151,6 +153,19 @@ def tip(alpha, direction):
     raise ValueError(direction)
 
 
+def defringe(crop):
+    """Half-transparent edge pixels take the colour of the nearest opaque pixel; the faintest ones are dropped."""
+    out = crop.copy()
+    alpha = out[..., 3]
+    solid = alpha >= 230
+    if solid.any():
+        _, (iy, ix) = ndimage.distance_transform_edt(~solid, return_indices=True)
+        edge = (alpha > 0) & ~solid
+        out[edge, :3] = out[iy[edge], ix[edge], :3]
+    out[alpha < 48] = 0
+    return out
+
+
 def hero(spec_path, preview=None):
     """SPEC: {"output", "columns", "rows", "cell": [w, h], "feet", "pivotX", "ppu", "height",
     "sources": {"A": {"image", "grid": [cols, rows], "reference": frame}}, "frames": [["A", frame, dx?], ...],
@@ -173,6 +188,10 @@ def hero(spec_path, preview=None):
         k = spec["height"] * ppu / (ys.max() - ys.min())
         print(f"source {key}: {len(found)} frames, scale {k:.3f}")
         sources[key] = ({r * gc + c: f for (r, c), f in found.items()}, k)
+    if spec.get("defringe"):
+        for key, (found, k) in sources.items():
+            for frame, crop in found.items():
+                found[frame] = defringe(crop)
     sheet = np.zeros((rows * ch, cols * cw, 4), np.uint8)
     for index, entry in enumerate(spec["frames"]):
         key, frame = entry[0], entry[1]

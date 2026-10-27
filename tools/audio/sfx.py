@@ -127,6 +127,13 @@ SOUNDS = {
                                    (.3, gen('noise', 3000, 2000, .1, attack=.02, hp=1500))),
     'tir-L-laser': lambda: layer((.8, gen('square', 1750, 1500, .09, attack=.004, sustain=.05, duty=.18, vib=(55, .05), punch=.1, crush=(22050, 8))),
                                  (.5, gen('saw', 880, 760, .09, attack=.004, sustain=.05, lp=6000, crush=(22050, 8)))),
+    # A freed hostage (lot 2a): the rope snaps, then a cheerful rising jingle. Last, like the others.
+    'otage-libere': lambda: np.concatenate([gen('noise', 3200, 700, .08, sustain=.01, punch=.9, hp=900, crush=(16000, 8)),
+                                            np.zeros(int(.02 * SR)),
+                                            gen('square', 784, 784, .07, duty=.25, punch=.2, sustain=.03),
+                                            gen('square', 1047, 1047, .07, duty=.25, punch=.2, sustain=.03),
+                                            gen('square', 1319, 1319, .07, duty=.25, punch=.2, sustain=.03),
+                                            gen('square', 1568, 1568, .22, duty=.25, punch=.2, sustain=.08, vib=(12, .02))]),
 }
 
 if __name__ == '__main__':

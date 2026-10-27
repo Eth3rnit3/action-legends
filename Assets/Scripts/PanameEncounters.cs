@@ -22,8 +22,6 @@ namespace Paname
         bool[] encounterStarted=new bool[0];
         // encounterLock: an encounter of its own (not a wave's) holds the screen.
         bool encounterLock;
-        public int ArrivalCount=>arrivals.Count;
-        public int CarrierCount=>carriers.Count;
         void ResetEncounters()
         {
             arrivals.Clear();carriers.Clear();foreach(var p in props)if(p.root)Destroy(p.root.gameObject);props.Clear();encounterLock=false;voiceGate=0;

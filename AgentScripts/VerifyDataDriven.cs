@@ -229,7 +229,7 @@ public static class VerifyDataDriven
         Check(g.CurrentMission.id=="test-data-driven"&&PanameArt.RouteSegments==3,"La carte assemble trois décors existants de trois missions",checks);
         g.BeginRound();
         var players=(PanameGame.Player[])Get(g,"players");var enemies=(IList)Get(g,"enemies");var commands=new PlayerCommand[4];
-        var cells=new HashSet<int>();var set=sniper.animations;int sniperHp=-1,shotsFromSniper=0;var attacks=new List<int>();int lastPhase=0;bool captured=false;
+        var cells=new HashSet<int>();var set=sniper.animations;int sniperHp=-1;var attacks=new List<int>();int lastPhase=0;bool captured=false;
         var shots=(IList)Get(g,"shots");
         int t=0;
         for(;t<60*60*6&&g.phase==PanameGame.Phase.Playing;t++)

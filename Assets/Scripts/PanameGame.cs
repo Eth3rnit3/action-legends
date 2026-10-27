@@ -605,7 +605,7 @@ namespace Paname
             if(phase==Phase.Paused)
             {
                 if(Button(440,467,400,46,"RETOUR À LA SÉLECTION",C("34515C")))ReturnToLobby();
-                Label(160,538,960,70,"CLAVIER   Q / A, D : bouger   ·   Z / W / HAUT : viser haut   ·   S / BAS : accroupi, tir bas en saut   ·   ESPACE : sauter\nJ : tirer, couteau au contact   ·   L : grenade   ·   K : spécial   ·   ÉCHAP / START : reprendre\nMANETTE   stick : bouger, viser, s'accroupir   ·   A / CROIX : sauter   ·   X / CARRÉ : tirer   ·   B / ROND : grenade   ·   Y / TRIANGLE : spécial",14,Cream,false,TextAnchor.MiddleCenter);
+                Label(160,528,960,92,"CLAVIER   Q / A, D : bouger   ·   W / Z / HAUT : viser haut   ·   S / BAS : accroupi, tir bas en saut   ·   ESPACE : sauter\nJ : tirer, couteau au contact   ·   L : grenade   ·   K : spécial   ·   ÉCHAP : reprendre\nMANETTE   stick ou croix directionnelle : bouger, viser, s'accroupir   ·   A / CROIX : sauter\nX / CARRÉ / RT : tirer   ·   B / ROND : grenade   ·   Y / TRIANGLE / RB : spécial   ·   START : reprendre",14,Cream,false,TextAnchor.MiddleCenter);
             }
         }
     }

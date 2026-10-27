@@ -57,10 +57,6 @@ namespace Paname
         {
             Shape(p,name+" contour",x,y,w+.07f,h+.07f,Ink,order,round); return Shape(p,name,x,y,w,h,color,order+1,round);
         }
-        public static void Line(Transform p,Vector2 a,Vector2 b,float width,Color c,int layer)
-        {
-            Vector2 v=b-a, mid=(a+b)*.5f; Shape(p,"Trait",mid.x,mid.y,v.magnitude,width,c,layer,false,Mathf.Atan2(v.y,v.x)*Mathf.Rad2Deg);
-        }
         public static void Text(Transform p,string text,float x,float y,float size,Color color,int order)
         {
             var g=new GameObject(text); g.transform.SetParent(p,false); g.transform.localPosition=new Vector3(x,y,-.1f);

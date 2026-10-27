@@ -17,7 +17,6 @@ namespace Paname
         readonly List<Hostage> hostages=new List<Hostage>();
         // Per hostage type, the credits of its weighted rewards table (same round robin as DrawWeapon).
         readonly Dictionary<HostageDefinition,int[]> rewardCredit=new Dictionary<HostageDefinition,int[]>();
-        public int HostageCount=>hostages.Count;
         public int HostagesFreed {get;private set;}
         // What the last won mission's tally paid: hostages per slot, points for them, seconds under parTime and points for them.
         public readonly int[] TallyHostages=new int[4];

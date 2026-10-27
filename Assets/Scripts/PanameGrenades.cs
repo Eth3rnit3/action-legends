@@ -10,7 +10,6 @@ namespace Paname
         sealed class Grenade {public Vector2 position,velocity;public float age;public int bounces;public Transform root;public bool hostile;public EnemyGrenade spec;}
         readonly List<Grenade> thrown=new List<Grenade>();
         GameRules Rules=>CurrentMission.ruleSet;
-        public int GrenadeCount=>thrown.Count;
         // Where enemy shots hit a hero, lower while crouching.
         static Vector2 HitCenter(Player p)=>p.position+Vector2.up*(p.crouching?p.Definition.crouch.y:p.Definition.hitbox.y);
         static float HitRadius(Player p)=>p.crouching?p.Definition.crouch.radius:p.Definition.hitbox.radius;

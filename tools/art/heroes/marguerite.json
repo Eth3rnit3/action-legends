@@ -1,0 +1,43 @@
+{
+  "output": "../../../Assets/ArtSources/NouveauxHeros/sprites/marguerite.png",
+  "columns": 2,
+  "rows": 2,
+  "cell": [
+    480,
+    320
+  ],
+  "feet": 14,
+  "pivotX": 0.5,
+  "ppu": 108,
+  "height": 1.85,
+  "defringe": true,
+  "sources": {
+    "A": {
+      "image": "../../../Assets/ArtSources/NouveauxHeros/sources/marguerite.png",
+      "grid": [
+        2,
+        2
+      ],
+      "reference": 0
+    }
+  },
+  "frames": [
+    [
+      "A",
+      0
+    ],
+    [
+      "A",
+      1
+    ],
+    [
+      "A",
+      2
+    ],
+    [
+      "A",
+      3
+    ]
+  ],
+  "anchors": {}
+}

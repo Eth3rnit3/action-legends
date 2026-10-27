@@ -1,0 +1,689 @@
+fileFormatVersion: 2
+guid: 73ff2264252434abcae6c872aea3d470
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3118763747802941378
+    second: fernandel-source_0
+  - first:
+      213: -3187707271453932813
+    second: fernandel-source_1
+  - first:
+      213: 1563725137099748809
+    second: fernandel-source_2
+  - first:
+      213: -8272047134298657736
+    second: fernandel-source_3
+  - first:
+      213: -1112171443158402990
+    second: fernandel-source_4
+  - first:
+      213: -6311610979722389409
+    second: fernandel-source_5
+  - first:
+      213: -6341313920380040020
+    second: fernandel-source_6
+  - first:
+      213: -2249506965179663860
+    second: fernandel-source_7
+  - first:
+      213: -7299813470741426462
+    second: fernandel-source_8
+  - first:
+      213: 980484636765354694
+    second: fernandel-source_9
+  - first:
+      213: 7092022563415848548
+    second: fernandel-source_10
+  - first:
+      213: -8357580218150140787
+    second: fernandel-source_11
+  - first:
+      213: 4402812239560015690
+    second: fernandel-source_12
+  - first:
+      213: 5015989760554752494
+    second: fernandel-source_13
+  - first:
+      213: -5710745896533980667
+    second: fernandel-source_14
+  - first:
+      213: 5261031485080946428
+    second: fernandel-source_15
+  - first:
+      213: 9068735949852447595
+    second: fernandel-source_16
+  - first:
+      213: 7943497557300776697
+    second: fernandel-source_17
+  - first:
+      213: -2157001885014745565
+    second: fernandel-source_18
+  - first:
+      213: -4643065160446395906
+    second: fernandel-source_19
+  - first:
+      213: 8048274554130615117
+    second: fernandel-source_20
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: fernandel-source_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 712
+        width: 355
+        height: 506
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e38f6d135ece7b4d0800000000000000
+      internalID: -3118763747802941378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_1
+      rect:
+        serializedVersion: 2
+        x: 331
+        y: 851
+        width: 346
+        height: 356
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f20f05302df2c3d0800000000000000
+      internalID: -3187707271453932813
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_2
+      rect:
+        serializedVersion: 2
+        x: 657
+        y: 777
+        width: 324
+        height: 457
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c5fd2b2ab773b510800000000000000
+      internalID: 1563725137099748809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_3
+      rect:
+        serializedVersion: 2
+        x: 987
+        y: 893
+        width: 267
+        height: 316
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83c27d265f8c33d80800000000000000
+      internalID: -8272047134298657736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_4
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 789
+        width: 15
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 258b53907f5c090f0800000000000000
+      internalID: -1112171443158402990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_5
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 785
+        width: 12
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5811391147a868a0800000000000000
+      internalID: -6311610979722389409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_6
+      rect:
+        serializedVersion: 2
+        x: 368
+        y: 387
+        width: 306
+        height: 465
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cac028e46902ff7a0800000000000000
+      internalID: -6341313920380040020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_7
+      rect:
+        serializedVersion: 2
+        x: 673
+        y: 797
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0af2b4655528c0e0800000000000000
+      internalID: -2249506965179663860
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_8
+      rect:
+        serializedVersion: 2
+        x: 963
+        y: 417
+        width: 285
+        height: 433
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ee88dd035ad1ba90800000000000000
+      internalID: -7299813470741426462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_9
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 722
+        width: 14
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ca702215916b9d00800000000000000
+      internalID: 980484636765354694
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_10
+      rect:
+        serializedVersion: 2
+        x: 285
+        y: 692
+        width: 18
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 466f47f32fceb6260800000000000000
+      internalID: 7092022563415848548
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_11
+      rect:
+        serializedVersion: 2
+        x: 643
+        y: 708
+        width: 13
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d84445b6219e30c80800000000000000
+      internalID: -8357580218150140787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_12
+      rect:
+        serializedVersion: 2
+        x: 683
+        y: 429
+        width: 270
+        height: 346
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4f77bf976ee91d30800000000000000
+      internalID: 4402812239560015690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_13
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 376
+        width: 354
+        height: 323
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee9dcd28c106c9540800000000000000
+      internalID: 5015989760554752494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_14
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 682
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50a829a2dda5fb0b0800000000000000
+      internalID: -5710745896533980667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_15
+      rect:
+        serializedVersion: 2
+        x: 930
+        y: 463
+        width: 10
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf64564f240f20940800000000000000
+      internalID: 5261031485080946428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_16
+      rect:
+        serializedVersion: 2
+        x: 649
+        y: 19
+        width: 321
+        height: 383
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b6315c45c4f9add70800000000000000
+      internalID: 9068735949852447595
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_17
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 387
+        width: 8
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9fe881121f8fc3e60800000000000000
+      internalID: 7943497557300776697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_18
+      rect:
+        serializedVersion: 2
+        x: 987
+        y: 17
+        width: 267
+        height: 403
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32e19dfb63ac012e0800000000000000
+      internalID: -2157001885014745565
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_19
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 19
+        width: 359
+        height: 353
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef9b99a26d4809fb0800000000000000
+      internalID: -4643065160446395906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fernandel-source_20
+      rect:
+        serializedVersion: 2
+        x: 368
+        y: 16
+        width: 280
+        height: 368
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4b45cdb01731bf60800000000000000
+      internalID: 8048274554130615117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      fernandel-source_0: -3118763747802941378
+      fernandel-source_1: -3187707271453932813
+      fernandel-source_10: 7092022563415848548
+      fernandel-source_11: -8357580218150140787
+      fernandel-source_12: 4402812239560015690
+      fernandel-source_13: 5015989760554752494
+      fernandel-source_14: -5710745896533980667
+      fernandel-source_15: 5261031485080946428
+      fernandel-source_16: 9068735949852447595
+      fernandel-source_17: 7943497557300776697
+      fernandel-source_18: -2157001885014745565
+      fernandel-source_19: -4643065160446395906
+      fernandel-source_2: 1563725137099748809
+      fernandel-source_20: 8048274554130615117
+      fernandel-source_3: -8272047134298657736
+      fernandel-source_4: -1112171443158402990
+      fernandel-source_5: -6311610979722389409
+      fernandel-source_6: -6341313920380040020
+      fernandel-source_7: -2249506965179663860
+      fernandel-source_8: -7299813470741426462
+      fernandel-source_9: 980484636765354694
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

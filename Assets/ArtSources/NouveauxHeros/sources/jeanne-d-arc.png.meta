@@ -1,0 +1,507 @@
+fileFormatVersion: 2
+guid: 37c40060697f34251a0d562d0e86ebd3
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 265804170445640780
+    second: jeanne-d-arc-source_0
+  - first:
+      213: 7472015952366751092
+    second: jeanne-d-arc-source_1
+  - first:
+      213: 6944918096071148689
+    second: jeanne-d-arc-source_2
+  - first:
+      213: -2249713681101788077
+    second: jeanne-d-arc-source_3
+  - first:
+      213: -1333391409273915536
+    second: jeanne-d-arc-source_4
+  - first:
+      213: 7434874736011894467
+    second: jeanne-d-arc-source_5
+  - first:
+      213: -2942370833102508510
+    second: jeanne-d-arc-source_6
+  - first:
+      213: 4897398942628996250
+    second: jeanne-d-arc-source_7
+  - first:
+      213: -6402199659248526278
+    second: jeanne-d-arc-source_8
+  - first:
+      213: -4077277212766173294
+    second: jeanne-d-arc-source_9
+  - first:
+      213: 14860594274234621
+    second: jeanne-d-arc-source_10
+  - first:
+      213: -2857922595357768054
+    second: jeanne-d-arc-source_11
+  - first:
+      213: 4354810226214755497
+    second: jeanne-d-arc-source_12
+  - first:
+      213: 3076260977482148124
+    second: jeanne-d-arc-source_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 684
+        width: 357
+        height: 402
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c44da371c7350b300800000000000000
+      internalID: 265804170445640780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_1
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 898
+        width: 13
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47d4fd49beee1b760800000000000000
+      internalID: 7472015952366751092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_2
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 341
+        width: 361
+        height: 745
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 194c08e663e416060800000000000000
+      internalID: 6944918096071148689
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_3
+      rect:
+        serializedVersion: 2
+        x: 718
+        y: 341
+        width: 383
+        height: 745
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35c6797935967c0e0800000000000000
+      internalID: -2249713681101788077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_4
+      rect:
+        serializedVersion: 2
+        x: 1110
+        y: 718
+        width: 338
+        height: 368
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 077bbafe397de7de0800000000000000
+      internalID: -1333391409273915536
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_5
+      rect:
+        serializedVersion: 2
+        x: 716
+        y: 860
+        width: 9
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ced3854e2bfd2760800000000000000
+      internalID: 7434874736011894467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_6
+      rect:
+        serializedVersion: 2
+        x: 722
+        y: 872
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22e647f01599a27d0800000000000000
+      internalID: -2942370833102508510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_7
+      rect:
+        serializedVersion: 2
+        x: 354
+        y: 793
+        width: 15
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a9466ca046e07f340800000000000000
+      internalID: 4897398942628996250
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_8
+      rect:
+        serializedVersion: 2
+        x: 1060
+        y: 0
+        width: 388
+        height: 717
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3c5d598451d627a0800000000000000
+      internalID: -6402199659248526278
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_9
+      rect:
+        serializedVersion: 2
+        x: 1355
+        y: 706
+        width: 16
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29707423af99a67c0800000000000000
+      internalID: -4077277212766173294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_10
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 0
+        width: 355
+        height: 681
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df0fddab1abc43000800000000000000
+      internalID: 14860594274234621
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_11
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 0
+        width: 777
+        height: 344
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a86432c9a8e9658d0800000000000000
+      internalID: -2857922595357768054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_12
+      rect:
+        serializedVersion: 2
+        x: 629
+        y: 326
+        width: 16
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9acd4c5f3d46f6c30800000000000000
+      internalID: 4354810226214755497
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: jeanne-d-arc-source_13
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 333
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c19283f6f0311ba20800000000000000
+      internalID: 3076260977482148124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      jeanne-d-arc-source_0: 265804170445640780
+      jeanne-d-arc-source_1: 7472015952366751092
+      jeanne-d-arc-source_10: 14860594274234621
+      jeanne-d-arc-source_11: -2857922595357768054
+      jeanne-d-arc-source_12: 4354810226214755497
+      jeanne-d-arc-source_13: 3076260977482148124
+      jeanne-d-arc-source_2: 6944918096071148689
+      jeanne-d-arc-source_3: -2249713681101788077
+      jeanne-d-arc-source_4: -1333391409273915536
+      jeanne-d-arc-source_5: 7434874736011894467
+      jeanne-d-arc-source_6: -2942370833102508510
+      jeanne-d-arc-source_7: 4897398942628996250
+      jeanne-d-arc-source_8: -6402199659248526278
+      jeanne-d-arc-source_9: -4077277212766173294
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

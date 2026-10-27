@@ -128,15 +128,24 @@ def pack(kind, src, dst):
     print(dst, sheet.shape[1], "x", sheet.shape[0])
 
 
-def tip(alpha, direction):
-    """Barrel tip (or hand) of a packed cell, in cell pixels: the extreme opaque pixel in a direction."""
+def tip(alpha, direction, below=None):
+    """Barrel tip (or hand) of a packed cell, in cell pixels: the extreme opaque pixel in a direction.
+    below: only pixels under that row count (a banner held above a sword)."""
     ys, xs = np.nonzero(alpha)
+    if below is not None:
+        keep = ys >= below
+        ys, xs = ys[keep], xs[keep]
     top, bottom, left, right = ys.min(), ys.max(), xs.min(), xs.max()
     if direction == "right":
         # The gun is the forward-most thing above the hips; a stride's front foot is lower.
         keep = ys <= top + (bottom - top) * .62
         x = xs[keep].max()
         return x, ys[keep][xs[keep] >= x - 2].mean()
+    if direction == "left":
+        # A second gun pointed backwards (a two-gun special): the rearmost thing above the hips.
+        keep = ys <= top + (bottom - top) * .62
+        x = xs[keep].min()
+        return x, ys[keep][xs[keep] <= x + 2].mean()
     if direction == "up":
         y = top
         return xs[ys <= y + 2].mean(), y
@@ -146,6 +155,12 @@ def tip(alpha, direction):
         keep = np.abs(xs - mid) <= (right - left) * .14
         y = ys[keep].max()
         return xs[keep][ys[keep] >= y - 2].mean(), y
+    if direction == "downRight":
+        # A barrel pointed down and forward: the lowest, foremost pixel in front of the body.
+        keep = xs >= (left + right) / 2
+        score = xs[keep] + ys[keep]
+        sel = score >= score.max() - 3
+        return xs[keep][sel].mean(), ys[keep][sel].mean()
     if direction in ("diagonal", "hand"):
         score = xs - ys
         best = score.max()
@@ -181,7 +196,9 @@ def hero(spec_path, preview=None):
     """SPEC: {"output", "columns", "rows", "cell": [w, h], "feet", "pivotX", "ppu", "height",
     "sources": {"A": {"image", "grid": [cols, rows], "reference": frame, "scale"?, "mirror"?}, "O": {"image", "grid", "exact": true}},
     "frames": [["A", frame, dx?, scale?], ...], "heightFrom"?: ["O", frame], "margins"?: [left px, right px],
-    "anchors": {"muzzle": {"cell": direction}, "hand": {"cell": "hand"}}}. Paths are relative to SPEC."""
+    "anchors": {"muzzle": {"cell": direction}, "hand": {"cell": "hand"}}}, direction right, left, up, down, downRight, diagonal or hand,
+    optionally ":units" to ignore what is drawn higher than units above the feet.
+    Paths are relative to SPEC."""
     spec_path = Path(spec_path)
     spec = json.loads(spec_path.read_text())
     base = spec_path.parent
@@ -266,7 +283,9 @@ def hero(spec_path, preview=None):
         for cell, direction in sorted(cells.items(), key=lambda c: int(c[0])):
             row, col = divmod(int(cell), cols)
             alpha = sheet[row * ch:(row + 1) * ch, col * cw:(col + 1) * cw, 3] > 128
-            x, y = tip(alpha, direction)
+            # "right:2.1": only what is drawn below 2.1 units above the feet.
+            direction, _, limit = direction.partition(":")
+            x, y = tip(alpha, direction, py - float(limit) * ppu if limit else None)
             anchors.append({"name": name, "cell": int(cell), "x": round((x - px) / ppu, 2), "y": round((py - y) / ppu, 2)})
             if shown:
                 cx, cy = col * cw + x, row * ch + y

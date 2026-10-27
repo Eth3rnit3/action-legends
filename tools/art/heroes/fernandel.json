@@ -1,0 +1,88 @@
+{
+  "output": "../../../Assets/ArtSources/NouveauxHeros/sprites/fernandel.png",
+  "columns": 4,
+  "rows": 3,
+  "cell": [
+    340,
+    340
+  ],
+  "feet": 14,
+  "pivotX": 0.34,
+  "ppu": 108,
+  "height": 2.15,
+  "defringe": true,
+  "sources": {
+    "A": {
+      "image": "../../../Assets/ArtSources/NouveauxHeros/sources/fernandel.png",
+      "grid": [
+        4,
+        3
+      ],
+      "reference": 0
+    }
+  },
+  "frames": [
+    [
+      "A",
+      0
+    ],
+    [
+      "A",
+      1
+    ],
+    [
+      "A",
+      2
+    ],
+    [
+      "A",
+      3
+    ],
+    [
+      "A",
+      4
+    ],
+    [
+      "A",
+      5
+    ],
+    [
+      "A",
+      6
+    ],
+    [
+      "A",
+      7
+    ],
+    [
+      "A",
+      8
+    ],
+    [
+      "A",
+      9
+    ],
+    [
+      "A",
+      10
+    ],
+    [
+      "A",
+      11
+    ]
+  ],
+  "anchors": {
+    "muzzle": {
+      "0": "right",
+      "1": "right",
+      "2": "right",
+      "3": "right",
+      "4": "right",
+      "5": "up",
+      "6": "down"
+    },
+    "hand": {
+      "8": "hand"
+    }
+  }
+}

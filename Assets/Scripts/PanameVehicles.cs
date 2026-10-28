@@ -236,15 +236,16 @@ namespace Paname
                 ArcadeEffects.HitFlash(v.pilot,v.flash>0?1:0,flashProperties);
             }
         }
-        // HUD: the vehicle's gauge replaces the pilot's health, its shells his grenades.
+        // HUD: the vehicle's badge and name, its gauge in place of the pilot's health, its shells on the right of it.
         void DrawVehicleHud(Player p,float x,Color accent)
         {
             var v=p.vehicle;var t=v.type;
-            if(t.icon.Texture)GUI.DrawTextureWithTexCoords(new Rect(x+10,48,28,18),t.icon.Texture,t.icon.TexCoords);
-            float w=130,fill=Mathf.Clamp01(v.hp/(float)v.maxHp);Panel(x+42,52,w,9,PanameArt.C("344A55"));
-            Panel(x+42,52,w*fill,9,fill>t.damagedAt?accent:Mathf.Repeat(Time.unscaledTime,.4f)<.2f?PanameArt.Coral:PanameArt.Gold);
-            var icon=t.shellIcon;if(icon.Texture)GUI.DrawTextureWithTexCoords(new Rect(x+10,61,17,17),icon.Texture,icon.TexCoords);
-            Label(x+28,60,60,19,"×"+v.shells,12,v.shells>0?PanameArt.Cream:PanameArt.C("7C929A"),true);
+            if(t.icon.Texture)GUI.DrawTextureWithTexCoords(new Rect(x+10,43,18,18),t.icon.Texture,t.icon.TexCoords);
+            Label(x+32,42,150,19,t.name,11,PanameArt.Cream,true);
+            float w=172,fill=Mathf.Clamp01(v.hp/(float)v.maxHp);Panel(x+13,65,w,8,PanameArt.C("344A55"));
+            Panel(x+13,65,w*fill,8,fill>t.damagedAt?accent:Mathf.Repeat(Time.unscaledTime,.4f)<.2f?PanameArt.Coral:PanameArt.Gold);
+            var icon=t.shellIcon;if(icon.Texture)GUI.DrawTextureWithTexCoords(new Rect(x+196,58,17,17),icon.Texture,icon.TexCoords);
+            Label(x+214,57,44,19,"×"+v.shells,12,v.shells>0?PanameArt.Cream:PanameArt.C("7C929A"),true);
         }
         public int VehicleHealth(int index)=>index>=0&&index<vehicles.Count?vehicles[index].hp:0;
     }

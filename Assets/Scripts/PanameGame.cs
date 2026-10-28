@@ -582,8 +582,8 @@ namespace Paname
                 else for(int h=0;h<MaxPlayerHealth;h++)Panel(x+13+h*17,56,11,6,h<p.hp?PlayerColors[i]:C("344A55"));
                 // The weapon's badge, then its ammunition, or its name when it never runs out.
                 var w=p.weapon;if(p.hp>0&&p.vehicle==null&&w.HasIcon&&w.icon.Texture)GUI.DrawTextureWithTexCoords(new Rect(x+170,44,26,26),w.icon.Texture,w.icon.TexCoords);
-                string ammo=p.vehicle!=null?p.vehicle.type.name:w.Unlimited?w.name:(w.HasIcon?"":w.letter+"  ")+p.ammo;
-                Label(x+112,45,141,25,p.hp<=0?"×":ammo,14,w.Unlimited?Cream:Gold,true,TextAnchor.MiddleRight);
+                string ammo=w.Unlimited?w.name:(w.HasIcon?"":w.letter+"  ")+p.ammo;
+                if(p.vehicle==null)Label(x+112,45,141,25,p.hp<=0?"×":ammo,14,w.Unlimited?Cream:Gold,true,TextAnchor.MiddleRight);
                 if(p.boost>0)Panel(x+3,77,261*Mathf.Clamp01(p.boost/p.boostMax),3,Gold);
                 var icon=Rules.grenade.icon;if(p.vehicle==null&&icon.Texture)GUI.DrawTextureWithTexCoords(new Rect(x+10,61,17,17),icon.Texture,icon.TexCoords);
                 if(p.vehicle==null)Label(x+28,60,60,19,"×"+p.grenades,12,p.grenades>0?Cream:C("7C929A"),true);
@@ -631,7 +631,7 @@ namespace Paname
             if(phase==Phase.Paused)
             {
                 if(Button(440,467,400,46,"RETOUR À LA SÉLECTION",C("34515C")))ReturnToLobby();
-                Label(160,528,960,92,"CLAVIER   Q / A, D : bouger   ·   W / Z / HAUT : viser haut   ·   S / BAS : accroupi, tir bas en saut   ·   ESPACE : sauter\nJ : tirer, couteau au contact   ·   L : grenade   ·   K : spécial   ·   ÉCHAP : reprendre\nMANETTE   stick ou croix directionnelle : bouger, viser, s'accroupir   ·   A / CROIX : sauter\nX / CARRÉ / RT : tirer   ·   B / ROND : grenade   ·   Y / TRIANGLE / RB : spécial   ·   START : reprendre",14,Cream,false,TextAnchor.MiddleCenter);
+                Label(160,528,960,92,"CLAVIER   Q / A, D : bouger   ·   W / Z / HAUT : viser haut   ·   S / BAS : accroupi, tir bas en saut   ·   ESPACE : sauter\nJ : tirer, couteau   ·   L : grenade, obus au volant   ·   K : spécial   ·   BAS + SAUT : sortir du véhicule   ·   ÉCHAP : reprendre\nMANETTE   stick ou croix directionnelle : bouger, viser, s'accroupir   ·   A / CROIX : sauter\nX / CARRÉ / RT : tirer   ·   B / ROND : grenade   ·   Y / TRIANGLE / RB : spécial   ·   START : reprendre",14,Cream,false,TextAnchor.MiddleCenter);
             }
         }
     }

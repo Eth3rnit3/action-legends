@@ -75,6 +75,8 @@ namespace Paname
             public int rescued,lives; public float boost,boostMax=1,animTime,grenadeTimer,knifePose,throwPose,kick;
             // The special's pose, a dash under way and the bursts of a salvo still to fire (PanameSpecials.cs).
             public float specialPose,dash,salvoTimer; public int salvo;
+            // How far ahead of him a dash held at the edge of the arena or of a held screen still strikes (PanameSpecials.cs).
+            public float dashAhead;
             // The relief under his feet (PanameTerrain.cs), and the ledge he drops through with down + jump until he is below it.
             public float floor,dropFrom=float.MaxValue;
             // The weapon in hand (Content/weapons), with ammo rounds left unless it is unlimited; shots counts what it has fired.
@@ -262,8 +264,10 @@ namespace Paname
                 else{p.position.x=Advance(p.position.x,p.position.y,move*hero.speed*(p.boost>0?1.35f:1)*dt,ForHeroes);p.walk+=Mathf.Abs(move)*dt*hero.strideRate;}
                 // A heavy weapon's recoil pushes the hero back for a moment.
                 if(p.kick!=0){p.position.x=Advance(p.position.x,p.position.y,p.kick*dt,ForHeroes);p.kick=Mathf.Abs(p.kick)<.05f?0:Mathf.Lerp(p.kick,0,Mathf.Min(1,dt*14));}
-                if(p.dash>0){float step=Mathf.Min(p.dash,dt);p.dash-=step;p.position.x=Advance(p.position.x,p.position.y,p.facing*hero.special.speed*step,ForHeroes);}
-                p.position.x=Mathf.Clamp(p.position.x,rear,BossActive?bossArenaX+ArenaHalfWidth-1:screenLocked?lockX+SimHalfWidth-1:CurrentMission.length);p.aimUp=input.aimUp;
+                bool dashing=p.dash>0;if(dashing){float step=Mathf.Min(p.dash,dt);p.dash-=step;p.position.x=Advance(p.position.x,p.position.y,p.facing*hero.special.speed*step,ForHeroes);}
+                float wanted=p.position.x;p.position.x=Mathf.Clamp(p.position.x,rear,BossActive?bossArenaX+ArenaHalfWidth-1:screenLocked?lockX+SimHalfWidth-1:CurrentMission.length);p.aimUp=input.aimUp;
+                // A dash held at the edge carries its blow on ahead of the hero, as far as he would have gone (twice its radius at most).
+                if(dashing)p.dashAhead=Mathf.Min(p.dashAhead+Mathf.Max(0,(wanted-p.position.x)*p.facing),2*hero.special.radius);
                 // Down + jump on a ledge drops through it; on solid ground it is a jump.
                 bool drop=input.jump&&input.down&&grounded&&OnLedge(p.position.x,p.position.y,ForHeroes);
                 if(drop)p.dropFrom=p.position.y;else if(input.jump&&grounded)p.vertical=hero.jump;

@@ -43,7 +43,7 @@ namespace Paname
             else if(s.kind==HeroSpecial.Summon)rushes.Add(new Rush{owner=p,spec=s,facing=p.facing,delay=s.delay});
             else if(s.kind==HeroSpecial.Dash)
             {
-                p.dash=s.time;p.invulnerable=Mathf.Max(p.invulnerable,s.time+s.invulnerable);
+                p.dash=s.time;p.dashAhead=0;p.invulnerable=Mathf.Max(p.invulnerable,s.time+s.invulnerable);
                 rushes.Add(new Rush{owner=p,spec=s,facing=p.facing,follows=true,started=true,position=HitCenter(p)});
             }
             else{p.salvo=s.bursts;p.salvoTimer=0;}
@@ -78,7 +78,7 @@ namespace Paname
                 {
                     // The charge ends with the dash, or with the hero (fallen, or gone from an online game).
                     if(owner.dash<=0||owner.hp<=0||System.Array.IndexOf(players,owner)<0){rushes.RemoveAt(i);continue;}
-                    r.position=HitCenter(owner);r.age+=dt;Strike(r,s.radius,1.2f);Trail(r,dt);continue;
+                    r.position=HitCenter(owner);r.age+=dt;Strike(r,s.radius,1.2f,0,owner.facing*owner.dashAhead);Trail(r,dt);continue;
                 }
                 var a=s.ally;
                 if(!r.started)
@@ -99,9 +99,10 @@ namespace Paname
             }
         }
         // Every enemy whose middle is within reach ahead or behind and half a height above or below, each once; the boss once; hostages freed.
-        void Strike(Rush r,float reach,float half,float rise=0)
+        // ahead: how far in front of the charge its blow lands (a dash held at the edge of the arena).
+        void Strike(Rush r,float reach,float half,float rise=0,float ahead=0)
         {
-            var s=r.spec;Vector2 centre=r.position+Vector2.up*rise;
+            var s=r.spec;Vector2 centre=r.position+new Vector2(ahead,rise);
             for(int e=enemies.Count-1;e>=0;e--)
             {
                 var enemy=enemies[e];if(r.struck.Contains(enemy)||!Shootable(enemy))continue;Vector2 at=enemy.position+Vector2.up;

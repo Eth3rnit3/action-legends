@@ -316,7 +316,7 @@ namespace Paname
         public static void Path(string path,string prefix,string label){if(string.IsNullOrEmpty(path)||!path.StartsWith(prefix,StringComparison.Ordinal)||path.Contains("..")||path.Contains(":")||path.Contains("\\"))throw new ArgumentException("Chemin invalide pour "+label);}
         public static void Require<T>(string path,string label) where T:UnityEngine.Object{if(!Resources.Load<T>(path))throw new ArgumentException(label+" manquant : "+path);}
     }
-    // Weapons, heroes, enemies, bosses, hostages, carriers, props, rules and difficulties shared by every mission, one JSON per entry under Resources/Content/<kind>/.
+    // Weapons, heroes, enemies, bosses, hostages, carriers, props, vehicles, rules and difficulties shared by every mission, one JSON per entry under Resources/Content/<kind>/.
     // An entry may name a parent with "extends": the parent is read first, then the entry's own fields replace its values.
     public static class ContentLibrary
     {
@@ -330,6 +330,7 @@ namespace Paname
         static readonly Dictionary<string,HostageDefinition> hostages=new Dictionary<string,HostageDefinition>();
         static readonly Dictionary<string,CarrierDefinition> carriers=new Dictionary<string,CarrierDefinition>();
         static readonly Dictionary<string,PropDefinition> props=new Dictionary<string,PropDefinition>();
+        static readonly Dictionary<string,VehicleDefinition> vehicles=new Dictionary<string,VehicleDefinition>();
         static readonly Dictionary<string,string> sources=new Dictionary<string,string>();
         static bool loaded;
         public const int MaxHeroes=99;
@@ -342,6 +343,7 @@ namespace Paname
         public static GameRules Rules(string id){Load();if(id!=null&&rules.TryGetValue(id,out var r))return r;throw new ArgumentException("Règles inconnues : "+id);}
         public static CarrierDefinition Carrier(string id){Load();if(id!=null&&carriers.TryGetValue(id,out var c))return c;throw new ArgumentException("Véhicule de dépôt inconnu : "+id);}
         public static PropDefinition Prop(string id){Load();if(id!=null&&props.TryGetValue(id,out var p))return p;throw new ArgumentException("Décor destructible inconnu : "+id);}
+        public static VehicleDefinition Vehicle(string id){Load();if(id!=null&&vehicles.TryGetValue(id,out var v))return v;throw new ArgumentException("Véhicule inconnu : "+id);}
         public static HostageDefinition Hostage(string id){Load();if(id!=null&&hostages.TryGetValue(id,out var h))return h;throw new ArgumentException("Otage inconnu : "+id);}
         public static WeaponDefinition Weapon(string id){Load();return FindWeapon(id)??throw new ArgumentException("Arme inconnue : "+id);}
         // While loading too: heroes, rules and missions resolve their weapons through it.
@@ -351,8 +353,8 @@ namespace Paname
         public static void Load()
         {
             if(loaded)return;
-            sources.Clear();enemies.Clear();bosses.Clear();rules.Clear();weapons.Clear();hostages.Clear();carriers.Clear();props.Clear();
-            var weaponTexts=Read("weapons");var heroTexts=Read("heroes");var enemyTexts=Read("enemies");var bossTexts=Read("bosses");var ruleTexts=Read("rules");var difficultyTexts=Read("difficulties");var hostageTexts=Read("hostages");var carrierTexts=Read("carriers");var propTexts=Read("props");
+            sources.Clear();enemies.Clear();bosses.Clear();rules.Clear();weapons.Clear();hostages.Clear();carriers.Clear();props.Clear();vehicles.Clear();
+            var weaponTexts=Read("weapons");var heroTexts=Read("heroes");var enemyTexts=Read("enemies");var bossTexts=Read("bosses");var ruleTexts=Read("rules");var difficultyTexts=Read("difficulties");var hostageTexts=Read("hostages");var carrierTexts=Read("carriers");var propTexts=Read("props");var vehicleTexts=Read("vehicles");
             // Weapons first: heroes and rules name them.
             foreach(var text in weaponTexts){var weapon=Parse<WeaponDefinition>("weapons",text);weapon.Validate();weapons[weapon.id]=weapon;}
             var list=new List<HeroDefinition>();var ids=new HashSet<string>();
@@ -365,6 +367,7 @@ namespace Paname
             foreach(var text in hostageTexts){var hostage=Parse<HostageDefinition>("hostages",text);hostage.Validate();hostages[hostage.id]=hostage;}
             foreach(var text in carrierTexts){var carrier=Parse<CarrierDefinition>("carriers",text);carrier.Validate();carriers[carrier.id]=carrier;}
             foreach(var text in propTexts){var prop=Parse<PropDefinition>("props",text);prop.Validate();props[prop.id]=prop;}
+            foreach(var text in vehicleTexts){var vehicle=Parse<VehicleDefinition>("vehicles",text);vehicle.Validate();vehicles[vehicle.id]=vehicle;}
             foreach(var text in ruleTexts){var set=Parse<GameRules>("rules",text);set.Validate();rules[set.id]=set;}
             if(!rules.ContainsKey("default"))throw new ArgumentException("Resources/Content/rules/default.json est requis");
             var levels=new List<DifficultyDefinition>();
@@ -401,6 +404,7 @@ namespace Paname
         public static WeaponDefinition AddWeapon(string json){Load();var w=Parse<WeaponDefinition>("weapons",json);w.Validate();weapons[w.id]=w;sources["weapons/"+w.id]=json;return w;}
         public static CarrierDefinition AddCarrier(string json){Load();var c=Parse<CarrierDefinition>("carriers",json);c.Validate();carriers[c.id]=c;sources["carriers/"+c.id]=json;return c;}
         public static PropDefinition AddProp(string json){Load();var p=Parse<PropDefinition>("props",json);p.Validate();props[p.id]=p;sources["props/"+p.id]=json;return p;}
+        public static VehicleDefinition AddVehicle(string json){Load();var v=Parse<VehicleDefinition>("vehicles",json);v.Validate();vehicles[v.id]=v;sources["vehicles/"+v.id]=json;return v;}
         public static HostageDefinition AddHostage(string json){Load();var h=Parse<HostageDefinition>("hostages",json);h.Validate();hostages[h.id]=h;sources["hostages/"+h.id]=json;return h;}
         // For tests: adds a hero written as JSON (it may extend a shipped one), in its place by order; Reload() forgets it.
         public static HeroDefinition AddHero(string json)

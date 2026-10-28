@@ -35,7 +35,10 @@ ATTACKS = ("gun", "bombs", "stomp", "charge", "troops")
 # Lot 2b: kinds of wounds (deaths), enemy states read with their fallbacks, and the entries of encounters.
 WOUNDS = ("bullet", "explosion", "fire", "knife")
 ENTRIES = ("none", "walk", "door", "window", "parachute", "drop", "truck")
-RESERVED_MAP = ("vehicles",)
+RESERVED_MAP = ()
+# Lot 3b: how a hero gets into a vehicle (VehicleBoarding.board), its states and the anchors read on each of its images.
+VEHICLE_BOARDS = ("touch", "jump")
+VEHICLE_STATES = ("idle", "run", "jump")
 # Lot 3a: kinds of relief (MapTerrain.Types) and who a prop stops (PropDefinition.Blocks).
 TERRAIN_TYPES = ("platform", "block", "slope", "pit")
 PROP_BLOCKS = ("none", "heroes", "all")
@@ -646,8 +649,9 @@ def validate_prop(data, resources, weapons=None):
     if blocks in ("heroes", "all") and platform and height is not None and platform < height:
         errors.append(f"{label}: platform above the top of the box (box.height) of a prop that blocks")
     errors.number(data, "score", 0, 10000, label, 0, True)
-    if not isinstance(data.get("cover", False), bool):
-        errors.append(f"{label}.cover: true or false")
+    for key in ("cover", "crush"):
+        if not isinstance(data.get(key, False), bool):
+            errors.append(f"{label}.{key}: true or false")
     explosion = obj(data, "explosion")
     if errors.number(explosion, "radius", 0, 8, label + ".explosion", 0):
         errors.number(explosion, "damage", 0, 500, label + ".explosion", 0, True)
@@ -679,6 +683,90 @@ def validate_prop(data, resources, weapons=None):
         if data.get(key) not in (None, ""):
             errors.resource(data.get(key), "Audio/", SOUNDS, resources, f"{label}.{key}")
     validate_animations(data.get("animations"), resources, label, ("intact",), errors)
+    return errors
+
+
+def validate_vehicle(data, resources, weapons=None):
+    """VehicleDefinition.Validate: a vehicle the heroes drive: health, moves, box, gun, cannon and shells, seat, boarding,
+    ram, wreck, debris, HUD icons, sounds and images (seat, turret and cannon anchors on every image it drives with)."""
+    errors = Errors()
+    label = f"vehicle {data.get('id')}"
+    weapons = weapon_library(resources) if weapons is None else weapons
+    errors.text(data, "name", 24, label)
+    errors.per_difficulty(data, "health", 1, 2000, label, True)
+    for key, low, high, default in (("damagedAt", 0, 1, .4), ("invulnerable", 0, 2, .12), ("speed", 1, 20, 6), ("jump", 0, 30, 11),
+                                    ("gravity", 5, 80, 29), ("strideRate", .05, 20, 1)):
+        errors.number(data, key, low, high, label, default)
+    box = obj(data, "box")
+    errors.number(box, "width", .8, 8, label + ".box", 1)
+    errors.number(box, "height", .6, 6, label + ".box", 1)
+
+    def weapon(wid, wl):
+        w = weapons.get(wid) if isinstance(wid, str) else None
+        if w is None:
+            errors.append(f"{wl}: unknown weapon {wid} (Content/weapons/<id>.json)")
+        elif obj(w, "projectile").get("type", "bullet") == "beam":
+            errors.append(f"{wl}: a vehicle's weapon fires no beam")
+        return w
+    gun = weapon(data.get("gun"), label + ".gun")
+    if gun is not None and not unlimited(gun):
+        errors.append(f"{label}.gun: a weapon that never runs out (ammo 0)")
+    cannon = obj(data, "cannon")
+    weapon(cannon.get("weapon"), label + ".cannon.weapon")
+    errors.per_difficulty(cannon, "shells", 0, 99, label + ".cannon", True)
+    errors.number(cannon, "angle", -90, 90, label + ".cannon", 0)
+    errors.number(cannon, "pose", 0, 2, label + ".cannon", .25)
+    if not isinstance(cannon.get("aimed", False), bool):
+        errors.append(f"{label}.cannon.aimed: true or false")
+    turret = obj(data, "turret")
+    validate_cell(turret.get("sprite"), resources, label + ".turret.sprite", errors)
+    if obj(turret, "firing").get("texture"):
+        validate_cell(turret.get("firing"), resources, label + ".turret.firing", errors)
+    for key, low, high, default in (("size", .1, 4, .5), ("pivot", 0, 1, .3), ("length", 0, 6, 1.4), ("turnRate", 30, 3600, 360),
+                                    ("up", -90, 90, 90), ("diagonal", -90, 90, 45), ("down", -90, 90, -25), ("downAir", -90, 90, -90)):
+        errors.number(turret, key, low, high, label + ".turret", default)
+    pilot = obj(data, "pilot")
+    errors.number(pilot, "scale", .2, 2, label + ".pilot", 1)
+    boarding = obj(data, "boarding")
+    if boarding.get("board", "touch") not in VEHICLE_BOARDS:
+        errors.append(f"{label}.boarding.board: one of {', '.join(VEHICLE_BOARDS)}")
+    for key, high, default in (("exitJump", 30, 10), ("ejectJump", 30, 15), ("exitInvulnerable", 5, .6), ("ejectInvulnerable", 5, 2)):
+        errors.number(boarding, key, 0, high, label + ".boarding", default)
+    ram = obj(data, "ram")
+    for key in ("damage", "propDamage", "stomp"):
+        errors.number(ram, key, 0, 500, label + ".ram", 0, True)
+    errors.number(ram, "interval", .05, 5, label + ".ram", .3)
+    if ram.get("wound", "explosion") not in WOUNDS:
+        errors.append(f"{label}.ram.wound: one of {', '.join(WOUNDS)}")
+    wreck = obj(data, "wreck")
+    errors.number(wreck, "time", 0, 6, label + ".wreck", 1.4)
+    errors.number(wreck, "radius", 0, 10, label + ".wreck", 3)
+    errors.number(wreck, "damage", 0, 500, label + ".wreck", 60, True)
+    errors.number(wreck, "bossDamage", 0, 1000, label + ".wreck", 0, True)
+    errors.number(wreck, "heroDamage", 0, 10, label + ".wreck", 0, True)
+    debris = obj(data, "debris")
+    if debris.get("texture") or debris.get("count", 0):
+        dl = label + ".debris"
+        errors.resource(debris.get("texture"), "Art/", IMAGES, resources, dl + ".texture")
+        errors.number(debris, "count", 1, 24, dl, 0, True)
+    for key in ("icon", "shellIcon"):
+        if obj(data, key).get("texture"):
+            validate_cell(data.get(key), resources, f"{label}.{key}", errors)
+    for key in ("sound", "boardSound", "exitSound", "ejectSound", "breakSound"):
+        if data.get(key) not in (None, ""):
+            errors.resource(data.get(key), "Audio/", SOUNDS, resources, f"{label}.{key}")
+    if data.get("voice") not in (None, "") and not str(data.get("voice")).startswith("Audio/"):
+        errors.append(f"{label}.voice: invalid path (must start with Audio/)")
+    errors.text(data, "announce", 30, label, required=False)
+    info = validate_animations(data.get("animations"), resources, label, VEHICLE_STATES, errors)
+    if info:
+        names = [n for n in ("idle", "run", "jump", "fire", "damaged", "damagedRun") if n in info["states"]]
+        anchors = (pilot.get("anchor", "seat"), turret.get("anchor", "turret"), cannon.get("anchor", "cannon"))
+        for name in names:
+            for c in info["states"][name].get("cells") or []:
+                for anchor in anchors:
+                    if not has_anchor(info, anchor, c):
+                        errors.append(f"{label}: anchor {anchor} missing on image {c}")
     return errors
 
 
@@ -992,8 +1080,9 @@ def validate_difficulty(data, resources):
 
 # Weapons first: heroes and rules name them.
 VALIDATORS = {"weapons": validate_weapon, "heroes": validate_hero, "enemies": validate_enemy, "bosses": validate_boss, "rules": validate_rules,
-              "difficulties": validate_difficulty, "hostages": validate_hostage, "carriers": validate_carrier, "props": validate_prop}
-NEEDS_WEAPONS = ("heroes", "rules", "hostages", "props")
+              "difficulties": validate_difficulty, "hostages": validate_hostage, "carriers": validate_carrier, "props": validate_prop,
+              "vehicles": validate_vehicle}
+NEEDS_WEAPONS = ("heroes", "rules", "hostages", "props", "vehicles")
 
 
 def load_library(resources, extra=None, kinds=None):
@@ -1173,7 +1262,40 @@ def validate_mission(data, resources, library=None):
     validate_map_hostages(game_map.get("hostages"), waves, length, library.get("rules", {}).get(rules), library, errors, terrain)
     validate_map_props(game_map.get("props", []), waves, data, terrain, library.get("rules", {}).get(rules), library, errors)
     validate_encounters(data.get("encounters"), waves, data, length, exit_x, library.get("rules", {}).get(rules), library, errors)
+    validate_map_vehicles(game_map.get("vehicles", []), data, terrain, library, errors)
     return errors
+
+
+def validate_map_vehicles(vehicles, data, terrain, library, errors):
+    """MissionDefinition.ValidateVehicles: at most eight vehicles of the library parked in the mission, outside the boss
+    arenas and off the pits."""
+    if vehicles in (None, []):
+        return
+    if not isinstance(vehicles, list) or len(vehicles) > 8:
+        errors.append("map.vehicles: a list of at most 8 vehicles")
+        return
+    length = data.get("length", 80) if isinstance(data.get("length", 80), (int, float)) else 80
+    for i, place in enumerate(vehicles):
+        label = f"map.vehicles[{i}]"
+        if not isinstance(place, dict):
+            errors.append(f"{label}: object required")
+            continue
+        kind = library.get("vehicles", {}).get(place.get("id"))
+        if kind is None:
+            errors.append(f"{label}.id: unknown vehicle {place.get('id')} (Content/vehicles/<id>.json)")
+            continue
+        half = obj(kind, "box").get("width", 1) * .5
+        x = errors.number(place, "x", 1 + half, length - 1 - half, label)
+        if not isinstance(place.get("flip", False), bool):
+            errors.append(f"{label}.flip: true or false")
+        if x is None:
+            continue
+        where = arena(data, x - half, x + half)
+        if where:
+            errors.append(f"{label}: no vehicle parked in {where}")
+        for piece in terrain or ():
+            if isinstance(piece, dict) and piece.get("type") == "pit" and x + half > piece.get("x", 0) and x - half < piece.get("x", 0) + piece.get("width", 0):
+                errors.append(f"{label}: not over a pit")
 
 
 def validate_decor(decor, length, resources, errors):

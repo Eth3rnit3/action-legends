@@ -3,7 +3,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
-from validate_content import (ROOT, find_proper_nouns, find_unused_art, load_library, merge, validate_boss, validate_enemy, validate_hero,
+from validate_content import (ROOT, find_proper_nouns, find_unused_art, load_library, merge, validate_boss, validate_enemy, validate_hero, validate_vehicle,
                               validate_mission, validate_rules, validate_weapon, validate_difficulty,
                               validate_hostage, validate_carrier, validate_prop)
 
@@ -129,12 +129,41 @@ class MissionValidationTests(unittest.TestCase):
             with self.subTest(extra=extra):
                 self.assertTrue(self.rejected(lambda d: d.update(extraEnemy=extra)))
 
-    def test_reserved_slots_must_stay_empty(self):
-        for key in ("vehicles",):
+    def test_optional_lists_may_be_left_out(self):
+        for key in ("vehicles", "props", "terrain"):
             with self.subTest(key=key):
-                self.assertTrue(self.rejected(lambda d: d["map"].update({key: [{"id": "x", "x": 10}]})))
-                self.assertFalse(self.rejected(lambda d: d["map"].pop(key)))
+                self.assertFalse(self.rejected(lambda d: d["map"].pop(key, None)))
         self.assertFalse(self.rejected(lambda d: d.pop("encounters")))
+
+    # Lot 3b: a test vehicle drawn on an existing sheet, added to the library like ContentLibrary.AddVehicle.
+    CELL = {"texture": "Art/weapon-crates", "columns": 3, "rows": 2, "cell": 0}
+    TEST_VEHICLE = {"id": "test-tank", "name": "CHAR D'ESSAI", "health": [20, 18, 16, 14], "speed": 6, "jump": 10, "box": {"width": 3, "height": 1.8},
+                    "gun": "heavy-machinegun-test", "cannon": {"weapon": "rocket-launcher-test", "shells": [10, 9, 8, 7]},
+                    "turret": {"sprite": CELL, "size": .5, "length": 1.2}, "ram": {"damage": 10, "propDamage": 8, "stomp": 30},
+                    "animations": {"sheet": {"texture": "Art/weapon-crates", "columns": 3, "rows": 2, "cellHeight": 2},
+                                   "states": [{"name": "idle", "cells": [0]}, {"name": "run", "cells": [0, 1], "perStride": 1}, {"name": "jump", "cells": [2]}],
+                                   "anchors": [{"name": "seat", "x": 0, "y": 1}, {"name": "turret", "x": -.4, "y": 1.6}, {"name": "cannon", "x": 1.5, "y": .8}]}}
+    TEST_WEAPONS = [{"id": "heavy-machinegun-test", "extends": "heavy-machinegun", "ammo": [0, 0, 0, 0]},
+                    {"id": "rocket-launcher-test", "extends": "rocket-launcher", "ammo": [0, 0, 0, 0]}]
+
+    def test_map_vehicles(self):
+        library, errors = load_library(RESOURCES, {"weapons": self.TEST_WEAPONS, "vehicles": [self.TEST_VEHICLE]})
+        self.assertEqual(errors, [])
+        self.data["map"]["vehicles"] = []
+
+        def rejected(place):
+            data = copy.deepcopy(self.data)
+            data["map"]["vehicles"] = [dict({"id": "test-tank"}, **place)]
+            return bool(validate_mission(data, RESOURCES, library))
+        for place, ok in (({"x": 60}, True), ({"x": 60, "flip": True}, True), ({"x": 1}, False), ({"x": 479}, False),
+                          ({"x": 215}, False),  # the mid-mission boss's arena
+                          ({"x": 470}, False),  # the final boss's arena
+                          ({"id": "nothing", "x": 60}, False), ({"x": 60, "flip": 1}, False)):
+            with self.subTest(place=place):
+                self.assertEqual(rejected(place), not ok)
+        data = copy.deepcopy(self.data)
+        data["map"]["vehicles"] = [{"id": "test-tank", "x": 60 + i} for i in range(9)]
+        self.assertTrue(validate_mission(data, RESOURCES, library))
 
     # Lot 3a: a test prop drawn on an existing sheet, added to the library like ContentLibrary.AddProp.
     TEST_PROP = {"id": "test-crate", "name": "CAISSE", "health": [10, 12, 14, 16], "box": {"width": 1.2, "height": 1.2},
@@ -715,6 +744,28 @@ class LibraryValidationTests(unittest.TestCase):
         library, errors = load_library(RESOURCES, {"props": [base, {"id": "test-barrel", "extends": "test-crate", "explosion": {"radius": 2.5, "damage": 30}}]})
         self.assertEqual(errors, [])
         self.assertEqual(library["props"]["test-barrel"]["box"]["width"], 1.2)
+
+    def test_vehicles(self):
+        base = MissionValidationTests.TEST_VEHICLE
+        weapons = load_library(RESOURCES, {"weapons": MissionValidationTests.TEST_WEAPONS}, kinds=("weapons",))[0]["weapons"]
+        self.assertEqual(validate_vehicle(base, RESOURCES, weapons), [])
+        full = dict(base, boarding={"board": "jump", "ejectJump": 14}, wreck={"time": 1, "radius": 3, "damage": 80, "bossDamage": 40},
+                    pilot={"state": "crouch", "scale": .9}, icon=MissionValidationTests.CELL, debris={"texture": "Art/weapon-crates", "columns": 3, "rows": 2, "count": 4})
+        self.assertEqual(validate_vehicle(full, RESOURCES, weapons), [])
+        changes = (lambda d: d.update(health=[1, 2]), lambda d: d.update(gun="rocket-launcher"),  # a gun runs out of ammunition
+                   lambda d: d.update(gun="laser"), lambda d: d.update(gun="nothing"), lambda d: d.update(cannon={"weapon": "rocket-launcher-test"}),
+                   lambda d: d.update(boarding={"board": "fly"}), lambda d: d.update(box={"width": .2, "height": 1}),
+                   lambda d: d.update(ram={"wound": "laser"}), lambda d: d.update(turret={"sprite": {"texture": "Art/nothing"}}),
+                   lambda d: d["animations"].update(anchors=[{"name": "seat", "x": 0, "y": 1}]),  # no turret nor cannon anchors
+                   lambda d: d["animations"].update(states=[{"name": "idle", "cells": [0]}]), lambda d: d.update(sound="Audio/none"))
+        for change in changes:
+            with self.subTest(change=change):
+                data = copy.deepcopy(base)
+                change(data)
+                self.assertTrue(validate_vehicle(data, RESOURCES, weapons))
+        library, errors = load_library(RESOURCES, {"weapons": MissionValidationTests.TEST_WEAPONS, "vehicles": [base, {"id": "test-tank-2", "extends": "test-tank", "speed": 8}]})
+        self.assertEqual(errors, [])
+        self.assertEqual(library["vehicles"]["test-tank-2"]["box"]["width"], 3)
 
     def test_enemy_terrain(self):
         base = content("enemies", "looter-rusher")

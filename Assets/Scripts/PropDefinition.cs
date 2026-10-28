@@ -41,6 +41,8 @@ namespace Paname
         public float damagedAt=.5f,platform,platformWidth,wall;
         public int score;
         public bool cover;
+        // A vehicle that drives into it breaks it at once (a stall, crates); otherwise a prop that walls the way stops it.
+        public bool crush;
         public PropBox box=new PropBox();
         public PropExplosion explosion=new PropExplosion();
         public PropDebris debris=new PropDebris();

@@ -79,6 +79,8 @@ namespace Paname
             public float floor,dropFrom=float.MaxValue;
             // The weapon in hand (Content/weapons), with ammo rounds left unless it is unlimited; shots counts what it has fired.
             public WeaponDefinition weapon;
+            // The vehicle he drives (PanameVehicles.cs): his position is its own while he is in it.
+            public Vehicle vehicle;
             public int hp=6,hero,facing=1; public bool moving,aimUp,aimDown,crouching; public Transform root; public SpriteRenderer illustrated; public SpriteRenderer[] renderers;
             public HeroDefinition Definition=>Heroes[hero];
         }
@@ -121,7 +123,7 @@ namespace Paname
             projectileRoot=new GameObject("Projectiles • pool").transform;projectileRoot.SetParent(transform,false);
             effects=new ArcadeEffects(transform);
             foreach(var hero in Heroes){hero.animations.Prewarm();if(hero.special.kind==HeroSpecial.Summon)hero.special.ally.animations.Prewarm();}
-            foreach(var mission in missions){foreach(var enemy in mission.roster)enemy.animations.Prewarm();foreach(var prop in mission.map.props)prop.definition.animations.Prewarm();}
+            foreach(var mission in missions){foreach(var enemy in mission.roster)enemy.animations.Prewarm();foreach(var prop in mission.map.props)prop.definition.animations.Prewarm();foreach(var v in mission.map.vehicles)v.definition.animations.Prewarm();}
             for(int row=0;row<4;row++)for(int frame=0;frame<6;frame++)ArcadeEffects.Frame(row,frame);
             LoadSoundtrack();BuildLobbyActors();
         }
@@ -130,11 +132,11 @@ namespace Paname
         {
             for(int i=actors.childCount-1;i>=0;i--){var child=actors.GetChild(i).gameObject;child.SetActive(false);Destroy(child);}
             foreach(var shot in shots){shot.active=false;shot.root.gameObject.SetActive(false);}
-            Array.Clear(players,0,4);enemies.Clear();shots.Clear();thrown.Clear();rushes.Clear();effects?.Clear();ResetBonuses();ResetBoss();ResetHostages();ResetEncounters();ResetProps();
+            Array.Clear(players,0,4);enemies.Clear();shots.Clear();thrown.Clear();rushes.Clear();effects?.Clear();ResetBonuses();ResetBoss();ResetHostages();ResetEncounters();ResetProps();ResetVehicles();
         }
         void BuildLobbyActors()
         {
-            ResetActors();PlaceProps();BuildTerrain();
+            ResetActors();PlaceProps();BuildTerrain();PlaceVehicles();
             for(int i=0;i<4;i++)if(slots[i].joined)SpawnPlayer(i,3+i*1.6f);
         }
         void SpawnPlayer(int i,float x)
@@ -147,7 +149,7 @@ namespace Paname
         public void BeginRound()
         {
             if(OnlineRound())return;
-            ResetActors();PlaceProps();BuildTerrain();Score=carriedScore;carriedScore=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;screenLocked=false;goFromX=-1;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
+            ResetActors();PlaceProps();BuildTerrain();PlaceVehicles();Score=carriedScore;carriedScore=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;screenLocked=false;goFromX=-1;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
             for(int i=0;i<4;i++)if(slots[i].joined)SpawnPlayer(i,2+i*1.3f);
             PlaceHostages();ResetContinue();StartReplay();
             phase=Phase.Playing;Announce(CurrentMission.intro);Sound(startClip);if(musicOut){musicOut.Stop();musicOut.clip=musicClip;}
@@ -244,6 +246,8 @@ namespace Paname
                     else {p.root.gameObject.SetActive(false);continue;}
                 }
                 PlayerCommand input=i<commands.Length?commands[i]:default;
+                // In a vehicle, the stick and the buttons drive it (PanameVehicles.cs).
+                if(p.vehicle!=null){Drive(p,input,dt,rear);SyncPlayer(i);continue;}
                 // A dash carries the hero forward whatever the stick says.
                 float move=p.dash>0?0:Mathf.Clamp(input.move,-1,1);p.moving=Mathf.Abs(move)>.1f;if(Mathf.Abs(move)>.1f)p.facing=move>0?1:-1;
                 var hero=p.Definition;bool grounded=p.position.y<=FloorAt(p.position.x,p.position.y,ForHeroes,p.dropFrom)+.001f;
@@ -274,7 +278,7 @@ namespace Paname
                 if(p.moving&&p.position.y-p.floor<.03f&&p.dust<=0){effects.Play(3,p.position+new Vector2(-p.facing*.28f,.1f),.42f,.3f,1,new Vector2(-p.facing*.18f,.2f));p.dust=.19f;}
                 SyncPlayer(i);
             }
-            TickRushes(dt);TickBoss(dt);if(!bossStarted)UpdateWaves(dt);TickEncounters(dt);UpdateEnemies(dt);UpdateShots(dt);TickGrenades(dt);effects.Tick(dt);TickBonuses(dt);TickHostages(dt);TickProps(dt);
+            TickRushes(dt);if(vehicles.Count>0)TickVehicles(dt);TickBoss(dt);if(!bossStarted)UpdateWaves(dt);TickEncounters(dt);UpdateEnemies(dt);UpdateShots(dt);TickGrenades(dt);effects.Tick(dt);TickBonuses(dt);TickHostages(dt);TickProps(dt);
             bool alive=false;foreach(var p in players)if(p!=null&&p.hp>0)alive=true;
             if(!alive&&!SpareLives)OutOfLives();
         }
@@ -351,7 +355,7 @@ namespace Paname
                 // Left behind, or routed out of sight once nothing holds the screen.
                 if(e.position.x<cameraX-SimHalfWidth-5||e.routed&&!screenLocked&&!BossActive&&Mathf.Abs(e.position.x-cameraX)>SimHalfWidth+2.5f){e.root.gameObject.SetActive(false);Destroy(e.root.gameObject);enemies.RemoveAt(enemyIndex);continue;}
                 Player target=null;float best=float.MaxValue;
-                foreach(var p in players)if(p!=null&&p.hp>0){float distance=Mathf.Abs(p.position.x-e.position.x);if(distance<best){best=distance;target=p;}}
+                foreach(var p in players)if(p!=null&&p.hp>0){float distance=Mathf.Abs(p.position.x-e.position.x)-Bulk(p);if(distance<best){best=distance;target=p;}}
                 if(target==null)continue;
                 e.target=target;e.flash=Mathf.Max(0,e.flash-dt);e.stagger=Mathf.Max(0,e.stagger-dt);
                 float lastX=e.position.x;
@@ -426,6 +430,8 @@ namespace Paname
         }
         void Damage(Player p,int amount)
         {
+            // A hero in a vehicle is not hurt: the vehicle is.
+            if(p.vehicle!=null){if(!bossDefeated&&p.hp>0)DamageVehicle(p.vehicle,amount);return;}
             if(bossDefeated||p.invulnerable>0||p.hp<=0)return;p.hp-=amount*Level.damageTaken;p.invulnerable=Level.hurtInvulnerable;p.flash=.075f;shake=.15f;effects.Impact(p.position+Vector2.up,-p.facing);Sound(playerHitClip);
             // A hero who falls loses the weapon in hand and comes back with the hero's own.
             if(p.hp<=0){p.downTimer=Level.respawn.delay;p.rescued=0;p.root.gameObject.SetActive(false);Disarm(p);p.dash=0;p.salvo=0;p.specialPose=0;}
@@ -468,7 +474,7 @@ namespace Paname
                 {
                     // Cover (a car, a barricade) stops enemy shots on their way.
                     if(breakables.Count>0&&CoverStops(before,s.position))hit=true;
-                    else foreach(var p in players)if(p!=null&&p.hp>0&&SegmentDistance(before,s.position,HitCenter(p))<HitRadius(p)){Damage(p,s.damage);hit=true;break;}
+                    else foreach(var p in players)if(p!=null&&p.hp>0&&Struck(p,before,s.position)){Damage(p,s.damage);hit=true;break;}
                 }
                 // A beam struck everything when it was fired; it only lingers on screen.
                 else if(s.weapon!=null&&s.weapon.projectile.Beam){}
@@ -572,14 +578,15 @@ namespace Paname
                 Panel(x,18,264,80,new Color(.035f,.09f,.14f,.76f));Panel(x,18,3,80,PlayerColors[i]);
                 Label(x+12,22,166,22,PlayerTag(i)+"  "+p.Definition.shortName,13,PlayerColors[i],true);
                 Label(x+180,23,77,20,p.specialTimer>0?"SPÉCIAL "+Mathf.CeilToInt(p.specialTimer):"SPÉCIAL",11,p.specialTimer<=0?Gold:C("7C929A"),true,TextAnchor.MiddleRight);
-                for(int h=0;h<MaxPlayerHealth;h++)Panel(x+13+h*17,56,11,6,h<p.hp?PlayerColors[i]:C("344A55"));
+                if(p.vehicle!=null)DrawVehicleHud(p,x,PlayerColors[i]);
+                else for(int h=0;h<MaxPlayerHealth;h++)Panel(x+13+h*17,56,11,6,h<p.hp?PlayerColors[i]:C("344A55"));
                 // The weapon's badge, then its ammunition, or its name when it never runs out.
-                var w=p.weapon;if(p.hp>0&&w.HasIcon&&w.icon.Texture)GUI.DrawTextureWithTexCoords(new Rect(x+170,44,26,26),w.icon.Texture,w.icon.TexCoords);
-                string ammo=w.Unlimited?w.name:(w.HasIcon?"":w.letter+"  ")+p.ammo;
+                var w=p.weapon;if(p.hp>0&&p.vehicle==null&&w.HasIcon&&w.icon.Texture)GUI.DrawTextureWithTexCoords(new Rect(x+170,44,26,26),w.icon.Texture,w.icon.TexCoords);
+                string ammo=p.vehicle!=null?p.vehicle.type.name:w.Unlimited?w.name:(w.HasIcon?"":w.letter+"  ")+p.ammo;
                 Label(x+112,45,141,25,p.hp<=0?"×":ammo,14,w.Unlimited?Cream:Gold,true,TextAnchor.MiddleRight);
                 if(p.boost>0)Panel(x+3,77,261*Mathf.Clamp01(p.boost/p.boostMax),3,Gold);
-                var icon=Rules.grenade.icon;if(icon.Texture)GUI.DrawTextureWithTexCoords(new Rect(x+10,61,17,17),icon.Texture,icon.TexCoords);
-                Label(x+28,60,60,19,"×"+p.grenades,12,p.grenades>0?Cream:C("7C929A"),true);
+                var icon=Rules.grenade.icon;if(p.vehicle==null&&icon.Texture)GUI.DrawTextureWithTexCoords(new Rect(x+10,61,17,17),icon.Texture,icon.TexCoords);
+                if(p.vehicle==null)Label(x+28,60,60,19,"×"+p.grenades,12,p.grenades>0?Cream:C("7C929A"),true);
                 if(slots[i].pad!=null&&!slots[i].Connected)Label(x+112,22,24,22,"!",16,Coral,true);
                 DrawPlayerTallies(i,x);
             }

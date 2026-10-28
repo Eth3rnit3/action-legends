@@ -38,22 +38,24 @@ namespace Paname
         {
             var w=p.weapon;var pr=w.projectile;Vector2 aim=AimDirection(p),muzzle=MuzzlePoint(p);
             if(pr.Beam)FireBeam(p,w,muzzle,aim);
-            else
-            {
-                float scatter=pr.jitter*Scatter[p.shots%Scatter.Length];
-                for(int j=0;j<pr.pellets;j++)
-                {
-                    float angle=(j-(pr.pellets-1)*.5f)*pr.spread+scatter;
-                    Vector2 velocity=angle==0?aim*pr.speed:(Vector2)(Quaternion.Euler(0,0,angle)*aim)*pr.speed;
-                    Load(Shoot(pr.drawn?ShotLook.Sprite:ShotLook.Tracer,muzzle,velocity,w.damage,false,true),w,p);
-                }
-            }
+            else Volley(w,muzzle,aim,p,p.shots);
             p.shots++;
             if(w.flashKind>0)effects.Muzzle(muzzle,aim,w.flashKind==2);
             p.fireTimer=w.fireRate;p.recoil=.045f;if(w.recoil.push>0)p.kick=-aim.x*w.recoil.push;
             if(!w.Unlimited&&--p.ammo<=0)Disarm(p);
             if(w.casings)effects.Casing(muzzle+new Vector2(-p.facing*.62f,.04f),p.facing);
             shake=Mathf.Max(shake,w.recoil.shake);Sound(w.Clip);
+        }
+        // The projectiles of one shot: pellets fanned out by spread, scattered by the fixed pattern at shot (a count of shots fired).
+        void Volley(WeaponDefinition w,Vector2 muzzle,Vector2 aim,Player owner,int shot)
+        {
+            var pr=w.projectile;float scatter=pr.jitter*Scatter[shot%Scatter.Length];
+            for(int j=0;j<pr.pellets;j++)
+            {
+                float angle=(j-(pr.pellets-1)*.5f)*pr.spread+scatter;
+                Vector2 velocity=angle==0?aim*pr.speed:(Vector2)(Quaternion.Euler(0,0,angle)*aim)*pr.speed;
+                Load(Shoot(pr.drawn?ShotLook.Sprite:ShotLook.Tracer,muzzle,velocity,w.damage,false,true),w,owner);
+            }
         }
         // A weapon's projectile: its life, piercing and explosion, and its look.
         void Load(Shot s,WeaponDefinition w,Player owner)

@@ -71,7 +71,8 @@ namespace Paname
         public string id,reward,weapon;public float x,y;public int wave=-1;
         [NonSerialized] public HostageDefinition definition;[NonSerialized] public int bonus=-1;[NonSerialized] public WeaponDefinition gun;
     }
-    [Serializable] public sealed class MapVehicle {public string id;public float x;}
+    // A vehicle of the library parked at x, on the street or on the solid relief there, facing right (left with flip).
+    [Serializable] public sealed class MapVehicle {public string id;public float x;public bool flip;[NonSerialized] public VehicleDefinition definition;}
     // Scenery standing in the street, drawn only: a cell of a sheet height units tall, the bottom centre of the cell at (x, y)
     // (y below 0 sinks a drawing that does not reach the bottom of its cell), mirrored with flip, in front of the actors with front.
     [Serializable] public sealed class MapDecor {public SpriteCell sprite=new SpriteCell();public float x,y,height=2;public bool flip,front;}
@@ -142,7 +143,6 @@ namespace Paname
             var mission=JsonUtility.FromJson<MissionDefinition>(text);
             if(mission==null)throw new ArgumentException("Mission JSON vide");mission.Validate();return mission;
         }
-        static void Reserved(Array list,string field){if(list!=null&&list.Length>0)throw new ArgumentException(field+" est réservé à un lot à venir : laisser la liste vide");}
         // Hostages are checked against the mission's rules: their rewards name its bonuses.
         void ValidateHostages()
         {
@@ -295,6 +295,20 @@ namespace Paname
                 }
             }
         }
+        // Vehicles stand where the heroes can walk to them: on the street or on solid relief, outside the boss arenas and pits.
+        void ValidateVehicles()
+        {
+            var list=map.vehicles??new MapVehicle[0];map.vehicles=list;
+            if(list.Length>8)throw new ArgumentException("map.vehicles : huit véhicules au plus");
+            for(int i=0;i<list.Length;i++)
+            {
+                var v=list[i];string label="map.vehicles["+i+"]";if(v==null)throw new ArgumentException(label+" : véhicule vide");
+                label+=" "+v.id+" à x "+v.x;v.definition=ContentLibrary.Vehicle(v.id);float half=v.definition.Half;
+                if(!(v.x-half>=1&&v.x+half<=length-1))throw new ArgumentException(label+" : dans la mission");
+                if(InArena(v.x-half,v.x+half,out var arena))throw new ArgumentException(label+" : pas de véhicule garé dans "+arena);
+                foreach(var t in map.terrain)if(t.kind==MapTerrain.Pit&&v.x+half>t.x&&v.x-half<t.Right)throw new ArgumentException(label+" : pas au-dessus d'un trou");
+            }
+        }
         public void Validate()
         {
             if(schemaVersion!=Schema)throw new ArgumentException("schemaVersion doit être "+Schema);
@@ -312,7 +326,6 @@ namespace Paname
             Content.Path(map.ground,"Art/","map.ground");Content.Require<Texture2D>(map.ground,"Sol");
             if(!(map.horizon>=0&&map.horizon<=.6f&&map.groundBand>=.02f&&map.groundBand<=1&&map.groundTop>=-6&&map.groundTop<=3&&map.groundFade>=0&&map.groundFade<=1))
                 throw new ArgumentException("map : horizon de 0 à 0.6, groundBand de 0.02 à 1, groundTop de -6 à 3, groundFade de 0 à 1");
-            Reserved(map.vehicles,"map.vehicles");
             map.decor??=new MapDecor[0];if(map.decor.Length>120)throw new ArgumentException("map.decor : 120 éléments au plus");
             for(int i=0;i<map.decor.Length;i++)
             {
@@ -333,7 +346,7 @@ namespace Paname
             }
             ruleSet=ContentLibrary.Rules(string.IsNullOrEmpty(rules)?"default":rules);
             GameRules.Table(weapons,"weapons",false);weaponTable=weapons!=null&&weapons.Length>0?weapons:ruleSet.weapons;
-            ValidateEncounters();ValidateTerrain();ValidateHostages();ValidateProps();
+            ValidateEncounters();ValidateTerrain();ValidateHostages();ValidateProps();ValidateVehicles();
             extraEnemy??=new MissionExtraEnemy();
             if(extraEnemy.enemy<-1||extraEnemy.enemy>=enemies.Length||extraEnemy.every<1||extraEnemy.every>30||extraEnemy.fromDifficulty<0||extraEnemy.fromDifficulty>3)throw new ArgumentException("extraEnemy : enemy de -1 à la taille du roster, every de 1 à 30, fromDifficulty de 0 à 3");
             boss??=new MissionBoss();

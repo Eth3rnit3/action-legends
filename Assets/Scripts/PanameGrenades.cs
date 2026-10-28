@@ -11,8 +11,13 @@ namespace Paname
         readonly List<Grenade> thrown=new List<Grenade>();
         GameRules Rules=>CurrentMission.ruleSet;
         // Where enemy shots hit a hero, lower while crouching.
-        static Vector2 HitCenter(Player p)=>p.position+Vector2.up*(p.crouching?p.Definition.crouch.y:p.Definition.hitbox.y);
-        static float HitRadius(Player p)=>p.crouching?p.Definition.crouch.radius:p.Definition.hitbox.radius;
+        // A hero in a vehicle is hit in its box.
+        static Vector2 HitCenter(Player p)=>p.vehicle!=null?VehicleCentre(p.vehicle):p.position+Vector2.up*(p.crouching?p.Definition.crouch.y:p.Definition.hitbox.y);
+        static float HitRadius(Player p)=>p.vehicle!=null?VehicleRadius(p.vehicle):p.crouching?p.Definition.crouch.radius:p.Definition.hitbox.radius;
+        // Whether a shot flying from a to b strikes the hero (or the box of the vehicle he drives).
+        static bool Struck(Player p,Vector2 a,Vector2 b){var v=p.vehicle;return v!=null?SegmentHitsBox(a,b,v.Left,v.Right,v.position.y,v.Top):SegmentDistance(a,b,HitCenter(p))<HitRadius(p);}
+        // How much wider than a point the hero is, for the enemies that walk up to him: a vehicle's half width.
+        static float Bulk(Player p)=>p.vehicle!=null?p.vehicle.type.Half-.3f:0;
         // The nearest enemy within the knife's reach in front of the hero, or -1.
         int KnifeTarget(Player p)
         {

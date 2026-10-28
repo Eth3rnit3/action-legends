@@ -323,6 +323,8 @@ namespace Paname
             // The props and the enemies' height over the relief, only where there are some: flat missions keep their hashes.
             foreach(var b in breakables)Mix(b.hp);
             if(relief)foreach(var e in enemies)MixF(e.position.y);
+            // The vehicles, only in missions that park some.
+            foreach(var v in vehicles){MixF(v.position.x);MixF(v.position.y);Mix(v.hp);Mix(v.shells);MixF(v.aim);Mix(System.Array.IndexOf(players,v.rider));}
             return h;
         }
         void ReportStatus()

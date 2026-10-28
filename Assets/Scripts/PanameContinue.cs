@@ -27,6 +27,7 @@ namespace Paname
         // Standing again with full health and the hero's own weapon, invulnerable for a while.
         void Revive(Player p,float rear,bool inPlace)
         {
+            if(p.vehicle!=null)LeaveVehicle(p,false);
             // Health first: the hero back on his feet counts as the leading hero, as he always did.
             p.hp=MaxPlayerHealth;float x=inPlace?Mathf.Clamp(p.position.x,rear,BossActive?bossArenaX+ArenaHalfWidth-1:screenLocked?lockX+SimHalfWidth-1:CurrentMission.length-1):Mathf.Clamp(LeaderX()-1,1,CurrentMission.length-1);
             // Out of a lethal pit's span, on top of what stands there.

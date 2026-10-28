@@ -1,6 +1,6 @@
 # Action Legends — guide de jeu
 
-Prototype Unity 2D — version 0.8.0 : sept héros sélectionnables (Chuck Norris, Arnold, Jean-Claude, Sylvester, Fernandel, Brigitte Bardot et Jeanne d'Arc) et coopération locale sur un même écran. Quatre missions qui s’enchaînent : Paris, Marseille, Saint-Rémy-de-Provence, puis Tokyo. Les nouveautés de cette version pour le joueur sont résumées dans [docs/UPDATE_080.md](docs/UPDATE_080.md).
+Prototype Unity 2D — version 0.9.0 : sept héros sélectionnables (Chuck Norris, Arnold, Jean-Claude, Sylvester, Fernandel, Brigitte Bardot et Jeanne d'Arc) et coopération locale sur un même écran. Quatre missions qui s’enchaînent : Paris, Marseille, Saint-Rémy-de-Provence, puis Tokyo. Les nouveautés de cette version pour le joueur sont résumées dans [docs/UPDATE_090.md](docs/UPDATE_090.md) (celles de la 0.8.0 dans [docs/UPDATE_080.md](docs/UPDATE_080.md)).
 
 ## Jouer
 
@@ -76,7 +76,7 @@ Les missions s’enchaînent : Paris, Marseille (code PASTIS), Saint-Rémy (FARA
 
 ## Classement mondial
 
-À la fin d’une mission, **PUBLIER MON SCORE** envoie le score et le replay de la partie sur des relais Nostr publics, sous le pseudo de la page d’accueil. **CLASSEMENT**, au menu, montre le top 10 de chaque mission et difficulté (Slug compris, parties sans continue seulement) ; chaque score est rejoué dans le navigateur avant d’être affiché. Depuis la version 0.7.0, le jeu local avance par pas fixes de 1/60 s comme le jeu en ligne. La version 0.8.0 change le gameplay : les scores publiés en 0.7.0 ne se rejouent plus à l'identique et disparaissent donc du classement. Détails et limites dans [docs/CLASSEMENT.md](docs/CLASSEMENT.md).
+À la fin d’une mission, **PUBLIER MON SCORE** envoie le score et le replay de la partie sur des relais Nostr publics, sous le pseudo de la page d’accueil. **CLASSEMENT**, au menu, montre le top 10 de chaque mission et difficulté (Slug compris, parties sans continue seulement) ; chaque score est rejoué dans le navigateur avant d’être affiché. Depuis la version 0.7.0, le jeu local avance par pas fixes de 1/60 s comme le jeu en ligne. Chaque version a son propre classement, rappelé au bas du tableau : la 0.9.0 change le gameplay (relief, décors, véhicules, nouveaux héros), son classement repart donc de zéro, et les scores publiés en 0.8.0 ne sont ni rejoués ni affichés. Détails et limites dans [docs/CLASSEMENT.md](docs/CLASSEMENT.md).
 
 ## État de cette version
 
@@ -92,7 +92,7 @@ Les missions s’enchaînent : Paris, Marseille (code PASTIS), Saint-Rémy (FARA
 
 ## Vérification
 
-La version 0.8.0 a été compilée pour navigateur et essayée dans un navigateur de bureau. Les scripts `AgentScripts/Verify*.cs`, lancés dans l'éditeur en mode batch, vérifient chaque fonctionnalité (blocage d'écran, commandes, armes, otages, mode Slug, rencontres, mini-boss, chaque mission) et font gagner les quatre missions par des bots, seuls et à quatre, dans toutes les difficultés ; les replays enregistrés doivent se reproduire à l'identique. Les missions passent également le validateur de contenu et ses tests Python. Cela ne remplace pas un essai avec quatre manettes physiques ; l'équilibrage reste à ajuster en jouant.
+La version 0.9.0 a été compilée pour navigateur et essayée dans un navigateur de bureau. Les scripts `AgentScripts/Verify*.cs`, lancés dans l'éditeur en mode batch, vérifient chaque fonctionnalité (blocage d'écran, commandes, armes, otages, mode Slug, rencontres, mini-boss, héros et spéciales, relief, décors destructibles, véhicules, poses, classement par version, chaque mission) et font gagner les quatre missions par des bots, seuls et à quatre, dans toutes les difficultés ; les replays enregistrés doivent se reproduire à l'identique. Les missions passent également le validateur de contenu et ses tests Python. Cela ne remplace pas un essai avec quatre manettes physiques ; l'équilibrage reste à ajuster en jouant.
 
 ## Fichiers du projet
 

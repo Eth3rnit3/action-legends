@@ -15,6 +15,8 @@ Assets/Resources/
   Content/hostages/<id>.json     les otages (POW) que les missions placent sur leur carte
   Content/difficulties/<id>.json les difficultés du menu (DÉTENTE, ARCADE, DIFFICILE, LÉGENDE, SLUG)
   Content/carriers/<id>.json     les véhicules qui déposent les ennemis d’une rencontre (camionnette, monospace)
+  Content/props/<id>.json        les décors destructibles (voitures, étals, caisses, barils, barricades)
+  Content/vehicles/<id>.json     les véhicules que les héros pilotent (2CV blindée, taureau mécanique…)
   Art/<mission>/...              images (PNG) de la mission
   Audio/Music/...                musiques (WAV, OGG ou MP3)
 ```
@@ -121,7 +123,7 @@ Exemple (positions à adapter aux vagues de la mission : un otage de vague se pl
 Les quatre missions livrées utilisent `horizon` 0,1, `groundBand` 0,12, `groundTop` -0,9 et `groundFade` 0,25 : les pieds tombent au milieu du pavé ou de la chaussée peints, et la bande (le bas d’un panorama de la mission à Marseille et Saint-Rémy, la chaussée `sol` à Paris et Tokyo) prolonge ce sol jusqu’au bas de l’écran. L’écran va de `y = -2,2` à `y = 9,4`.
 - `hostages` : les otages de la mission (voir plus bas).
 - `decor` : facultatif, jusqu’à 120 accessoires dessinés dans la rue, devant le décor : un tonneau, une fontaine, une terrasse de café. Ils ne font que se voir (rien ne les touche, ils ne gênent personne). Chacun est une case d’une planche (`sprite`, comme une icône : `{"texture", "columns", "rows", "cell"}`) affichée sur `height` unités de haut (la hauteur de la case), le milieu du bas de la case posé en (`x`, `y`) ; un `y` négatif enfonce dans la rue un dessin qui n’atteint pas le bas de sa case (le tonneau de Saint-Rémy finit à 17 % du bas de la sienne : `y` = −0,17 × `height`). `flip` le retourne, `front` le dessine devant les personnages (derrière par défaut). Un ennemi peut en sortir : une entrée `door` dont `fromX` est celui de l’accessoire et `"opening": "none"`.
-- `terrain` : le relief (voir « Relief » plus bas) ; `props` : les décors destructibles (voir « Décors destructibles ») ; `vehicles` : réservé (section 6), à laisser vide.
+- `terrain` : le relief (voir « Relief » plus bas) ; `props` : les décors destructibles (voir « Décors destructibles ») ; `vehicles` : les véhicules pilotables garés sur la carte (voir « Véhicules » plus bas).
 
 Une carte peut réutiliser les décors d’autres missions.
 
@@ -145,6 +147,10 @@ Seules les plateformes se superposent ; les pièces pleines (blocs, pentes, trou
 `map.props` : jusqu'à 60 décors de la bibliothèque (`Content/props/<id>.json`, section 5 septies) : `{"id", "x", "y", "wave", "flip", "reward", "weapon"}`. Le décor est centré sur `x`, son pied à `y` : la rue (0) ou le dessus d'un bloc ou d'une pente à cet endroit (pas d'une plateforme). `reward` / `weapon` remplacent ses récompenses (comme pour un otage), `flip` le retourne.
 
 **Objectif de vague** : avec `wave`, le décor est l'objectif de cette vague bloquée. Il se place dans son écran, entre `atX − 14` et `atX + 2` (à droite de l'écran, il barre le passage), n'est abîmé qu'une fois la vague commencée (avant, il arrête les tirs sans broncher), un signal clignote au-dessus (`objective` des règles) ; la vague ne finit **que** quand il tombe, et finit dès qu'il tombe, même si des ennemis arrivent encore. Chaque mission livrée a une barricade-objectif. Ne pas le donner à une vague qui commence pendant qu'une rencontre bloquée (`lock`) tient encore l'écran plus à gauche : l'écran resterait où la rencontre l'a fixé et l'objectif hors de portée.
+
+### Véhicules
+
+`map.vehicles` : jusqu'à 8 véhicules de la bibliothèque (`Content/vehicles/<id>.json`, section 5 octies) : `{"id", "x", "flip"}`. Le véhicule est garé, vide, centré sur `x`, posé sur ce qui s'y trouve (la rue, un bloc, une pente) ; `flip` le tourne vers la gauche. Il ne se gare ni dans une arène de boss (`exitX − 30` et `atX − 12,5 … + 15` d'un boss de mi-parcours) ni au-dessus d'un trou ; on peut en revanche l'y conduire. Chaque mission livrée en gare un, au milieu du parcours et avant son boss de mi-parcours (Paris x 160, Marseille 137, Saint-Rémy 165, Tokyo 124) : assez tôt pour servir, assez loin pour que le début reste à pied. Un véhicule détruit ne revient pas.
 
 ### Otages
 
@@ -658,19 +664,57 @@ Les quatre premières reprennent au bit près les anciennes règles du code (`0.
 | `rewards` | Récompenses tirées à tour de rôle, comme celles d'un otage (bonus des règles ou armes) ; vide : aucune. |
 | `score` | Points quand il casse. |
 | `sound`, `breakSound` | Bruit d'un coup, de sa destruction. |
+| `crush` | Un véhicule piloté (section 5 octies) qui roule dessus le casse aussitôt (étals, caisses, barils, foin) ; sinon un décor qui barre le passage l'arrête et il doit l'enfoncer. |
 | `animations` | États `intact` (requis), `damaged` (défaut : `intact`), `destroyed` (défaut : il disparaît) ; `fps` pour un état animé. `layer` 24 le dessine derrière les personnages. |
 
 Les vingt décors livrés (`Art/props/<ville>.png`, une ligne par décor, une colonne par état) : barricade, véhicule, étal, caisses (ou distributeur), baril, pour chaque ville. Les règles donnent le signal d'objectif : `objective` (une case, la suivante sert au clignotement) et `objectiveSize`. Les ennemis ont un bloc facultatif `terrain {climb, leap, follow}` (section 3).
 
+## 5 octies. Les véhicules pilotables
+
+`Resources/Content/vehicles/<id>.json`, classe `VehicleDefinition` (`Assets/Scripts/VehicleDefinition.cs`, moteur `PanameVehicles.cs`). Comme le SV-001 de Metal Slug : un héros à pied qui touche un véhicule vide y monte ; tant qu'il conduit, **sa position est celle du véhicule** (caméra, ennemis, boss, bonus et otages le trouvent là) et chaque coup qu'il prendrait use la jauge du véhicule, jamais ses PV. Tir : la mitrailleuse qui tourne avec la visée ; grenade : le canon et ses obus ; **bas + saut** : il sort (aucune nouvelle touche, ni dans les replays ni en ligne). À zéro, le pilote est éjecté (invulnérable un moment), le véhicule clignote puis explose. Un véhicule vide se reprend par n'importe quel joueur ; celui qui vient d'en sortir doit d'abord s'en éloigner. Les spéciales, le couteau et les grenades du héros attendent qu'il sorte ; les bonus ramassés au volant vont au héros (son arme l'attend à la sortie). Exemple (la 2CV de Paris, abrégée) :
+
+```json
+{"id": "deuche-blindee", "name": "DEUCHE BLINDÉE", "health": [36, 30, 26, 22], "speed": 8, "jump": 12, "gravity": 30,
+ "box": {"width": 3.2, "height": 1.6}, "gun": "mitrailleuse-de-bord",
+ "cannon": {"weapon": "obus-de-char", "shells": [12, 10, 9, 8], "angle": 0, "pose": 0.25},
+ "turret": {"sprite": {"texture": "Art/vehicles/deuche-blindee", "columns": 4, "rows": 3, "cell": 10},
+            "firing": {"texture": "Art/vehicles/deuche-blindee", "columns": 4, "rows": 3, "cell": 11},
+            "size": 2.7, "pivot": 0.3076, "length": 1.09, "turnRate": 400, "up": 90, "diagonal": 45, "down": -25, "downAir": -90},
+ "pilot": {"state": "crouch", "scale": 0.9}, "boarding": {"board": "touch", "exitJump": 10, "ejectJump": 15},
+ "ram": {"damage": 12, "propDamage": 10, "stomp": 40, "interval": 0.3}, "wreck": {"time": 1.4, "radius": 3.2, "damage": 60, "bossDamage": 40},
+ "icon": {"texture": "Art/vehicles/vehicle-fx", "columns": 4, "rows": 2, "cell": 3}, "shellIcon": {"texture": "Art/vehicles/vehicle-fx", "columns": 4, "rows": 2, "cell": 2},
+ "sound": "Audio/Sfx/vehicule-moteur", "boardSound": "Audio/Sfx/vehicule-monte", "voice": "Audio/Voices/vehicule",
+ "animations": {"sheet": {"texture": "Art/vehicles/deuche-blindee", "columns": 4, "rows": 3, "cellHeight": 3.265, "pivot": {"x": 0.5, "y": 0.0365}}, "layer": 32,
+   "states": [{"name": "idle", "cells": [0]}, {"name": "run", "cells": [1, 2, 3], "perStride": 1.5}, {"name": "jump", "cells": [4]}, {"name": "fire", "cells": [5]},
+              {"name": "damaged", "cells": [6]}, {"name": "damagedRun", "cells": [6, 7], "perStride": 1.5}, {"name": "wreck", "cells": [8]}, {"name": "destroyed", "cells": [9]}],
+   "anchors": [{"name": "seat", "x": 0.12, "y": 0.9}, {"name": "turret", "x": 0.54, "y": 1.62}, {"name": "cannon", "x": 1.69, "y": 0.99}]}}
+```
+
+| Champ | Rôle |
+|---|---|
+| `name` | Nom (24 caractères), affiché dans la fiche du pilote. |
+| `health`, `damagedAt`, `invulnerable` | Jauge du véhicule (quatre valeurs) ; sous `damagedAt` de sa jauge il montre ses états `damaged`/`damagedRun` ; `invulnerable` : secondes sans dégât après un coup (défaut 0,12). La difficulté ne multiplie pas ces dégâts : même en SLUG (mort en un coup), le véhicule a sa jauge. |
+| `speed`, `jump`, `gravity`, `strideRate` | Vitesse (u/s), saut, gravité ; `strideRate` règle l'horloge de roulement (les `perStride` de ses états comptent en unités parcourues). |
+| `box` | `width` × `height` : la boîte où il est touché (balles ennemies, explosions) et dont l'avant bute contre les murs et les décors qui barrent le passage. Il suit les pentes et marches comme un héros, se pose sur les plateformes et sur une voiture. |
+| `gun` | Arme de `Content/weapons` (sans fin de munitions, pas de rayon) tirée avec le bouton de tir depuis la tourelle. |
+| `turret` | La tourelle dessinée à part : `sprite` (et `firing` en tir), `size` unités de haut pour la case, `pivot` (part de la largeur de la case où elle tourne), `length` (du pivot à la bouche), `turnRate` (°/s), angles visés `up`, `diagonal` (haut en roulant), `down` (bas au sol), `downAir` (bas en l'air). Son pivot est l'ancrage `turret` de l'image affichée. |
+| `cannon` | `weapon` (une arme de `Content/weapons`, ses obus explosent avec son `explosion`), `shells` (obus par difficulté, bouton grenade), `angle` (élévation fixe) ou `aimed` (suit la tourelle), `pose` (secondes d'état `fire`). La bouche est l'ancrage `cannon`. |
+| `pilot` | Le héros assis : son image de l'état `state` (défaut `crouch`, sinon `idle`) à l'échelle `scale`, ses pieds sur l'ancrage `seat`, derrière la carrosserie : on ne voit que sa tête et son buste au-dessus du poste. Chaque héros a donc son pilote sans nouvelle image. |
+| `boarding` | `board` : `touch` (le toucher, défaut) ou `jump` (lui retomber dessus) ; `exitJump`/`exitInvulnerable` à la sortie, `ejectJump`/`ejectInvulnerable` à l'éjection. |
+| `ram` | Toutes les `interval` s en roulant : `damage` aux ennemis dans sa boîte, `propDamage` au décor qui l'arrête (il enfonce une voiture, une barricade-objectif une fois sa vague commencée) ; `stomp` aux ennemis sous lui quand il retombe ; `wound` (façon de tomber). Un décor `"crush": true` (section 5 septies) casse dès qu'il roule dessus. |
+| `wreck` | `time` de clignotement avant l'explosion, puis `radius`, `damage` (ennemis, décors), `bossDamage`, `heroDamage`. |
+| `debris` | Éclats lancés à l'explosion (comme ceux d'un décor). |
+| `icon`, `shellIcon` | Icônes du HUD : la jauge du véhicule remplace les PV du pilote, ses obus ses grenades. |
+| `sound`, `boardSound`, `exitSound`, `ejectSound`, `breakSound`, `voice`, `announce` | Moteur (rejoué en roulant), montée, sortie, éjection, explosion, voix et annonce à la montée. |
+| `animations` | États `idle`, `run`, `jump` requis ; `fire` (défaut `idle`), `damaged` (défaut `idle`), `damagedRun` (défaut `damaged` ou `run`), `wreck` (défaut `damaged`), `destroyed` (défaut : il disparaît). Ancrages `seat`, `turret`, `cannon` exigés sur chaque image où il roule (les tirs partent de l'image affichée, comme ceux des héros). `layer` : au-dessus des personnages (32). |
+
+Livrés : `deuche-blindee` (Paris), et trois variantes qui l'étendent : `estafette-marseillaise` (le fourgon du port, plus solide et plus lent), `taureau-mecanique` (Saint-Rémy, rapide, qui charge plus fort) et `mini-mecha` (Tokyo, qui saute haut et écrase en retombant). Planches `Art/vehicles/<id>.png` (4 × 3 cases de 512 × 384 : attente, trois de roulement, saut, tir, abîmé, abîmé qui roule, en flammes, détruit, puis la tourelle et la tourelle qui tire), assemblées par `tools/art/pack_sheet.py vehicle tools/art/vehicles/<id>.json` (une échelle pour toutes les images, roues sur la ligne de pied, mesure du pivot et de la bouche de la tourelle) ; obus, icônes et éclats dans `Art/vehicles/vehicle-fx.png`. Prompts : `docs/ART_LOT3B.md`.
+
+Pour un nouveau véhicule : une planche à la même échelle, ses ancrages mesurés sur la case d'attente (en unités depuis le pivot : x vers l'avant, y vers le haut ; la case du saut a les siens), un JSON qui étend `deuche-blindee` en ne changeant que ce qui diffère, et une place dans `map.vehicles`.
+
 ## 6. Emplacements réservés aux lots suivants
 
-Le relief (`map.terrain`) et les décors destructibles (`map.props`) sont lus depuis le lot 3a (sections 1 et 5 septies). Ce champ existe déjà dans le schéma pour que les prochaines mécaniques s’y branchent sans changer le format. Tant que le moteur ne le lit pas, il doit rester **vide ou absent** : une liste non vide est refusée, pour ne pas laisser croire qu’elle agit. Forme prévue :
-
-| Champ | Élément prévu | Bibliothèque prévue |
-|---|---|---|
-| `map.vehicles` | `{"id": "<véhicule>", "x": 120}` : véhicule pilotable posé sur la carte. | `Content/vehicles/<id>.json` |
-
-Les nouvelles bibliothèques suivront les règles de la section 0 (`id` = nom du fichier, `extends`, validation C# et Python).
+Plus aucun : le relief (`map.terrain`), les décors destructibles (`map.props`, lot 3a) et les véhicules (`map.vehicles`, lot 3b) sont lus par le moteur. Une prochaine bibliothèque suivra les règles de la section 0 (`id` = nom du fichier, `extends`, validation C# et Python).
 
 ## 7. Images et sons
 

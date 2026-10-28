@@ -1,5 +1,6 @@
 {
   "id": "bottes-de-foin",
+  "crush": true,
   "name": "BOTTES DE FOIN",
   "blocks": "heroes",
   "health": [

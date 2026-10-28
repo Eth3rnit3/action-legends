@@ -1,5 +1,6 @@
 {
   "id": "bidon-bleu",
+  "crush": true,
   "name": "BIDON D'HUILE",
   "blocks": "none",
   "health": [

@@ -1,5 +1,6 @@
 {
   "id": "bidon-chimique",
+  "crush": true,
   "name": "BIDON CHIMIQUE",
   "blocks": "none",
   "health": [

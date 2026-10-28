@@ -1,5 +1,6 @@
 {
   "id": "baril-rouge",
+  "crush": true,
   "name": "BARIL D'ESSENCE",
   "blocks": "none",
   "health": [

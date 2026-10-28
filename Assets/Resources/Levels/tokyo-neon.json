@@ -176,7 +176,12 @@
         "reward": "grenades"
       }
     ],
-    "vehicles": []
+    "vehicles": [
+      {
+        "id": "mini-mecha",
+        "x": 124
+      }
+    ]
   },
   "enemies": [
     "gunman-pistol",

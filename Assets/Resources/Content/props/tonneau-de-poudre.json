@@ -1,5 +1,6 @@
 {
   "id": "tonneau-de-poudre",
+  "crush": true,
   "name": "TONNEAU DE POUDRE",
   "blocks": "none",
   "health": [

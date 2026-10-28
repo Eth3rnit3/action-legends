@@ -1,5 +1,6 @@
 {
   "id": "distributeur",
+  "crush": true,
   "name": "DISTRIBUTEUR",
   "blocks": "none",
   "health": [

@@ -1,5 +1,6 @@
 {
   "id": "yatai",
+  "crush": true,
   "name": "YATAI",
   "blocks": "none",
   "health": [

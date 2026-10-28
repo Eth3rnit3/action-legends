@@ -195,7 +195,12 @@
         "reward": "weapon"
       }
     ],
-    "vehicles": [],
+    "vehicles": [
+      {
+        "id": "taureau-mecanique",
+        "x": 165
+      }
+    ],
     "decor": [
       {
         "sprite": {

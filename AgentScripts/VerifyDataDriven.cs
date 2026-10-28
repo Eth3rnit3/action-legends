@@ -99,14 +99,19 @@ public static class VerifyDataDriven
     // hero onto a ledge, and an enemy outside a held screen walks into view; the state hash mixes the props' health and,
     // where there is relief, the enemies' height. On a flat street the engine still gave these nine runs exactly (checked before
     // the missions were staged).
+    // Recorded again in lot 3b: each mission parks a drivable vehicle (Content/vehicles) mid-route; these bots walk into it and
+    // drive it (their fire is its turret gun, it takes their hits, rams and crushes props and enemies), and the state hash mixes
+    // every vehicle's position, health, shells, gun angle and pilot, even when nobody gets in (hence the new hashes of the
+    // short runs that end before reaching it). Without vehicles placed, the engine still gave these nine runs exactly (checked
+    // before the missions were staged).
     // A lot that changes gameplay on purpose records them again and says so.
     // m: the position among the three missions these runs were recorded on (Saint-Remy has since come before Tokyo).
     static readonly string[] OldIds={"panique-a-paname","mistral-gagnant","tokyo-neon"};
     static int OldIndex(PanameGame g,int m)=>Array.FindIndex((MissionDefinition[])Get(g,"missions"),x=>x.id==OldIds[m]);
     static readonly (int m,int d,int[] h,bool inv,int ticks,int score,int hash)[] Legacy={
-        (0,0,new[]{0,1,2,3},false,5971,103600,931245209),(1,1,new[]{2,3,-1,-1},false,4851,36500,-631214879),(2,0,new[]{3,2,1,0},false,4932,93220,1428716127),
-        (2,3,new[]{1,-1,-1,-1},false,940,2700,435001056),(0,2,new[]{0,-1,-1,-1},false,724,1200,-207593181),(1,3,new[]{1,0,3,2},false,1420,12100,1715338567),
-        (2,1,new[]{0,1,-1,-1},false,5344,65550,1031698776),(0,1,new[]{2,-1,3,-1},false,4959,37200,-839452326),(1,0,new[]{0,1,2,3},true,5217,104330,1048175061)};
+        (0,0,new[]{0,1,2,3},false,6068,97480,-1452633095),(1,1,new[]{2,3,-1,-1},false,7964,64570,-457406715),(2,0,new[]{3,2,1,0},false,5042,86400,1697886812),
+        (2,3,new[]{1,-1,-1,-1},false,940,2700,-1830670157),(0,2,new[]{0,-1,-1,-1},false,724,1200,-737754895),(1,3,new[]{1,0,3,2},false,1420,12100,-852023952),
+        (2,1,new[]{0,1,-1,-1},false,5692,71400,-1825645389),(0,1,new[]{2,-1,3,-1},false,7918,59500,-1310664489),(1,0,new[]{0,1,2,3},true,5337,102310,714385860)};
     static readonly string[] ProperNouns={"Paris","Parisien","Macron","Bastille","Seine","Eiffel","Haussmann","Marseille","Marseillaise","Mistral","Pastis","Canebière","Tokyo","Shogun","Sakura","Shibuya","Akihabara","Chuck","Norris","Arnold","Jean-Claude","JCVD","Sylvester","macron-helicopter","mecha-shogun","news-helicopter","route-0","Saint-Rémy","Saint-Remy","Provence","Provençal","Nostradamus","Arlésien","Arlésienne","arlesien","arlesienne","Farandole","Alpilles","Glanum","Favier","Camargue","taureau","prophetie-en-provence","Fernandel","Marguerite","Bardot","Brigitte","Jeanne","jeanne-d-arc","brigitte-bardot"};
 
     public static object Main(string captures)
@@ -300,7 +305,7 @@ public static class VerifyDataDriven
             int hash=(int)Call(g,"StateHash");bool ok=ticks==run.ticks&&g.Score==run.score&&hash==run.hash;if(!ok)fails.Add("run");
             results.Add(g.CurrentMission.id+" d"+run.d+" ×"+Array.FindAll(run.h,x=>x>=0).Length+(ok?" =":" ≠ "+ticks+"/"+g.Score+"/"+hash));
         }
-        Check(Clean(),"Neuf parties de bot enregistrées (lot 3a) finissent au même pas, au même score et au même état ("+string.Join(" ; ",results)+")",checks);
+        Check(Clean(),"Neuf parties de bot enregistrées (lot 3b) finissent au même pas, au même score et au même état ("+string.Join(" ; ",results)+")",checks);
     }
 
     static void Capture(PanameGame g,string path)

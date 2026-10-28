@@ -1,5 +1,6 @@
 {
   "id": "etal-fleuriste",
+  "crush": true,
   "name": "ETAL DE FLEURISTE",
   "blocks": "none",
   "health": [

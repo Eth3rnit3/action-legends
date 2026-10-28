@@ -1,5 +1,6 @@
 {
   "id": "etal-provencal",
+  "crush": true,
   "name": "ETAL DU MARCHE",
   "blocks": "none",
   "health": [

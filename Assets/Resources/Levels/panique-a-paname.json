@@ -197,7 +197,12 @@
         "reward": "grenades"
       }
     ],
-    "vehicles": []
+    "vehicles": [
+      {
+        "id": "deuche-blindee",
+        "x": 160
+      }
+    ]
   },
   "enemies": [
     "looter-rusher",

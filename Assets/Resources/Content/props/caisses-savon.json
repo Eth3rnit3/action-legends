@@ -1,5 +1,6 @@
 {
   "id": "caisses-savon",
+  "crush": true,
   "name": "CAISSES DE SAVON",
   "blocks": "heroes",
   "health": [

@@ -206,7 +206,12 @@
         "reward": "weapon"
       }
     ],
-    "vehicles": []
+    "vehicles": [
+      {
+        "id": "estafette-marseillaise",
+        "x": 137
+      }
+    ]
   },
   "enemies": [
     "looter-rusher",

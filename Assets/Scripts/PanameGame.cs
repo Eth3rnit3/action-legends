@@ -635,18 +635,36 @@ namespace Paname
                 if(slots[i].pad!=null&&!slots[i].Connected)Label(x+112,22,24,22,"!",16,Coral,true);
                 DrawPlayerTallies(i,x);
             }
-            Label(22,104,230,28,Score.ToString("00000000"),20,Gold,true);
-            Label(520,104,240,28,Clock(SimulationTime),17,Cream,true,TextAnchor.MiddleCenter);
-            DrawGo();
-            if(!Level.livesPerPlayer){Panel(1206,110,7,7,Cream);Panel(1203,119,13,8,Cream);Label(1223,103,48,29,"×"+Reserves,18,Cream,true);}
+            // Outlined: these lines sit right on the scenery, a bright sky as well as a night street.
+            Outlined(22,104,230,28,Score.ToString("00000000"),20,Gold,true);
+            Outlined(520,104,240,28,Clock(SimulationTime),17,Cream,true,TextAnchor.MiddleCenter);
+            DrawGo();DrawAnnouncement();
+            if(!Level.livesPerPlayer){var ink=new Color(.035f,.09f,.14f,.7f);Panel(1204,108,11,11,ink);Panel(1201,117,17,12,ink);Panel(1206,110,7,7,Cream);Panel(1203,119,13,8,Cream);Outlined(1223,103,48,29,"×"+Reserves,18,Cream,true);}
             if(JoinedCount>1)for(int i=0;i<4;i++)
             {
                 var p=players[i];if(p==null||p.hp<=0)continue;
                 var v=gameCamera.WorldToScreenPoint(p.position+Vector2.up*2.25f);
                 float scale=Mathf.Min(Screen.width/1280f,Screen.height/720f),ox=(Screen.width-1280*scale)*.5f,oy=(Screen.height-720*scale)*.5f;
-                if(Online)Label((v.x-ox)/scale-60,(Screen.height-v.y-oy)/scale-12,120,23,PlayerTag(i),13,PlayerColors[i],true,TextAnchor.MiddleCenter);
-                else Label((v.x-ox)/scale-14,(Screen.height-v.y-oy)/scale-9,28,18,(i+1).ToString(),12,PlayerColors[i],true,TextAnchor.MiddleCenter);
+                if(Online)Outlined((v.x-ox)/scale-60,(Screen.height-v.y-oy)/scale-12,120,23,PlayerTag(i),13,PlayerColors[i],true,TextAnchor.MiddleCenter);
+                else Outlined((v.x-ox)/scale-14,(Screen.height-v.y-oy)/scale-9,28,18,(i+1).ToString(),12,PlayerColors[i],true,TextAnchor.MiddleCenter);
             }
+        }
+        // A label with a dark outline, readable over any scenery.
+        void Outlined(float x,float y,float w,float h,string text,int size,Color color,bool bold=false,TextAnchor align=TextAnchor.MiddleLeft)
+        {
+            var ink=new Color(.02f,.05f,.08f,.85f*color.a);
+            for(int k=0;k<4;k++)Label(x+(k<2?-1.5f:1.5f),y+(k%2==0?-1.5f:1.5f),w,h,text,size,ink,bold,align);
+            Label(x,y,w,h,text,size,color,bold,align);
+        }
+        // The announcements (mission, waves, bosses, rescues, weapons) on a short banner under the score line, clear of the
+        // players' panels above, of GO on the right and of the boss's gauge below; the rules' screen.banner turns it on.
+        void DrawAnnouncement()
+        {
+            if(!Rules.screen.banner||phase!=Phase.Playing||announcementTimer<=0||string.IsNullOrEmpty(announcement)||ContinueOffered)return;
+            int size=18;float text=Style(size,Gold,true).CalcSize(new GUIContent(announcement)).x;if(text>700){size=14;text*=14f/18;}
+            float fade=Mathf.Clamp01(announcementTimer/.35f),w=Mathf.Clamp(text+56,220,760),x=640-w*.5f;
+            Panel(x,140,w,34,new Color(.035f,.09f,.14f,.78f*fade));Panel(x,140,w,2,new Color(Gold.r,Gold.g,Gold.b,.8f*fade));Panel(x,172,w,2,new Color(0,0,0,.35f*fade));
+            Outlined(x,140,w,34,announcement,size,new Color(Gold.r,Gold.g,Gold.b,fade),true,TextAnchor.MiddleCenter);
         }
         // After a locked wave, a blinking GO points the way until the team has moved on.
         void DrawGo()

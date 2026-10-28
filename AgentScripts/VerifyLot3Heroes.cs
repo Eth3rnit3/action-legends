@@ -45,6 +45,8 @@ public static class VerifyLot3Heroes
     static void Quiet()
     {
         Clear(enemies);Clear(hostages);Clear(pickups);arrivals.Clear();Clear(carriers);Clear(thrown);
+        // Nor the props of lot 3a (a barrel among the dummies would blow up under the charge).
+        Clear((IList)Get(g,"breakables"));Call(g,"BuildTerrain");
         foreach(var shot in shots){SetField(shot,"active",false);((Transform)Field(shot,"root")).gameObject.SetActive(false);}shots.Clear();
         typeof(PanameGame).GetProperty("Wave").SetValue(g,g.CurrentMission.waves.Length);
         var started=(bool[])Get(g,"encounterStarted");for(int i=0;i<started.Length;i++)started[i]=true;

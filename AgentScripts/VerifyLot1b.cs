@@ -201,6 +201,8 @@ public static class VerifyLot1b
         try
         {
             Start(0,1,1);mission.ruleSet=rules;g.BeginRound();players=(PanameGame.Player[])Get(g,"players");var p=players[0];ClearEnemies();NoWaves();
+            // The hero walks without shooting: the props of lot 3a (a car before the crate) would stop him.
+            foreach(var prop in (IList)Get(g,"breakables"))((Transform)Field(prop,"root")).gameObject.SetActive(false);((IList)Get(g,"breakables")).Clear();Call(g,"BuildTerrain");
             // The first crate of the route stands at firstSupply: walk to it.
             commands[0]=new PlayerCommand{move=1};for(int t=0;t<60*8&&p.weapon!=zap;t++)Tick(1);commands[0]=default;
             Check(p.weapon==zap&&p.ammo==7,"Une arme définie seulement en JSON ("+zap.id+") sort de la première caisse du parcours, 7 munitions",checks);

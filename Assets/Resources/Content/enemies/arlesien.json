@@ -33,6 +33,11 @@
   "cries": [
     "Audio/Voices/cri-chute"
   ],
+  "terrain": {
+    "climb": 1.7,
+    "leap": 10,
+    "follow": true
+  },
   "animations": {
     "sheet": {
       "texture": "Art/enemies/arlesien",

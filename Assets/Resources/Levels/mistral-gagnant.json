@@ -21,8 +21,139 @@
     "groundBand": 0.12,
     "groundTop": -0.9,
     "groundFade": 0.25,
-    "terrain": [],
-    "props": [],
+    "terrain": [
+      {
+        "type": "platform",
+        "x": 56,
+        "width": 5.51,
+        "height": 1.8,
+        "sprite": {
+          "texture": "Art/props/marseille-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 0
+        }
+      },
+      {
+        "type": "platform",
+        "x": 262,
+        "width": 5.51,
+        "height": 1.8,
+        "sprite": {
+          "texture": "Art/props/marseille-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 0
+        }
+      },
+      {
+        "type": "slope",
+        "x": 170.0,
+        "width": 2.67,
+        "height": 0,
+        "toHeight": 1.5,
+        "sprite": {
+          "texture": "Art/props/marseille-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 1
+        },
+        "drawX": -0.0,
+        "drawWidth": 3.0
+      },
+      {
+        "type": "block",
+        "x": 172.67,
+        "width": 3.252,
+        "height": 1.5,
+        "sprite": {
+          "texture": "Art/props/marseille-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 2
+        },
+        "drawX": 0.33,
+        "drawWidth": 2.922
+      },
+      {
+        "type": "block",
+        "x": 175.922,
+        "width": 3.252,
+        "height": 1.5,
+        "sprite": {
+          "texture": "Art/props/marseille-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 2
+        },
+        "drawX": 0,
+        "drawWidth": 2.922
+      },
+      {
+        "type": "slope",
+        "x": 179.174,
+        "width": 2.67,
+        "height": 1.5,
+        "toHeight": 0,
+        "sprite": {
+          "texture": "Art/props/marseille-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 1
+        },
+        "flip": true,
+        "drawX": -0.33,
+        "drawWidth": 3.0
+      }
+    ],
+    "props": [
+      {
+        "id": "bidon-bleu",
+        "x": 64
+      },
+      {
+        "id": "triporteur",
+        "x": 92
+      },
+      {
+        "id": "barricade-du-port",
+        "x": 114,
+        "wave": 3
+      },
+      {
+        "id": "caisses-savon",
+        "x": 126
+      },
+      {
+        "id": "etal-poissonnier",
+        "x": 130
+      },
+      {
+        "id": "bidon-bleu",
+        "x": 145
+      },
+      {
+        "id": "caisses-savon",
+        "x": 163
+      },
+      {
+        "id": "bidon-bleu",
+        "x": 186
+      },
+      {
+        "id": "triporteur",
+        "x": 226,
+        "flip": true
+      },
+      {
+        "id": "etal-poissonnier",
+        "x": 238
+      },
+      {
+        "id": "bidon-bleu",
+        "x": 290
+      }
+    ],
     "hostages": [
       {
         "id": "boules-player",

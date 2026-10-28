@@ -21,8 +21,109 @@
     "groundBand": 0.12,
     "groundTop": -0.9,
     "groundFade": 0.25,
-    "terrain": [],
-    "props": [],
+    "terrain": [
+      {
+        "type": "platform",
+        "x": 150,
+        "width": 8.036,
+        "height": 1.5,
+        "sprite": {
+          "texture": "Art/props/tokyo-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 0
+        }
+      },
+      {
+        "type": "slope",
+        "x": 278.545,
+        "width": 3.832,
+        "height": 0,
+        "toHeight": 1.2,
+        "sprite": {
+          "texture": "Art/props/tokyo-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 1
+        },
+        "drawX": -1.045,
+        "drawWidth": 5.806
+      },
+      {
+        "type": "block",
+        "x": 282.377,
+        "width": 8.287,
+        "height": 1.2,
+        "sprite": {
+          "texture": "Art/props/tokyo-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 2
+        },
+        "drawX": 0.929,
+        "drawWidth": 6.429
+      },
+      {
+        "type": "slope",
+        "x": 290.664,
+        "width": 3.832,
+        "height": 1.2,
+        "toHeight": 0,
+        "sprite": {
+          "texture": "Art/props/tokyo-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 1
+        },
+        "flip": true,
+        "drawX": -0.929,
+        "drawWidth": 5.806
+      }
+    ],
+    "props": [
+      {
+        "id": "fourgonnette-kei",
+        "x": 22
+      },
+      {
+        "id": "yatai",
+        "x": 55
+      },
+      {
+        "id": "bidon-chimique",
+        "x": 66
+      },
+      {
+        "id": "distributeur",
+        "x": 88
+      },
+      {
+        "id": "barricade-travaux",
+        "x": 111,
+        "wave": 3
+      },
+      {
+        "id": "distributeur",
+        "x": 120
+      },
+      {
+        "id": "bidon-chimique",
+        "x": 130
+      },
+      {
+        "id": "fourgonnette-kei",
+        "x": 214,
+        "flip": true
+      },
+      {
+        "id": "bidon-chimique",
+        "x": 228
+      },
+      {
+        "id": "yatai",
+        "x": 246
+      }
+    ],
     "hostages": [
       {
         "id": "office-worker",

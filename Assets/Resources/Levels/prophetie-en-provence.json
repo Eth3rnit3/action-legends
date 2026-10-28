@@ -25,8 +25,117 @@
     "groundBand": 0.12,
     "groundTop": -0.9,
     "groundFade": 0.25,
-    "terrain": [],
-    "props": [],
+    "terrain": [
+      {
+        "type": "platform",
+        "x": 130,
+        "width": 6.923,
+        "height": 1.8,
+        "sprite": {
+          "texture": "Art/props/saint-remy-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 0
+        }
+      },
+      {
+        "type": "slope",
+        "x": 309.6,
+        "width": 5.388,
+        "height": 0,
+        "toHeight": 1.5,
+        "sprite": {
+          "texture": "Art/props/saint-remy-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 1
+        },
+        "drawX": -0.0,
+        "drawWidth": 5.921
+      },
+      {
+        "type": "block",
+        "x": 314.988,
+        "width": 7.683,
+        "height": 1.5,
+        "sprite": {
+          "texture": "Art/props/saint-remy-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 2
+        },
+        "drawX": 0.533,
+        "drawWidth": 6.618
+      },
+      {
+        "type": "slope",
+        "x": 322.671,
+        "width": 5.388,
+        "height": 1.5,
+        "toHeight": 0,
+        "sprite": {
+          "texture": "Art/props/saint-remy-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 1
+        },
+        "flip": true,
+        "drawX": -0.533,
+        "drawWidth": 5.921
+      }
+    ],
+    "props": [
+      {
+        "id": "tonneau-de-poudre",
+        "x": 36
+      },
+      {
+        "id": "charrette",
+        "x": 56
+      },
+      {
+        "id": "bottes-de-foin",
+        "x": 66
+      },
+      {
+        "id": "etal-provencal",
+        "x": 109
+      },
+      {
+        "id": "tonneau-de-poudre",
+        "x": 139
+      },
+      {
+        "id": "barricade-de-foin",
+        "x": 89,
+        "wave": 2
+      },
+      {
+        "id": "bottes-de-foin",
+        "x": 175
+      },
+      {
+        "id": "charrette",
+        "x": 241,
+        "flip": true
+      },
+      {
+        "id": "tonneau-de-poudre",
+        "x": 254
+      },
+      {
+        "id": "etal-provencal",
+        "x": 283
+      },
+      {
+        "id": "tonneau-de-poudre",
+        "x": 296
+      },
+      {
+        "id": "bottes-de-foin",
+        "x": 287
+      }
+    ],
     "hostages": [
       {
         "id": "peintre",
@@ -431,7 +540,7 @@
           "rows": 3,
           "cell": 9
         },
-        "x": 312,
+        "x": 305.5,
         "y": -0.672,
         "height": 3.4,
         "flip": true
@@ -443,7 +552,7 @@
           "rows": 3,
           "cell": 10
         },
-        "x": 320,
+        "x": 333,
         "y": -0.777,
         "height": 2.3
       },

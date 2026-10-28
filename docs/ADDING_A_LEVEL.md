@@ -86,7 +86,15 @@ Exemple (positions à adapter aux vagues de la mission : un otage de vague se pl
   "backgrounds": ["Art/tokyo/shibuya", "Art/marseille/panier", "Art/canal-panorama"],
   "ground": "Art/marseille/panier",
   "horizon": 0.1, "groundBand": 0.12, "groundTop": -0.9, "groundFade": 0.25,
-  "terrain": [], "props": [], "vehicles": [],
+  "terrain": [
+    {"type": "platform", "x": 60, "width": 5.12, "height": 1.8, "sprite": {"texture": "Art/props/paris-terrain", "columns": 3, "rows": 1, "cell": 0}},
+    {"type": "slope", "x": 282.08, "width": 3.415, "height": 0, "toHeight": 1.5, "sprite": {"texture": "Art/props/paris-terrain", "columns": 3, "rows": 1, "cell": 1}, "drawX": -0.08, "drawWidth": 4.018}
+  ],
+  "props": [
+    {"id": "voiture-parisienne", "x": 28},
+    {"id": "barricade-vauban", "x": 129, "wave": 3}
+  ],
+  "vehicles": [],
   "decor": [
     {"sprite": {"texture": "Art/saint-remy/accessoires", "columns": 4, "rows": 3, "cell": 6}, "x": 79, "y": -0.4, "height": 1.85},
     {"sprite": {"texture": "Art/saint-remy/accessoires", "columns": 4, "rows": 3, "cell": 11}, "x": 178, "y": -0.74, "height": 4.4, "flip": true}
@@ -113,9 +121,30 @@ Exemple (positions à adapter aux vagues de la mission : un otage de vague se pl
 Les quatre missions livrées utilisent `horizon` 0,1, `groundBand` 0,12, `groundTop` -0,9 et `groundFade` 0,25 : les pieds tombent au milieu du pavé ou de la chaussée peints, et la bande (le bas d’un panorama de la mission à Marseille et Saint-Rémy, la chaussée `sol` à Paris et Tokyo) prolonge ce sol jusqu’au bas de l’écran. L’écran va de `y = -2,2` à `y = 9,4`.
 - `hostages` : les otages de la mission (voir plus bas).
 - `decor` : facultatif, jusqu’à 120 accessoires dessinés dans la rue, devant le décor : un tonneau, une fontaine, une terrasse de café. Ils ne font que se voir (rien ne les touche, ils ne gênent personne). Chacun est une case d’une planche (`sprite`, comme une icône : `{"texture", "columns", "rows", "cell"}`) affichée sur `height` unités de haut (la hauteur de la case), le milieu du bas de la case posé en (`x`, `y`) ; un `y` négatif enfonce dans la rue un dessin qui n’atteint pas le bas de sa case (le tonneau de Saint-Rémy finit à 17 % du bas de la sienne : `y` = −0,17 × `height`). `flip` le retourne, `front` le dessine devant les personnages (derrière par défaut). Un ennemi peut en sortir : une entrée `door` dont `fromX` est celui de l’accessoire et `"opening": "none"`.
-- `terrain`, `props`, `vehicles` : réservés (section 6), à laisser vides.
+- `terrain` : le relief (voir « Relief » plus bas) ; `props` : les décors destructibles (voir « Décors destructibles ») ; `vehicles` : réservé (section 6), à laisser vide.
 
 Une carte peut réutiliser les décors d’autres missions.
+
+### Relief
+
+`map.terrain` : jusqu'à 60 pièces de relief le long de la rue, de `x` à `x + width`. Tout ce qui bouge en tient compte : héros, ennemis, otages, bonus, grenades et tirs.
+
+| `type` | Champs | Comportement |
+|---|---|---|
+| `platform` | `height` (0,4 à 6) | Plancher fin à `height` au-dessus de la rue : on saute dessus par-dessous, on s'y tient, **bas + saut** fait redescendre à travers ; on passe dessous, les tirs le traversent. |
+| `block` | `height` (0,2 à 4) | Bloc plein de la rue jusqu'à `height` : il arrête la marche (au-delà d'une marche de 0,36), les tirs et les grenades ; son dessus se parcourt. |
+| `slope` | `height`, `toHeight` (0 à 4) | Sol plein qui monte (ou descend) de `height` en `x` à `toHeight` en `x + width`, une unité par unité au plus : escalier, rampe. Héros et ennemis le suivent sans sauter. |
+| `pit` | `height` (profondeur, 0,3 à 8), `width` ≤ 8, `lethal`, `damage` (0 à 10, défaut 1) | La rue s'ouvre jusqu'à `height` sous elle. Un trou peu profond se traverse à pied et on en sort en sautant ; un trou `lethal` coûte `damage` PV au héros qui y tombe et le remet sur le bord d'où il venait (un ennemi y est perdu). |
+
+Seules les plateformes se superposent ; les pièces pleines (blocs, pentes, trous) se mettent bout à bout. Un ennemi saute sur un obstacle plein jusqu'à `terrain.climb` de haut (voir section 3) ; placé en hauteur dans une rencontre (`y` > 0), il y reste.
+
+**Tout relief se voit** : une plateforme, un bloc ou une pente est dessiné par `sprite` (une case de planche, comme `decor`), le bas de la case à `drawY` au-dessus de la rue, son bord gauche en `x + drawX` et `drawWidth` de large (défaut : de `x` à `x + width`), `drawHeight` de haut (défaut : les proportions de la case), retourné avec `flip`, devant les personnages avec `front`. La fresque défile en parallaxe : un élément peint du panorama ne reste pas sous une plateforme, il faut donc toujours un dessin posé. Pour ajuster le dessus d'une pièce à sa hauteur, mesurer sa hauteur dans la case (`tools/art/pack_sheet.py strip` l'imprime) : une case de proportion 3:2 dont le dessus est à la fraction `f` de sa hauteur montre un dessus à `height` si elle est large de `1,5 × height / f`. Un escalier se dessine avec son palier : la pente couvre les marches, le palier appartient au bloc qui suit (d'où `drawX` et `drawWidth`). Relief et décors destructibles sont refusés dans les arènes des boss (à partir de `exitX − 30` et de `atX − 12,5` à `atX + 15` d'un boss de mi-parcours). Un otage se place sur la rue (`y` 0, hors d'un bloc ou d'une pente) ou sur le dessus d'une pièce (`y` = sa hauteur à cet endroit).
+
+### Décors destructibles
+
+`map.props` : jusqu'à 60 décors de la bibliothèque (`Content/props/<id>.json`, section 5 septies) : `{"id", "x", "y", "wave", "flip", "reward", "weapon"}`. Le décor est centré sur `x`, son pied à `y` : la rue (0) ou le dessus d'un bloc ou d'une pente à cet endroit (pas d'une plateforme). `reward` / `weapon` remplacent ses récompenses (comme pour un otage), `flip` le retourne.
+
+**Objectif de vague** : avec `wave`, le décor est l'objectif de cette vague bloquée. Il se place dans son écran, entre `atX − 14` et `atX + 2` (à droite de l'écran, il barre le passage), n'est abîmé qu'une fois la vague commencée (avant, il arrête les tirs sans broncher), un signal clignote au-dessus (`objective` des règles) ; la vague ne finit **que** quand il tombe, et finit dès qu'il tombe, même si des ennemis arrivent encore. Chaque mission livrée a une barricade-objectif. Ne pas le donner à une vague qui commence pendant qu'une rencontre bloquée (`lock`) tient encore l'écran plus à gauche : l'écran resterait où la rencontre l'a fixé et l'objectif hors de portée.
 
 ### Otages
 
@@ -321,6 +350,8 @@ Blocs facultatifs, valables pour tout comportement (les ennemis livrés les util
 | `cries` | Sons ou voix (prises `-a`, `-b`, `-c`) joués de temps en temps à sa chute (`Audio/Voices/cri-chute` pour les livrés). |
 
 La **mort** dépend de ce qui l’a touché : balle, explosion (grenade, roquette, spécial), feu (lance-flammes) ou couteau. L’état joué est `death`, `deathExplosion`, `deathFire` ou `deathKnife` (sinon `death`) et le mouvement du corps vient des règles (`deaths`, section 5 bis). Une arme dit la blessure qu’elle donne (`damageType`, section 5 ter).
+
+Le **relief** (lot 3a) : un ennemi suit les pentes, tombe des rebords et saute sur un bloc, une marche ou un décor qui l'arrête jusqu'à `terrain.climb` unités au-dessus de ses pieds (défaut 1,7, vitesse de saut `terrain.leap`, défaut 10). Avec `"terrain": {"follow": true}` il saute aussi sur la plateforme où se tient sa cible et en redescend derrière elle (les pillards à pied-de-biche et les Arlésiens le font). Un bagarreur monté au-dessus de sa cible marche jusqu'au bord plutôt que d'attendre au-dessus d'elle ; un tireur plus haut ou plus bas qu'un héros posé sur le relief tire vers lui.
 
 ### Créer un nouvel ennemi
 
@@ -600,14 +631,43 @@ Les quatre premières reprennent au bit près les anciennes règles du code (`0.
 
 `black-minivan` (Tokyo) prend la deuxième ligne de la même planche. Un nouveau véhicule peut en étendre un (`"extends": "rusty-van"`).
 
+## 5 septies. Les décors destructibles
+
+`Resources/Content/props/<id>.json`, classe `PropDefinition` (`Assets/Scripts/PropDefinition.cs`, moteur `PanameProps.cs`). Exemple (le baril de Paris) :
+
+```json
+{"id": "baril-rouge", "name": "BARIL D'ESSENCE", "blocks": "none", "health": [6, 8, 10, 12], "score": 300,
+ "box": {"width": 0.69, "height": 1.12}, "explosion": {"radius": 2.8, "damage": 40, "heroDamage": 1},
+ "sound": "Audio/Sfx/metal-coup", "breakSound": "Audio/Sfx/metal-casse",
+ "debris": {"texture": "Art/props/debris", "columns": 4, "rows": 2, "cells": [2, 3], "count": 6, "size": 0.5, "speed": 5},
+ "animations": {"sheet": {"texture": "Art/props/paris", "columns": 3, "rows": 5, "cellHeight": 1.4599, "pivot": {"x": 0.5, "y": 0.025}}, "layer": 24,
+   "states": [{"name": "intact", "cells": [12]}, {"name": "damaged", "cells": [13]}, {"name": "destroyed", "cells": [14]}]}}
+```
+
+| Champ | Rôle |
+|---|---|
+| `name` | Nom (24 caractères). |
+| `health` | PV, quatre valeurs (une par colonne de difficulté). Tirs, rayons, explosions (grenades, roquettes, spéciales, barils), couteau (décor qui barre le passage) et charges (`dash`, `summon`) l'abîment ; seul ce que l'équipe voit est touché. |
+| `damagedAt` | Sous cette part de ses PV, il montre l'état `damaged` (défaut 0,5). |
+| `box` | `width` × `height` : la boîte où il est touché, centrée sur son `x`, depuis son pied. |
+| `blocks` | `heroes` (défaut) : il barre le passage aux héros tant qu'il tient, et son dessus est un plancher (on monte sur une voiture) ; les ennemis le traversent. `all` : il arrête aussi les ennemis. `none` : on passe devant. |
+| `cover` | Il arrête les tirs ennemis tant qu'il tient. |
+| `platform`, `platformWidth` | Plancher fin à `platform` au-dessus de son pied (l'auvent d'un étal), large de `platformWidth` (défaut `box.width`), tant qu'il tient. |
+| `explosion` | `radius`, `damage` (ennemis et autres décors : les barils s'enchaînent), `heroDamage` (héros, 0 à 10). |
+| `debris` | Éclats lancés quand il casse (dessin seulement) : `count` cases `cells` d'une planche, `size` unités de haut, vitesse `speed`. |
+| `rewards` | Récompenses tirées à tour de rôle, comme celles d'un otage (bonus des règles ou armes) ; vide : aucune. |
+| `score` | Points quand il casse. |
+| `sound`, `breakSound` | Bruit d'un coup, de sa destruction. |
+| `animations` | États `intact` (requis), `damaged` (défaut : `intact`), `destroyed` (défaut : il disparaît) ; `fps` pour un état animé. `layer` 24 le dessine derrière les personnages. |
+
+Les vingt décors livrés (`Art/props/<ville>.png`, une ligne par décor, une colonne par état) : barricade, véhicule, étal, caisses (ou distributeur), baril, pour chaque ville. Les règles donnent le signal d'objectif : `objective` (une case, la suivante sert au clignotement) et `objectiveSize`. Les ennemis ont un bloc facultatif `terrain {climb, leap, follow}` (section 3).
+
 ## 6. Emplacements réservés aux lots suivants
 
-Ces champs existent déjà dans le schéma pour que les prochaines mécaniques s’y branchent sans changer le format. Tant que le moteur ne les lit pas, ils doivent rester **vides ou absents** : une liste non vide est refusée, pour ne pas laisser croire qu’elle agit. Formes prévues :
+Le relief (`map.terrain`) et les décors destructibles (`map.props`) sont lus depuis le lot 3a (sections 1 et 5 septies). Ce champ existe déjà dans le schéma pour que les prochaines mécaniques s’y branchent sans changer le format. Tant que le moteur ne le lit pas, il doit rester **vide ou absent** : une liste non vide est refusée, pour ne pas laisser croire qu’elle agit. Forme prévue :
 
 | Champ | Élément prévu | Bibliothèque prévue |
 |---|---|---|
-| `map.terrain` | `{"type": "platform" \| "slope" \| "pit", "x": 40, "width": 6, "height": 2, "toHeight": 3}` : relief le long du parcours. | — |
-| `map.props` | `{"id": "<prop>", "x": 52, "y": 0, "wave": 3}` : décor destructible, objectif de la vague `wave` si elle est donnée. | `Content/props/<id>.json` |
 | `map.vehicles` | `{"id": "<véhicule>", "x": 120}` : véhicule pilotable posé sur la carte. | `Content/vehicles/<id>.json` |
 
 Les nouvelles bibliothèques suivront les règles de la section 0 (`id` = nom du fichier, `extends`, validation C# et Python).
@@ -627,8 +687,8 @@ python3 tools/validate_content.py
 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
-Le validateur lit la bibliothèque et les missions comme le jeu : `extends`, références d’armes, d’ennemis et de boss, images et sons présents, états d’animation requis par chaque comportement, ancrages, bornes de tous les nombres, otages placés dans l’écran de leur vague et récompenses connues des règles, rencontres vues de l’équipe (entrées dans l’écran de la rencontre, camion, ouvertures connues des règles, mini-boss hors des écrans de vague), emplacements réservés vides. Il refuse aussi qu’un nom propre à une mission apparaisse dans `Assets/Scripts`. Le jeu refait les mêmes contrôles au démarrage et refuse une mission invalide.
+Le validateur lit la bibliothèque et les missions comme le jeu : `extends`, références d’armes, d’ennemis et de boss, images et sons présents, états d’animation requis par chaque comportement, ancrages, bornes de tous les nombres, otages placés dans l’écran de leur vague et récompenses connues des règles, rencontres vues de l’équipe (entrées dans l’écran de la rencontre, camion, ouvertures connues des règles, mini-boss hors des écrans de vague), relief dessiné et hors des arènes de boss, décors destructibles posés sur la rue ou le relief, objectifs dans l'écran de leur vague, emplacements réservés vides. Il refuse aussi qu’un nom propre à une mission apparaisse dans `Assets/Scripts`. Le jeu refait les mêmes contrôles au démarrage et refuse une mission invalide.
 
-Dans Unity, jouer la mission avec un puis plusieurs joueurs dans plusieurs difficultés : vagues, sortie, raccords du décor, animations et boss. Pour l’ouvrir sans jouer les précédentes, saisir son code dans **CODE MISSION**. `AgentScripts/VerifyDataDriven.cs` montre comment charger une mission depuis du JSON et la faire finir par un bot ; `AgentScripts/VerifySaintRemy.cs` vérifie une mission livrée de bout en bout (décors, ennemis, mini-boss, boss, campagne, bots dans chaque difficulté) ; `AgentScripts/VerifyLot2b.cs` fait de même avec une mission dont les rencontres (toutes les entrées, un véhicule et un mini-boss qui étendent ceux de la bibliothèque) sont écrites seulement en JSON.
+Dans Unity, jouer la mission avec un puis plusieurs joueurs dans plusieurs difficultés : vagues, sortie, raccords du décor, animations et boss. Pour l’ouvrir sans jouer les précédentes, saisir son code dans **CODE MISSION**. `AgentScripts/VerifyDataDriven.cs` montre comment charger une mission depuis du JSON et la faire finir par un bot ; `AgentScripts/VerifySaintRemy.cs` vérifie une mission livrée de bout en bout (décors, ennemis, mini-boss, boss, campagne, bots dans chaque difficulté) ; `AgentScripts/VerifyLot3a.cs` joue une mission dont le relief et deux décors sont écrits seulement en JSON ; `AgentScripts/VerifyLot2b.cs` fait de même avec une mission dont les rencontres (toutes les entrées, un véhicule et un mini-boss qui étendent ceux de la bibliothèque) sont écrites seulement en JSON.
 
 Proposer les JSON, les images et leurs `.meta` dans une pull request avec des captures. Une fois la proposition fusionnée, la compilation web suivante inclut la mission.

@@ -20,8 +20,125 @@
     "groundBand": 0.12,
     "groundTop": -0.9,
     "groundFade": 0.25,
-    "terrain": [],
-    "props": [],
+    "terrain": [
+      {
+        "type": "platform",
+        "x": 60,
+        "width": 5.123,
+        "height": 1.8,
+        "sprite": {
+          "texture": "Art/props/paris-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 0
+        }
+      },
+      {
+        "type": "platform",
+        "x": 138,
+        "width": 5.123,
+        "height": 1.8,
+        "sprite": {
+          "texture": "Art/props/paris-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 0
+        }
+      },
+      {
+        "type": "slope",
+        "x": 282.08,
+        "width": 3.415,
+        "height": 0,
+        "toHeight": 1.5,
+        "sprite": {
+          "texture": "Art/props/paris-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 1
+        },
+        "drawX": -0.08,
+        "drawWidth": 4.018
+      },
+      {
+        "type": "block",
+        "x": 285.495,
+        "width": 6.67,
+        "height": 1.5,
+        "sprite": {
+          "texture": "Art/props/paris-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 2
+        },
+        "drawX": 0.522,
+        "drawWidth": 5.625
+      },
+      {
+        "type": "slope",
+        "x": 292.165,
+        "width": 3.415,
+        "height": 1.5,
+        "toHeight": 0,
+        "sprite": {
+          "texture": "Art/props/paris-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 1
+        },
+        "flip": true,
+        "drawX": -0.522,
+        "drawWidth": 4.018
+      }
+    ],
+    "props": [
+      {
+        "id": "voiture-parisienne",
+        "x": 28
+      },
+      {
+        "id": "baril-rouge",
+        "x": 44
+      },
+      {
+        "id": "etal-fleuriste",
+        "x": 74
+      },
+      {
+        "id": "baril-rouge",
+        "x": 90
+      },
+      {
+        "id": "barricade-vauban",
+        "x": 129,
+        "wave": 3
+      },
+      {
+        "id": "caisses-paris",
+        "x": 152
+      },
+      {
+        "id": "voiture-parisienne",
+        "x": 192,
+        "flip": true
+      },
+      {
+        "id": "baril-rouge",
+        "x": 236
+      },
+      {
+        "id": "caisses-paris",
+        "x": 258
+      },
+      {
+        "id": "etal-fleuriste",
+        "x": 305
+      },
+      {
+        "id": "baril-rouge",
+        "x": 334
+      }
+    ],
     "hostages": [
       {
         "id": "baker",

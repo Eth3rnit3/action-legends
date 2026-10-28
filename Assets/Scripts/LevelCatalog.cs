@@ -43,7 +43,8 @@ namespace Paname
     // and a lethal pit costs a hero damage and puts him back on its edge. It is drawn by sprite, the cell's bottom at drawY above
     // the street, its left side at x + drawX and drawWidth wide (else on x and x + width: a flight of stairs drawn with its
     // landing, which is the next block's), drawHeight tall (else as the cell's proportions make it), mirrored with flip, in front
-    // of the actors with front: a platform must show what holds it.
+    // of the actors with front: a platform must show what holds it. A piece without a sprite lies within the drawing of another
+    // (lot 3c: the bottom step of a flight of stairs, drawn with it, given its own height).
     [Serializable] public sealed class MapTerrain
     {
         public string type;public float x,width,height,toHeight,drawX,drawY,drawWidth,drawHeight;public bool lethal,flip,front;public int damage=1;
@@ -55,6 +56,8 @@ namespace Paname
         public bool Drawn=>!string.IsNullOrEmpty(sprite?.texture);
         // The top of a block or slope, the ledge of a platform, at a point of its span.
         public float TopAt(float at)=>kind==Slope?Mathf.Lerp(height,toHeight,(at-x)/width):height;
+        // Where its drawing spans along the street.
+        public float DrawLeft=>x+drawX;public float DrawRight=>x+drawX+(drawWidth>0?drawWidth:width);
     }
     // A prop of the library (Content/props) standing at x, its foot at y (the street, or the top of a block, slope or platform
     // there). wave: the locked wave it is the objective of: that wave ends when it breaks, not before. reward / weapon replace
@@ -258,7 +261,7 @@ namespace Paname
                 if(t.kind!=MapTerrain.Pit&&t.lethal)throw new ArgumentException(label+" : lethal ne sert qu'aux trous");
                 if(InArena(t.x,t.Right,out var arena))throw new ArgumentException(label+" : pas de relief dans "+arena);
                 // What stands there must be seen: platforms, blocks and slopes are drawn.
-                if(t.kind!=MapTerrain.Pit&&!t.Drawn)throw new ArgumentException(label+" : un relief est dessiné (sprite), sinon on ne le voit pas");
+                if(t.kind!=MapTerrain.Pit&&!t.Drawn&&!Array.Exists(list,o=>o!=null&&o!=t&&o.Drawn&&o.kind!=MapTerrain.Pit&&o.DrawLeft<=t.x+.01f&&o.DrawRight>=t.Right-.01f))throw new ArgumentException(label+" : un relief est dessiné (sprite) ou tient dans le dessin d'un autre, sinon on ne le voit pas");
                 if(t.Drawn){t.sprite.Validate(label+".sprite");if(!(t.drawY>=-8&&t.drawY<=6&&t.drawHeight>=0&&t.drawHeight<=12&&Mathf.Abs(t.drawX)<=10&&t.drawWidth>=0&&t.drawWidth<=60))throw new ArgumentException(label+" : drawX de -10 à 10, drawY de -8 à 6, drawWidth de 0 à 60, drawHeight de 0 à 12");}
                 // Solid ground does not overlap: a pit beside a block, a block between two slopes.
                 if(t.kind!=MapTerrain.Platform)for(int j=0;j<i;j++){var o=list[j];if(o.kind!=MapTerrain.Platform&&t.x<o.Right-.01f&&o.x<t.Right-.01f)throw new ArgumentException(label+" : chevauche map.terrain["+j+"] (seules les plateformes se superposent)");}

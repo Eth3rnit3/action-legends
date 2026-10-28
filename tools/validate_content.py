@@ -1505,8 +1505,8 @@ def validate_terrain(terrain, data, resources, errors):
             errors.append(f"{label}: no relief in {where}")
         sprite = t.get("sprite")
         drawn = isinstance(sprite, dict) and bool(sprite.get("texture"))
-        if kind != "pit" and not drawn:
-            errors.append(f"{label}: a piece of relief is drawn (sprite), or nobody sees it")
+        if kind != "pit" and not drawn and not any(covers(o, x, x + width) for o in terrain if o is not t):
+            errors.append(f"{label}: a piece of relief is drawn (sprite), or lies within another's drawing, or nobody sees it")
         if drawn:
             validate_cell(sprite, resources, label + ".sprite", errors)
             errors.number(t, "drawY", -8, 6, label, 0)
@@ -1519,6 +1519,18 @@ def validate_terrain(terrain, data, resources, errors):
                     errors.append(f"{label}: overlaps map.terrain[{j}] (only platforms overlap)")
         pieces.append((i, {"type": kind, "x": x, "width": width, "height": height, "toHeight": to if kind == "slope" else height}))
     return [p for _, p in pieces]
+
+
+def covers(piece, left, right):
+    """Whether a drawn piece of relief's drawing spans left to right (an undrawn step drawn with its stairs)."""
+    if not isinstance(piece, dict) or piece.get("type") == "pit" or not isinstance(piece.get("sprite"), dict) or not piece["sprite"].get("texture"):
+        return False
+    try:
+        x, width, dx, dw = (float(piece.get(k, 0)) for k in ("x", "width", "drawX", "drawWidth"))
+    except (TypeError, ValueError):
+        return False
+    a, b = x + dx, x + dx + (dw if dw > 0 else width)
+    return a <= left + .01 and b >= right - .01
 
 
 def top_at(piece, x):

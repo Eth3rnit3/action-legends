@@ -188,12 +188,20 @@ class MissionValidationTests(unittest.TestCase):
             lambda t: t.append({"type": "pit", "x": 100, "width": 12, "height": 2}),
             lambda t: t.append({"type": "block", "x": 460, "width": 2, "height": 1, "sprite": cell}),  # in the end boss arena
             lambda t: t.append({"type": "block", "x": 214, "width": 2, "height": 1, "sprite": cell}),  # in the armoured van's arena
+            lambda t: t.append({"type": "block", "x": 100, "width": 1, "height": .24}),  # undrawn, under no other drawing
         )
         for change in changes:
             with self.subTest(change=change):
                 terrain = copy.deepcopy(good)
                 change(terrain)
                 self.assertTrue(self.rejected(lambda d: d["map"].update(terrain=terrain)))
+        # Lot 3c: an undrawn step lies within its stairs' drawing (drawX, drawWidth), like Tokyo's.
+        steps = copy.deepcopy(good)
+        steps[1].update(x=81, width=2, height=.24, drawX=-1, drawWidth=3)
+        steps.append({"type": "block", "x": 80, "width": 1, "height": .24})
+        self.assertFalse(self.rejected(lambda d: d["map"].update(terrain=steps)))
+        steps[1].update(drawX=0, drawWidth=0)
+        self.assertTrue(self.rejected(lambda d: d["map"].update(terrain=steps)))
         # A hostage stands on the street or on the relief, never inside a block or in the air.
         self.data["map"]["terrain"] = good
         self.data["map"]["hostages"] = []

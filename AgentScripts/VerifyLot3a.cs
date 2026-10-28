@@ -139,7 +139,8 @@ public static class VerifyLot3a
         foreach(var id in Four)
         {
             var m=original[M(id)];int drawn=0,objectives=0,platforms=0,slopes=0;
-            foreach(var t in m.map.terrain){if(t.Drawn)drawn++;if(t.kind==MapTerrain.Platform)platforms++;if(t.kind==MapTerrain.Slope)slopes++;}
+            // Drawn, or (lot 3c) within the drawing of another piece, like the bottom step of Tokyo's stairs.
+            foreach(var t in m.map.terrain){if(t.Drawn||Array.Exists(m.map.terrain,o=>o!=t&&o.Drawn&&o.DrawLeft<=t.x+.01f&&o.DrawRight>=t.Right-.01f))drawn++;if(t.kind==MapTerrain.Platform)platforms++;if(t.kind==MapTerrain.Slope)slopes++;}
             foreach(var p in m.map.props)if(p.wave>=0)objectives++;
             Check(drawn==m.map.terrain.Length&&platforms>=1&&slopes>=2&&objectives>=1&&m.map.props.Length>=8,id+" : relief dessiné et décor destructible",new List<string>());
             lines.Add(id+" "+m.map.terrain.Length+" reliefs ("+platforms+" plateformes, "+slopes+" pentes), "+m.map.props.Length+" décors dont "+objectives+" objectif");

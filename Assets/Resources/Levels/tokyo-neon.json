@@ -35,10 +35,16 @@
         }
       },
       {
+        "type": "block",
+        "x": 277.5,
+        "width": 1.045,
+        "height": 0.24
+      },
+      {
         "type": "slope",
         "x": 278.545,
         "width": 3.832,
-        "height": 0,
+        "height": 0.24,
         "toHeight": 1.2,
         "sprite": {
           "texture": "Art/props/tokyo-terrain",
@@ -68,7 +74,7 @@
         "x": 290.664,
         "width": 3.832,
         "height": 1.2,
-        "toHeight": 0,
+        "toHeight": 0.24,
         "sprite": {
           "texture": "Art/props/tokyo-terrain",
           "columns": 3,
@@ -78,6 +84,12 @@
         "flip": true,
         "drawX": -0.929,
         "drawWidth": 5.806
+      },
+      {
+        "type": "block",
+        "x": 294.496,
+        "width": 1.045,
+        "height": 0.24
       }
     ],
     "props": [

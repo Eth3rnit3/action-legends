@@ -161,6 +161,23 @@ SOUNDS = {
                                                  (.35, gen('square', 3300, 2900, .3, duty=.1, vib=(90, .05), hp=2000)))]),
     'foin-casse': lambda: layer((1, gen('noise', 1800, 900, .35, attack=.02, sustain=.05, punch=.2, curve=.8, lp=3500, hp=400, crush=(11025, 8))),
                                 (.4, gen('noise', 400, 150, .25, punch=.8, lp=900))),
+    # Drivable vehicles (lot 3b), last again: the engine's putter while it drives, getting in (starter and rev), getting out
+    # (a hatch), the alarm and pop of an ejection, the cannon's boom and the turret gun's burst.
+    'vehicule-moteur': lambda: np.concatenate([layer((1, gen('saw', 62, 70, .11, attack=.005, sustain=.05, punch=.5, lp=700, crush=(11025, 8))),
+                                                      (.4, gen('noise', 300, 200, .1, punch=.6, lp=600))) for _ in range(4)]),
+    'vehicule-monte': lambda: np.concatenate([gen('noise', 800, 200, .08, sustain=.01, punch=1, lp=2000, crush=(11025, 7)),
+                                              layer((1, gen('saw', 45, 50, .25, attack=.01, sustain=.1, vib=(16, .4), lp=600)), (.3, gen('noise', 250, 150, .25, lp=500))),
+                                              gen('saw', 55, 150, .4, attack=.02, sustain=.15, curve=.6, lp=1100, crush=(11025, 8))]),
+    'vehicule-sortie': lambda: np.concatenate([gen('square', 330, 520, .07, duty=.3, punch=.5, lp=2500),
+                                               gen('noise', 1200, 300, .1, sustain=.01, punch=.9, lp=2500, crush=(11025, 7))]),
+    'vehicule-ejection': lambda: np.concatenate([gen('square', 1400, 1400, .07, duty=.25, sustain=.04), np.zeros(int(.03 * SR)),
+                                                 gen('square', 1050, 1050, .07, duty=.25, sustain=.04), np.zeros(int(.03 * SR)),
+                                                 layer((1, gen('noise', 2600, 400, .22, sustain=.01, punch=1, crush=(11025, 8))),
+                                                       (.6, gen('square', 300, 900, .2, duty=.4, curve=.6)))]),
+    'vehicule-canon': lambda: layer((1, gen('noise', 1500, 60, .55, sustain=.02, punch=1.2, curve=1.6, lp=2600, crush=(11025, 8))),
+                                    (.8, gen('sine', 110, 38, .45, punch=1, curve=1.3)), (.3, gen('square', 220, 70, .2, duty=.4))),
+    'vehicule-rafale': lambda: layer((1, gen('noise', 2600, 700, .09, sustain=.006, punch=1, lp=5000, crush=(11025, 8))),
+                                     (.6, gen('square', 260, 120, .08, duty=.35, punch=.7)), (.3, gen('sine', 90, 60, .08))),
 }
 
 if __name__ == '__main__':

@@ -1,0 +1,1 @@
+{"source": "mini-mecha-codex.png", "grid": [4, 3], "output": "mini-mecha.png", "cell": [512, 384], "bodies": 10, "length": 330, "feet": 14, "lift": {"4": 24}, "gun": {"height": 80, "left": 80}, "defringe": true}

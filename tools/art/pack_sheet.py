@@ -11,6 +11,7 @@ usage: pack_sheet.py enemies IN.png OUT.png   (4 x 3 grid -> 4 x 3 cells of 420 
        pack_sheet.py hero SPEC.json [PREVIEW.png]
        pack_sheet.py props SPEC.json   (destructible props, lot 3a: one row per prop, one column per state)
        pack_sheet.py strip SPEC.json   (terrain pieces, lot 3a: each piece stretched to the width of its cell)
+       pack_sheet.py vehicle SPEC.json (drivable vehicles, lot 3b: body images on one scale and baseline, the turret gun apart)
 The hero mode assembles several generated sheets of one character into one sheet (see hero(),
 tools/art/heroes/*.json, tools/art/hostages/*.json and tools/art/enemies/*.json): each source is scaled so that its reference
 frame stands as tall as the character should in the game, and the "muzzle" and "hand" anchors are
@@ -371,9 +372,91 @@ def strip(spec_path):
     Image.fromarray(out).save(base / spec["output"])
 
 
+def vehicle(spec_path):
+    """SPEC: {"source", "grid": [cols, rows], "output", "cell": [w, h], "bodies": n, "length": px, "feet": px, "lift": {cell: px}?,
+    "gun": {"height": px, "left": px}, "gunSource": {"image", "grid", "cells"}?, "defringe"?, "peel"?, "peelBelow"?}. The first n cells of the source are the
+    vehicle's body images: all on the scale that makes the first one length px long, the middle of their lowest quarter (wheels,
+    legs) on the cell's centre line, their bottom feet px above the cell bottom (lift raises a jump). The cells after them are
+    the turret gun alone, pointing right: scaled to height px, its left end at left px, centred on the cell's middle line (from
+    gunSource when the vehicle's own gun is too small). Faint alpha is dropped and nearly opaque pixels made opaque. Prints the
+    gun's pivot (the middle of its mount) and its muzzle in fractions of the cell, for turret.pivot and turret.length."""
+    spec = json.loads(Path(spec_path).read_text())
+    base = Path(spec_path).parent
+    a = np.asarray(Image.open(base / spec["source"]).convert("RGBA")).copy()
+    cols, rows = spec["grid"]
+    found = pieces(a, cols, rows)
+    cw, ch = spec["cell"]
+    n, feet = spec["bodies"], spec.get("feet", 14)
+    order = [(i // cols, i % cols) for i in range(cols * rows)]
+    out = np.zeros((rows * ch, cols * cw, 4), np.uint8)
+
+    def clean(crop):
+        crop = defringe(crop) if spec.get("defringe") else crop.copy()
+        # "peel": n strips the black rim a background removal left around the sprite, one edge pixel deep at a time.
+        for _ in range(spec.get("peel", 0)):
+            solid = crop[..., 3] > 0
+            rim = solid & ~ndimage.binary_erosion(solid) & (crop[..., :3].max(axis=2) <= spec.get("peelBelow", 12))
+            crop[rim] = 0
+        alpha = crop[..., 3]
+        crop[alpha < 40] = 0
+        alpha[alpha >= 200] = 255
+        return crop
+
+    def paste(img, cell, x0, y0):
+        c = np.asarray(img)
+        r, k = order[cell]
+        ox, oy = k * cw, r * ch
+        xs, ys = max(0, -x0), max(0, -y0)
+        xe, ye = min(c.shape[1], cw - x0), min(c.shape[0], ch - y0)
+        out[oy + y0 + ys:oy + y0 + ye, ox + x0 + xs:ox + x0 + xe] = c[ys:ye, xs:xe]
+
+    first = found[order[0]]
+    scale = spec["length"] / first.shape[1]
+    for cell in range(n):
+        crop = found.get(order[cell])
+        if crop is None:
+            continue
+        crop = clean(crop)
+        img = Image.fromarray(crop).resize((max(1, round(crop.shape[1] * scale)), max(1, round(crop.shape[0] * scale))), Image.LANCZOS)
+        c = np.asarray(img)
+        low = c[int(c.shape[0] * .75):, :, 3] > 128
+        xs = np.nonzero(low.any(axis=0))[0]
+        middle = (xs.min() + xs.max()) / 2 if len(xs) else c.shape[1] / 2
+        paste(img, cell, round(cw / 2 - middle), ch - feet - spec.get("lift", {}).get(str(cell), 0) - c.shape[0])
+    g = spec["gun"]
+    guns = list(range(n, cols * rows))
+    if "gunSource" in spec:
+        gs = spec["gunSource"]
+        b = np.asarray(Image.open(base / gs["image"]).convert("RGBA")).copy()
+        other = pieces(b, gs["grid"][0], gs["grid"][1])
+        sources = [other.get((i // gs["grid"][0], i % gs["grid"][0])) for i in gs["cells"]]
+    else:
+        sources = [found.get(order[i]) for i in guns]
+    for cell, crop in zip(guns, sources):
+        if crop is None:
+            continue
+        crop = clean(crop)
+        s = g["height"] / crop.shape[0]
+        img = Image.fromarray(crop).resize((max(1, round(crop.shape[1] * s)), g["height"]), Image.LANCZOS)
+        paste(img, cell, g["left"], (ch - g["height"]) // 2)
+        if cell == guns[0]:
+            c = np.asarray(img)[..., 3] > 128
+            # The mount: the tallest columns at the left end of the gun.
+            heights = c.sum(axis=0)
+            left = heights[:max(1, c.shape[1] // 3)]
+            mount = np.nonzero(left >= left.max() * .85)[0]
+            pivot = g["left"] + mount.mean()
+            print(f"gun: pivot {pivot / cw:.4f} of the cell width, muzzle {(g['left'] + c.shape[1] - pivot) / ch:.4f} cell heights from it, "
+                  f"gun {g['height'] / ch:.4f} of the cell height")
+    Image.fromarray(out).save(base / spec["output"])
+    print(f"body: scale {scale:.3f}, length {spec['length'] / cw:.4f} of the cell width, feet {feet / ch:.4f} of its height")
+
+
 if __name__ == "__main__":
     if sys.argv[1] == "props":
         props(sys.argv[2])
+    elif sys.argv[1] == "vehicle":
+        vehicle(sys.argv[2])
     elif sys.argv[1] == "strip":
         strip(sys.argv[2])
     elif sys.argv[1] == "hero":

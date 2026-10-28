@@ -1,0 +1,137 @@
+{
+  "id": "estafette-marseillaise",
+  "extends": "deuche-blindee",
+  "name": "FOURGON DU PORT",
+  "health": [
+    42,
+    36,
+    30,
+    26
+  ],
+  "speed": 7.5,
+  "jump": 11,
+  "box": {
+    "width": 3.2,
+    "height": 1.9
+  },
+  "turret": {
+    "sprite": {
+      "texture": "Art/vehicles/deuche-blindee",
+      "columns": 4,
+      "rows": 3,
+      "cell": 10
+    },
+    "firing": {
+      "texture": "Art/vehicles/deuche-blindee",
+      "columns": 4,
+      "rows": 3,
+      "cell": 11
+    },
+    "size": 2.7,
+    "pivot": 0.3076,
+    "length": 1.09
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/vehicles/estafette-marseillaise",
+      "columns": 4,
+      "rows": 3,
+      "cellHeight": 3.265,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.0365
+      }
+    },
+    "layer": 32,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "run",
+        "cells": [
+          1,
+          2,
+          3
+        ],
+        "perStride": 1.5
+      },
+      {
+        "name": "jump",
+        "cells": [
+          4
+        ]
+      },
+      {
+        "name": "fire",
+        "cells": [
+          5
+        ]
+      },
+      {
+        "name": "damaged",
+        "cells": [
+          6
+        ]
+      },
+      {
+        "name": "damagedRun",
+        "cells": [
+          6,
+          7
+        ],
+        "perStride": 1.5
+      },
+      {
+        "name": "wreck",
+        "cells": [
+          8
+        ]
+      },
+      {
+        "name": "destroyed",
+        "cells": [
+          9
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "seat",
+        "x": 0.29,
+        "y": 1.15
+      },
+      {
+        "name": "seat",
+        "cell": 4,
+        "x": 0.29,
+        "y": 1.35
+      },
+      {
+        "name": "turret",
+        "x": 0.63,
+        "y": 1.87
+      },
+      {
+        "name": "turret",
+        "cell": 4,
+        "x": 0.63,
+        "y": 2.07
+      },
+      {
+        "name": "cannon",
+        "x": 1.65,
+        "y": 0.95
+      },
+      {
+        "name": "cannon",
+        "cell": 4,
+        "x": 1.65,
+        "y": 1.15
+      }
+    ]
+  }
+}

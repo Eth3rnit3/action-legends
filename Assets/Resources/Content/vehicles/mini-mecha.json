@@ -1,0 +1,140 @@
+{
+  "id": "mini-mecha",
+  "extends": "deuche-blindee",
+  "name": "MINI-MÉCHA",
+  "health": [
+    38,
+    32,
+    28,
+    24
+  ],
+  "speed": 7,
+  "jump": 14,
+  "box": {
+    "width": 2.6,
+    "height": 2.2
+  },
+  "ram": {
+    "stomp": 60
+  },
+  "turret": {
+    "sprite": {
+      "texture": "Art/vehicles/mini-mecha",
+      "columns": 4,
+      "rows": 3,
+      "cell": 10
+    },
+    "firing": {
+      "texture": "Art/vehicles/mini-mecha",
+      "columns": 4,
+      "rows": 3,
+      "cell": 11
+    },
+    "size": 2.6,
+    "pivot": 0.2295,
+    "length": 1.09
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/vehicles/mini-mecha",
+      "columns": 4,
+      "rows": 3,
+      "cellHeight": 3.265,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.0365
+      }
+    },
+    "layer": 32,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "run",
+        "cells": [
+          1,
+          2,
+          3
+        ],
+        "perStride": 1.5
+      },
+      {
+        "name": "jump",
+        "cells": [
+          4
+        ]
+      },
+      {
+        "name": "fire",
+        "cells": [
+          5
+        ]
+      },
+      {
+        "name": "damaged",
+        "cells": [
+          6
+        ]
+      },
+      {
+        "name": "damagedRun",
+        "cells": [
+          6,
+          7
+        ],
+        "perStride": 1.5
+      },
+      {
+        "name": "wreck",
+        "cells": [
+          8
+        ]
+      },
+      {
+        "name": "destroyed",
+        "cells": [
+          9
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "seat",
+        "x": 0.37,
+        "y": 1.4
+      },
+      {
+        "name": "seat",
+        "cell": 4,
+        "x": 0.37,
+        "y": 1.6
+      },
+      {
+        "name": "turret",
+        "x": 0.84,
+        "y": 2.1
+      },
+      {
+        "name": "turret",
+        "cell": 4,
+        "x": 0.84,
+        "y": 2.3
+      },
+      {
+        "name": "cannon",
+        "x": 0.76,
+        "y": 1.19
+      },
+      {
+        "name": "cannon",
+        "cell": 4,
+        "x": 0.76,
+        "y": 1.39
+      }
+    ]
+  }
+}

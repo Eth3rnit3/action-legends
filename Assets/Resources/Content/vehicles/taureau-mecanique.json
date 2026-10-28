@@ -1,0 +1,141 @@
+{
+  "id": "taureau-mecanique",
+  "extends": "deuche-blindee",
+  "name": "TAUREAU MÉCANIQUE",
+  "health": [
+    34,
+    28,
+    24,
+    20
+  ],
+  "speed": 9,
+  "jump": 13,
+  "box": {
+    "width": 3.3,
+    "height": 1.9
+  },
+  "ram": {
+    "damage": 20,
+    "propDamage": 14
+  },
+  "turret": {
+    "sprite": {
+      "texture": "Art/vehicles/taureau-mecanique",
+      "columns": 4,
+      "rows": 3,
+      "cell": 10
+    },
+    "firing": {
+      "texture": "Art/vehicles/taureau-mecanique",
+      "columns": 4,
+      "rows": 3,
+      "cell": 11
+    },
+    "size": 2.4,
+    "pivot": 0.2979,
+    "length": 0.95
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/vehicles/taureau-mecanique",
+      "columns": 4,
+      "rows": 3,
+      "cellHeight": 3.265,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.0365
+      }
+    },
+    "layer": 32,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "run",
+        "cells": [
+          1,
+          2,
+          3
+        ],
+        "perStride": 1.5
+      },
+      {
+        "name": "jump",
+        "cells": [
+          4
+        ]
+      },
+      {
+        "name": "fire",
+        "cells": [
+          5
+        ]
+      },
+      {
+        "name": "damaged",
+        "cells": [
+          6
+        ]
+      },
+      {
+        "name": "damagedRun",
+        "cells": [
+          6,
+          7
+        ],
+        "perStride": 1.5
+      },
+      {
+        "name": "wreck",
+        "cells": [
+          8
+        ]
+      },
+      {
+        "name": "destroyed",
+        "cells": [
+          9
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "seat",
+        "x": 0.0,
+        "y": 0.93
+      },
+      {
+        "name": "seat",
+        "cell": 4,
+        "x": 0.0,
+        "y": 1.13
+      },
+      {
+        "name": "turret",
+        "x": 0.25,
+        "y": 1.57
+      },
+      {
+        "name": "turret",
+        "cell": 4,
+        "x": 0.25,
+        "y": 1.77
+      },
+      {
+        "name": "cannon",
+        "x": 1.82,
+        "y": 1.06
+      },
+      {
+        "name": "cannon",
+        "cell": 4,
+        "x": 1.82,
+        "y": 1.26
+      }
+    ]
+  }
+}

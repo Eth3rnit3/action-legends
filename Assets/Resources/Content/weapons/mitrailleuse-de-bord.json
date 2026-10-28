@@ -1,0 +1,27 @@
+{
+  "id": "mitrailleuse-de-bord",
+  "name": "MITRAILLEUSE DE BORD",
+  "ammo": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "fireRate": 0.075,
+  "damage": 4,
+  "projectile": {
+    "type": "bullet",
+    "speed": 40,
+    "life": 1.0,
+    "jitter": 2.5,
+    "size": 1.2,
+    "color": "FFC34A"
+  },
+  "recoil": {
+    "shake": 0.04,
+    "push": 0
+  },
+  "flash": "light",
+  "casings": true,
+  "sound": "Audio/Sfx/vehicule-rafale"
+}

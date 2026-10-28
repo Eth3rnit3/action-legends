@@ -150,7 +150,7 @@ Seules les plateformes se superposent ; les pièces pleines (blocs, pentes, trou
 
 ### Véhicules
 
-`map.vehicles` : jusqu'à 8 véhicules de la bibliothèque (`Content/vehicles/<id>.json`, section 5 octies) : `{"id", "x", "flip"}`. Le véhicule est garé, vide, centré sur `x`, posé sur ce qui s'y trouve (la rue, un bloc, une pente) ; `flip` le tourne vers la gauche. Il ne se gare ni dans une arène de boss (`exitX − 30` et `atX − 12,5 … + 15` d'un boss de mi-parcours) ni au-dessus d'un trou ; on peut en revanche l'y conduire. Chaque mission livrée en gare un, au milieu du parcours et avant son boss de mi-parcours (Paris x 160, Marseille 137, Saint-Rémy 165, Tokyo 124) : assez tôt pour servir, assez loin pour que le début reste à pied. Un véhicule détruit ne revient pas.
+`map.vehicles` : jusqu'à 8 véhicules de la bibliothèque (`Content/vehicles/<id>.json`, section 5 octies) : `{"id", "x", "flip"}`. Le véhicule est garé, vide, centré sur `x`, posé sur ce qui s'y trouve (la rue, un bloc, une pente) ; `flip` le tourne vers la gauche. Il ne se gare ni dans une arène de boss (`exitX − 30` et `atX − 12,5 … + 15` d'un boss de mi-parcours) ni au-dessus d'un trou ; on peut en revanche l'y conduire. Chaque mission livrée en gare un au milieu du parcours (Paris x 160, Marseille 137, Saint-Rémy 165, Tokyo 124 : avant le mini-boss sauf à Marseille, dont le hors-bord est à x 30) : assez tôt pour servir, assez loin pour que le début reste à pied. Un véhicule détruit ne revient pas.
 
 ### Otages
 

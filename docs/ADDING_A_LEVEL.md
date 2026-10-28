@@ -1,6 +1,6 @@
 # Ajouter un niveau
 
-Tout ce qui fait un niveau d’**Action Legends** — sa carte, ses ennemis et leurs animations, son boss, sa musique, ses textes — est décrit en JSON. Le moteur (`Assets/Scripts`) ne fournit que des **comportements génériques** : ennemi au contact, lanceur, tireur, boss volant, boss marcheur. Ce guide suffit pour ajouter une mission complète, avec un nouvel ennemi, ses animations, un boss et une carte, **sans toucher au C#**.
+Tout ce qui fait un niveau d’**Action Legends** — sa carte, ses ennemis et leurs animations, son boss, sa musique, ses textes — est décrit en JSON. Le moteur (`Assets/Scripts`) ne fournit que des **comportements génériques** : ennemi au contact, lanceur, tireur, boss volant, boss marcheur. Ce guide suffit pour ajouter une mission complète, avec un nouvel ennemi, ses animations, un boss, une carte avec son relief, ses décors destructibles et ses véhicules, ou un nouveau héros, **sans toucher au C#**.
 
 ## 0. Où vont les fichiers
 
@@ -104,7 +104,7 @@ Exemple (positions à adapter aux vagues de la mission : un otage de vague se pl
   "hostages": [
     {"id": "baker", "x": 34, "y": 0},
     {"id": "baker", "x": 49, "y": 0, "wave": 1, "reward": "weapon"},
-    {"id": "civilian", "x": 238, "y": 0, "wave": 6, "weapon": "heavy-machinegun"}
+    {"id": "civilian", "x": 238, "y": 0, "wave": 5, "weapon": "heavy-machinegun"}
   ]
 }
 ```
@@ -174,7 +174,7 @@ Une rencontre place des ennemis précis, qui font leur entrée là où l’équi
 "encounters": [
   {"wave": 0, "spawns": [
     {"enemy": "looter-thrower", "entry": "door", "x": 12, "fromX": 13},
-    {"enemy": "looter-thrower", "entry": "window", "x": 45, "y": 2, "fromX": 45, "fromY": 2, "delay": 1},
+    {"enemy": "looter-thrower", "entry": "window", "x": 6, "y": 2, "fromX": 6, "fromY": 2, "delay": 1},
     {"enemy": "looter-rusher", "entry": "walk", "x": 10, "side": "right", "delay": 1.2}]},
   {"wave": 2, "truck": {"id": "rusty-van", "side": "right", "x": 97},
    "spawns": [{"enemy": "looter-rusher", "entry": "truck", "x": 96}, {"enemy": "looter-thrower", "entry": "truck", "x": 95}]},
@@ -190,7 +190,7 @@ Une rencontre place des ennemis précis, qui font leur entrée là où l’équi
 | `atX` | Rencontre sans vague : elle démarre quand l’équipe atteint `atX`. |
 | `wave`, `on` | Rencontre d’une vague (indice dans `waves`) : `"start"` (défaut) au départ de la vague, `"clear"` quand elle est vaincue. |
 | `lock` | L’écran se bloque jusqu’à la chute de ses ennemis (une vague bloquée le tient déjà). |
-| `announce` | Facultatif : annonce du départ (40 caractères ; non affichée par le HUD actuel, voir section 0). |
+| `announce` | Facultatif : annonce du départ (40 caractères ; bandeau et voix, voir section 0). |
 | `truck` | Un véhicule de `Content/carriers` (section 5 sexies) qui arrive du côté `side` (`right` par défaut) et s’arrête le centre en `x` ; les apparitions `"entry": "truck"` en descendent. |
 | `spawns` | Une à seize apparitions (ci-dessous). |
 | `boss` | Un boss de mi-parcours (ci-dessous) ; il se déclenche seul, sans `wave`, `spawns`, `lock` ni `truck`. |
@@ -218,7 +218,7 @@ Les missions livrées : Paris 10 vagues et 16 rencontres (portes cochères, fen�
 
 `lane` (facultatif, boss volant seulement, mi-parcours ou final) le garde dans une bande de l’arène : il va et vient de `left` à `right` (en unités depuis le centre de l’arène, de -10 à 10, au moins 1 d’écart) sur la ligne `y` (sa ligne de flottaison ou de vol, de 0 à 12), au lieu de balayer tout l’écran à l’`altitude` de sa fiche. Le hors-bord de Marseille navigue ainsi sur l’eau visible derrière le quai : mesurer la zone sur une capture de l’arène (le panorama ne bouge pas pendant le combat) et vérifier que la zone touchée (`hitbox`) descend jusqu’aux tirs droits des héros (vers `y` = 1,5).
 
-Un boss de la bibliothèque (section 4), avec les mêmes champs que le boss final (`health`, `name`, `intro`, `rage`, `defeat`). Quand l’équipe atteint `atX`, l’écran se bloque autour d’elle, la barre de vie s’affiche et les vagues attendent ; à sa chute (il rapporte son `score`), le défilement repart, la flèche GO s’affiche et les renforts qu’il a lâchés s’enfuient. Il se place au moins 30 unités avant la sortie et hors de l’écran d’une vague (pas entre `atX - 10` et `atX + 5` d’une vague) ; trois au plus par mission. Les bonus ne se ramassent pas pendant un combat de boss : ne pas placer d’otage dans son arène. Paris : `armored-van` (x 215), Marseille : `speedboat` (x 62, là où le décor montre le Vieux-Port), Saint-Rémy : `taureau` (x 196, sur la route qui sort de la ville), Tokyo : `combat-drone` (x 176).
+Un boss de la bibliothèque (section 4), avec les mêmes champs que le boss final (`health`, `name`, `intro`, `rage`, `defeat`). Quand l’équipe atteint `atX`, l’écran se bloque autour d’elle, la barre de vie s’affiche et les vagues attendent ; à sa chute (il rapporte son `score`), le défilement repart, la flèche GO s’affiche et les renforts qu’il a lâchés s’enfuient. Il se place au moins 30 unités avant la sortie et hors de l’écran d’une vague (pas entre `atX - 10` et `atX + 5` d’une vague) ; trois au plus par mission. Les bonus ne se ramassent pas pendant un combat de boss : ne pas placer d’otage dans son arène. Paris : `armored-van` (x 215), Marseille : `speedboat` (x 30, là où l’arène montre l’eau du Vieux-Port), Saint-Rémy : `taureau` (x 196, sur la route qui sort de la ville), Tokyo : `combat-drone` (x 176).
 
 ### Boss de mission
 
@@ -295,7 +295,7 @@ Un état qui n’est pas dans ce tableau est accepté et ignoré : une planche p
 | Boss | `smoke` | D’où sort la fumée sous la moitié de ses PV. |
 | Boss | ceux de ses attaques | `muzzles`, `rack`, `foot`, `walk.foot` (section 4). |
 
-Les neuf ennemis livrés ont chacun leur planche, `Art/enemies/<id>.png` (4 × 4 cases) : la première ligne reprend au pixel près leurs quatre anciennes cases (pour les Arlésiens, leur ligne de `Assets/ArtSources/saint-remy/enemies.png`), les trois suivantes ajoutent inattentif, sursaut, touché ou lancer, fuite et les morts (`docs/ART_LOT2B.md`, `docs/MISSION_SAINT_REMY.md`) ; `pack_sheet.py hero tools/art/enemies/<id>.json` la refait. Les planches des Arlésiens ont des cases de 512 px : `pivot` (0,4 ; 0,0527344), `cellHeight` 2,88 (3,2 pour l’Arlésien au fouet, dessiné plus petit).
+Les neuf ennemis livrés ont chacun leur planche, `Art/enemies/<id>.png` (4 × 4 cases ; 4 × 6 pour `looter-rusher`, `looter-thrower`, `gunman-pistol` et `arlesien`, dont les deux lignes ajoutées au lot 3c donnent des courses et fuites en quatre images, la fin du coup, la respiration et une mort en trois temps, `docs/ART_LOT3C.md`) : la première ligne reprend au pixel près leurs quatre anciennes cases (pour les Arlésiens, leur ligne de `Assets/ArtSources/saint-remy/enemies.png`), les trois suivantes ajoutent inattentif, sursaut, touché ou lancer, fuite et les morts (`docs/ART_LOT2B.md`, `docs/MISSION_SAINT_REMY.md`) ; `pack_sheet.py hero tools/art/enemies/<id>.json` la refait. Les planches des Arlésiens ont des cases de 512 px : `pivot` (0,4 ; 0,0527344), `cellHeight` 2,88 (3,2 pour l’Arlésien au fouet, dessiné plus petit).
 
 `tools/art/pack_sheet.py` recale une planche générée (pieds sur une même ligne, jambes sur le pivot) et affiche les bouts de canon. Pour un héros, `pack_sheet.py hero tools/art/heroes/<héros>.json` assemble ses planches générées en une seule (une taille commune fixée par une image de référence de chaque planche), mesure les `muzzle` (vers l’avant `right`, l’arrière `left`, le haut `up`, le bas `down`, en bas devant `downRight` ou en diagonale `diagonal` selon la case ; `right:2.0` ignore ce qui est dessiné à plus de 2 u au-dessus des pieds, comme l’étendard de Jeanne au-dessus de son épée) et la `hand`, et imprime les ancrages JSON ; voir `docs/ART_LOT1A.md` et `docs/ART_LOT3H.md` (une planche de 12 poses fournie, complétée par 12 poses générées). `tools/art/measure_muzzles.py` mesure ceux de l’ancienne planche `Assets/ArtSources/heroes.png`.
 
@@ -366,7 +366,7 @@ Le **relief** (lot 3a) : un ennemi suit les pentes, tombe des rebords et saute s
 3. Décrire ses états et ses ancrages ; mesurer le canon ou la main avec `pack_sheet.py`.
 4. L’ajouter à la liste `enemies` d’une mission et dans ses `enemyPattern`.
 
-Exemple d’ennemi entièrement nouveau, un tireur qui utilise la planche des héros avec ses propres états (repris par `AgentScripts/VerifyDataDriven.cs`) :
+Exemple d’ennemi entièrement nouveau, un tireur qui utilise la planche du pistolero avec ses propres états (repris par `AgentScripts/VerifyDataDriven.cs`) :
 
 ```json
 {
@@ -375,7 +375,7 @@ Exemple d’ennemi entièrement nouveau, un tireur qui utilise la planche des h�
   "gun": {"range": 10, "aimTime": 0.3, "cooldown": 1.2, "burst": 2, "burstInterval": 0.15, "pellets": 2, "spread": -2, "spreadStep": 4,
           "speed": [10, 11, 12, 13], "life": 1, "pose": 0.2, "damage": 1, "projectile": "bullet", "sound": "Audio/Sfx/tir-D-pistolet-sec"},
   "animations": {
-    "sheet": {"texture": "Art/heroes", "columns": 4, "rows": 4, "cropLeft": 0.065, "cropRight": 0.025, "pivot": {"x": 0.4, "y": 0.045}, "cellHeight": 2.5},
+    "sheet": {"texture": "Art/enemies/gunman-pistol", "columns": 4, "rows": 4, "cropLeft": 0.065, "cropRight": 0.025, "pivot": {"x": 0.4, "y": 0.045}, "cellHeight": 2.5},
     "states": [
       {"name": "idle", "cells": [12, 13], "fps": 4},
       {"name": "run", "cells": [13, 14, 15], "perStride": 0.5},
@@ -515,7 +515,6 @@ Les trois héros du lot 3H en sont les exemples : Fernandel siffle (`summon`) et
 | `weapons` | La table des caisses d’armes qui ne nomment pas leur arme : `[{"weapon": "<id>", "weight": 3}, …]`. Sur toute suite de tirages aussi longue que la somme des poids, chaque arme sort `weight` fois, réparties (tourniquet pondéré, le même sur toutes les machines). Une mission peut la remplacer par son propre champ `weapons`. Obligatoire dès qu’un bonus `weapon` ne nomme pas d’arme. |
 | `go` | L’image de la flèche GO, `{"texture": "Art/go-sign"}`. |
 | `tally` | Le décompte de fin de mission : `hostage` (points par otage compté) et `perSecond` (points par seconde gagnée sur le `parTime` de la mission), par difficulté (`[1000, 1000, 1000, 1000]` et `[10, 10, 10, 10]`), et `icon`, la case qui représente les otages au HUD et au décompte. |
-
 | `deaths` | Comment tombe un ennemi selon sa blessure : `[{"damage": "bullet" \| "explosion" \| "fire" \| "knife", "launch": {"x": 1.6, "y": 2.4}, "spin": 0, "time": 1.3, "gravity": 16, "lie": true, "burn": false}]`. Le corps part à `launch` (x : en s’éloignant du coup), tourne de `spin` °/s, retombe sous `gravity` ; `lie` : il se pose et reste dans la rue ; `burn` : il flambe et fume. Il clignote et s’efface à la fin de `time`. Une blessure absente garde la courte culbute d’avant. |
 | `poses` | Dessin seul (lot 3c), les poses des héros par-dessus leur image simulée (les tirs partent toujours de celle-ci) : `{"hurt": 0.3, "fall": {"time": 0.4, "back": 0.7, "height": 0.6}, "blink": 0.6, "lie": 2.5, "victory": 3}`. `hurt` : secondes de l’état `hurt` après un coup (pas accroupi, ni pendant couteau, lancer ou spéciale). À sa chute le héros est projeté de `fall.back` unités en arrière et `fall.height` vers le haut en `fall.time` s (image `hurt`), puis reste à terre (`down`) jusqu’à son renfort, en clignotant `blink` s avant ; sans renfort, il reste `lie` s puis disparaît. `victory` : secondes de l’état `victory` après la chute d’un boss pour un héros immobile au sol qui ne tire plus ; à la fin de la mission, tous la gardent. Absent : ces valeurs-là. |
 | `screen` | Dessin seul (lot 3c), la vie à l’écran : `{"shake": 0.3, "vertical": 0.6, "max": 0.22, "fade": 2, "dust": 0.55, "landing": 7, "push": 0.09, "hop": 0.05, "tilt": 7, "casings": 0.065, "banner": true}`. `shake` : unités de secousse de la caméra par unité de secousse du jeu (explosions 0,3 à 0,5, coups 0,15, tirs 0,02 à 0,04), `vertical` × autant de haut en bas, `max` au plus, s’éteignant de `fade` par seconde ; `dust` : taille des bouffées de poussière sous un héros ou un véhicule qui retombe à plus de `landing` unités/s (0 : aucune) ; `push`, `hop`, `tilt` : un ennemi touché recule de `push`, se soulève de `hop` unités et penche de `tilt` degrés un instant ; `casings` : taille des douilles, qui rebondissent sur le relief sous l’arme (0 : aucune) ; `banner` : le bandeau des annonces. Absent : les réglages d’avant le lot 3c (secousse 0,15 horizontale, pas de poussière ni de recul, pas de bandeau). |
@@ -551,7 +550,7 @@ Des caisses d’armes qui ne donnent que des roquettes, et plus serrées :
 | `recoil` | `shake` : secousse de l’écran à chaque tir ; `push` : vitesse (unités/s) à laquelle le tir repousse le héros, vite amortie. |
 | `damageType` | Facultatif : la blessure qu’elle donne, `bullet`, `explosion`, `fire` ou `knife` ; par défaut `fire` pour `flame`, `explosion` si elle explose, `bullet` sinon. Elle choisit la mort des ennemis (section 3). |
 | `flash`, `casings`, `sound` | Éclair de bouche `none`, `light` ou `heavy`, douilles éjectées, son du tir. |
-| `announce`, `voice` | Annonce du ramassage (obligatoire avec des munitions ; non affichée par le HUD actuel, voir section 0) et voix facultative (`Audio/Voices/<ligne>`, prises `-a`, `-b`, `-c`). |
+| `announce`, `voice` | Annonce du ramassage (obligatoire avec des munitions ; bandeau, voir section 0) et voix facultative (`Audio/Voices/<ligne>`, prises `-a`, `-b`, `-c`). |
 | `icon`, `crate` | Le badge du HUD à côté du compteur et la caisse posée dans la rue (obligatoire avec des munitions), `{"texture", "columns", "rows", "cell"}`. |
 
 ```json
@@ -736,7 +735,7 @@ python3 tools/validate_content.py
 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
-Le validateur lit la bibliothèque et les missions comme le jeu : `extends`, références d’armes, d’ennemis et de boss, images et sons présents, états d’animation requis par chaque comportement, ancrages, bornes de tous les nombres, otages placés dans l’écran de leur vague et récompenses connues des règles, rencontres vues de l’équipe (entrées dans l’écran de la rencontre, camion, ouvertures connues des règles, mini-boss hors des écrans de vague), relief dessiné et hors des arènes de boss, décors destructibles posés sur la rue ou le relief, objectifs dans l'écran de leur vague, emplacements réservés vides. Il refuse aussi qu’un nom propre à une mission apparaisse dans `Assets/Scripts`. Le jeu refait les mêmes contrôles au démarrage et refuse une mission invalide.
+Le validateur lit la bibliothèque et les missions comme le jeu : `extends`, références d’armes, d’ennemis et de boss, images et sons présents, états d’animation requis par chaque comportement, ancrages, bornes de tous les nombres, otages placés dans l’écran de leur vague et récompenses connues des règles, rencontres vues de l’équipe (entrées dans l’écran de la rencontre, camion, ouvertures connues des règles, mini-boss hors des écrans de vague), relief dessiné et hors des arènes de boss, décors destructibles posés sur la rue ou le relief, objectifs dans l'écran de leur vague, véhicules garés sur la rue ou le relief hors des arènes et des trous. Il refuse aussi qu’un nom propre à une mission apparaisse dans `Assets/Scripts`. Le jeu refait les mêmes contrôles au démarrage et refuse une mission invalide.
 
 Dans Unity, jouer la mission avec un puis plusieurs joueurs dans plusieurs difficultés : vagues, sortie, raccords du décor, animations et boss. Pour l’ouvrir sans jouer les précédentes, saisir son code dans **CODE MISSION**. `AgentScripts/VerifyDataDriven.cs` montre comment charger une mission depuis du JSON et la faire finir par un bot ; `AgentScripts/VerifySaintRemy.cs` vérifie une mission livrée de bout en bout (décors, ennemis, mini-boss, boss, campagne, bots dans chaque difficulté) ; `AgentScripts/VerifyLot3a.cs` joue une mission dont le relief et deux décors sont écrits seulement en JSON ; `AgentScripts/VerifyLot2b.cs` fait de même avec une mission dont les rencontres (toutes les entrées, un véhicule et un mini-boss qui étendent ceux de la bibliothèque) sont écrites seulement en JSON.
 

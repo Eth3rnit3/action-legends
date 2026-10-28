@@ -9,6 +9,8 @@ y .045, cropLeft .065), the centre for the mecha. Prints the barrel tips to writ
 usage: pack_sheet.py enemies IN.png OUT.png   (4 x 3 grid -> 4 x 3 cells of 420 x 362)
        pack_sheet.py mecha IN.png OUT.png     (3 x 2 grid -> 3 x 2 cells of 560 x 512)
        pack_sheet.py hero SPEC.json [PREVIEW.png]
+       pack_sheet.py props SPEC.json   (destructible props, lot 3a: one row per prop, one column per state)
+       pack_sheet.py strip SPEC.json   (terrain pieces, lot 3a: each piece stretched to the width of its cell)
 The hero mode assembles several generated sheets of one character into one sheet (see hero(),
 tools/art/heroes/*.json, tools/art/hostages/*.json and tools/art/enemies/*.json): each source is scaled so that its reference
 frame stands as tall as the character should in the game, and the "muzzle" and "hand" anchors are
@@ -299,8 +301,82 @@ def hero(spec_path, preview=None):
     print(json.dumps(anchors))
 
 
+def props(spec_path):
+    """SPEC: {"source", "grid": [cols, rows], "output", "cell": [w, h], "feet": px, "margin": px, "defringe"?,
+    "replace": {"row": r, "source": image, "grid": [cols, 1]}?, "erase": [[x0, y0, x1, y1], ...]?}: erase clears regions of the
+    source (a broken row to be replaced) before it is cut. Every row is one prop and its columns its states (intact,
+    damaged, destroyed): the row keeps one scale (the largest that fits all its states in a cell), each image is centred with
+    its bottom feet px above the cell bottom. Prints, per row, the intact image's size in cell fractions (for box, platform
+    and cellHeight in Content/props)."""
+    spec = json.loads(Path(spec_path).read_text())
+    base = Path(spec_path).parent
+    a = np.asarray(Image.open(base / spec["source"]).convert("RGBA")).copy()
+    for x0, y0, x1, y1 in spec.get("erase", []):
+        a[y0:y1, x0:x1] = 0
+    cols, rows = spec["grid"]
+    found = pieces(a, cols, rows)
+    if "replace" in spec:
+        r = spec["replace"]
+        b = np.asarray(Image.open(base / r["source"]).convert("RGBA")).copy()
+        for (_, col), crop in pieces(b, r["grid"][0], 1).items():
+            found[(r["row"], col)] = crop
+    cw, ch = spec["cell"]
+    feet, margin = spec.get("feet", 8), spec.get("margin", 6)
+    out = np.zeros((rows * ch, cols * cw, 4), np.uint8)
+    for row in range(rows):
+        crops = [found.get((row, c)) for c in range(cols)]
+        if spec.get("defringe"):
+            crops = [defringe(c) if c is not None else None for c in crops]
+        w = max(c.shape[1] for c in crops if c is not None)
+        h = max(c.shape[0] for c in crops if c is not None)
+        scale = min(1.0, (cw - 2 * margin) / w, (ch - feet - margin) / h)
+        for col, crop in enumerate(crops):
+            if crop is None:
+                continue
+            img = Image.fromarray(crop)
+            if scale < 1:
+                img = img.resize((max(1, round(crop.shape[1] * scale)), max(1, round(crop.shape[0] * scale))), Image.LANCZOS)
+            c = np.asarray(img)
+            y0 = row * ch + ch - feet - c.shape[0]
+            x0 = col * cw + (cw - c.shape[1]) // 2
+            out[y0:y0 + c.shape[0], x0:x0 + c.shape[1]] = c
+            if col == 0:
+                print(f"row {row}: intact {c.shape[1] / cw:.3f} x {c.shape[0] / ch:.3f} of the cell, feet {feet / ch:.4f}, scale {scale:.3f}")
+    Image.fromarray(out).save(base / spec["output"])
+
+
+def strip(spec_path):
+    """SPEC: {"source", "output", "cell": [w, h], "pieces": [[x0, x1], ...]}: each piece is cut between x0 and x1 of the
+    source, trimmed to its opaque pixels and scaled to the cell's width, its bottom on the cell's bottom. Prints, per piece,
+    the height of its top at tenths of its width (fractions of the cell height), to place the walking surface."""
+    spec = json.loads(Path(spec_path).read_text())
+    base = Path(spec_path).parent
+    a = np.asarray(Image.open(base / spec["source"]).convert("RGBA")).copy()
+    cw, ch = spec["cell"]
+    out = np.zeros((ch, cw * len(spec["pieces"]), 4), np.uint8)
+    for i, (x0, x1) in enumerate(spec["pieces"]):
+        part = a[:, x0:x1]
+        ys, xs = np.nonzero(part[..., 3] > 40)
+        crop = part[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+        scale = cw / crop.shape[1]
+        img = Image.fromarray(crop).resize((cw, min(ch, round(crop.shape[0] * scale))), Image.LANCZOS)
+        c = np.asarray(img)
+        out[ch - c.shape[0]:, i * cw:(i + 1) * cw] = c
+        cell = out[:, i * cw:(i + 1) * cw, 3]
+        tops = []
+        for t in range(1, 10):
+            column = np.nonzero(cell[:, int(cw * t / 10)] > 128)[0]
+            tops.append(f"{(ch - column.min()) / ch:.2f}" if len(column) else "-")
+        print(f"piece {i}: tops " + " ".join(tops))
+    Image.fromarray(out).save(base / spec["output"])
+
+
 if __name__ == "__main__":
-    if sys.argv[1] == "hero":
+    if sys.argv[1] == "props":
+        props(sys.argv[2])
+    elif sys.argv[1] == "strip":
+        strip(sys.argv[2])
+    elif sys.argv[1] == "hero":
         hero(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else None)
     else:
         pack(sys.argv[1], sys.argv[2], sys.argv[3])

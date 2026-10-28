@@ -218,15 +218,15 @@ class MissionValidationTests(unittest.TestCase):
             lambda d: d["encounters"].append(dict(wave(good), wave=40)),
             lambda d: d["encounters"].append(wave()),
             lambda d: d["encounters"].append({"atX": 470, "boss": {"id": "armored-van"}}),
-            lambda d: d["encounters"].append({"atX": 300, "boss": {"id": "armored-van"}, "spawns": [good]}),
+            lambda d: d["map"].update(terrain=[], props=[]) or d["encounters"].append({"atX": 300, "boss": {"id": "armored-van"}, "spawns": [good]}),
             lambda d: d["encounters"].append({"atX": 50, "boss": {"id": "armored-van"}}),
-            lambda d: d["encounters"].append({"atX": 300, "boss": {"id": "nobody"}}),
-            lambda d: d["encounters"].append({"atX": 300, "boss": {"id": "speedboat", "health": 9}}),
+            lambda d: d["map"].update(terrain=[], props=[]) or d["encounters"].append({"atX": 300, "boss": {"id": "nobody"}}),
+            lambda d: d["map"].update(terrain=[], props=[]) or d["encounters"].append({"atX": 300, "boss": {"id": "speedboat", "health": 9}}),
         )
         for change in changes:
             with self.subTest(change=change):
                 self.assertTrue(self.rejected(change))
-        self.assertFalse(self.rejected(lambda d: d["encounters"].append({"atX": 300, "boss": {"id": "speedboat", "name": "BARQUE"}})))
+        self.assertFalse(self.rejected(lambda d: d["map"].update(terrain=[], props=[]) or d["encounters"].append({"atX": 300, "boss": {"id": "speedboat", "name": "BARQUE"}})))
         self.assertFalse(self.rejected(lambda d: d["waves"][0].update(baseEnemies=0)))
 
     def test_street_decor(self):
@@ -257,13 +257,13 @@ class MissionValidationTests(unittest.TestCase):
         self.assertTrue(boat["boss"]["lane"]["right"] > boat["boss"]["lane"]["left"])
         lane = {"left": -7, "right": -1, "y": 1.9}
         self.assertFalse(self.rejected(lambda d: d["boss"].update(lane=lane)))
-        self.assertFalse(self.rejected(lambda d: d["encounters"].append({"atX": 300, "boss": {"id": "speedboat", "lane": lane}})))
+        self.assertFalse(self.rejected(lambda d: d["map"].update(terrain=[], props=[]) or d["encounters"].append({"atX": 300, "boss": {"id": "speedboat", "lane": lane}})))
         changes = (
             lambda d: d["boss"].update(lane=dict(lane, right=-6.5)),
             lambda d: d["boss"].update(lane=dict(lane, left=-11)),
             lambda d: d["boss"].update(lane=dict(lane, y=13)),
             lambda d: d["boss"].update(lane="water"),
-            lambda d: d["encounters"].append({"atX": 300, "boss": {"id": "armored-van", "lane": lane}}),
+            lambda d: d["map"].update(terrain=[], props=[]) or d["encounters"].append({"atX": 300, "boss": {"id": "armored-van", "lane": lane}}),
         )
         for change in changes:
             with self.subTest(change=change):

@@ -31,13 +31,14 @@ namespace Paname
     // Scenery the heroes can break (Content/props): a car, a stall, a barrel, a barricade. It takes health hits (per difficulty) from
     // the heroes' shots, blasts, knife and specials, shows its "damaged" state below damagedAt of its health and its "destroyed" state
     // (or nothing) once broken. While it stands it may block the way (blocks: heroes, all or none; its top is then a floor) and stop
-    // enemy shots (cover), and offer a ledge platform units high (a stall's awning) that is jumped onto from below. Broken, it may
+    // enemy shots (cover), and offer a ledge platform units high. wall raises the obstacle above the drawing (an objective
+    // barricade nobody jumps over or stands on), else it is the box's height; (a stall's awning) that is jumped onto from below. Broken, it may
     // explode, fling debris, drop a reward drawn from rewards (bonuses of the mission's rules or weapons) and give score points.
     [Serializable] public sealed class PropDefinition
     {
         public string id,extends,name,blocks="heroes",sound,breakSound;
         public int[] health;
-        public float damagedAt=.5f,platform,platformWidth;
+        public float damagedAt=.5f,platform,platformWidth,wall;
         public int score;
         public bool cover;
         public PropBox box=new PropBox();
@@ -52,6 +53,7 @@ namespace Paname
         public AudioClip HitClip=>string.IsNullOrEmpty(sound)?null:hitClip?hitClip:(hitClip=Resources.Load<AudioClip>(sound));
         public AudioClip BreakClip=>string.IsNullOrEmpty(breakSound)?null:breakClip?breakClip:(breakClip=Resources.Load<AudioClip>(breakSound));
         public float LedgeWidth=>platformWidth>0?platformWidth:box.width;
+        public float Obstacle=>wall>0?wall:box.height;
         public void Validate()
         {
             string label="Décor destructible "+id;
@@ -61,7 +63,8 @@ namespace Paname
             Content.Range(box.width,.3f,12,label+".box.width");Content.Range(box.height,.2f,6,label+".box.height");
             // A ledge stays within reach of a jump from the ground or from the prop's own top.
             Content.Range(platform,0,4,label+".platform");Content.Range(platformWidth,0,12,label+".platformWidth");
-            if(blockKind>0&&platform>0&&platform<box.height)throw new ArgumentException(label+" : platform au-dessus du haut de la boîte (box.height) d'un décor qui bloque");
+            Content.Range(wall,0,8,label+".wall");if(wall>0&&(wall<box.height||blockKind==0))throw new ArgumentException(label+" : wall (hauteur de l'obstacle) d'un décor qui bloque, au moins box.height");
+            if(blockKind>0&&platform>0&&platform<Obstacle)throw new ArgumentException(label+" : platform au-dessus du haut de la boîte (box.height) d'un décor qui bloque");
             if(score<0||score>10000)throw new ArgumentException(label+" : score de 0 à 10000");
             var x=explosion;Content.Range(x.radius,0,8,label+".explosion.radius");
             if(x.radius>0&&(x.damage<0||x.damage>500||x.heroDamage<0||x.heroDamage>10))throw new ArgumentException(label+" : explosion.damage de 0 à 500, explosion.heroDamage de 0 à 10");

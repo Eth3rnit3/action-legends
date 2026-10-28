@@ -144,6 +144,23 @@ SOUNDS = {
                                (.5, gen('noise', 300, 150, .35, attack=.02, punch=.6, lp=900))),
     'porte': lambda: np.concatenate([gen('square', 180, 260, .16, duty=.4, vib=(18, .25), attack=.02, lp=1500),
                                      gen('noise', 900, 120, .18, sustain=.01, punch=1, lp=2500, crush=(11025, 7))]),
+    # Destructible props (lot 3a), last again: a knock on wood, a clang on metal, then each breaking, glass shattering, hay.
+    'bois-coup': lambda: layer((1, gen('noise', 900, 300, .08, sustain=.005, punch=1, lp=2200, crush=(11025, 8))),
+                               (.6, gen('tri', 220, 140, .07, punch=.6))),
+    'bois-casse': lambda: np.concatenate([layer((1, gen('noise', 1400, 200, .16, sustain=.01, punch=1, lp=3000, crush=(11025, 8))),
+                                                (.5, gen('tri', 160, 70, .14, punch=.6))),
+                                          gen('noise', 700, 150, .12, sustain=.01, punch=.8, lp=2000, crush=(11025, 7)),
+                                          gen('noise', 1100, 250, .2, sustain=.02, punch=.5, lp=2400, crush=(11025, 7))]),
+    'metal-coup': lambda: layer((.8, gen('square', 1300, 1150, .14, duty=.2, vib=(70, .06), punch=.5)),
+                                (.5, gen('noise', 6000, 2500, .04, hp=2500)), (.4, gen('sine', 640, 600, .16))),
+    'metal-casse': lambda: np.concatenate([layer((1, gen('noise', 2200, 300, .3, sustain=.02, punch=1, curve=1.4, crush=(11025, 8))),
+                                                 (.6, gen('square', 520, 180, .3, duty=.3, vib=(40, .1)))),
+                                           layer((.6, gen('square', 900, 700, .25, duty=.15, vib=(55, .08))), (.4, gen('noise', 3000, 800, .2, hp=1200)))]),
+    'verre-casse': lambda: np.concatenate([gen('noise', 9000, 5000, .05, sustain=.005, punch=1, hp=3000, crush=(22050, 8)),
+                                           layer((.7, gen('noise', 7000, 3500, .35, sustain=.02, punch=.4, curve=.8, hp=2500, crush=(22050, 8))),
+                                                 (.35, gen('square', 3300, 2900, .3, duty=.1, vib=(90, .05), hp=2000)))]),
+    'foin-casse': lambda: layer((1, gen('noise', 1800, 900, .35, attack=.02, sustain=.05, punch=.2, curve=.8, lp=3500, hp=400, crush=(11025, 8))),
+                                (.4, gen('noise', 400, 150, .25, punch=.8, lp=900))),
 }
 
 if __name__ == '__main__':

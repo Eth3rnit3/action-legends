@@ -148,7 +148,7 @@ namespace Paname
                 if(!relief){e.position.x=Mathf.MoveTowards(e.position.x,e.goal.x,type.speed*SpeedFactor*dt);return type.run;}
                 // Over the relief it climbs and falls on its way.
                 bool stood=EnemyStands(e);float from=e.position.x,want=Mathf.MoveTowards(from,e.goal.x,type.speed*SpeedFactor*dt)-from;
-                e.position.x=Advance(from,e.position.y,want,ForEnemies);if(e.position.x!=from+want)Leap(e);
+                e.position.x=Advance(from,e.position.y,want,ForEnemies);if(walled)Leap(e);
                 Settle(ref e.position,ref e.vertical,26,dt,ForEnemies,float.MaxValue,stood&&e.vertical<=0);return type.run;
             }
             FinishEntry(e);return e.mode==EnemyUnaware?type.unaware:type.idle;

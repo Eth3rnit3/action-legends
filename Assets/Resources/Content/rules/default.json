@@ -333,5 +333,7 @@
         "time": 0.6
       }
     ]
-  }
+  },
+  "objective": {"texture": "Art/props/objective", "columns": 2, "rows": 1, "cell": 0},
+  "objectiveSize": 1.1
 }

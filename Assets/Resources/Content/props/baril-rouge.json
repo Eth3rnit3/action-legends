@@ -1,0 +1,68 @@
+{
+  "id": "baril-rouge",
+  "name": "BARIL D'ESSENCE",
+  "blocks": "none",
+  "health": [
+    6,
+    8,
+    10,
+    12
+  ],
+  "score": 300,
+  "box": {
+    "width": 0.69,
+    "height": 1.12
+  },
+  "explosion": {
+    "radius": 2.8,
+    "damage": 40,
+    "heroDamage": 1
+  },
+  "sound": "Audio/Sfx/metal-coup",
+  "breakSound": "Audio/Sfx/metal-casse",
+  "debris": {
+    "texture": "Art/props/debris",
+    "columns": 4,
+    "rows": 2,
+    "cells": [
+      2,
+      3
+    ],
+    "count": 6,
+    "size": 0.5,
+    "speed": 5
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/props/paris",
+      "columns": 3,
+      "rows": 5,
+      "cellHeight": 1.4599,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.025
+      }
+    },
+    "layer": 24,
+    "states": [
+      {
+        "name": "intact",
+        "cells": [
+          12
+        ]
+      },
+      {
+        "name": "damaged",
+        "cells": [
+          13
+        ]
+      },
+      {
+        "name": "destroyed",
+        "cells": [
+          14
+        ]
+      }
+    ]
+  }
+}

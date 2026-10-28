@@ -88,6 +88,8 @@ namespace Paname
         // and the staging of encounters (surprise sign, parachutes, doorways).
         public DeathMotion[] deaths;
         public StageRules stage=new StageRules();
+        // The sign that blinks over a wave's objective (a barricade to break) while that wave holds the screen, size units tall.
+        public SpriteCell objective=new SpriteCell();public float objectiveSize=1.1f;
         [NonSerialized] public DeathMotion[] motions;
         public void Validate()
         {
@@ -129,6 +131,7 @@ namespace Paname
             motions=new DeathMotion[Wounds.Names.Length];
             if(deaths!=null)for(int i=0;i<deaths.Length;i++){var d=deaths[i];if(d==null)throw new ArgumentException(label+".deaths : entrée vide");d.Validate(label+".deaths["+i+"]");if(motions[d.kind]!=null)throw new ArgumentException(label+".deaths : "+d.damage+" deux fois");motions[d.kind]=d;}
             stage.Validate(label+".stage");
+            if(!string.IsNullOrEmpty(objective?.texture))objective.Validate(label+".objective");Content.Range(objectiveSize,.2f,5,label+".objectiveSize");
             Content.PerDifficulty(tally.hostage,0,100000,label+".tally.hostage");Content.PerDifficulty(tally.perSecond,0,10000,label+".tally.perSecond");tally.icon.Validate(label+".tally.icon");
         }
         // Also checks a mission's own table; required when some weapon crate draws from it.

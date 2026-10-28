@@ -11,7 +11,7 @@ namespace Paname
         sealed class Breakable
         {
             public MapProp place;public PropDefinition type;public Vector2 position;public int hp,maxHp,lastShot,animState=-1;public float flash,animTime,soundAt;
-            public Transform root;public SpriteRenderer renderer;
+            public Transform root,sign;public SpriteRenderer renderer;
             public float Left=>position.x-type.box.width*.5f;public float Right=>position.x+type.box.width*.5f;public float Top=>position.y+type.box.height;
             public Vector2 Centre=>position+Vector2.up*(type.box.height*.5f);
         }
@@ -31,8 +31,9 @@ namespace Paname
                 breakables.Add(b);DrawBreakable(b,0);
             }
         }
-        // Only what the team sees is hurt, and an objective only once its wave is under way.
-        bool PropHittable(Breakable b)=>b.hp>0&&Mathf.Abs(b.position.x-cameraX)<SimHalfWidth+b.type.box.width*.5f&&(b.place.wave<0||Wave>b.place.wave||Wave==b.place.wave&&waveLive);
+        // Only what the team sees stops its fire; an objective is only hurt once its wave is under way (before, it shrugs shots off).
+        bool PropHittable(Breakable b)=>b.hp>0&&Mathf.Abs(b.position.x-cameraX)<SimHalfWidth+b.type.box.width*.5f;
+        bool PropLive(Breakable b)=>b.place.wave<0||Wave>b.place.wave||Wave==b.place.wave&&waveLive;
         static bool Clip(float p,float q,ref float t0,ref float t1)
         {
             if(p==0)return q>=0;float r=q/p;
@@ -98,7 +99,7 @@ namespace Paname
             Breakable best=null;float nearest=float.MaxValue,chest=p.position.y+1;
             foreach(var b in breakables)
             {
-                if(!PropHittable(b)||chest<b.position.y||chest>b.Top+.4f)continue;
+                if(b.type.blockKind==0||!PropHittable(b)||chest<b.position.y||chest>b.Top+.4f)continue;
                 float near=p.facing>0?b.Left-p.position.x:p.position.x-b.Right;
                 if(near>=-b.type.box.width&&near<=k.reach&&near<nearest){nearest=near;best=b;}
             }
@@ -106,7 +107,7 @@ namespace Paname
         }
         void HitProp(Breakable b,int damage,int direction,bool explosive=false)
         {
-            if(b.hp<=0)return;
+            if(b.hp<=0||!PropLive(b))return;
             b.hp-=damage;b.flash=.07f;shake=Mathf.Max(shake,explosive?.25f:.04f);
             if(Time.unscaledTime>=b.soundAt){if(b.type.HitClip)Sound(b.type.HitClip);else Sound(impactClips);b.soundAt=Time.unscaledTime+.09f;}
             if(b.hp<=0)Break(b,direction);else DrawBreakable(b,0);
@@ -149,7 +150,22 @@ namespace Paname
         bool ObjectiveStands(int wave){foreach(var b in breakables)if(b.place.wave==wave&&b.hp>0)return true;return false;}
         void TickProps(float dt)
         {
+            for(int i=0;i<breakables.Count;i++)ShowObjective(breakables[i]);
             for(int i=0;i<breakables.Count;i++){var b=breakables[i];if(b.flash>0){b.flash=Mathf.Max(0,b.flash-dt);DrawBreakable(b,dt);}else if(b.renderer&&b.renderer.enabled&&b.type.animations.states[b.animState<0?0:b.animState].fps>0)DrawBreakable(b,dt);}
+        }
+        // Drawn only: the rules' sign blinks over an objective while its wave holds the screen.
+        void ShowObjective(Breakable b)
+        {
+            bool shown=b.place.wave>=0&&b.hp>0&&Wave==b.place.wave&&waveLive&&!string.IsNullOrEmpty(Rules.objective.texture);
+            if(shown&&!b.sign)
+            {
+                b.sign=new GameObject("Objectif").transform;b.sign.SetParent(b.root,false);var r=b.sign.gameObject.AddComponent<SpriteRenderer>();
+                r.sprite=Rules.objective.Sprite;r.sortingOrder=71;b.sign.localScale=Vector3.one*Rules.objectiveSize;
+            }
+            if(!b.sign)return;
+            b.sign.gameObject.SetActive(shown);if(!shown)return;
+            float t=Time.unscaledTime;var cell=Rules.objective;b.sign.GetComponent<SpriteRenderer>().sprite=cell.At(Mathf.Repeat(t,.5f)<.25f?0:1);
+            b.sign.localPosition=new Vector3(0,b.type.box.height+Rules.objectiveSize*.7f+Mathf.Abs(Mathf.Sin(t*5))*.25f,0);
         }
         // Intact, damaged below damagedAt of its health, then destroyed (or gone when it has no such image).
         void DrawBreakable(Breakable b,float dt)

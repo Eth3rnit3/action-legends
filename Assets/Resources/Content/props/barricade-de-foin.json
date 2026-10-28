@@ -1,0 +1,67 @@
+{
+  "id": "barricade-de-foin",
+  "name": "BARRICADE DE FOIN",
+  "blocks": "heroes",
+  "cover": true,
+  "wall": 3.2,
+  "health": [
+    80,
+    110,
+    140,
+    170
+  ],
+  "damagedAt": 0.5,
+  "score": 1000,
+  "box": {
+    "width": 2.96,
+    "height": 1.71
+  },
+  "sound": "Audio/Sfx/bois-coup",
+  "breakSound": "Audio/Sfx/foin-casse",
+  "debris": {
+    "texture": "Art/props/debris",
+    "columns": 4,
+    "rows": 2,
+    "cells": [
+      6,
+      0,
+      1
+    ],
+    "count": 8,
+    "size": 0.5,
+    "speed": 5
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/props/saint-remy",
+      "columns": 3,
+      "rows": 5,
+      "cellHeight": 2.1552,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.025
+      }
+    },
+    "layer": 24,
+    "states": [
+      {
+        "name": "intact",
+        "cells": [
+          0
+        ]
+      },
+      {
+        "name": "damaged",
+        "cells": [
+          1
+        ]
+      },
+      {
+        "name": "destroyed",
+        "cells": [
+          2
+        ]
+      }
+    ]
+  }
+}

@@ -31,7 +31,7 @@ namespace Paname
             }
             foreach(var b in breakables)
             {
-                var d=b.type;float half=d.box.width*.5f,top=b.position.y+d.box.height;
+                var d=b.type;float half=d.box.width*.5f,top=b.position.y+d.Obstacle;
                 // A prop that stops the heroes only is a floor for the enemies that walk through it, once they are above it.
                 if(d.blockKind>0){solids.Add(new Ground{left=b.position.x-half,right=b.position.x+half,height=top,toHeight=top,blocks=d.blockKind==1?ForHeroes:ForHeroes|ForEnemies,prop=b});if(d.blockKind==1)ledges.Add(new Ground{left=b.position.x-half,right=b.position.x+half,height=top,toHeight=top,prop=b});}
                 if(d.platform>0){float w=d.LedgeWidth*.5f;ledges.Add(new Ground{left=b.position.x-w,right=b.position.x+w,height=b.position.y+d.platform,prop=b});}
@@ -58,12 +58,15 @@ namespace Paname
             return f;
         }
         bool OnLedge(float x,float y,int who)=>relief&&FloorAt(x,y,who)>SolidAt(x,who)+.001f;
-        // Where a walk of dx from (x, y) ends: at the first wall higher than a step, else at x + dx.
+        // Where a walk of dx from (x, y) ends: at the first wall higher than a step, else at x + dx. walled tells whether a wall
+        // stopped it (compared floats may carry extra precision, so the walk says it rather than a test of where it ended).
+        bool walled;
         float Advance(float x,float y,float dx,int who)
         {
-            if(!relief||dx==0)return x+dx;
+            walled=false;if(!relief||dx==0)return x+dx;
             float to=x+dx,limit=y+StepUp;
             if(SolidAt(to,who)<=limit)return to;
+            walled=true;
             bool found=false;float stop=to;
             foreach(var s in solids)
             {

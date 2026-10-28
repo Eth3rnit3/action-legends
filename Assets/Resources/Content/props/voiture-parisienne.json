@@ -1,0 +1,75 @@
+{
+  "id": "voiture-parisienne",
+  "name": "VOITURE",
+  "blocks": "heroes",
+  "cover": true,
+  "health": [
+    50,
+    70,
+    90,
+    110
+  ],
+  "score": 500,
+  "box": {
+    "width": 2.79,
+    "height": 1.65
+  },
+  "explosion": {
+    "radius": 2.4,
+    "damage": 30,
+    "heroDamage": 0
+  },
+  "rewards": [
+    {
+      "bonus": "score"
+    }
+  ],
+  "sound": "Audio/Sfx/metal-coup",
+  "breakSound": "Audio/Sfx/metal-casse",
+  "debris": {
+    "texture": "Art/props/debris",
+    "columns": 4,
+    "rows": 2,
+    "cells": [
+      2,
+      3,
+      4
+    ],
+    "count": 8,
+    "size": 0.5,
+    "speed": 5
+  },
+  "animations": {
+    "sheet": {
+      "texture": "Art/props/paris",
+      "columns": 3,
+      "rows": 5,
+      "cellHeight": 2.2398,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.025
+      }
+    },
+    "layer": 24,
+    "states": [
+      {
+        "name": "intact",
+        "cells": [
+          3
+        ]
+      },
+      {
+        "name": "damaged",
+        "cells": [
+          4
+        ]
+      },
+      {
+        "name": "destroyed",
+        "cells": [
+          5
+        ]
+      }
+    ]
+  }
+}

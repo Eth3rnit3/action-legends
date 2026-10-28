@@ -364,9 +364,10 @@ namespace Paname
                 if(!shooting)e.facing=target.position.x>=e.position.x?1:-1;
                 e.attackTimer-=dt;e.attackPose=Mathf.Max(0,e.attackPose-dt);e.throwPose=Mathf.Max(0,e.throwPose-dt);e.grenadeTimer-=dt;
                 // An enemy holds its strike, throw or aim pose briefly instead of running through it; one on a ledge holds it.
-                // Up on the relief above its target, it walks on and off the edge rather than wait over his head.
-                bool walking=!e.perched&&(best>type.keepDistance||relief&&e.position.y-target.floor>.6f)&&e.stagger<=0&&e.attackPose<=0&&!shooting;
-                if(walking){float want=e.facing*type.speed*SpeedFactor*dt,from=e.position.x;e.position.x=Advance(from,e.position.y,want,ForEnemies);if(relief&&e.position.x!=from+want)Leap(e);e.walk+=dt*type.strideRate;}
+                // A brawler up on the relief above its target walks on and off the edge rather than wait over his head.
+                // One that keeps its distance beyond the edge of a held screen still walks into view, where the team can reach it.
+                bool walking=!e.perched&&(best>type.keepDistance||relief&&type.kind==EnemyBehavior.Melee&&e.position.y-target.floor>.6f||screenLocked&&Mathf.Abs(e.position.x-lockX)>SimHalfWidth-1)&&e.stagger<=0&&e.attackPose<=0&&!shooting;
+                if(walking){float want=e.facing*type.speed*SpeedFactor*dt,from=e.position.x;e.position.x=Advance(from,e.position.y,want,ForEnemies);if(walled)Leap(e);e.walk+=dt*type.strideRate;}
                 // While the screen is locked, an enemy that has walked in stays in view, so none is left to hunt off screen.
                 if(screenLocked&&Mathf.Abs(lastX-lockX)<=SimHalfWidth-.6f)e.position.x=Mathf.Clamp(e.position.x,lockX-SimHalfWidth+.6f,lockX+SimHalfWidth-.6f);
                 if(type.Armed&&e.stagger<=0)TickGunman(e,best,dt);
@@ -488,8 +489,9 @@ namespace Paname
                     }
                 }
                 // A weapon's explosive goes off on the ground and at the end of its flight too.
+                // Into the street (a little below it for shots fired down) or into the side of the relief.
                 float ground=ShotFloor(s.position.x);
-                bool grounded=s.weapon==null||!s.weapon.projectile.Beam?s.position.y<ground+(s.blastAnywhere&&s.blast>0?0:-.3f):false;
+                bool grounded=s.weapon==null||!s.weapon.projectile.Beam?s.position.y<(ground>.001f?ground:ground+(s.blastAnywhere&&s.blast>0?0:-.3f)):false;
                 if(!hit&&s.blastAnywhere&&s.blast>0&&(grounded||s.life<=0)){Blast(new Vector2(s.position.x,Mathf.Max(s.position.y,ground+.25f)),s.blast,s.blastDamage,s.blastBoss,direction,true);hit=true;}
                 if(hit||s.life<=0||grounded){s.active=false;s.root.gameObject.SetActive(false);shots.RemoveAt(i);}else{s.root.position=s.position;if(s.weapon!=null)DrawWeaponShot(s,dt);else if(s.drawn!=null)s.sprite.sprite=s.drawn.Frame(s.age);}
             }

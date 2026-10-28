@@ -1,0 +1,2 @@
+{"source": "marseille-props-codex.png", "grid": [3, 5], "output": "marseille.png", "cell": [512, 320], "feet": 8, "margin": 6, "defringe": false,
+ "erase": [[0, 1225, 1536, 1600]], "replace": {"row": 4, "source": "marseille-barrel-codex.png", "grid": [3, 1]}}

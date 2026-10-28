@@ -93,9 +93,9 @@ namespace Paname
             if(map.terrain!=null)foreach(var t in map.terrain)
             {
                 if(!t.Drawn)continue;var sprite=t.sprite.Sprite;if(!sprite)continue;
-                float w=t.width,h=t.drawHeight>0?t.drawHeight:w*sprite.rect.height/sprite.rect.width;
+                float w=t.drawWidth>0?t.drawWidth:t.width,h=t.drawHeight>0?t.drawHeight:w*sprite.rect.height/sprite.rect.width;
                 var go=new GameObject("Relief • "+t.type+" "+t.x);go.transform.SetParent(root,false);
-                go.transform.localPosition=new Vector3(t.x+w*.5f,t.drawY+h*.5f,0);go.transform.localScale=new Vector3((t.flip?-w:w)*sprite.rect.height/sprite.rect.width,h,1);
+                go.transform.localPosition=new Vector3(t.x+t.drawX+w*.5f,t.drawY+h*.5f,0);go.transform.localScale=new Vector3((t.flip?-w:w)*sprite.rect.height/sprite.rect.width,h,1);
                 var r=go.AddComponent<SpriteRenderer>();r.sprite=sprite;r.sortingOrder=t.front?70:21;
             }
             // Street scenery: behind the actors (a fountain an enemy steps out from), or in front of them.

@@ -512,6 +512,10 @@ def validate_rules(data, resources, weapons=None):
         for key in ("lie", "burn"):
             if not isinstance(death.get(key, False), bool):
                 errors.append(f"{dl}.{key}: true or false")
+    # Lot 3a: the sign over a wave's objective.
+    if isinstance(data.get("objective"), dict) and data["objective"].get("texture"):
+        validate_cell(data["objective"], resources, label + ".objective", errors)
+    errors.number(data, "objectiveSize", .2, 5, label, 1.1)
     stage, sl = obj(data, "stage"), label + ".stage"
     if "alert" in stage:
         validate_cell(stage["alert"], resources, sl + ".alert", errors)
@@ -634,6 +638,11 @@ def validate_prop(data, resources, weapons=None):
     height = errors.number(box, "height", .2, 6, label + ".box", 1)
     platform = errors.number(data, "platform", 0, 4, label, 0)
     errors.number(data, "platformWidth", 0, 12, label, 0)
+    wall = errors.number(data, "wall", 0, 8, label, 0)
+    if wall and (blocks == "none" or height is not None and wall < height):
+        errors.append(f"{label}.wall: the obstacle's height of a prop that blocks, at least box.height")
+    if wall and height is not None:
+        height = wall
     if blocks in ("heroes", "all") and platform and height is not None and platform < height:
         errors.append(f"{label}: platform above the top of the box (box.height) of a prop that blocks")
     errors.number(data, "score", 0, 10000, label, 0, True)
@@ -1366,10 +1375,12 @@ def validate_terrain(terrain, data, resources, errors):
         if drawn:
             validate_cell(sprite, resources, label + ".sprite", errors)
             errors.number(t, "drawY", -8, 6, label, 0)
+            errors.number(t, "drawX", -10, 10, label, 0)
+            errors.number(t, "drawWidth", 0, 60, label, 0)
             errors.number(t, "drawHeight", 0, 12, label, 0)
         if kind != "platform":
             for j, other in pieces:
-                if other["type"] != "platform" and x < other["x"] + other["width"] - .001 and other["x"] < x + width - .001:
+                if other["type"] != "platform" and x < other["x"] + other["width"] - .01 and other["x"] < x + width - .01:
                     errors.append(f"{label}: overlaps map.terrain[{j}] (only platforms overlap)")
         pieces.append((i, {"type": kind, "x": x, "width": width, "height": height, "toHeight": to if kind == "slope" else height}))
     return [p for _, p in pieces]

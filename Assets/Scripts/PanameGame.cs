@@ -81,6 +81,8 @@ namespace Paname
             public WeaponDefinition weapon;
             // The vehicle he drives (PanameVehicles.cs): his position is its own while he is in it.
             public Vehicle vehicle;
+            // Drawn only (lot 3c): when he was last hurt and when he fell, for his hurt and down poses; nothing reads them in the simulation.
+            public float hurtAt=-99,fellAt=-99;
             public int hp=6,hero,facing=1; public bool moving,aimUp,aimDown,crouching; public Transform root; public SpriteRenderer illustrated; public SpriteRenderer[] renderers;
             public HeroDefinition Definition=>Heroes[hero];
         }
@@ -132,7 +134,7 @@ namespace Paname
         {
             for(int i=actors.childCount-1;i>=0;i--){var child=actors.GetChild(i).gameObject;child.SetActive(false);Destroy(child);}
             foreach(var shot in shots){shot.active=false;shot.root.gameObject.SetActive(false);}
-            Array.Clear(players,0,4);enemies.Clear();shots.Clear();thrown.Clear();rushes.Clear();effects?.Clear();ResetBonuses();ResetBoss();ResetHostages();ResetEncounters();ResetProps();ResetVehicles();
+            Array.Clear(players,0,4);enemies.Clear();shots.Clear();thrown.Clear();rushes.Clear();effects?.Clear();bossFellAt=-99;ResetBonuses();ResetBoss();ResetHostages();ResetEncounters();ResetProps();ResetVehicles();
         }
         void BuildLobbyActors()
         {
@@ -149,7 +151,7 @@ namespace Paname
         public void BeginRound()
         {
             if(OnlineRound())return;
-            ResetActors();PlaceProps();BuildTerrain();PlaceVehicles();Score=carriedScore;carriedScore=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;screenLocked=false;goFromX=-1;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;
+            ResetActors();PlaceProps();BuildTerrain();PlaceVehicles();Score=carriedScore;carriedScore=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;screenLocked=false;goFromX=-1;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;bossFellAt=-99;
             for(int i=0;i<4;i++)if(slots[i].joined)SpawnPlayer(i,2+i*1.3f);
             PlaceHostages();ResetContinue();StartReplay();
             phase=Phase.Playing;Announce(CurrentMission.intro);Sound(startClip);if(musicOut){musicOut.Stop();musicOut.clip=musicClip;}
@@ -185,6 +187,8 @@ namespace Paname
             }
             else if(phase==Phase.Won&&NextMissionDefinition!=null&&ContinuePressed())NextMission();
             else if(phase==Phase.Playing)LocalStep();
+            // The simulation has stopped at the mission's end: the heroes are drawn in their victory pose (drawn only).
+            if(phase==Phase.Won){for(int i=0;i<4;i++)if(players[i]!=null&&players[i].hp>0)SyncPlayer(i);}
             UpdateCamera(Time.unscaledDeltaTime);UpdateSoundtrack(Time.unscaledDeltaTime);
         }
         void CheckControllers()
@@ -230,7 +234,7 @@ namespace Paname
             if(phase!=Phase.Playing)return;
             // CONTINUE? holds the whole mission until the team answers or the countdown ends.
             if(continueClock>0){TickContinue(dt,commands);return;}
-            SimulationTime+=dt;announcementTimer=Mathf.Max(0,announcementTimer-dt);shake=Mathf.Max(0,shake-dt*2);
+            SimulationTime+=dt;announcementTimer=Mathf.Max(0,announcementTimer-dt);shake=Mathf.Max(0,shake-dt*Rules.screen.fade);
             cameraX=Mathf.Max(cameraX,CameraTarget());
             float rear=Mathf.Max(.5f,cameraX-SimHalfWidth+.7f);
             for(int i=0;i<4;i++)
@@ -243,7 +247,7 @@ namespace Paname
                     p.downTimer-=dt;
                     // Back from the team's lives, or from his own when every hero has his.
                     if(p.downTimer<=0&&(Level.livesPerPlayer?p.lives>0:Reserves>0)){if(Level.livesPerPlayer)p.lives--;else Reserves--;Revive(p,rear,Level.respawn.inPlace);}
-                    else {p.root.gameObject.SetActive(false);continue;}
+                    else {ShowFallen(p);continue;}
                 }
                 PlayerCommand input=i<commands.Length?commands[i]:default;
                 // In a vehicle, the stick and the buttons drive it (PanameVehicles.cs).
@@ -263,7 +267,9 @@ namespace Paname
                 // Down + jump on a ledge drops through it; on solid ground it is a jump.
                 bool drop=input.jump&&input.down&&grounded&&OnLedge(p.position.x,p.position.y,ForHeroes);
                 if(drop)p.dropFrom=p.position.y;else if(input.jump&&grounded)p.vertical=hero.jump;
-                if(Settle(ref p.position,ref p.vertical,29,dt,ForHeroes,p.dropFrom,grounded&&!drop&&p.vertical<=0)&&p.position.y<p.dropFrom-.01f)p.dropFrom=float.MaxValue;
+                float fall=p.vertical;bool landed=Settle(ref p.position,ref p.vertical,29,dt,ForHeroes,p.dropFrom,grounded&&!drop&&p.vertical<=0);
+                if(landed&&p.position.y<p.dropFrom-.01f)p.dropFrom=float.MaxValue;
+                if(landed&&!grounded)LandingDust(p.position,fall,.9f);
                 if(relief)PitFall(p);
                 p.floor=FloorAt(p.position.x,p.position.y,ForHeroes,p.dropFrom);
                 p.aimDown=input.down&&!input.aimUp&&p.position.y-p.floor>.1f;
@@ -301,11 +307,45 @@ namespace Paname
             var tip=p.Definition.muzzles[HeroCell(p)];
             return p.position+new Vector2(tip.x*p.facing,tip.y+StrideBob(p));
         }
+        // Drawn only (lot 3c): the hurt and victory poses replace the simulated image for a while; shots still leave from the
+        // simulated one (MuzzlePoint), whose gun the poses do not draw.
+        float bossFellAt=-99;
+        int ShownCell(Player p)
+        {
+            var h=p.Definition;var a=h.animations;var poses=Rules.poses;float hurt=SimulationTime-p.hurtAt;
+            if(h.victoryPose>=0&&Victorious(p))return a.Cell(h.victoryPose,SimulationTime-bossFellAt,0);
+            if(h.hurtPose>=0&&hurt<poses.hurt&&!p.crouching&&p.knifePose<=0&&p.throwPose<=0&&p.specialPose<=0&&p.dash<=0)return a.Cell(h.hurtPose,hurt,0);
+            return HeroCell(p);
+        }
+        // At the mission's end, and for a while after a boss falls when he stands still and holds his fire.
+        bool Victorious(Player p)=>phase==Phase.Won||SimulationTime-bossFellAt<Rules.poses.victory&&p.position.y-p.floor<.03f&&!p.moving&&!p.aimUp&&!p.crouching&&p.fireTimer<-.15f;
+        // Drawn only: a fallen hero is knocked back (his hurt image while he flies) and lies in his "down" state until he gets up,
+        // blinking just before; out of lives he stays a while. Without a "down" state he is gone at once, as before.
+        void ShowFallen(Player p)
+        {
+            if(!p.root)return;var h=p.Definition;var poses=Rules.poses;float t=SimulationTime-p.fellAt;
+            bool back=Level.livesPerPlayer?p.lives>0:Reserves>0,shown=h.downPose>=0&&(back||t<poses.fall.time+poses.lie);
+            if(p.root.gameObject.activeSelf!=shown)p.root.gameObject.SetActive(shown);if(!shown)return;
+            var a=h.animations;float k=poses.fall.time>0?Mathf.Clamp01(t/poses.fall.time):1;
+            p.root.position=new Vector2(p.position.x,p.floor);p.root.localScale=new Vector3(p.facing,1,1);
+            p.illustrated.sprite=a.Sprite(a.Cell(k<1&&h.hurtPose>=0?h.hurtPose:h.downPose,t,0));
+            p.illustrated.transform.localPosition=new Vector3(-poses.fall.back*k,Mathf.Sin(k*Mathf.PI)*poses.fall.height,0);
+            ArcadeEffects.HitFlash(p.illustrated,0,flashProperties);
+            float left=back?p.downTimer:poses.fall.time+poses.lie-t;
+            float alpha=left<poses.blink&&Mathf.Repeat(SimulationTime,.14f)<.07f?.25f:1;
+            foreach(var r in p.renderers){var c=r.color;c.a=alpha;r.color=c;}
+        }
+        // Drawn only: puffs of dust on both sides of whatever lands hard (the rules' screen.dust, 0 none).
+        void LandingDust(Vector2 at,float fall,float width)
+        {
+            var f=Rules.screen;if(f.dust<=0||-fall<f.landing)return;
+            for(int side=-1;side<=1;side+=2)effects.Play(3,at+new Vector2(side*width*.45f,.08f),f.dust,.32f,side,new Vector2(side*.9f,.15f));
+        }
         void SyncPlayer(int i)
         {
-            var p=players[i];if(p==null||!p.root)return;
-            p.root.position=p.position;p.root.localScale=new Vector3(p.facing,1,1);
-            p.illustrated.sprite=p.Definition.animations.Sprite(HeroCell(p));
+            var p=players[i];if(p==null||!p.root)return;if(p.hp<=0){ShowFallen(p);return;}
+            p.root.position=phase==Phase.Won?new Vector2(p.position.x,p.floor):p.position;p.root.localScale=new Vector3(p.facing,1,1);
+            p.illustrated.sprite=p.Definition.animations.Sprite(ShownCell(p));
             p.illustrated.transform.localPosition=new Vector3(0,StrideBob(p),0);
             ArcadeEffects.HitFlash(p.illustrated,p.flash>0?1:0,flashProperties);
             float alpha=p.invulnerable>0&&Mathf.Sin(SimulationTime*35)>0?.45f:1;
@@ -397,7 +437,10 @@ namespace Paname
         {
             e.root.position=e.position;e.root.localScale=new Vector3(e.facing,1,1);var set=e.type.animations;
             if(state!=e.animState){e.animState=state;e.animTime=0;}else e.animTime+=dt;
-            e.illustrated.sprite=set.Sprite(set.Cell(state,e.animTime,e.walk));ArcadeEffects.HitFlash(e.illustrated,e.flash>0?1:0,flashProperties);e.illustrated.transform.localRotation=Quaternion.Euler(0,0,e.stagger>0?-7:0);
+            e.illustrated.sprite=set.Sprite(set.Cell(state,e.animTime,e.walk));ArcadeEffects.HitFlash(e.illustrated,e.flash>0?1:0,flashProperties);
+            // A hit jolts it back and up for a moment (drawn only, the rules' screen block).
+            var feel=Rules.screen;float jolt=Mathf.Clamp01(e.stagger/.11f),away=e.knockback!=0?Mathf.Sign(e.knockback):-e.facing;
+            e.illustrated.transform.localRotation=Quaternion.Euler(0,0,-feel.tilt*(e.stagger>0?1:0));e.illustrated.transform.localPosition=new Vector3(feel.push*jolt*away*e.facing,feel.hop*jolt,0);
             ShowEnemyStaging(e);
         }
         // Gunmen aim, freeze in their shooting frame, then fire level at chest height: jumping dodges it.
@@ -432,9 +475,9 @@ namespace Paname
         {
             // A hero in a vehicle is not hurt: the vehicle is.
             if(p.vehicle!=null){if(!bossDefeated&&p.hp>0)DamageVehicle(p.vehicle,amount);return;}
-            if(bossDefeated||p.invulnerable>0||p.hp<=0)return;p.hp-=amount*Level.damageTaken;p.invulnerable=Level.hurtInvulnerable;p.flash=.075f;shake=.15f;effects.Impact(p.position+Vector2.up,-p.facing);Sound(playerHitClip);
+            if(bossDefeated||p.invulnerable>0||p.hp<=0)return;p.hp-=amount*Level.damageTaken;p.invulnerable=Level.hurtInvulnerable;p.flash=.075f;shake=.15f;effects.Impact(p.position+Vector2.up,-p.facing);Sound(playerHitClip);p.hurtAt=SimulationTime;
             // A hero who falls loses the weapon in hand and comes back with the hero's own.
-            if(p.hp<=0){p.downTimer=Level.respawn.delay;p.rescued=0;p.root.gameObject.SetActive(false);Disarm(p);p.dash=0;p.salvo=0;p.specialPose=0;}
+            if(p.hp<=0){p.downTimer=Level.respawn.delay;p.rescued=0;p.fellAt=SimulationTime;Disarm(p);p.dash=0;p.salvo=0;p.specialPose=0;ShowFallen(p);}
         }
         static ShotLook Look(string look)=>look=="molotov"?ShotLook.Molotov:look=="tracer"?ShotLook.Tracer:ShotLook.Bullet;
         static readonly Color TracerHalo=new Color(1,.45f,.08f,.65f);
@@ -528,7 +571,9 @@ namespace Paname
             viewX=phase==Phase.Lobby||dt<=0||cameraX<viewX||cameraX>viewX+40?cameraX:Mathf.MoveTowards(viewX,cameraX,25*dt);
             if(goFromX!=goSeen){goSeen=goFromX;goSince=Time.unscaledTime;}
             UpdatePanorama(viewX,gameCamera.orthographicSize*gameCamera.aspect,CurrentMission.cameraMin,CurrentMission.cameraMax);
-            gameCamera.transform.position=new Vector3(viewX+(phase==Phase.Playing?Mathf.Sin(Time.unscaledTime*70)*shake*.15f:0),3.6f,-10);
+            // The shake of the rules' screen block: drawn only, from the simulation's shake.
+            var feel=Rules.screen;float jolt=phase==Phase.Playing?Mathf.Min(shake*feel.shake,feel.max):0;
+            gameCamera.transform.position=new Vector3(viewX+Mathf.Sin(Time.unscaledTime*70)*jolt,3.6f+Mathf.Sin(Time.unscaledTime*53+1)*jolt*feel.vertical,-10);
         }
         void OnGUI()
         {

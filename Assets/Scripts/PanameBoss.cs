@@ -225,7 +225,7 @@ namespace Paname
             bossHealth=Mathf.Max(0,bossHealth-amount);bossFlash=.065f;
             if(!bossEnraged&&bossHealth>0&&bossHealth<=bossMaxHealth/2){bossEnraged=true;bossRageTime=0;bossTimer=Mathf.Min(bossTimer,Boss.rageDelay);Announce(BossEntry.rage);}
             if(bossHealth>0)return;
-            bossDefeated=true;bossDeathClock=2.5f;bossExplosionTimer=0;Score+=Boss.score;if(bossWake)bossWake.enabled=false;
+            bossDefeated=true;bossFellAt=SimulationTime;bossDeathClock=2.5f;bossExplosionTimer=0;Score+=Boss.score;if(bossWake)bossWake.enabled=false;
             // A boss with a "wreck" state shows it as it goes down.
             int wreck=Boss.animations.Find("wreck");if(wreck>=0&&bossRenderer){bossCell=Boss.animations.states[wreck].cells[0];bossRenderer.sprite=Boss.animations.Sprite(bossCell);}
             if(bossSight)bossSight.gameObject.SetActive(false);

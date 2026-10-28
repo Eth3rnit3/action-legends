@@ -92,6 +92,7 @@ namespace Paname
             p.position=v.position;if(relief){PitFall(p);v.position=p.position;}
             v.lift=v.position.y-FloorAt(v.position.x,v.position.y,ForHeroes);
             // Landing from a jump or a fall crushes the enemies under it.
+            if(landed&&!grounded)LandingDust(v.position,fall,t.box.width);
             if(landed&&!grounded&&fall<-4&&t.ram.stomp>0)for(int e=enemies.Count-1;e>=0;e--){var en=enemies[e];if(Shootable(en)&&Mathf.Abs(en.position.x-v.position.x)<half+en.type.hitRadius*.5f&&Mathf.Abs(en.position.y-v.position.y)<1.2f)HitEnemy(e,t.ram.stomp,en.position.x>=v.position.x?1:-1,t.ram.woundKind);}
             // Ramming, every interval while it moves: the enemies in its way, the prop that walls it.
             v.ramTimer-=dt;
@@ -141,7 +142,7 @@ namespace Paname
             var t=v.type;var w=t.Gun;Vector2 aim=GunAim(v),muzzle=VehiclePoint(v,t.turret.anchor)+aim*t.turret.length;
             Volley(w,muzzle,aim,p,p.shots);p.shots++;
             if(w.flashKind>0)effects.Muzzle(muzzle,aim,w.flashKind==2);
-            if(w.casings)effects.Casing(VehiclePoint(v,t.turret.anchor)+Vector2.up*.1f,v.facing);
+            if(w.casings)effects.Casing(VehiclePoint(v,t.turret.anchor)+Vector2.up*.1f,v.facing,FloorUnder(v),Rules.screen.casings);
             v.fireTimer=w.fireRate;shake=Mathf.Max(shake,w.recoil.shake);Sound(w.Clip);
         }
         void FireCannon(Player p,Vehicle v)

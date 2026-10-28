@@ -548,6 +548,19 @@ def validate_rules(data, resources, weapons=None):
         validate_cell(opening.get("sprite"), resources, ol + ".sprite", errors)
         errors.number(opening, "height", .2, 10, ol, 2.6)
         errors.number(opening, "time", 0, 5, ol, .7)
+    # Lot 3c, drawn only: the heroes' hurt, down and victory poses, and the life on screen.
+    poses, pl = obj(data, "poses"), label + ".poses"
+    for key, low, high, default in (("hurt", 0, 2, .3), ("blink", 0, 5, .5), ("lie", 0, 30, 2.5), ("victory", 0, 10, 3)):
+        errors.number(poses, key, low, high, pl, default)
+    fall = obj(poses, "fall")
+    for key, low, high, default in (("time", 0, 2, .4), ("back", 0, 5, .7), ("height", 0, 5, .6)):
+        errors.number(fall, key, low, high, pl + ".fall", default)
+    screen, scl = obj(data, "screen"), label + ".screen"
+    for key, low, high, default in (("shake", 0, 1, .15), ("vertical", 0, 2, 0), ("max", 0, 1, .2), ("fade", .2, 20, 2), ("dust", 0, 3, 0), ("landing", 0, 40, 6),
+                                    ("push", 0, 1, 0), ("hop", 0, 1, 0), ("tilt", 0, 45, 7), ("casings", 0, .3, .055)):
+        errors.number(screen, key, low, high, scl, default)
+    if not isinstance(screen.get("banner", False), bool):
+        errors.append(f"{scl}.banner: true or false")
     return errors
 
 

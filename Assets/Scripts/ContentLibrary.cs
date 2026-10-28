@@ -179,8 +179,9 @@ namespace Paname
         public AnimationSet animations=new AnimationSet();
         // States the engine reads; the optional ones fall back to a near pose: crouchWalk and crouchShoot to crouch, aimDiagonal to aimUp.
         public static readonly string[] Required={"idle","run","jump","crouch","aimUp","jumpDown","knife","throw"};
-        // specialPose: the optional "special" state, shown while the special's pose lasts.
-        [NonSerialized] public int idle,run,jumping,crouching,crouchWalk,crouchShoot,aimUp,aimDiagonal,jumpDown,stab,throwing,specialPose;
+        // specialPose: the optional "special" state, shown while the special's pose lasts. hurtPose, downPose, victoryPose: the
+        // optional "hurt", "down" and "victory" states, drawn over the simulated image (the rules' poses), -1 without them.
+        [NonSerialized] public int idle,run,jumping,crouching,crouchWalk,crouchShoot,aimUp,aimDiagonal,jumpDown,stab,throwing,specialPose,hurtPose,downPose,victoryPose;
         [NonSerialized] public Vector2[] muzzles;
         // Where a thrown grenade leaves the hand, in the last image of the throw.
         [NonSerialized] public Vector2 hand;
@@ -209,6 +210,7 @@ namespace Paname
             var f=portraitFrame;if(!(f.size>.05f&&f.x>=0&&f.y>=0&&f.x+f.size<=1.0001f&&f.y+f.size*PortraitAspect<=1.0001f))throw new ArgumentException(label+" : portraitFrame dans la case (x, y, size entre 0 et 1)");
             var a=animations;idle=a.Find("idle");run=a.Find("run");jumping=a.Find("jump");crouching=a.Find("crouch");crouchWalk=a.Find("crouchWalk",crouching);crouchShoot=a.Find("crouchShoot",crouching);
             aimUp=a.Find("aimUp");aimDiagonal=a.Find("aimDiagonal",aimUp);jumpDown=a.Find("jumpDown");stab=a.Find("knife");throwing=a.Find("throw");specialPose=a.Find("special");
+            hurtPose=a.Find("hurt");downPose=a.Find("down");victoryPose=a.Find("victory");
             // Shots leave from the image shown, so every pose the hero fires from needs its barrel tip; the knife and the throw do not fire.
             foreach(var state in new[]{idle,run,jumping,crouching,crouchWalk,crouchShoot,aimUp,aimDiagonal,jumpDown})foreach(int cell in a.states[state].cells)if(!a.HasAnchor("muzzle",cell))throw new ArgumentException(label+" : ancrage muzzle manquant pour l'image "+cell);
             muzzles=a.Points("muzzle");

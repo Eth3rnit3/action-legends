@@ -67,6 +67,38 @@ namespace Paname
     [Serializable] public sealed class TallyRules {public int[] hostage,perSecond;public SpriteCell icon=new SpriteCell();}
     // One line of a weapons table: weapon crates that do not name their weapon give these, weight times in every sum of weights.
     [Serializable] public sealed class WeaponChance {public string weapon;public int weight=1;[NonSerialized] public WeaponDefinition gun;}
+    // Drawn only (lot 3c): the poses a hero strikes over his simulated image. hurt: seconds his "hurt" state shows after a hit;
+    // a hero who falls is knocked back (fall: back units behind him, height up, over time seconds) and shows his "down" state
+    // until he gets up, blinking for blink seconds before; out of lives, he lies there lie seconds. victory: seconds his "victory"
+    // state shows after a boss falls while he stands still (and to the end at the mission's end). A hero without a state keeps
+    // his simulated image (no "down": he disappears as he falls, as before).
+    [Serializable] public sealed class PoseFall {public float time=.4f,back=.7f,height=.6f;}
+    [Serializable] public sealed class HeroPoses
+    {
+        public float hurt=.3f,blink=.5f,lie=2.5f,victory=3;public PoseFall fall=new PoseFall();
+        public void Validate(string label)
+        {
+            Content.Range(hurt,0,2,label+".hurt");Content.Range(blink,0,5,label+".blink");Content.Range(lie,0,30,label+".lie");Content.Range(victory,0,10,label+".victory");
+            Content.Range(fall.time,0,2,label+".fall.time");Content.Range(fall.back,0,5,label+".fall.back");Content.Range(fall.height,0,5,label+".fall.height");
+        }
+    }
+    // Drawn only (lot 3c): life on screen, nothing of it reaches the simulation. shake: how far the camera shakes per unit of the
+    // game's shake (horizontally, vertical times as much up and down, at most max units), fading at fade units per second;
+    // dust: size of the puffs under a hero or a vehicle that lands from a fall of at least landing units per second (0 none);
+    // jolt: an enemy hit is pushed back push units and lifted hop units for a moment, tilted tilt degrees;
+    // casings: size of the spent cases, which bounce on the relief under the gun; banner: the announcements' banner.
+    [Serializable] public sealed class ScreenFeel
+    {
+        public float shake=.15f,vertical,max=.2f,fade=2,dust,landing=6,push,hop,tilt=7,casings=.055f;
+        // banner: the announcements' banner under the score line (off since 0.5.1 unless the rules turn it on).
+        public bool banner;
+        public void Validate(string label)
+        {
+            Content.Range(shake,0,1,label+".shake");Content.Range(vertical,0,2,label+".vertical");Content.Range(max,0,1,label+".max");Content.Range(fade,.2f,20,label+".fade");
+            Content.Range(dust,0,3,label+".dust");Content.Range(landing,0,40,label+".landing");Content.Range(push,0,1,label+".push");Content.Range(hop,0,1,label+".hop");
+            Content.Range(tilt,0,45,label+".tilt");Content.Range(casings,0,.3f,label+".casings");
+        }
+    }
     // Rules every mission plays by unless it names other ones: grenades, bonuses, weapon crates and the GO sign.
     // Resources/Content/rules/<id>.json, "default" unless the mission sets "rules".
     [Serializable] public sealed class GameRules
@@ -90,6 +122,8 @@ namespace Paname
         public StageRules stage=new StageRules();
         // The sign that blinks over a wave's objective (a barricade to break) while that wave holds the screen, size units tall.
         public SpriteCell objective=new SpriteCell();public float objectiveSize=1.1f;
+        // The heroes' hurt, down and victory poses, and the shake, dust, jolts and casings (both drawn only).
+        public HeroPoses poses=new HeroPoses();public ScreenFeel screen=new ScreenFeel();
         [NonSerialized] public DeathMotion[] motions;
         public void Validate()
         {
@@ -132,6 +166,7 @@ namespace Paname
             if(deaths!=null)for(int i=0;i<deaths.Length;i++){var d=deaths[i];if(d==null)throw new ArgumentException(label+".deaths : entrée vide");d.Validate(label+".deaths["+i+"]");if(motions[d.kind]!=null)throw new ArgumentException(label+".deaths : "+d.damage+" deux fois");motions[d.kind]=d;}
             stage.Validate(label+".stage");
             if(!string.IsNullOrEmpty(objective?.texture))objective.Validate(label+".objective");Content.Range(objectiveSize,.2f,5,label+".objectiveSize");
+            poses.Validate(label+".poses");screen.Validate(label+".screen");
             Content.PerDifficulty(tally.hostage,0,100000,label+".tally.hostage");Content.PerDifficulty(tally.perSecond,0,10000,label+".tally.perSecond");tally.icon.Validate(label+".tally.icon");
         }
         // Also checks a mission's own table; required when some weapon crate draws from it.

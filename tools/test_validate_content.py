@@ -510,6 +510,14 @@ class LibraryValidationTests(unittest.TestCase):
             lambda d: d.update(supplies=[0, 7]),
             lambda d: d.update(drops=[]),
             lambda d: d["go"].update(texture="Art/none"),
+            # Lot 3c: poses and screen effects, drawn only, within their bounds.
+            lambda d: d["poses"].update(hurt=5),
+            lambda d: d["poses"]["fall"].update(back=9),
+            lambda d: d["poses"].update(victory=-1),
+            lambda d: d["screen"].update(shake=3),
+            lambda d: d["screen"].update(dust=-1),
+            lambda d: d["screen"].update(banner="yes"),
+            lambda d: d["screen"].update(fade=0),
         )
         for change in changes:
             with self.subTest(change=change):
@@ -525,6 +533,11 @@ class LibraryValidationTests(unittest.TestCase):
         library, errors = load_library(RESOURCES, {"rules": [variant]})
         self.assertEqual(errors, [])
         self.assertEqual(library["rules"]["test-rules"]["grenade"], LIBRARY["rules"]["default"]["grenade"])
+        # Rules without poses or screen blocks keep the engine's defaults.
+        bare = copy.deepcopy(base)
+        bare.pop("poses")
+        bare.pop("screen")
+        self.assertEqual(validate_rules(bare, RESOURCES), [])
 
     def test_weapons(self):
         for weapon_id in ("rifle", "heavy-machinegun", "shotgun", "flamethrower", "rocket-launcher", "laser"):

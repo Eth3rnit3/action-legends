@@ -43,7 +43,7 @@ namespace Paname
             if(w.flashKind>0)effects.Muzzle(muzzle,aim,w.flashKind==2);
             p.fireTimer=w.fireRate;p.recoil=.045f;if(w.recoil.push>0)p.kick=-aim.x*w.recoil.push;
             if(!w.Unlimited&&--p.ammo<=0)Disarm(p);
-            if(w.casings)effects.Casing(muzzle+new Vector2(-p.facing*.62f,.04f),p.facing);
+            if(w.casings)effects.Casing(muzzle+new Vector2(-p.facing*.62f,.04f),p.facing,p.floor,Rules.screen.casings);
             shake=Mathf.Max(shake,w.recoil.shake);Sound(w.Clip);
         }
         // The projectiles of one shot: pellets fanned out by spread, scattered by the fixed pattern at shot (a count of shots fired).

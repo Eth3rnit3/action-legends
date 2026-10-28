@@ -178,10 +178,12 @@ namespace Paname
             var sprite=Sprite.Create(texture,rect,new Vector2(.5f,.5f),ppu,0,SpriteMeshType.FullRect);
             if(m.outline!=null&&m.outline.Length>=3)
             {
+                // OverrideGeometry takes pixels from the rect's corner, not units from the pivot: the fan's centre is the rect's middle.
                 var vertices=new Vector2[m.outline.Length+1];var triangles=new ushort[m.outline.Length*3];
+                vertices[0]=new Vector2(rect.width*.5f,rect.height*.5f);
                 for(int i=0;i<m.outline.Length;i++)
                 {
-                    vertices[i+1]=new Vector2((m.outline[i].x-.5f)*rect.width/ppu,(m.outline[i].y-.5f)*rect.height/ppu);
+                    vertices[i+1]=new Vector2(Mathf.Clamp(m.outline[i].x*rect.width,0,rect.width),Mathf.Clamp(m.outline[i].y*rect.height,0,rect.height));
                     triangles[i*3]=0;triangles[i*3+1]=(ushort)(i+1);triangles[i*3+2]=(ushort)((i+1)%m.outline.Length+1);
                 }
                 sprite.OverrideGeometry(vertices,triangles);

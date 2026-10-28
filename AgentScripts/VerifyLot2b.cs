@@ -89,9 +89,10 @@ public static class VerifyLot2b
         {
             var e=ContentLibrary.Enemy(id);var a=e.animations;
             foreach(var s in new[]{"unaware","surprised","flee","death","deathExplosion","deathFire","deathKnife"})if(a.Find(s)<0){states=false;missing.Add(id+"."+s);}
-            states&=a.sheet.texture=="Art/enemies/"+id&&a.CellCount==16&&e.cries!=null;
+            // Lot 3c appends rows of in-between images to the most common ones; the first sixteen cells stay.
+            states&=a.sheet.texture=="Art/enemies/"+id&&a.CellCount>=16&&a.sheet.columns==4&&e.cries!=null;
         }
-        Check(states,"Les six ennemis ont leur planche (Art/enemies/<id>.png, 16 cases : les 4 anciennes à l'identique + inattentif, surpris, fuite, morts par balle, explosion, feu, couteau) et un cri"+(missing.Count>0?" ; manque "+string.Join(",",missing):""),checks);
+        Check(states,"Les six ennemis ont leur planche (Art/enemies/<id>.png, 16 cases au moins : les 4 anciennes à l'identique + inattentif, surpris, fuite, morts par balle, explosion, feu, couteau) et un cri"+(missing.Count>0?" ; manque "+string.Join(",",missing):""),checks);
         var lines=new List<string>();bool staged=true;
         foreach(var m in original)
         {

@@ -42,7 +42,7 @@
     "sheet": {
       "texture": "Art/enemies/looter-rusher",
       "columns": 4,
-      "rows": 4,
+      "rows": 6,
       "cropLeft": 0.065,
       "cropRight": 0.025,
       "pivot": {
@@ -63,15 +63,20 @@
         "name": "run",
         "cells": [
           1,
-          2
+          16,
+          2,
+          17
         ],
-        "perStride": 0.7
+        "perStride": 1.4
       },
       {
         "name": "attack",
         "cells": [
-          3
-        ]
+          3,
+          18
+        ],
+        "fps": 8,
+        "loop": false
       },
       {
         "name": "unaware",
@@ -84,8 +89,11 @@
       {
         "name": "surprised",
         "cells": [
-          6
-        ]
+          6,
+          23
+        ],
+        "fps": 4,
+        "loop": false
       },
       {
         "name": "hurt",
@@ -97,9 +105,11 @@
         "name": "flee",
         "cells": [
           8,
-          9
+          21,
+          9,
+          22
         ],
-        "perStride": 0.7
+        "perStride": 1.4
       },
       {
         "name": "fall",
@@ -111,9 +121,10 @@
         "name": "death",
         "cells": [
           10,
+          20,
           11
         ],
-        "fps": 5,
+        "fps": 6,
         "loop": false
       },
       {
@@ -141,9 +152,10 @@
         "cells": [
           7,
           10,
+          20,
           11
         ],
-        "fps": 5,
+        "fps": 6,
         "loop": false
       }
     ],

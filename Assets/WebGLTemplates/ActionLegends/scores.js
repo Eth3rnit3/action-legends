@@ -91,7 +91,9 @@
       for (const event of latest.values()) {
         try {
           const content = JSON.parse(event.content);
-          if (content.game === 'action-legends' && content.replay && content.runs && Number.isInteger(content.score)) scored.push({event, content});
+          // One board per game version: an older run is not replayed by this simulation (PanameScores.cs).
+          if (content.game === 'action-legends' && content.replay && content.runs && Number.isInteger(content.score) &&
+            content.replay.version === request.version) scored.push({event, content});
         } catch {}
       }
       scored.sort((a, b) => b.content.score - a.content.score);

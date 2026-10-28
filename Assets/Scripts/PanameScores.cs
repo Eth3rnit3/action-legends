@@ -72,6 +72,9 @@ namespace Paname
             {
                 if(entry.verdict=="ok"&&++shown>=BoardSize)return;
                 if(entry.verdict.Length>0)continue;
+                // Each version has its own board: an older run is not replayed (it would rarely match a changed
+                // simulation, and would spend the checks), nor called a cheat. scores.js already leaves them out.
+                if(entry.replay.version!=Application.version){entry.verdict="old";continue;}
                 if(entry.replay.continues>0){entry.verdict="ko";continue;}
                 if(boardChecks>=BoardChecks)return;
                 verifier??=CreateVerifier(missions);
@@ -175,7 +178,7 @@ namespace Paname
             }
             string note=boardLoading?"CHARGEMENT DES SCORES...":verifyingEntry!=null?"VÉRIFICATION DES REPLAYS EN COURS...":rank==0&&boardNote.Length==0&&board.Count>0?"AUCUN SCORE VÉRIFIÉ POUR CETTE VERSION DU JEU.":boardNote;
             if(note.Length>0)Label(300,rank==0?300:y+6,680,26,note,14,Gold,true,TextAnchor.MiddleCenter);
-            Label(300,546,680,34,"Chaque score est rejoué dans ton navigateur avant d'être affiché : seuls les scores reproduits à l'identique apparaissent.",11,C("9AAFB2"),false,TextAnchor.MiddleCenter);
+            Label(300,546,680,34,"Classement de la version "+Application.version+". Chaque score est rejoué dans ton navigateur avant d'être affiché : seuls les scores reproduits à l'identique apparaissent.",11,C("9AAFB2"),false,TextAnchor.MiddleCenter);
             if(Button(540,584,200,34,"FERMER",Coral,true))CloseBoard();
         }
         void CloseBoard(){boardOpen=false;codeClosedAt=Time.unscaledTime;}

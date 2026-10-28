@@ -81,7 +81,7 @@ namespace Paname
             int hits=pr.pierce<0?beamTargets.Count:Mathf.Min(beamTargets.Count,pr.pierce+1);
             if(pr.pierce>=0&&hits==pr.pierce+1)length=Mathf.Min(length,beamDepths[hits-1]+.4f);
             for(int i=0;i<hits;i++){int index=enemies.IndexOf(beamTargets[i]);if(index>=0)HitEnemy(index,w.damage,direction,w.wound);}
-            HitBossOrBomb(muzzle,muzzle+aim*length,w.damage);BeamFreesHostages(muzzle,muzzle+aim*length,p);if(breakables.Count>0)BeamHitsProps(muzzle,muzzle+aim*length,w.damage,direction);
+            HitBossOrBomb(muzzle,muzzle+aim*length,w.BossDamage(w.damage));BeamFreesHostages(muzzle,muzzle+aim*length,p);if(breakables.Count>0)BeamHitsProps(muzzle,muzzle+aim*length,w.damage,direction);
             var s=Shoot(ShotLook.Sprite,muzzle+aim*(length*.5f),Vector2.zero,w.damage,false,true);Load(s,w,p);
             if(s!=null){s.heading=aim;s.length=length;s.root.localScale=new Vector3(length,pr.size,1);s.root.localRotation=Quaternion.Euler(0,0,Mathf.Atan2(aim.y,aim.x)*Mathf.Rad2Deg);}
         }

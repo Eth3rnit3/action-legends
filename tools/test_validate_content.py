@@ -571,6 +571,8 @@ class LibraryValidationTests(unittest.TestCase):
             lambda d: d["projectile"]["sprite"].update(texture="Art/none"),
             lambda d: d["explosion"].update(radius=20) if "explosion" in d else d.update(explosion={"radius": 20}),
             lambda d: d["recoil"].update(push=50),
+            lambda d: d.update(bossFactor=5),
+            lambda d: d.update(bossFactor="half"),
         )
         for change in changes:
             with self.subTest(change=change):
@@ -582,6 +584,9 @@ class LibraryValidationTests(unittest.TestCase):
         beam["projectile"].pop("sprite")
         self.assertTrue(validate_weapon(beam, RESOURCES))
         self.assertEqual(LIBRARY["weapons"]["carbine"]["fireRate"], .085)
+        # Lot 3c: the vehicles' guns do less to bosses than to the street.
+        for weapon_id in ("mitrailleuse-de-bord", "obus-de-char"):
+            self.assertLess(LIBRARY["weapons"][weapon_id]["bossFactor"], 1, weapon_id)
         self.assertNotIn("letter", LIBRARY["weapons"]["carbine"])
 
     def test_new_weapon_from_data_only(self):

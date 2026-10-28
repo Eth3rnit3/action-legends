@@ -526,7 +526,7 @@ namespace Paname
                 // A beam struck everything when it was fired; it only lingers on screen.
                 else if(s.weapon!=null&&s.weapon.projectile.Beam){}
                 else if(ShotFreesHostage(s,before))hit=true;
-                else if(HitBossOrBomb(before,s.position,s.damage)){hit=true;if(s.blast>0&&s.blastAnywhere)Blast(s.position,s.blast,s.blastDamage,0,direction,true);}
+                else if(HitBossOrBomb(before,s.position,s.weapon!=null?s.weapon.BossDamage(s.damage):s.damage)){hit=true;if(s.blast>0&&s.blastAnywhere)Blast(s.position,s.blast,s.blastDamage,0,direction,true);}
                 else if(breakables.Count>0&&ShotHitsProp(s,before,direction))hit=true;
                 else
                 {

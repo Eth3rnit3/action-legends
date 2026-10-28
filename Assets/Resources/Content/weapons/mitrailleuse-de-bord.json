@@ -9,6 +9,7 @@
   ],
   "fireRate": 0.075,
   "damage": 4,
+  "bossFactor": 0.75,
   "projectile": {
     "type": "bullet",
     "speed": 40,

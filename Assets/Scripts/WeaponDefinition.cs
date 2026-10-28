@@ -38,6 +38,9 @@ namespace Paname
         public int damage;
         public int[] ammo;
         public float fireRate;
+        // What its projectiles and rays do to a boss, times their damage (rounded, at least 1 unless 0): a vehicle's gun
+        // can sweep a street without melting the bosses. The explosion's own bossDamage is not scaled.
+        public float bossFactor=1;
         public bool casings=true;
         public WeaponProjectile projectile=new WeaponProjectile();
         public WeaponExplosion explosion=new WeaponExplosion();
@@ -50,6 +53,7 @@ namespace Paname
         public bool Unlimited=>ammo==null||ammo.Length==0||ammo[0]==0;
         public AudioClip Clip=>clip?clip:(clip=Resources.Load<AudioClip>(sound));
         public bool HasIcon=>!string.IsNullOrEmpty(icon?.texture);
+        public int BossDamage(int amount)=>bossFactor==1?amount:bossFactor<=0?0:Mathf.Max(1,Mathf.RoundToInt(amount*bossFactor));
         public void Validate()
         {
             string label="Arme "+id;
@@ -67,7 +71,7 @@ namespace Paname
             if(!string.IsNullOrEmpty(voice))Content.Path(voice,"Audio/",label+".voice");
             if(HasIcon)icon.Validate(label+".icon");
             if(!string.IsNullOrEmpty(crate?.texture))crate.Validate(label+".crate");
-            Content.Range(fireRate,.02f,3,label+".fireRate");
+            Content.Range(fireRate,.02f,3,label+".fireRate");Content.Range(bossFactor,0,4,label+".bossFactor");
             if(damage<1||damage>200)throw new ArgumentException(label+" : damage entre 1 et 200");
             Content.Path(sound,"Audio/",label+".sound");Content.Require<AudioClip>(sound,label+" : son du tir");
             flashKind=Array.IndexOf(Flashes,flash);if(flashKind<0)throw new ArgumentException(label+" : flash doit être none, light ou heavy");

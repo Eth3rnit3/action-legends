@@ -356,6 +356,8 @@ def validate_weapon(data, resources, library=None):
     voice = data.get("voice")
     if voice not in (None, ""):
         errors.resource(voice + "-a" if isinstance(voice, str) else voice, "Audio/", SOUNDS, resources, label + ".voice")
+    # Lot 3c: what its projectiles do to a boss, times their damage.
+    errors.number(data, "bossFactor", 0, 4, label, 1)
     if "icon" in data:
         validate_cell(data["icon"], resources, label + ".icon", errors)
     errors.number(data, "fireRate", .02, 3, label)

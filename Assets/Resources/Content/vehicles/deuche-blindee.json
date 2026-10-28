@@ -21,10 +21,10 @@
   "cannon": {
     "weapon": "obus-de-char",
     "shells": [
-      12,
       10,
-      9,
-      8
+      8,
+      7,
+      6
     ],
     "angle": 0,
     "pose": 0.25

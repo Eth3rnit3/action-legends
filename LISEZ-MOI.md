@@ -1,14 +1,16 @@
 # Action Legends — guide de jeu
 
-Prototype Unity 2D — version 0.9.0 : sept héros sélectionnables (Chuck Norris, Arnold, Jean-Claude, Sylvester, Fernandel, Brigitte Bardot et Jeanne d'Arc) et coopération locale sur un même écran. Quatre missions qui s’enchaînent : Paris, Marseille, Saint-Rémy-de-Provence, puis Tokyo. Les nouveautés de cette version pour le joueur sont résumées dans [docs/UPDATE_090.md](docs/UPDATE_090.md) (celles de la 0.8.0 dans [docs/UPDATE_080.md](docs/UPDATE_080.md)).
+Prototype Unity 2D — version 0.9.1 : sept héros sélectionnables (Chuck Norris, Arnold, Jean-Claude, Sylvester, Fernandel, Brigitte Bardot et Jeanne d'Arc) et coopération locale sur un même écran. Quatre missions qui s’enchaînent : Paris, Marseille, Saint-Rémy-de-Provence, puis Tokyo. Les nouveautés de cette version pour le joueur sont résumées dans [docs/UPDATE_091.md](docs/UPDATE_091.md) (celles de la 0.9.0 dans [docs/UPDATE_090.md](docs/UPDATE_090.md), de la 0.8.0 dans [docs/UPDATE_080.md](docs/UPDATE_080.md)).
 
 ## Jouer
 
 1. Ouvrir ce dossier dans Unity 6000.4.7f1.
 2. Ouvrir `Assets/Scenes/Paris2026.unity` si nécessaire.
-3. Cliquer sur **Play**, choisir son héros, puis **Déployer l’équipe** ou **Entrée**.
+3. Cliquer sur **Play**, choisir son héros, puis **Déployer l’équipe** ou **Entrée**. À plusieurs, chacun se déclare prêt : la mission part quand toute l’équipe l’est.
 
-Le joueur 1 peut jouer immédiatement au clavier. Sans manette, un seul joueur rejoint la partie. Appuyer sur **A / croix** sur une manette pour ajouter un partenaire : les places 2 à 4 sont occupées en premier ; une quatrième manette peut prendre le joueur 1. Les joueurs peuvent aussi rejoindre pendant le niveau. Le menu montre quatre cartes, une par joueur (J1 à J4) : chacun fait défiler tous les héros sur la sienne avec ses flèches (souris), Q / E ou ← / → pour J1 au clavier, ou la croix gauche / droite de sa manette ; la carte indique le rôle, la spéciale et la place du héros (« 5 / 7 »). Une carte vide invite à rejoindre. Les héros peuvent être choisis plusieurs fois.
+Le joueur 1 peut jouer immédiatement au clavier. Sans manette, un seul joueur rejoint la partie. La première manette sur laquelle on appuie sur **A / croix** devient celle du joueur 1, qui garde aussi le clavier ; les manettes suivantes ajoutent les joueurs 2 à 4. **Y / triangle** sur une manette libre ajoute toujours un nouveau joueur : le joueur 1 reste au clavier et un ami prend la manette. Si la manette du joueur 1 se débranche au menu, il reste au clavier. Les joueurs peuvent aussi rejoindre pendant le niveau. Le menu montre quatre cartes, une par joueur (J1 à J4) : chacun fait défiler tous les héros sur la sienne avec ses flèches (souris), Q / E ou ← / → pour J1 au clavier, ou la croix gauche / droite de sa manette ; la carte indique le rôle, la spéciale et la place du héros (« 5 / 7 »). Une carte vide invite à rejoindre avec Y / triangle.
+
+**Prêt.** À plusieurs, chaque joueur se déclare prêt : Entrée (J1), **A / croix** ou Start sur sa manette, le bouton **PRÊT ?** de sa carte ou le grand bouton du menu, qui compte les joueurs prêts. Un tampon PRÊT s’affiche sur sa carte ; la même touche le retire. La mission part dès que toute l’équipe est prête. Changer de héros retire le « prêt » de ce joueur ; changer de mission ou de difficulté le retire à tous. Seul, une pression lance la mission comme avant. Les héros peuvent être choisis plusieurs fois.
 
 | Action | Joueur 1 au clavier | Manette |
 |---|---|---|
@@ -22,9 +24,10 @@ Le joueur 1 peut jouer immédiatement au clavier. Sans manette, un seul joueur r
 | Pause | Échap | Start / Options |
 | Choisir le héros, au menu | Flèches de sa carte (souris), ← / →, Q / E ou A / D | Croix gauche / droite |
 | Changer de mission, au menu | Clic sur < / > | LB / RB (manette du joueur 1) |
-| Démarrer, au menu | Entrée | Start / Options |
+| Rejoindre, au menu ou en jeu | — | A / croix (prend J1 s’il n’a pas de manette), Y / triangle (nouveau joueur) |
+| Se déclarer prêt (seul : démarrer), au menu | Entrée | A / croix ou Start / Options |
 
-Le clavier contrôle uniquement le joueur 1. Pour jouer à plusieurs, brancher des manettes.
+Le clavier contrôle uniquement le joueur 1, qui peut aussi prendre une manette. Pour jouer à plusieurs, brancher des manettes.
 
 **Otages.** Comme dans Metal Slug, des prisonniers attachés attendent le long du parcours, certains au milieu d'un assaut : tirer sur leurs liens, les toucher, ou faire exploser une grenade à côté les libère. L'otage salue, lâche un cadeau (une caisse d'arme, des grenades, des soins ou des points) puis s'enfuit en courant. Chaque joueur compte ses otages sous sa fiche (icône et ×N) et perd son compte s'il tombe. À la victoire, le **décompte de fin de mission** paie 1 000 points par otage compté et 10 points par seconde d'avance sur le temps de référence de la mission (5 minutes à Paris, 4 à Marseille, 4 min 40 à Saint-Rémy, 3 min 40 à Tokyo), avant l'écran de victoire ; Entrée ou **PASSER** enchaîne tout de suite. Chaque ville a son otage (un boulanger à Paris, un bouliste à Marseille, un peintre à Saint-Rémy, un employé de bureau à Tokyo) ; les caisses du parcours sont deux fois moins nombreuses qu'avant.
 
@@ -76,7 +79,7 @@ Les missions s’enchaînent : Paris, Marseille (code PASTIS), Saint-Rémy (FARA
 
 ## Classement mondial
 
-À la fin d’une mission, une fois la partie rejouée à l’identique, le jeu envoie de lui-même le score et le replay sur des relais Nostr publics, sous le pseudo de la page d’accueil. **CLASSEMENT**, au menu, montre le top 10 de chaque mission et difficulté (Slug compris, parties sans continue seulement) ; chaque score est rejoué dans le navigateur avant d’être affiché. Depuis la version 0.7.0, le jeu local avance par pas fixes de 1/60 s comme le jeu en ligne. Chaque version a son propre classement, rappelé au bas du tableau : la 0.9.0 change le gameplay (relief, décors, véhicules, nouveaux héros), son classement repart donc de zéro, et les scores publiés en 0.8.0 ne sont ni rejoués ni affichés. Détails et limites dans [docs/CLASSEMENT.md](docs/CLASSEMENT.md).
+À la fin d’une mission, une fois la partie rejouée à l’identique, le jeu envoie de lui-même le score et le replay sur des relais Nostr publics, sous le pseudo de la page d’accueil. **CLASSEMENT**, au menu, montre le top 10 de chaque mission et difficulté (Slug compris, parties sans continue seulement) ; chaque score est rejoué dans le navigateur avant d’être affiché. Depuis la version 0.7.0, le jeu local avance par pas fixes de 1/60 s comme le jeu en ligne. Chaque version a son propre classement, rappelé au bas du tableau : la 0.9.1 a donc son propre classement, reparti de zéro, et les scores publiés en 0.9.0 ou avant ne sont ni rejoués ni affichés. Détails et limites dans [docs/CLASSEMENT.md](docs/CLASSEMENT.md).
 
 ## État de cette version
 
@@ -92,7 +95,7 @@ Les missions s’enchaînent : Paris, Marseille (code PASTIS), Saint-Rémy (FARA
 
 ## Vérification
 
-La version 0.9.0 a été compilée pour navigateur et essayée dans un navigateur de bureau. Les scripts `AgentScripts/Verify*.cs`, lancés dans l'éditeur en mode batch, vérifient chaque fonctionnalité (blocage d'écran, commandes, armes, otages, mode Slug, rencontres, mini-boss, héros et spéciales, relief, décors destructibles, véhicules, poses, classement par version, chaque mission) et font gagner les quatre missions par des bots, seuls et à quatre, dans toutes les difficultés ; les replays enregistrés doivent se reproduire à l'identique. Les missions passent également le validateur de contenu et ses tests Python. Cela ne remplace pas un essai avec quatre manettes physiques ; l'équilibrage reste à ajuster en jouant.
+La version 0.9.1 a été compilée pour navigateur et essayée dans un navigateur de bureau. Les scripts `AgentScripts/Verify*.cs`, lancés dans l'éditeur en mode batch, vérifient chaque fonctionnalité (blocage d'écran, commandes, armes, otages, mode Slug, rencontres, mini-boss, héros et spéciales, relief, décors destructibles, véhicules, poses, classement par version, manettes et « prêt » du menu, chaque mission) et font gagner les quatre missions par des bots, seuls et à quatre, dans toutes les difficultés ; les replays enregistrés doivent se reproduire à l'identique. Les missions passent également le validateur de contenu et ses tests Python. Cela ne remplace pas un essai avec quatre manettes physiques ; l'équilibrage reste à ajuster en jouant.
 
 ## Fichiers du projet
 

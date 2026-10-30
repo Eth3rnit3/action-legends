@@ -306,6 +306,25 @@ class MissionValidationTests(unittest.TestCase):
             with self.subTest(change=change):
                 self.assertTrue(self.rejected(change))
 
+    def test_panorama_joins(self):
+        item = {"sprite": {"texture": "Art/saint-remy/accessoires", "columns": 4, "rows": 3, "cell": 9}, "after": 0, "x": 0.5, "y": 0.9, "height": 7}
+        self.data["map"]["joins"] = [item, dict(item, after=len(self.data["map"]["backgrounds"]) - 2, flip=True)]
+        self.assertEqual(self.errors(), [])
+        changes = (
+            lambda d: d["map"]["joins"][0].update(after=len(d["map"]["backgrounds"]) - 1),
+            lambda d: d["map"]["joins"][0].update(after=-1),
+            lambda d: d["map"]["joins"][0].update(after=0.5),
+            lambda d: d["map"]["joins"][0].update(x=11),
+            lambda d: d["map"]["joins"][0].update(height=14),
+            lambda d: d["map"]["joins"][0].update(flip="yes"),
+            lambda d: d["map"]["joins"][0]["sprite"].update(cell=12),
+            lambda d: d["map"].update(joins=[item] * 17),
+            lambda d: d["map"].update(joins={}),
+        )
+        for change in changes:
+            with self.subTest(change=change):
+                self.assertTrue(self.rejected(change))
+
     def test_map_framing(self):
         self.assertFalse(self.rejected(lambda d: d["map"].update(horizon=0.1, groundBand=0.12, groundTop=-1.1, groundFade=0.5)))
         changes = (

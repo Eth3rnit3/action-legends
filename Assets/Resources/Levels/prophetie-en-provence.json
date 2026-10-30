@@ -25,6 +25,65 @@
     "groundBand": 0.17,
     "groundTop": 0.6,
     "groundFade": 0.2,
+    "joins": [
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 4
+        },
+        "after": 0,
+        "y": 0.9,
+        "height": 8
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 5
+        },
+        "after": 1,
+        "y": 0.9,
+        "height": 8
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 4
+        },
+        "after": 2,
+        "y": 0.9,
+        "height": 8,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 5
+        },
+        "after": 3,
+        "y": 0.9,
+        "height": 8,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 4
+        },
+        "after": 4,
+        "y": 0.9,
+        "height": 8
+      }
+    ],
     "terrain": [
       {
         "type": "platform",

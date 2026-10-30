@@ -2,7 +2,7 @@
 
 Mission définie dans `Assets/Resources/Levels/tokyo-neon.json`. Elle suit Prophétie en Provence (`order: 4` ; elle suivait Mistral Gagnant avant l’arrivée de Saint-Rémy) et se débloque en terminant Saint-Rémy ou avec le code **SAKURA** dans le menu ; un navigateur qui l’avait déjà débloquée la garde (et y trouve aussi Saint-Rémy ouverte).
 
-Parcours de nuit de 330 unités en huit vagues : Shibuya, puis Akihabara, puis le quartier de Minato jusqu’au pied de la tour de Tokyo. C’est la première mission où **tous les ennemis sont armés** : un gang de rue fictif équipé de pistolets, de mitraillettes et de fusils à pompe. Ils visent un court instant, figés dans leur pose de tir, puis tirent à hauteur de poitrine : un saut esquive la balle. Le boss est le **Mécha Shogun**, un robot géant au sol qui marche vers les héros et alterne trois attaques : rafale de gatling en balayage, piétinement qui envoie deux ondes de choc à sauter, et salve de missiles à esquiver ou détruire. Il a 1,3 fois les points de vie de l’hélicoptère.
+Parcours de nuit de 330 unités en huit vagues : Shibuya, puis Akihabara, Asakusa et le quartier de Minato jusqu’au pied de la tour de Tokyo. C’est la première mission où **tous les ennemis sont armés** : un gang de rue fictif équipé de pistolets, de mitraillettes et de fusils à pompe. Ils visent un court instant, figés dans leur pose de tir, puis tirent à hauteur de poitrine : un saut esquive la balle. Le boss est le **Mécha Shogun**, un robot géant au sol qui marche vers les héros et alterne trois attaques : rafale de gatling en balayage, piétinement qui envoie deux ondes de choc à sauter, et salve de missiles à esquiver ou détruire. Il a 1,3 fois les points de vie de l’hélicoptère.
 
 ## Images
 
@@ -14,7 +14,8 @@ Les deux planches générées passent ensuite par `tools/art/pack_sheet.py` (Pil
 |---|---|---|
 | `Art/tokyo/shibuya.png` | 2172×724 | Décor 1 |
 | `Art/tokyo/akihabara.png` | 2172×724 | Décor 2 |
-| `Art/tokyo/minato.png` | 2172×724 | Décor 3, arène du boss |
+| `Art/tokyo/asakusa.png` | 2172×724 | Décor 3, ajouté après la 0.9.0 (prompt dans [ART_RACCORDS.md](ART_RACCORDS.md)) |
+| `Art/tokyo/minato.png` | 2172×724 | Décor 4, arène du boss |
 | `Art/tokyo/sol.png` | 2172×724 | Chaussée mouillée : seuls les 25 % inférieurs, sous la bordure, sont répétés |
 | `ArtSources/tokyo/enemies.png` (dans `Resources` jusqu’à la 0.8.0) | 1680×1086, transparent | Trois tireurs, quatre images chacun : attente, deux foulées, tir |
 | `Art/tokyo/mecha-shogun.png` | 1680×1024, transparent | Boss, six images : attente, deux pas, piétinement, gatling, missiles |

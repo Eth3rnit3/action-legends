@@ -14,6 +14,7 @@
     "backgrounds": [
       "Art/marseille/vieux-port",
       "Art/marseille/panier",
+      "Art/marseille/noailles",
       "Art/marseille/canebiere"
     ],
     "ground": "Art/marseille/panier",
@@ -21,6 +22,42 @@
     "groundBand": 0.17,
     "groundTop": 0.6,
     "groundFade": 0.2,
+    "joins": [
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 2
+        },
+        "after": 0,
+        "y": 0.9,
+        "height": 8
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 3
+        },
+        "after": 1,
+        "y": 0.9,
+        "height": 8
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 2
+        },
+        "after": 2,
+        "y": 0.9,
+        "height": 8,
+        "flip": true
+      }
+    ],
     "terrain": [
       {
         "type": "platform",

@@ -1210,6 +1210,7 @@ def validate_mission(data, resources, library=None):
         if game_map.get(key) not in (None, []):
             errors.append(f"map.{key} is reserved for a later batch: leave the list empty")
     validate_decor(game_map.get("decor", []), data.get("length", 80), resources, errors)
+    validate_joins(game_map.get("joins", []), len(backgrounds) if isinstance(backgrounds, list) else 0, resources, errors)
     terrain = validate_terrain(game_map.get("terrain", []), data, resources, errors)
     rules = data.get("rules", "default")
     if rules not in library["rules"]:
@@ -1331,6 +1332,27 @@ def validate_decor(decor, length, resources, errors):
         for key in ("flip", "front"):
             if not isinstance(item.get(key, False), bool):
                 errors.append(f"{label}.{key}: true or false")
+
+
+def validate_joins(joins, pieces, resources, errors):
+    """MissionDefinition.Validate: scenery drawn on the panoramas where two of them meet, to hide the seam."""
+    if not isinstance(joins, list) or len(joins) > 16:
+        errors.append("map.joins: a list of at most 16 items")
+        return
+    for i, item in enumerate(joins):
+        label = f"map.joins[{i}]"
+        if not isinstance(item, dict):
+            errors.append(f"{label}: object required")
+            continue
+        validate_cell(item.get("sprite"), resources, label + ".sprite", errors)
+        after = item.get("after", 0)
+        if not isinstance(after, int) or isinstance(after, bool) or not 0 <= after < pieces - 1:
+            errors.append(f"{label}.after: the index of a panorama followed by another one (0 to {pieces - 2})")
+        errors.number(item, "x", -10, 10, label, 0)
+        errors.number(item, "y", -3, 8, label, 0)
+        errors.number(item, "height", .5, 13, label, 8)
+        if not isinstance(item.get("flip", False), bool):
+            errors.append(f"{label}.flip: true or false")
 
 
 def validate_encounters(encounters, waves, data, length, exit_x, rules, library, errors):

@@ -79,6 +79,10 @@ namespace Paname
     // Scenery standing in the street, drawn only: a cell of a sheet height units tall, the bottom centre of the cell at (x, y)
     // (y below 0 sinks a drawing that does not reach the bottom of its cell), mirrored with flip, in front of the actors with front.
     [Serializable] public sealed class MapDecor {public SpriteCell sprite=new SpriteCell();public float x,y,height=2;public bool flip,front;}
+    // Scenery drawn on the panoramas where two of them meet, to hide the seam: a cell of a sheet height units tall, the bottom
+    // centre of the cell x units from the junction after backgrounds[after] and y above the walking line, mirrored with flip.
+    // It scrolls with the panoramas.
+    [Serializable] public sealed class MapJoin {public SpriteCell sprite=new SpriteCell();public int after;public float x,y,height=8;public bool flip;}
     // One enemy of an encounter: a library enemy that comes delay seconds after the encounter starts and takes its place at (x, y),
     // y above the street for a ledge, a window or a roof it holds. entry: none (already there, off screen ahead of the team),
     // walk (from the side of the screen, side left or right, else the side away from the team), door and window (out of an
@@ -116,6 +120,7 @@ namespace Paname
         public MapHostage[] hostages;
         public MapVehicle[] vehicles;
         public MapDecor[] decor;
+        public MapJoin[] joins;
     }
     [Serializable] public sealed class MissionDefinition
     {
@@ -335,6 +340,14 @@ namespace Paname
                 var d=map.decor[i];string label="map.decor["+i+"]";if(d==null)throw new ArgumentException(label+" : élément vide");
                 d.sprite.Validate(label+".sprite");
                 if(!(d.x>=-10&&d.x<=length+10&&d.y>=-3&&d.y<=8&&d.height>=.2f&&d.height<=12))throw new ArgumentException(label+" : x dans la mission, y de -3 à 8, height de 0.2 à 12");
+            }
+            map.joins??=new MapJoin[0];if(map.joins.Length>16)throw new ArgumentException("map.joins : 16 éléments au plus");
+            for(int i=0;i<map.joins.Length;i++)
+            {
+                var j=map.joins[i];string label="map.joins["+i+"]";if(j==null)throw new ArgumentException(label+" : élément vide");
+                j.sprite.Validate(label+".sprite");
+                if(!(j.after>=0&&j.after<map.backgrounds.Length-1&&j.x>=-10&&j.x<=10&&j.y>=-3&&j.y<=8&&j.height>=.5f&&j.height<=13))
+                    throw new ArgumentException(label+" : after entre deux panoramas (0 à "+(map.backgrounds.Length-2)+"), x de -10 à 10, y de -3 à 8, height de 0.5 à 13");
             }
             if(enemies==null||enemies.Length<1||enemies.Length>8)throw new ArgumentException("enemies : un à huit identifiants d'ennemis");
             roster=new EnemyDefinition[enemies.Length];for(int i=0;i<enemies.Length;i++)roster[i]=ContentLibrary.Enemy(enemies[i]);

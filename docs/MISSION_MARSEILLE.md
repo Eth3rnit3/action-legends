@@ -12,7 +12,8 @@ Générées avec le générateur d’images intégré de Codex CLI, en prenant `
 |---|---|---|
 | `Art/marseille/vieux-port.png` | 2172×724 | Décor 1 |
 | `Art/marseille/panier.png` | 2172×724 | Décor 2 |
-| `Art/marseille/canebiere.png` | 2172×724 | Décor 3 |
+| `Art/marseille/noailles.png` | 2172×724 | Décor 3, ajouté après la 0.9.0 (prompt dans [ART_RACCORDS.md](ART_RACCORDS.md)) |
+| `Art/marseille/canebiere.png` | 2172×724 | Décor 4 |
 | `ArtSources/marseille-sol.png` | 2172×724 | Ancienne chaussée répétée devant les acteurs ; depuis 0.8.0 la bande de premier plan reprend le bas de `panier.png` (`map.groundBand`), dont le pavé raccorde |
 | `Art/bosses/speedboat-wake.png` | 2048×512, 4 × 1, transparent | Écume du hors-bord (`flight.wake`, 4 images en boucle, derrière la coque) |
 | `Art/marseille/news-helicopter.png` | 2161×728, transparent | Boss |

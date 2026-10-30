@@ -5,7 +5,9 @@ namespace Paname
     public static class PanameArt
     {
         static Sprite square, circle;
-        static Transform routeRoot;
+        static Transform routeRoot,joinRoot;
+        // The joins' x on the panoramas, before their horizontal stretch.
+        static readonly System.Collections.Generic.List<float> joinX=new System.Collections.Generic.List<float>();
         public static float RouteWidth {get;private set;}
         public static int RouteSegments {get;private set;}
         public static void UpdatePanorama(float cameraX,float halfWidth,float cameraMin=7,float cameraMax=74)
@@ -15,6 +17,8 @@ namespace Paname
             routeRoot.localScale=new Vector3(scale,1,1);
             float scroll=Mathf.Clamp((RouteWidth*scale-2*halfWidth-2)/Mathf.Max(1,cameraMax-cameraMin),0,.5f);
             routeRoot.localPosition=new Vector3(cameraMin-halfWidth-1+(1-scroll)*(cameraX-cameraMin),0,0);
+            // The joins follow the panoramas without being stretched with them.
+            if(joinRoot){joinRoot.localPosition=routeRoot.localPosition;for(int i=0;i<joinRoot.childCount;i++){var t=joinRoot.GetChild(i);t.localPosition=new Vector3(joinX[i]*scale,t.localPosition.y,0);}}
         }
         public static readonly Color Ink = C("203441"), Cream = C("F6E8CC"), Teal = C("277D80"), Coral = C("F87854"), Gold = C("F4C65D");
         public static Color C(string s) { ColorUtility.TryParseHtmlString("#" + s, out var c); return c; }
@@ -70,17 +74,27 @@ namespace Paname
         public static void Street(Transform root,MissionMap map,float length,float viewBottom)
         {
             routeRoot=new GameObject("Panorama").transform;routeRoot.SetParent(root,false);
-            RouteWidth=0;RouteSegments=0;var routePaths=map.backgrounds;
+            RouteWidth=0;RouteSegments=0;var routePaths=map.backgrounds;var starts=new float[routePaths.Length];var blended=new bool[routePaths.Length];
             for(int i=0;i<routePaths.Length;i++)
             {
                 var texture=Resources.Load<Texture2D>(routePaths[i]);if(!texture)continue;
                 var sprite=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),new Vector2(0,map.horizon),texture.height/13f,0,SpriteMeshType.FullRect);
                 bool blend=i>0&&(texture.width/(float)texture.height>2||Resources.Load<Texture2D>(routePaths[i-1]).width/(float)Resources.Load<Texture2D>(routePaths[i-1]).height>2);
-                if(blend)RouteWidth-=1.5f;
+                if(blend)RouteWidth-=1.5f;starts[i]=RouteWidth;blended[i]=blend;
                 var g=new GameObject("Décor "+(i+1)+" • "+routePaths[i]);g.transform.SetParent(routeRoot,false);g.transform.localPosition=new Vector3(RouteWidth,0,0);
                 var r=g.AddComponent<SpriteRenderer>();r.sprite=sprite;r.sortingOrder=-85+i;
                 if(blend){var shader=Resources.Load<Shader>("BackgroundBlend");if(shader){r.sharedMaterial=new Material(shader);r.sharedMaterial.SetFloat("_LeftFade",1.5f/sprite.bounds.size.x);}}
                 RouteWidth+=sprite.bounds.size.x;RouteSegments++;
+            }
+            // The joins, on the middle of each cross-fade (or on the edge between two pieces that do not fade).
+            joinRoot=new GameObject("Raccords").transform;joinRoot.SetParent(root,false);joinX.Clear();
+            if(map.joins!=null)foreach(var j in map.joins)
+            {
+                var sprite=j.sprite.Sprite;if(!sprite||j.after+1>=routePaths.Length)continue;
+                var go=new GameObject("Raccord • "+j.sprite.texture+" "+j.sprite.cell);go.transform.SetParent(joinRoot,false);
+                float x=starts[j.after+1]+(blended[j.after+1]?.75f:0)+j.x;joinX.Add(x);
+                go.transform.localPosition=new Vector3(x,j.y+j.height*.5f,0);go.transform.localScale=new Vector3(j.flip?-j.height:j.height,j.height,1);
+                var r=go.AddComponent<SpriteRenderer>();r.sprite=sprite;r.sortingOrder=-60;
             }
             var ground=Resources.Load<Texture2D>(map.ground);if(!ground)return;
             var road=Sprite.Create(ground,new Rect(0,0,ground.width,ground.height*map.groundBand),new Vector2(0,1),ground.height/13f,0,SpriteMeshType.FullRect);

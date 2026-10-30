@@ -12,7 +12,10 @@
     "backgrounds": [
       "Art/route-01",
       "Art/route-02",
+      "Art/paris-opera",
+      "Art/paris-marais",
       "Art/canal-panorama",
+      "Art/paris-montmartre",
       "Art/bastille-panorama"
     ],
     "ground": "Art/bastille-panorama",
@@ -20,6 +23,76 @@
     "groundBand": 0.22,
     "groundTop": 0.6,
     "groundFade": 0.2,
+    "joins": [
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 0
+        },
+        "after": 0,
+        "y": 0.9,
+        "height": 8
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 1
+        },
+        "after": 1,
+        "y": 0.9,
+        "height": 8
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 0
+        },
+        "after": 2,
+        "y": 0.9,
+        "height": 8,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 1
+        },
+        "after": 3,
+        "y": 0.9,
+        "height": 8,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 0
+        },
+        "after": 4,
+        "y": 0.9,
+        "height": 8
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 1
+        },
+        "after": 5,
+        "y": 0.9,
+        "height": 8
+      }
+    ],
     "terrain": [
       {
         "type": "platform",

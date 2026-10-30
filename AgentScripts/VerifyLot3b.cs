@@ -85,7 +85,7 @@ public static class VerifyLot3b
     static string Cell(int i)=>@"{""texture"": ""Art/props/paris-terrain"", ""columns"": 3, ""rows"": 1, ""cell"": "+i+"}";
     static string Mission=>@"{""schemaVersion"": 2, ""id"": ""test-vehicule"", ""order"": 900, ""title"": ""Véhicule de test"", ""location"": ""Banc d'essai"", ""intro"": ""ESSAI !"",
       ""exitLabel"": ""FIN"", ""winTitle"": ""ESSAI RÉUSSI"", ""music"": ""Audio/Music/marseillaise-arcade"", ""bossMusic"": ""Audio/Music/marseillaise-boss"",
-      ""map"": {""backgrounds"": [""Art/route-01"", ""Art/route-02""], ""ground"": ""Art/paris"", ""horizon"": 0.1, ""groundBand"": 0.12, ""groundTop"": -0.9, ""groundFade"": 0.25,
+      ""map"": {""backgrounds"": [""Art/route-01"", ""Art/route-02""], ""ground"": ""Art/bastille-panorama"", ""horizon"": 0.1, ""groundBand"": 0.12, ""groundTop"": -0.9, ""groundFade"": 0.25,
         ""terrain"": [{""type"": ""slope"", ""x"": 40, ""width"": 3, ""height"": 0, ""toHeight"": 1.2, ""sprite"": "+Cell(1)+@"},
           {""type"": ""block"", ""x"": 43, ""width"": 5, ""height"": 1.2, ""sprite"": "+Cell(2)+@"},
           {""type"": ""slope"", ""x"": 48, ""width"": 3, ""height"": 1.2, ""toHeight"": 0, ""sprite"": "+Cell(1)+@", ""flip"": true},

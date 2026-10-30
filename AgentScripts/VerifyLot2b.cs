@@ -285,7 +285,7 @@ public static class VerifyLot2b
         ""interval"": [0.4, 0.4, 0.4, 0.4], ""duration"": 1, ""door"": ""door"", ""cooldown"": 1}]}";
     const string Mission=@"{""schemaVersion"": 2, ""id"": ""test-encounters"", ""order"": 900, ""title"": ""Rencontres de test"", ""location"": ""Banc d'essai"", ""intro"": ""ESSAI !"",
       ""exitLabel"": ""FIN"", ""winTitle"": ""ESSAI RÉUSSI"", ""music"": ""Audio/Music/marseillaise-arcade"", ""bossMusic"": ""Audio/Music/marseillaise-boss"",
-      ""map"": {""backgrounds"": [""Art/route-01"", ""Art/route-02""], ""ground"": ""Art/paris""}, ""enemies"": [""looter-rusher"", ""gunman-pistol""],
+      ""map"": {""backgrounds"": [""Art/route-01"", ""Art/route-02""], ""ground"": ""Art/bastille-panorama""}, ""enemies"": [""looter-rusher"", ""gunman-pistol""],
       ""length"": 160, ""exitX"": 157, ""cameraMin"": 7, ""cameraMax"": 154, ""rules"": ""pow"",
       ""waves"": [{""atX"": 30, ""baseEnemies"": 0, ""enemiesPerPlayer"": 0, ""maxAlive"": 10, ""spawnInterval"": 0.5, ""enemyPattern"": [0]},
                  {""atX"": 120, ""baseEnemies"": 1, ""enemiesPerPlayer"": 0, ""maxAlive"": 4, ""spawnInterval"": 0.5, ""enemyPattern"": [1]}],

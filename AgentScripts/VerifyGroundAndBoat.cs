@@ -34,7 +34,8 @@ public static class VerifyGroundAndBoat
         try
         {
             var missions=(MissionDefinition[])Get(g,"missions");
-            // Framing: the panoramas' pivot is the walking line, the foreground band starts below the feet and covers the screen's bottom.
+            // Framing: the panoramas' pivot is the walking line; the foreground band, which scrolls with the world, starts behind the feet
+            // but below the foot of the facades (20 % of the panoramas) and covers the screen's bottom.
             var lines=new List<string>();
             for(int m=0;m<missions.Length;m++)
             {
@@ -44,8 +45,8 @@ public static class VerifyGroundAndBoat
                 foreach(Transform piece in route){var s=piece.GetComponent<SpriteRenderer>().sprite;pivots&=Mathf.Abs(s.pivot.y/s.rect.height-map.horizon)<1e-4f;}
                 float bottom=float.MaxValue,top=float.MinValue;int strips=0;
                 foreach(Transform t in street)if(t.name.StartsWith("Chaussée")){var b=t.GetComponent<SpriteRenderer>().bounds;bottom=Mathf.Min(bottom,b.min.y);top=Mathf.Max(top,b.max.y);strips++;}
-                float panoramaBottom=-13*map.horizon,screenBottom=3.6f-g.gameCamera.orthographicSize;
-                Check(pivots&&strips>0&&top<0&&top>panoramaBottom&&bottom<screenBottom-.05f&&map.horizon<.2f,missions[m].id+" : pieds au milieu du sol peint (horizon "+map.horizon+"), bande de premier plan de "+top.ToString("0.00")+" à "+bottom.ToString("0.00")+" sous les pieds, sur le bas du panorama ("+panoramaBottom.ToString("0.00")+") et jusqu'au bas de l'écran ("+screenBottom.ToString("0.0")+")",checks);
+                float screenBottom=3.6f-g.gameCamera.orthographicSize;
+                Check(pivots&&strips>0&&top>0&&top<13*(.2f-map.horizon)&&bottom<screenBottom-.05f&&map.horizon<.2f,missions[m].id+" : pieds au milieu du sol peint (horizon "+map.horizon+"), bande de premier plan de "+top.ToString("0.00")+" (derrière les pieds, sous le pied des façades à "+(13*(.2f-map.horizon)).ToString("0.00")+") à "+bottom.ToString("0.00")+", jusqu'au bas de l'écran ("+screenBottom.ToString("0.0")+")",checks);
             }
             int marseille=Array.FindIndex(missions,x=>x.id=="mistral-gagnant");
             Boat(marseille,checks,captures);

@@ -94,7 +94,7 @@ public static class VerifyLot3c
     static string Stairs(float drawX)=>@"{""type"": ""slope"", ""x"": 41, ""width"": 4, ""height"": 0.24, ""toHeight"": 1.2, ""sprite"": {""texture"": ""Art/props/tokyo-terrain"", ""columns"": 3, ""rows"": 1, ""cell"": 1}, ""drawX"": "+drawX.ToString(System.Globalization.CultureInfo.InvariantCulture)+@", ""drawWidth"": 5.8}";
     static string Mission(string terrain)=>@"{""schemaVersion"": 2, ""id"": ""test-3c"", ""order"": 900, ""title"": ""Essai"", ""location"": ""Banc d'essai"", ""intro"": ""ESSAI !"",
       ""exitLabel"": ""FIN"", ""winTitle"": ""ESSAI RÉUSSI"", ""music"": ""Audio/Music/marseillaise-arcade"", ""bossMusic"": ""Audio/Music/marseillaise-boss"",
-      ""map"": {""backgrounds"": [""Art/route-01"", ""Art/route-02""], ""ground"": ""Art/paris"", ""terrain"": ["+terrain+@"]},
+      ""map"": {""backgrounds"": [""Art/route-01"", ""Art/route-02""], ""ground"": ""Art/bastille-panorama"", ""terrain"": ["+terrain+@"]},
       ""enemies"": [""looter-rusher""], ""length"": 200, ""exitX"": 197, ""cameraMin"": 7, ""cameraMax"": 194,
       ""waves"": [{""atX"": 122, ""baseEnemies"": 2, ""enemiesPerPlayer"": 0, ""maxAlive"": 4, ""spawnInterval"": 0.5, ""enemyPattern"": [0]}],
       ""boss"": {""enabled"": true, ""id"": ""armored-van"", ""health"": 1}}";

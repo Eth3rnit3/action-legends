@@ -74,7 +74,7 @@ class MissionValidationTests(unittest.TestCase):
     def test_missing_ground_music_or_boss_music_is_rejected(self):
         for change in (lambda d: d["map"].update(ground="Art/does-not-exist"), lambda d: d["map"].pop("ground"),
                        lambda d: d.update(music="Audio/Music/does-not-exist"), lambda d: d.pop("music"),
-                       lambda d: d.update(bossMusic="Art/paris"), lambda d: d.pop("bossMusic")):
+                       lambda d: d.update(bossMusic="Art/route-01"), lambda d: d.pop("bossMusic")):
             with self.subTest(change=change):
                 self.assertTrue(self.rejected(change))
 

@@ -18,9 +18,9 @@
     ],
     "ground": "Art/tokyo/sol",
     "horizon": 0.1,
-    "groundBand": 0.12,
-    "groundTop": -0.9,
-    "groundFade": 0.25,
+    "groundBand": 0.25,
+    "groundTop": 0.6,
+    "groundFade": 0.2,
     "terrain": [
       {
         "type": "platform",

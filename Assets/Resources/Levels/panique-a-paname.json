@@ -15,11 +15,11 @@
       "Art/canal-panorama",
       "Art/bastille-panorama"
     ],
-    "ground": "Art/paris",
+    "ground": "Art/bastille-panorama",
     "horizon": 0.1,
-    "groundBand": 0.12,
-    "groundTop": -0.9,
-    "groundFade": 0.25,
+    "groundBand": 0.22,
+    "groundTop": 0.6,
+    "groundFade": 0.2,
     "terrain": [
       {
         "type": "platform",

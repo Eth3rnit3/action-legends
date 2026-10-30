@@ -64,8 +64,10 @@ namespace Paname
             var r=g.GetComponent<MeshRenderer>(); r.sharedMaterial=t.font.material; r.sortingOrder=order;
         }
         // The panorama pieces side by side, each 13 units tall with the walking line at map.horizon of its height; wide pieces
-        // cross-fade into the previous one. The bottom map.groundBand of the ground image is repeated along the street.
-        public static void Street(Transform root,MissionMap map,float length)
+        // cross-fade into the previous one. The bottom map.groundBand of the ground image is repeated along the street, in
+        // world space: what stands on it (heroes, props, decor) stays put on it while the facades behind scroll in parallax.
+        // It is stretched down to viewBottom when it would not reach the bottom of the screen.
+        public static void Street(Transform root,MissionMap map,float length,float viewBottom)
         {
             routeRoot=new GameObject("Panorama").transform;routeRoot.SetParent(root,false);
             RouteWidth=0;RouteSegments=0;var routePaths=map.backgrounds;
@@ -84,9 +86,12 @@ namespace Paname
             var road=Sprite.Create(ground,new Rect(0,0,ground.width,ground.height*map.groundBand),new Vector2(0,1),ground.height/13f,0,SpriteMeshType.FullRect);
             var blendShader=Resources.Load<Shader>("BackgroundBlend");var material=blendShader?new Material(blendShader):null;
             if(material){material.SetFloat("_LeftFade",.05f);material.SetFloat("_TopFade",map.groundFade);material.SetFloat("_Band",map.groundBand);}
-            for(float x=-12;x<length+25;x+=road.bounds.size.x-2)
+            float stretch=Mathf.Max(1,(map.groundTop-viewBottom)/road.bounds.size.y);
+            // Each strip a little nearer than the previous one, so its faded left edge is drawn over the previous strip's end.
+            int strip=0;
+            for(float x=-12;x<length+25;x+=road.bounds.size.x-2,strip++)
             {
-                var go=new GameObject("Chaussée • premier plan");go.transform.SetParent(root,false);go.transform.localPosition=new Vector3(x,map.groundTop,0);
+                var go=new GameObject("Chaussée • premier plan");go.transform.SetParent(root,false);go.transform.localPosition=new Vector3(x,map.groundTop,-.001f*strip);go.transform.localScale=new Vector3(1,stretch,1);
                 var r=go.AddComponent<SpriteRenderer>();r.sprite=road;r.sortingOrder=-35;if(material)r.sharedMaterial=material;
             }
             // The relief: each piece drawn over its span, its cell's bottom at drawY.

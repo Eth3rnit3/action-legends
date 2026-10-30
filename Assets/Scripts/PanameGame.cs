@@ -34,7 +34,7 @@ namespace Paname
         {
             missionIndex=Mod(index,missions.Length);
             if(world){world.gameObject.SetActive(false);Destroy(world.gameObject);}
-            world=new GameObject("Décor de mission").transform;world.SetParent(transform,false);Street(world,CurrentMission.map,CurrentMission.length);
+            world=new GameObject("Décor de mission").transform;world.SetParent(transform,false);Street(world,CurrentMission.map,CurrentMission.length,ViewBottom);
             cameraX=CurrentMission.cameraMin;LoadMissionMusic();BuildLobbyActors();
             missionLogo=string.IsNullOrEmpty(CurrentMission.logo)?null:Resources.Load<Texture2D>(CurrentMission.logo);
         }
@@ -121,7 +121,7 @@ namespace Paname
             font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             if(!gameCamera) {var go=new GameObject("Main Camera");gameCamera=go.AddComponent<Camera>();go.tag="MainCamera";}
             gameCamera.orthographic=true; gameCamera.orthographicSize=ViewHalfHeight; gameCamera.backgroundColor=C("C6DFD9"); gameCamera.transform.position=new Vector3(cameraX,3.6f,-10);
-            world=new GameObject("Décor de mission").transform; world.SetParent(transform,false); Street(world,CurrentMission.map,CurrentMission.length);
+            world=new GameObject("Décor de mission").transform; world.SetParent(transform,false); Street(world,CurrentMission.map,CurrentMission.length,ViewBottom);
             actors=new GameObject("Acteurs et effets").transform;actors.SetParent(transform,false);
             audioOut=gameObject.AddComponent<AudioSource>();audioOut.volume=.2f;
             projectileRoot=new GameObject("Projectiles • pool").transform;projectileRoot.SetParent(transform,false);
@@ -231,6 +231,8 @@ namespace Paname
         public int GetPlayerHealth(int slot)=>players[slot]?.hp??0;
         // The simulation sees a fixed 16:9 view so every browser computes the same game, whatever its window size.
         const float ViewHalfHeight=5.8f,SimHalfWidth=ViewHalfHeight*16f/9f;
+        // The lowest y the camera (at y 3.6) shows, with room for the screen shake.
+        const float ViewBottom=3.6f-ViewHalfHeight-.5f;
         public void TickSimulation(float dt,PlayerCommand[] commands)
         {
             if(phase!=Phase.Playing)return;

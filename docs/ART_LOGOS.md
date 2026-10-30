@@ -7,6 +7,7 @@ Les fiches de mission du menu affichent le logo de la mission (champ `logo`) à 
 | `Art/paris-logo.png` | 2172×724, transparent | Panique à Paname |
 | `Art/marseille/mission-logo.png` | 2172×724, transparent | Mistral Gagnant |
 | `Art/tokyo/mission-logo.png` | 2172×724, transparent | Tokyo Néon |
+| `Art/avignon/mission-logo.png` | 2172×724, transparent | Sur le Pont d'Avignon (0.10.0) |
 
 Chaque image a été vérifiée avant d'être gardée :
 - le titre est exact, accents compris ;
@@ -49,6 +50,20 @@ Create a Tokyo mission logo in exactly the same visual series and layout as refe
 Text verbatim: line 1 “TOKYO”; line 2 “NÉON”. Preserve the acute accent on É. No other readable text.
 
 Vivid hot-magenta-to-electric-cyan neon letter faces, restrained glow, stippled hand-painted pixel-art texture, small chips and bullet holes. Behind the letters: Tokyo at night under a deep indigo sky, red-and-white lattice tower on the left, dense neon skyscrapers with abstract non-readable sign glyphs and a five-storey pagoda on the right. Left framing: blank red paper lantern and cherry blossoms. Right framing: golden samurai kuwagata crest and glowing neon tube coil.
+
+Richly detailed 1990s arcade pixel-art finish. Genuine RGBA transparency outside the emblem. Generous transparent padding. No crop, frame, panel, people, animals, brands, watermark or extra text.
+```
+
+### Sur le Pont d'Avignon
+
+Références : `saint-remy/mission-logo.png`, `avignon/rhone.png`.
+
+```text
+Create an Avignon mission logo in exactly the same visual series and layout as reference-logo.png. Ultra-wide 3:1 isolated emblem. Huge centered two-line title filling about 80% of the width, chunky forward-italic 3D arcade block letters, thick ink-navy outline and deep extruded navy shadow.
+
+Text verbatim: line 1 “SUR LE PONT”; line 2 “D’AVIGNON”. Keep the apostrophe. No other readable text, letter for letter.
+
+Cream-to-gold-to-fiery-orange letter faces, stippled hand-painted pixel-art texture, small chips and bullet holes. Behind the letters, in bright Provençal daylight with the palette of avignon-rhone.png: the broken Pont Saint-Bénézet with its four arches and little chapel on the left over the turquoise Rhône, the crenellated city ramparts, and the massive Gothic Palais des Papes with its towers on the right. Left framing: plane-tree leaves and a red-and-gold theatre comedy/tragedy mask pair. Right framing: a bronze church bell and a golden papal crosier with crossed keys.
 
 Richly detailed 1990s arcade pixel-art finish. Genuine RGBA transparency outside the emblem. Generous transparent padding. No crop, frame, panel, people, animals, brands, watermark or extra text.
 ```

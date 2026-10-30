@@ -1,0 +1,10 @@
+{
+  "id": "affichiste",
+  "extends": "civilian",
+  "name": "AFFICHISTE",
+  "animations": {
+    "sheet": {
+      "texture": "Art/hostages/affichiste"
+    }
+  }
+}

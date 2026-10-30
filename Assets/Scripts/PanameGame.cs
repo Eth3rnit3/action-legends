@@ -109,7 +109,7 @@ namespace Paname
             public Vector2 position,velocity,heading; public float life=1.8f,age,blast,length; public int damage,pierce,blastDamage,blastBoss,serial; public ShotLook look; public bool hostile,active,blastAnywhere; public Transform root;
             // Heroes' weapons: the weapon that fired it and its owner (a beam follows the barrel); struck: enemies it has passed through.
             public WeaponDefinition weapon; public Player owner; public SpriteRenderer sprite,halo;
-            // A boss's drawn projectile (Sprite look, hostile): its frames play as it flies.
+            // A boss's or a thrower's drawn projectile (Sprite look, hostile): its frames play as it flies.
             public BossSprite drawn;
             public readonly List<Enemy> struck=new List<Enemy>();
             public bool Hostile=>hostile;
@@ -453,7 +453,8 @@ namespace Paname
                 {
                     var hand=e.position+new Vector2(e.facing*type.hand.x,type.hand.y);
                     // A bottle is aimed at the hero's chest, or lower at a crouching hero.
-                    Shoot(Look(t.projectile),hand,(target.position+Vector2.up*Mathf.Min(t.aimHeight,HitCenter(target).y-target.position.y)-hand).normalized*t.speed[DifficultyIndex],t.damage);
+                    var thrown=Shoot(t.sprite.Drawn?ShotLook.Sprite:Look(t.projectile),hand,(target.position+Vector2.up*Mathf.Min(t.aimHeight,HitCenter(target).y-target.position.y)-hand).normalized*t.speed[DifficultyIndex],t.damage);
+                    if(t.sprite.Drawn&&thrown!=null){thrown.drawn=t.sprite;thrown.sprite.sprite=t.sprite.Frame(0);thrown.sprite.color=Color.white;thrown.root.localScale=Vector3.one*t.sprite.size;}
                     e.attackTimer=t.cooldown*AttackFactor;e.attackPose=type.attackPose;
                 }
                 var m=type.melee;
@@ -722,7 +723,13 @@ namespace Paname
                 Label(90,355,1100,30,"PROCHAINE MISSION : "+next.title.ToUpperInvariant()+(string.IsNullOrEmpty(next.code)?"":"  ·  CODE "+next.code),16,Cream,true,TextAnchor.MiddleCenter);
                 if((!Online||IsHost)&&Button(440,467,400,46,"RETOUR À LA SÉLECTION",C("34515C")))ReturnToLobby();
             }
-            else if(phase==Phase.Won&&MissionCount>1)Label(90,355,1100,30,"CAMPAGNE TERMINÉE : BRAVO, LES LÉGENDES !",16,Cream,true,TextAnchor.MiddleCenter);
+            else if(phase==Phase.Won&&CurrentMission.hidden)Label(90,355,1100,30,"MISSION SECRÈTE ACCOMPLIE : BRAVO, LES LÉGENDES !",16,Cream,true,TextAnchor.MiddleCenter);
+            else if(phase==Phase.Won&&MissionCount>1)
+            {
+                // The end of the campaign gives away the code of a secret mission not found yet.
+                var secret=SecretHint;
+                Label(90,355,1100,30,"CAMPAGNE TERMINÉE : BRAVO, LES LÉGENDES !"+(secret!=null?"  ·  MISSION SECRÈTE : CODE "+secret.code:""),16,Cream,true,TextAnchor.MiddleCenter);
+            }
             if(Online&&IsHost&&phase==Phase.Lost&&Button(440,467,400,46,"RETOUR À LA SÉLECTION",C("34515C")))ReturnToLobby();
             if(phase==Phase.Paused)
             {

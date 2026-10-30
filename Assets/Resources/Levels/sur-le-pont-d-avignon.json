@@ -1,0 +1,1275 @@
+{
+  "schemaVersion": 2,
+  "order": 4,
+  "id": "sur-le-pont-d-avignon",
+  "code": "PAPALINE",
+  "title": "Sur le Pont d'Avignon",
+  "location": "Avignon, 2026",
+  "intro": "AVIGNON : LE FESTIVAL TOURNE AU DRAME, FONCEZ !",
+  "exitLabel": "LE PALAIS DES PAPES",
+  "winTitle": "LE SCHISME EST TERMINÉ !",
+  "music": "Audio/Music/pont-avignon-arcade",
+  "bossMusic": "Audio/Music/pont-avignon-boss",
+  "logo": "Art/avignon/mission-logo",
+  "map": {
+    "backgrounds": [
+      "Art/avignon/rhone",
+      "Art/avignon/remparts",
+      "Art/avignon/teinturiers",
+      "Art/avignon/carmes",
+      "Art/avignon/horloge",
+      "Art/avignon/palais"
+    ],
+    "ground": "Art/avignon/horloge",
+    "horizon": 0.1,
+    "groundBand": 0.17,
+    "groundTop": 0.6,
+    "groundFade": 0.2,
+    "joins": [
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 4
+        },
+        "after": 0,
+        "y": 0.9,
+        "height": 8
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 5
+        },
+        "after": 1,
+        "y": 0.9,
+        "height": 8
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 4
+        },
+        "after": 2,
+        "y": 0.9,
+        "height": 8,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 5
+        },
+        "after": 3,
+        "y": 0.9,
+        "height": 8,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/joins",
+          "columns": 4,
+          "rows": 2,
+          "cell": 4
+        },
+        "after": 4,
+        "y": 0.9,
+        "height": 8
+      }
+    ],
+    "terrain": [
+      {
+        "type": "platform",
+        "x": 130,
+        "width": 6.923,
+        "height": 1.8,
+        "sprite": {
+          "texture": "Art/props/saint-remy-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 0
+        }
+      },
+      {
+        "type": "slope",
+        "x": 309.6,
+        "width": 5.388,
+        "height": 0,
+        "toHeight": 1.5,
+        "sprite": {
+          "texture": "Art/props/saint-remy-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 1
+        },
+        "drawX": -0.0,
+        "drawWidth": 5.921
+      },
+      {
+        "type": "block",
+        "x": 314.988,
+        "width": 7.683,
+        "height": 1.5,
+        "sprite": {
+          "texture": "Art/props/saint-remy-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 2
+        },
+        "drawX": 0.533,
+        "drawWidth": 6.618
+      },
+      {
+        "type": "slope",
+        "x": 322.671,
+        "width": 5.388,
+        "height": 1.5,
+        "toHeight": 0,
+        "sprite": {
+          "texture": "Art/props/saint-remy-terrain",
+          "columns": 3,
+          "rows": 1,
+          "cell": 1
+        },
+        "flip": true,
+        "drawX": -0.533,
+        "drawWidth": 5.921
+      }
+    ],
+    "props": [
+      {
+        "id": "tonneau-de-poudre",
+        "x": 36
+      },
+      {
+        "id": "charrette",
+        "x": 56
+      },
+      {
+        "id": "bottes-de-foin",
+        "x": 66
+      },
+      {
+        "id": "etal-provencal",
+        "x": 109
+      },
+      {
+        "id": "tonneau-de-poudre",
+        "x": 139
+      },
+      {
+        "id": "barricade-de-foin",
+        "x": 89,
+        "wave": 2
+      },
+      {
+        "id": "bottes-de-foin",
+        "x": 175
+      },
+      {
+        "id": "charrette",
+        "x": 241,
+        "flip": true
+      },
+      {
+        "id": "tonneau-de-poudre",
+        "x": 254
+      },
+      {
+        "id": "etal-provencal",
+        "x": 283
+      },
+      {
+        "id": "tonneau-de-poudre",
+        "x": 296
+      },
+      {
+        "id": "bottes-de-foin",
+        "x": 287
+      }
+    ],
+    "hostages": [
+      {
+        "id": "affichiste",
+        "x": 30,
+        "y": 0
+      },
+      {
+        "id": "affichiste",
+        "x": 46,
+        "y": 0,
+        "wave": 1,
+        "reward": "weapon"
+      },
+      {
+        "id": "civilian",
+        "x": 100,
+        "y": 0,
+        "reward": "grenades"
+      },
+      {
+        "id": "affichiste",
+        "x": 118,
+        "y": 0,
+        "wave": 3,
+        "reward": "health"
+      },
+      {
+        "id": "affichiste",
+        "x": 172,
+        "y": 0
+      },
+      {
+        "id": "affichiste",
+        "x": 226,
+        "y": 0,
+        "wave": 5,
+        "weapon": "shotgun"
+      },
+      {
+        "id": "affichiste",
+        "x": 252,
+        "y": 0,
+        "reward": "score"
+      },
+      {
+        "id": "civilian",
+        "x": 300,
+        "y": 0,
+        "wave": 7,
+        "reward": "grenades"
+      },
+      {
+        "id": "affichiste",
+        "x": 340,
+        "y": 0,
+        "wave": 8,
+        "reward": "weapon"
+      }
+    ],
+    "vehicles": [
+      {
+        "id": "deuche-blindee",
+        "x": 165
+      }
+    ],
+    "decor": [
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 0
+        },
+        "x": 20,
+        "y": -0.481,
+        "height": 1.8
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 1
+        },
+        "x": 18.9,
+        "y": -0.297,
+        "height": 1.55
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 1
+        },
+        "x": 21.2,
+        "y": -0.297,
+        "height": 1.55,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 2
+        },
+        "x": 20.1,
+        "y": -0.284,
+        "height": 3.0
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 3
+        },
+        "x": 25.5,
+        "y": -0.474,
+        "height": 2.0
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 4
+        },
+        "x": 33,
+        "y": -0.272,
+        "height": 2.0
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 0
+        },
+        "x": 39,
+        "y": -0.481,
+        "height": 1.8
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 1
+        },
+        "x": 40.1,
+        "y": -0.297,
+        "height": 1.55,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 4
+        },
+        "x": 47.5,
+        "y": -0.272,
+        "height": 2.0
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 8
+        },
+        "x": 62,
+        "y": -0.548,
+        "height": 2.6
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 4
+        },
+        "x": 70,
+        "y": -0.272,
+        "height": 2.0
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 6
+        },
+        "x": 79,
+        "y": -0.402,
+        "height": 1.85
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 6
+        },
+        "x": 80.1,
+        "y": -0.402,
+        "height": 1.85,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 5
+        },
+        "x": 95,
+        "y": -0.382,
+        "height": 1.6
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 3
+        },
+        "x": 104,
+        "y": -0.474,
+        "height": 2.0,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 4
+        },
+        "x": 113,
+        "y": -0.272,
+        "height": 2.0
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 0
+        },
+        "x": 128,
+        "y": -0.481,
+        "height": 1.8
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 1
+        },
+        "x": 126.9,
+        "y": -0.297,
+        "height": 1.55
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 11
+        },
+        "x": 146,
+        "y": -0.74,
+        "height": 4.4
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 10
+        },
+        "x": 152,
+        "y": -0.777,
+        "height": 2.3
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 7
+        },
+        "x": 165,
+        "y": -0.407,
+        "height": 1.55
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 11
+        },
+        "x": 178,
+        "y": -0.74,
+        "height": 4.4,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 10
+        },
+        "x": 186,
+        "y": -0.777,
+        "height": 2.3
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 3
+        },
+        "x": 214,
+        "y": -0.474,
+        "height": 2.0
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 10
+        },
+        "x": 225,
+        "y": -0.777,
+        "height": 2.3
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 3
+        },
+        "x": 247,
+        "y": -0.474,
+        "height": 2.0,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 11
+        },
+        "x": 262,
+        "y": -0.74,
+        "height": 4.4
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 10
+        },
+        "x": 276,
+        "y": -0.777,
+        "height": 2.3
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 3
+        },
+        "x": 292,
+        "y": -0.474,
+        "height": 2.0
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 7
+        },
+        "x": 300,
+        "y": -0.407,
+        "height": 1.55
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 3
+        },
+        "x": 305.5,
+        "y": -0.474,
+        "height": 2.0,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 10
+        },
+        "x": 333,
+        "y": -0.777,
+        "height": 2.3
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 11
+        },
+        "x": 336,
+        "y": -0.74,
+        "height": 4.4
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 10
+        },
+        "x": 352,
+        "y": -0.777,
+        "height": 2.3
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 11
+        },
+        "x": 366,
+        "y": -0.74,
+        "height": 4.4,
+        "flip": true
+      },
+      {
+        "sprite": {
+          "texture": "Art/saint-remy/accessoires",
+          "columns": 4,
+          "rows": 3,
+          "cell": 5
+        },
+        "x": 378,
+        "y": -0.382,
+        "height": 1.6
+      }
+    ]
+  },
+  "enemies": [
+    "mime",
+    "comedien",
+    "arlesien-fouet"
+  ],
+  "extraEnemy": {
+    "enemy": 2,
+    "every": 4,
+    "fromDifficulty": 1
+  },
+  "length": 420,
+  "exitX": 417,
+  "cameraMin": 7,
+  "cameraMax": 414,
+  "rules": "pow",
+  "parTime": 280,
+  "waves": [
+    {
+      "atX": 14,
+      "baseEnemies": 5,
+      "enemiesPerPlayer": 2,
+      "maxAlive": 9,
+      "spawnInterval": 0.45,
+      "enemyPattern": [
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "atX": 50,
+      "baseEnemies": 6,
+      "enemiesPerPlayer": 2,
+      "maxAlive": 9,
+      "spawnInterval": 0.42,
+      "enemyPattern": [
+        0,
+        1,
+        0,
+        0,
+        2
+      ]
+    },
+    {
+      "atX": 88,
+      "baseEnemies": 6,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 10,
+      "spawnInterval": 0.4,
+      "enemyPattern": [
+        0,
+        1,
+        0,
+        2,
+        0
+      ]
+    },
+    {
+      "atX": 122,
+      "baseEnemies": 7,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 10,
+      "spawnInterval": 0.38,
+      "enemyPattern": [
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "atX": 160,
+      "baseEnemies": 8,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 11,
+      "spawnInterval": 0.36,
+      "enemyPattern": [
+        0,
+        2,
+        1,
+        0,
+        2
+      ]
+    },
+    {
+      "atX": 232,
+      "baseEnemies": 8,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 11,
+      "spawnInterval": 0.34,
+      "enemyPattern": [
+        2,
+        1,
+        0,
+        1,
+        0,
+        2
+      ]
+    },
+    {
+      "atX": 268,
+      "baseEnemies": 9,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 12,
+      "spawnInterval": 0.32,
+      "enemyPattern": [
+        1,
+        2,
+        0,
+        2,
+        1,
+        0
+      ]
+    },
+    {
+      "atX": 305,
+      "baseEnemies": 9,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 12,
+      "spawnInterval": 0.3,
+      "enemyPattern": [
+        2,
+        1,
+        2,
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "atX": 345,
+      "baseEnemies": 10,
+      "enemiesPerPlayer": 3,
+      "maxAlive": 13,
+      "spawnInterval": 0.28,
+      "enemyPattern": [
+        2,
+        1,
+        2,
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "encounters": [
+    {
+      "wave": 0,
+      "spawns": [
+        {
+          "enemy": "mime",
+          "entry": "door",
+          "x": 11,
+          "delay": 0,
+          "fromX": 12,
+          "fromY": 0,
+          "y": 0
+        },
+        {
+          "enemy": "comedien",
+          "entry": "walk",
+          "x": 9,
+          "delay": 1.2,
+          "side": "right"
+        },
+        {
+          "enemy": "mime",
+          "entry": "door",
+          "x": 4,
+          "delay": 1.8,
+          "fromX": 4,
+          "fromY": 0,
+          "y": 0,
+          "opening": "none"
+        }
+      ]
+    },
+    {
+      "atX": 30,
+      "spawns": [
+        {
+          "enemy": "mime",
+          "entry": "none",
+          "x": 49,
+          "delay": 0,
+          "unaware": true,
+          "facing": -1
+        },
+        {
+          "enemy": "comedien",
+          "entry": "none",
+          "x": 51,
+          "delay": 0,
+          "unaware": true,
+          "facing": 1
+        }
+      ]
+    },
+    {
+      "wave": 1,
+      "spawns": [
+        {
+          "enemy": "comedien",
+          "entry": "window",
+          "x": 44,
+          "delay": 0,
+          "fromX": 44,
+          "fromY": 2.0,
+          "y": 0
+        },
+        {
+          "enemy": "mime",
+          "entry": "door",
+          "x": 47,
+          "delay": 0.6,
+          "fromX": 47.5,
+          "fromY": 0,
+          "y": 0,
+          "opening": "none"
+        },
+        {
+          "enemy": "arlesien-fouet",
+          "entry": "walk",
+          "x": 40,
+          "delay": 1.4,
+          "side": "left"
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "spawns": [
+        {
+          "enemy": "mime",
+          "entry": "door",
+          "x": 80,
+          "delay": 0,
+          "fromX": 80,
+          "fromY": 0,
+          "y": 0,
+          "opening": "none"
+        },
+        {
+          "enemy": "comedien",
+          "entry": "drop",
+          "x": 84,
+          "delay": 0.7
+        },
+        {
+          "enemy": "arlesien-fouet",
+          "entry": "window",
+          "x": 76,
+          "delay": 1.3,
+          "fromX": 76,
+          "fromY": 2.0,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "truck": {
+        "id": "rusty-van",
+        "side": "right",
+        "x": 118
+      },
+      "spawns": [
+        {
+          "enemy": "mime",
+          "entry": "truck",
+          "x": 117,
+          "delay": 0
+        },
+        {
+          "enemy": "arlesien-fouet",
+          "entry": "truck",
+          "x": 116,
+          "delay": 0
+        },
+        {
+          "enemy": "comedien",
+          "entry": "truck",
+          "x": 115,
+          "delay": 0
+        }
+      ]
+    },
+    {
+      "atX": 140,
+      "lock": true,
+      "announce": "EMBUSCADE DANS LES OLIVIERS !",
+      "spawns": [
+        {
+          "enemy": "mime",
+          "entry": "door",
+          "x": 146,
+          "delay": 0,
+          "fromX": 146,
+          "fromY": 0,
+          "y": 0,
+          "opening": "none"
+        },
+        {
+          "enemy": "arlesien-fouet",
+          "entry": "drop",
+          "x": 149,
+          "delay": 0.5
+        },
+        {
+          "enemy": "comedien",
+          "entry": "walk",
+          "x": 136,
+          "delay": 1,
+          "side": "left"
+        },
+        {
+          "enemy": "mime",
+          "entry": "walk",
+          "x": 150,
+          "delay": 1.6,
+          "side": "right"
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "spawns": [
+        {
+          "enemy": "arlesien-fouet",
+          "entry": "door",
+          "x": 152,
+          "delay": 0,
+          "fromX": 152,
+          "fromY": 0,
+          "y": 0,
+          "opening": "none"
+        },
+        {
+          "enemy": "mime",
+          "entry": "door",
+          "x": 157,
+          "delay": 0.8,
+          "fromX": 157,
+          "fromY": 0,
+          "y": 0
+        },
+        {
+          "enemy": "comedien",
+          "entry": "walk",
+          "x": 150,
+          "delay": 1.5,
+          "side": "left"
+        }
+      ]
+    },
+    {
+      "atX": 196,
+      "boss": {
+        "id": "taureau",
+        "health": 1
+      }
+    },
+    {
+      "atX": 208,
+      "spawns": [
+        {
+          "enemy": "arlesien-fouet",
+          "entry": "none",
+          "x": 226,
+          "delay": 0,
+          "unaware": true,
+          "facing": -1
+        },
+        {
+          "enemy": "mime",
+          "entry": "none",
+          "x": 228,
+          "delay": 0,
+          "unaware": true,
+          "facing": 1
+        },
+        {
+          "enemy": "comedien",
+          "entry": "none",
+          "x": 230,
+          "delay": 0,
+          "unaware": true,
+          "facing": -1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "spawns": [
+        {
+          "enemy": "mime",
+          "entry": "door",
+          "x": 225,
+          "delay": 0,
+          "fromX": 225,
+          "fromY": 0,
+          "y": 0,
+          "opening": "none"
+        },
+        {
+          "enemy": "arlesien-fouet",
+          "entry": "drop",
+          "x": 229,
+          "delay": 0.6
+        },
+        {
+          "enemy": "comedien",
+          "entry": "walk",
+          "x": 220,
+          "delay": 1.2,
+          "side": "left"
+        }
+      ]
+    },
+    {
+      "wave": 6,
+      "truck": {
+        "id": "rusty-van",
+        "side": "right",
+        "x": 264
+      },
+      "spawns": [
+        {
+          "enemy": "arlesien-fouet",
+          "entry": "truck",
+          "x": 263,
+          "delay": 0
+        },
+        {
+          "enemy": "mime",
+          "entry": "truck",
+          "x": 262,
+          "delay": 0
+        },
+        {
+          "enemy": "comedien",
+          "entry": "truck",
+          "x": 261,
+          "delay": 0
+        },
+        {
+          "enemy": "mime",
+          "entry": "door",
+          "x": 262,
+          "delay": 0.5,
+          "fromX": 262,
+          "fromY": 0,
+          "y": 0,
+          "opening": "none"
+        }
+      ]
+    },
+    {
+      "wave": 6,
+      "on": "clear",
+      "lock": true,
+      "announce": "ILS ARRIVENT PAR DERRIÈRE !",
+      "spawns": [
+        {
+          "enemy": "mime",
+          "entry": "walk",
+          "x": 262,
+          "delay": 0,
+          "side": "left"
+        },
+        {
+          "enemy": "arlesien-fouet",
+          "entry": "walk",
+          "x": 260,
+          "delay": 0.7,
+          "side": "left"
+        }
+      ]
+    },
+    {
+      "wave": 7,
+      "spawns": [
+        {
+          "enemy": "mime",
+          "entry": "door",
+          "x": 292,
+          "delay": 0,
+          "fromX": 292,
+          "fromY": 0,
+          "y": 0,
+          "opening": "none"
+        },
+        {
+          "enemy": "comedien",
+          "entry": "door",
+          "x": 300,
+          "delay": 0.6,
+          "fromX": 300,
+          "fromY": 0,
+          "y": 0,
+          "opening": "none"
+        },
+        {
+          "enemy": "arlesien-fouet",
+          "entry": "drop",
+          "x": 297,
+          "delay": 1.2
+        }
+      ]
+    },
+    {
+      "wave": 8,
+      "spawns": [
+        {
+          "enemy": "arlesien-fouet",
+          "entry": "door",
+          "x": 336,
+          "delay": 0,
+          "fromX": 336,
+          "fromY": 0,
+          "y": 0,
+          "opening": "none"
+        },
+        {
+          "enemy": "comedien",
+          "entry": "walk",
+          "x": 340,
+          "delay": 0.8,
+          "side": "right"
+        },
+        {
+          "enemy": "mime",
+          "entry": "drop",
+          "x": 344,
+          "delay": 1.4
+        }
+      ]
+    },
+    {
+      "atX": 370,
+      "lock": true,
+      "announce": "LA GARDE DU DEVIN !",
+      "spawns": [
+        {
+          "enemy": "arlesien-fouet",
+          "entry": "walk",
+          "x": 376,
+          "delay": 0,
+          "side": "right"
+        },
+        {
+          "enemy": "mime",
+          "entry": "door",
+          "x": 366,
+          "delay": 0.5,
+          "fromX": 366,
+          "fromY": 0,
+          "y": 0,
+          "opening": "none"
+        },
+        {
+          "enemy": "comedien",
+          "entry": "walk",
+          "x": 365,
+          "delay": 1,
+          "side": "left"
+        },
+        {
+          "enemy": "arlesien-fouet",
+          "entry": "drop",
+          "x": 372,
+          "delay": 1.6
+        }
+      ]
+    }
+  ],
+  "boss": {
+    "enabled": true,
+    "id": "antipape",
+    "health": 1
+  },
+  "weapons": [
+    {
+      "weapon": "shotgun",
+      "weight": 3
+    },
+    {
+      "weapon": "heavy-machinegun",
+      "weight": 2
+    },
+    {
+      "weapon": "flamethrower",
+      "weight": 2
+    },
+    {
+      "weapon": "rocket-launcher",
+      "weight": 2
+    },
+    {
+      "weapon": "laser",
+      "weight": 1
+    }
+  ]
+}

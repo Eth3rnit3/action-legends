@@ -27,21 +27,21 @@ public static class VerifyCampaignTokyo
         foreach(var m in missions)PlayerPrefs.DeleteKey("action-legends.unlocked."+m.id);
         var players=(PanameGame.Player[])Get(g,"players");var commands=new PlayerCommand[4];
         var shots=(IList)Get(g,"shots");var enemies=(IList)Get(g,"enemies");var bombs=(IList)Get(g,"bossBombs");var waves=(IList)Get(g,"shockwaves");
-        // Tokyo is found by its id: Saint-Remy comes before it since mission 4 (VerifySaintRemy covers the four-mission campaign).
+        // Tokyo is found by its id. Since 0.10.0 it is a secret mission after the campaign (Paris, Marseille, Saint-Remy,
+        // Avignon): VerifyAvignon covers the campaign's end, this test Tokyo's own code.
         int tokyo=Array.FindIndex(missions,m=>m.id=="tokyo-neon");
-        Check(g.MissionCount==4&&tokyo==3&&missions[0].id=="panique-a-paname"&&missions[1].id=="mistral-gagnant","Le catalogue contient Paris, Marseille, Saint-Rémy et Tokyo, Tokyo en dernier",checks);
+        Check(g.MissionCount==5&&tokyo==4&&missions[tokyo].hidden&&missions[0].id=="panique-a-paname"&&missions[1].id=="mistral-gagnant","Le catalogue contient Paris, Marseille, Saint-Rémy, Avignon et Tokyo, Tokyo en dernier et secret",checks);
         Check(missions[0].enemies.Length==3&&missions[0].enemies[2]=="looter-shield"&&missions[0].roster[2].animations.sheet.texture=="Art/enemies/looter-shield","Paris garde ses pilleurs (planche de chaque pillard, lot 2b)",checks);
         Check(missions[tokyo].enemies.Length==3&&missions[tokyo].roster[0].Armed&&missions[tokyo].roster[1].Armed&&missions[tokyo].roster[2].Armed,"Les trois ennemis de Tokyo sont armés",checks);
         g.ReturnToLobby();Call(g,"LoadMission",0);
-        Check(!g.IsUnlocked(1)&&!g.IsUnlocked(2)&&!g.IsUnlocked(tokyo)&&g.UnlockedCount==1,"Seule la première mission est ouverte au départ",checks);
+        Check(!g.IsUnlocked(1)&&!g.IsUnlocked(2)&&!g.IsUnlocked(tokyo)&&g.UnlockedCount==1&&g.ShownCount==4,"Seule la première mission est ouverte au départ, et le menu compte quatre missions sans la secrète",checks);
         g.SelectMission(1);Check(g.MissionIndex==0,"Les flèches sautent les missions verrouillées",checks);
         Check(!g.EnterMissionCode("NOPE")&&g.MissionIndex==0,"Un code inconnu est refusé",checks);
-        Check(g.EnterMissionCode("sakura")&&g.MissionIndex==tokyo&&g.IsUnlocked(tokyo),"Le code SAKURA ouvre et sélectionne Tokyo",checks);
-        // Since 0.8.0 a mission is open when it or a later one is unlocked: Tokyo's code opens the whole campaign.
-        Check(g.IsUnlocked(1)&&g.IsUnlocked(2)&&g.UnlockedCount==4,"Le code de la dernière mission ouvre aussi les missions précédentes",checks);
+        Check(g.EnterMissionCode("sakura")&&g.MissionIndex==tokyo&&g.IsUnlocked(tokyo)&&g.CampaignNumber(tokyo)==0,"Le code SAKURA ouvre et sélectionne Tokyo, mission secrète",checks);
+        // A secret mission opens nothing else: the campaign before it stays locked.
+        Check(!g.IsUnlocked(1)&&!g.IsUnlocked(3)&&g.UnlockedCount==2&&g.ShownCount==5,"Le code secret n'ouvre pas les missions de la campagne",checks);
         g.SelectMission(1);Check(g.MissionIndex==0,"Les flèches passent de Tokyo à Paris",checks);
-        g.SelectMission(1);Check(g.MissionIndex==1,"Puis de Paris à Marseille, désormais ouverte",checks);
-        g.SelectMission(-1);g.SelectMission(-1);Check(g.MissionIndex==tokyo,"Tokyo reste accessible avec les flèches",checks);
+        g.SelectMission(1);Check(g.MissionIndex==tokyo,"Puis de Paris à Tokyo, Marseille restant fermée",checks);
 
         for(int i=0;i<4;i++)g.slots[i].joined=i==0;
         g.SetDifficulty(1);
@@ -102,7 +102,7 @@ public static class VerifyCampaignTokyo
         p.position=new Vector2(p.position.x,2);p.vertical=0;var before=p.hp;
         Call(g,"DamageBoss",health);
         for(int n=0;n<60*4&&g.phase==PanameGame.Phase.Playing;n++)g.TickSimulation(1f/60,commands);
-        Check(g.phase==PanameGame.Phase.Won&&g.NextMissionDefinition==null,"Abattre le mécha termine la dernière mission",checks);
+        Check(g.phase==PanameGame.Phase.Won&&g.NextMissionDefinition==null&&!g.IsUnlocked(1),"Abattre le mécha termine la mission secrète, sans mission suivante ni déblocage",checks);
 
         Call(g,"LoadMission",0);g.BeginRound();Call(g,"WinMission");int score=g.Score+12345;
         g.GetType().GetProperty("Score").SetValue(g,score);

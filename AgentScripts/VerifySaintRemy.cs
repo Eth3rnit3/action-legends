@@ -9,7 +9,7 @@ using Paname;
 // Mission 4, Saint-Remy-de-Provence ("Prophétie en Provence"), built from data only: the mission loads, its six panoramas
 // join and cover the course, its street scenery stands, the Arlésiens fight (the whip at reach), the bull holds the screen
 // and charges, Nostradamus plays every move (scrolls, announced circles, troops, the great prophecy) and falls, the campaign
-// runs Paris, Marseille, Saint-Remy, Tokyo with its unlocks and codes (a Tokyo unlocked before stays unlocked), a game is
+// runs Paris, Marseille, Saint-Remy, Avignon with its unlocks and codes (Tokyo, secret since 0.10.0, stays out of it), a game is
 // replayed exactly, and bots win the mission in the five difficulties, alone and four together.
 public static class VerifySaintRemy
 {
@@ -27,7 +27,7 @@ public static class VerifySaintRemy
 
     static PanameGame g;static PanameGame.Player[] players;static IList enemies,shots,hostages,pickups,arrivals,carriers,bombs,thrown;
     static readonly PlayerCommand[] commands=new PlayerCommand[4];
-    static MissionDefinition[] original;static int sr,tokyo;
+    static MissionDefinition[] original;static int sr,avignon,tokyo;
     static void Start(int mission,int difficulty,int heroes)
     {
         g.ReturnToLobby();Call(g,"LoadMission",mission);g.SetDifficulty(difficulty);
@@ -76,8 +76,8 @@ public static class VerifySaintRemy
 
     static void Catalog(List<string> checks)
     {
-        var ids=Array.ConvertAll(original,m=>m.id);sr=Array.IndexOf(ids,Id);tokyo=Array.IndexOf(ids,"tokyo-neon");
-        Check(string.Join(",",ids)=="panique-a-paname,mistral-gagnant,"+Id+",tokyo-neon","La campagne compte quatre missions dans l'ordre Paris, Marseille, Saint-Rémy, Tokyo ("+string.Join(", ",ids)+")",checks);
+        var ids=Array.ConvertAll(original,m=>m.id);sr=Array.IndexOf(ids,Id);avignon=Array.IndexOf(ids,"sur-le-pont-d-avignon");tokyo=Array.IndexOf(ids,"tokyo-neon");
+        Check(string.Join(",",ids)=="panique-a-paname,mistral-gagnant,"+Id+",sur-le-pont-d-avignon,tokyo-neon"&&original[tokyo].hidden,"Le catalogue suit l'ordre Paris, Marseille, Saint-Rémy, Avignon, puis Tokyo, secret ("+string.Join(", ",ids)+")",checks);
         var m=original[sr];
         Check(m.code=="FARANDOLE"&&original[tokyo].code=="SAKURA"&&original[1].code=="PASTIS"&&m.title=="Prophétie en Provence"&&m.location.StartsWith("Saint-Rémy-de-Provence"),"Saint-Rémy a son code FARANDOLE ; PASTIS et SAKURA restent valables",checks);
         Check(m.roster.Length==3&&m.roster[0].id=="arlesien"&&m.roster[1].id=="arlesienne"&&m.roster[2].id=="arlesien-fouet"&&m.boss.definition.id=="nostradamus"&&
@@ -85,10 +85,10 @@ public static class VerifySaintRemy
               "Arlésien, Arlésienne et Arlésien au fouet, le taureau en mini-boss, Nostradamus en boss final, la Farandole 8 bits (parcours et boss)",checks);
         Check(m.waves.Length==9&&m.encounters.Length>=14&&m.map.hostages.Length>=8&&Array.TrueForAll(m.map.hostages,h=>h.id=="peintre"||h.id=="civilian")&&m.map.decor.Length>=30,
               "Neuf vagues, "+m.encounters.Length+" rencontres, "+m.map.hostages.Length+" otages (le peintre local), "+m.map.decor.Length+" accessoires posés dans la rue",checks);
-        // The optional mission logo (0.8.0): only Saint-Remy has one; the lobby card falls back to the title elsewhere.
+        // The optional mission logo (0.8.0, every mission has one since 0.9.1): each mission shows its own.
         g.ReturnToLobby();Call(g,"LoadMission",sr);var logo=(Texture2D)Get(g,"missionLogo");
-        Call(g,"LoadMission",0);var none=(Texture2D)Get(g,"missionLogo");
-        Check(m.logo=="Art/saint-remy/mission-logo"&&logo&&logo.width>2*logo.height&&!none&&string.IsNullOrEmpty(original[0].logo),"Saint-Rémy affiche son logo dans la carte de mission du menu ; Paris garde son titre ("+m.logo+", "+(logo?logo.width+"×"+logo.height:"pas d'image")+")",checks);
+        Call(g,"LoadMission",0);var paris=(Texture2D)Get(g,"missionLogo");
+        Check(m.logo=="Art/saint-remy/mission-logo"&&logo&&logo.width>2*logo.height&&paris&&paris!=logo,"Saint-Rémy affiche son logo dans la carte de mission du menu, Paris le sien ("+m.logo+", "+(logo?logo.width+"×"+logo.height:"pas d'image")+")",checks);
         var bad=Resources.Load<TextAsset>("Levels/"+Id).text.Replace("\"logo\": \"Art/saint-remy/mission-logo\"","\"logo\": \"Art/saint-remy/absent\"");
         bool refused=false;try{MissionDefinition.Parse(bad);}catch(ArgumentException){refused=true;}
         Check(refused,"Un logo de mission introuvable est refusé à la validation",checks);
@@ -242,7 +242,7 @@ public static class VerifySaintRemy
         Check(g.BossHealth<health,"Les tirs des héros le blessent ("+health+" -> "+g.BossHealth+")",checks);
         Call(g,"DamageBoss",g.BossHealth);int wreck=Drawn(boss);
         for(int t=0;t<60*6&&g.phase==PanameGame.Phase.Playing;t++)Tick(1);
-        Check(g.phase==PanameGame.Phase.Won&&wreck==7&&g.NextMissionDefinition!=null&&g.NextMissionDefinition.id=="tokyo-neon","Vaincu, il s'assoit sur son grimoire (case 7) : la mission est gagnée et Tokyo vient ensuite",checks);
+        Check(g.phase==PanameGame.Phase.Won&&wreck==7&&g.NextMissionDefinition!=null&&g.NextMissionDefinition.id=="sur-le-pont-d-avignon","Vaincu, il s'assoit sur son grimoire (case 7) : la mission est gagnée et Avignon vient ensuite",checks);
     }
 
     // The cell the boss is drawn with.
@@ -251,27 +251,31 @@ public static class VerifySaintRemy
     {
         foreach(var m in original)PlayerPrefs.DeleteKey("action-legends.unlocked."+m.id);
         g.ReturnToLobby();Call(g,"LoadMission",0);
-        Check(g.UnlockedCount==1&&!g.IsUnlocked(sr)&&!g.IsUnlocked(tokyo),"Au départ seul Paris est ouvert",checks);
+        Check(g.UnlockedCount==1&&!g.IsUnlocked(sr)&&!g.IsUnlocked(avignon)&&!g.IsUnlocked(tokyo),"Au départ seul Paris est ouvert",checks);
         Call(g,"LoadMission",1);g.BeginRound();Call(g,"WinMission");
-        Check(g.IsUnlocked(sr)&&!g.IsUnlocked(tokyo)&&g.NextMissionDefinition.id==Id&&g.NextMissionDefinition.code=="FARANDOLE","Gagner Marseille débloque Saint-Rémy (pas Tokyo) et révèle FARANDOLE",checks);
+        Check(g.IsUnlocked(sr)&&!g.IsUnlocked(avignon)&&g.NextMissionDefinition.id==Id&&g.NextMissionDefinition.code=="FARANDOLE","Gagner Marseille débloque Saint-Rémy (pas Avignon) et révèle FARANDOLE",checks);
         int score=g.Score;g.NextMission();
         Check(g.MissionIndex==sr&&g.phase==PanameGame.Phase.Playing&&g.Score==score&&g.Wave==0,"MISSION SUIVANTE enchaîne Marseille sur Saint-Rémy en gardant le score",checks);
         Call(g,"WinMission");
-        Check(g.IsUnlocked(tokyo)&&g.NextMissionDefinition.id=="tokyo-neon"&&g.NextMissionDefinition.code=="SAKURA","Gagner Saint-Rémy débloque Tokyo et révèle SAKURA",checks);
-        g.NextMission();Check(g.MissionIndex==tokyo&&g.phase==PanameGame.Phase.Playing,"Saint-Rémy enchaîne sur Tokyo",checks);
+        Check(g.IsUnlocked(avignon)&&!g.IsUnlocked(tokyo)&&g.NextMissionDefinition.id=="sur-le-pont-d-avignon"&&g.NextMissionDefinition.code=="PAPALINE","Gagner Saint-Rémy débloque Avignon et révèle PAPALINE",checks);
+        g.NextMission();Check(g.MissionIndex==avignon&&g.phase==PanameGame.Phase.Playing,"Saint-Rémy enchaîne sur Avignon",checks);
+        // The end of the campaign: no next mission, Tokyo stays secret and its code is given away.
+        Call(g,"WinMission");
+        Check(g.NextMissionDefinition==null&&!g.IsUnlocked(tokyo)&&g.SecretHint!=null&&g.SecretHint.code=="SAKURA","Gagner Avignon termine la campagne : pas de mission suivante, Tokyo reste secrète et son code SAKURA est donné",checks);
         g.ReturnToLobby();
-        // A browser that had unlocked Tokyo (0.7.0: only Tokyo's key is stored): Tokyo stays open, and Saint-Remy,
-        // inserted before it, opens too, as does every mission before a mission already unlocked.
+        // A browser that had only unlocked Tokyo (0.7.0 kept only that key): Tokyo stays open, a secret mission, and opens nothing else.
         foreach(var m in original)PlayerPrefs.DeleteKey("action-legends.unlocked."+m.id);
         PlayerPrefs.SetInt("action-legends.unlocked.tokyo-neon",1);Call(g,"LoadMission",0);
-        Check(g.IsUnlocked(tokyo)&&g.IsUnlocked(sr)&&g.IsUnlocked(1)&&g.UnlockedCount==4,"Un Tokyo déjà débloqué le reste et ouvre Saint-Rémy, insérée avant lui",checks);
-        g.SelectMission(1);g.SelectMission(1);Check(g.MissionIndex==sr,"Les flèches s'arrêtent sur Saint-Rémy entre Marseille et Tokyo",checks);
+        Check(g.IsUnlocked(tokyo)&&!g.IsUnlocked(1)&&!g.IsUnlocked(avignon)&&g.UnlockedCount==2,"Un Tokyo déjà débloqué le reste, sans ouvrir la campagne",checks);
         foreach(var m in original)PlayerPrefs.DeleteKey("action-legends.unlocked."+m.id);
-        PlayerPrefs.SetInt("action-legends.unlocked."+Id,1);Call(g,"LoadMission",0);
-        Check(g.IsUnlocked(sr)&&g.IsUnlocked(1)&&!g.IsUnlocked(tokyo)&&g.UnlockedCount==3,"Saint-Rémy débloquée ouvre Marseille mais pas Tokyo, qui vient après",checks);
+        PlayerPrefs.SetInt("action-legends.unlocked.sur-le-pont-d-avignon",1);Call(g,"LoadMission",0);
+        Check(g.IsUnlocked(avignon)&&g.IsUnlocked(sr)&&g.IsUnlocked(1)&&!g.IsUnlocked(tokyo)&&g.UnlockedCount==4,"Avignon débloquée ouvre les missions avant elle, pas Tokyo",checks);
+        g.SelectMission(1);g.SelectMission(1);g.SelectMission(1);Check(g.MissionIndex==avignon,"Les flèches mènent de Paris à Avignon par Marseille et Saint-Rémy",checks);
+        g.SelectMission(1);Check(g.MissionIndex==0,"Puis reviennent à Paris : Tokyo, secrète, n'est pas dans la liste",checks);
         foreach(var m in original)PlayerPrefs.DeleteKey("action-legends.unlocked."+m.id);Call(g,"LoadMission",0);
-        Check(g.EnterMissionCode("farandole")&&g.MissionIndex==sr&&g.IsUnlocked(sr)&&g.IsUnlocked(1)&&!g.IsUnlocked(tokyo),"Le code FARANDOLE ouvre et sélectionne Saint-Rémy (et Marseille avant elle)",checks);
-        Check(g.EnterMissionCode("SAKURA")&&g.MissionIndex==tokyo,"Le code SAKURA sélectionne toujours Tokyo, à sa nouvelle place",checks);
+        Check(g.EnterMissionCode("farandole")&&g.MissionIndex==sr&&g.IsUnlocked(sr)&&g.IsUnlocked(1)&&!g.IsUnlocked(avignon)&&!g.IsUnlocked(tokyo),"Le code FARANDOLE ouvre et sélectionne Saint-Rémy (et Marseille avant elle)",checks);
+        Check(g.EnterMissionCode("papaline")&&g.MissionIndex==avignon&&g.IsUnlocked(avignon)&&!g.IsUnlocked(tokyo),"Le code PAPALINE ouvre et sélectionne Avignon",checks);
+        Check(g.EnterMissionCode("SAKURA")&&g.MissionIndex==tokyo,"Le code SAKURA ouvre Tokyo, la mission secrète",checks);
         Call(g,"LoadMission",0);foreach(var m in original)PlayerPrefs.DeleteKey("action-legends.unlocked."+m.id);
     }
 

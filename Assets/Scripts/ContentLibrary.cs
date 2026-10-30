@@ -227,7 +227,8 @@ namespace Paname
         [NonSerialized] AudioClip clip;
         public AudioClip Clip=>string.IsNullOrEmpty(sound)?null:clip?clip:(clip=Resources.Load<AudioClip>(sound));
     }
-    [Serializable] public sealed class EnemyThrow {public float range,cooldown,aimHeight;public float[] speed;public int damage;public string projectile;}
+    // sprite: optional art of the thrown object (a tomato...), drawn in place of the projectile look; it only changes the picture.
+    [Serializable] public sealed class EnemyThrow {public float range,cooldown,aimHeight;public float[] speed;public int damage;public string projectile;public BossSprite sprite=new BossSprite();}
     [Serializable] public sealed class EnemyGun
     {
         public float range,aimTime,cooldown,burstInterval,spread,spreadStep,life,pose,shake;
@@ -290,7 +291,7 @@ namespace Paname
             {
                 var t=@throw;Content.Range(t.range,.5f,30,label+".throw.range");Content.Range(t.cooldown,.1f,20,label+".throw.cooldown");Content.Range(t.aimHeight,0,5,label+".throw.aimHeight");
                 Content.PerDifficulty(t.speed,1,60,label+".throw.speed");if(t.damage<1||t.damage>10)throw new ArgumentException(label+" : throw.damage entre 1 et 10");
-                Content.Look(t.projectile,label+".throw.projectile");
+                Content.Look(t.projectile,label+".throw.projectile");t.sprite.Validate(label+".throw.sprite");
                 if(!animations.HasAnchor("hand",pose))throw new ArgumentException(label+" : ancrage hand requis sur l'image d'attaque");hand=animations.Points("hand")[pose];
             }
             if(Armed)

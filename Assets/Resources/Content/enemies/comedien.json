@@ -1,0 +1,179 @@
+{
+  "id": "comedien",
+  "behavior": "thrower",
+  "health": 3,
+  "speed": 3.4,
+  "keepDistance": 5.5,
+  "hitRadius": 0.5,
+  "knockback": 3.5,
+  "bonusScore": 0,
+  "armored": false,
+  "firstAttack": 0.7,
+  "attackPose": 0.3,
+  "strideRate": 11,
+  "melee": {
+    "reach": 0.9,
+    "height": 1.35,
+    "cooldown": 1,
+    "damage": 1
+  },
+  "throw": {
+    "range": 10,
+    "cooldown": 1.5,
+    "aimHeight": 1,
+    "speed": [
+      8,
+      10,
+      12,
+      14
+    ],
+    "damage": 1,
+    "projectile": "bullet",
+    "sprite": {
+      "sprite": {
+        "texture": "Art/avignon/tomate",
+        "columns": 4,
+        "rows": 1,
+        "cell": 0
+      },
+      "frames": 3,
+      "fps": 12,
+      "size": 0.55,
+      "y": 0
+    }
+  },
+  "awareness": {
+    "sight": 8,
+    "hearing": 2.5,
+    "surprise": 0.65,
+    "alarm": 5
+  },
+  "panic": {
+    "health": 0.34,
+    "time": 2,
+    "speed": 1.3,
+    "returns": true
+  },
+  "cries": [
+    "Audio/Voices/cri-chute"
+  ],
+  "animations": {
+    "sheet": {
+      "texture": "Art/enemies/comedien",
+      "columns": 4,
+      "rows": 4,
+      "cropLeft": 0.065,
+      "cropRight": 0.025,
+      "pivot": {
+        "x": 0.4,
+        "y": 0.0527344
+      },
+      "cellHeight": 2.879964
+    },
+    "layer": 30,
+    "states": [
+      {
+        "name": "idle",
+        "cells": [
+          0
+        ],
+        "fps": 2
+      },
+      {
+        "name": "run",
+        "cells": [
+          1,
+          2
+        ],
+        "perStride": 1
+      },
+      {
+        "name": "attack",
+        "cells": [
+          3
+        ]
+      },
+      {
+        "name": "unaware",
+        "cells": [
+          4,
+          5
+        ],
+        "fps": 1.6
+      },
+      {
+        "name": "surprised",
+        "cells": [
+          6
+        ]
+      },
+      {
+        "name": "hurt",
+        "cells": [
+          7
+        ]
+      },
+      {
+        "name": "flee",
+        "cells": [
+          8,
+          9
+        ],
+        "perStride": 1
+      },
+      {
+        "name": "fall",
+        "cells": [
+          6
+        ]
+      },
+      {
+        "name": "death",
+        "cells": [
+          10,
+          11
+        ],
+        "fps": 5,
+        "loop": false
+      },
+      {
+        "name": "deathExplosion",
+        "cells": [
+          12,
+          13,
+          11
+        ],
+        "fps": 4,
+        "loop": false
+      },
+      {
+        "name": "deathFire",
+        "cells": [
+          14,
+          14,
+          15
+        ],
+        "fps": 2.5,
+        "loop": false
+      },
+      {
+        "name": "deathKnife",
+        "cells": [
+          7,
+          10,
+          11
+        ],
+        "fps": 6,
+        "loop": false
+      }
+    ],
+    "anchors": [
+      {
+        "name": "hand",
+        "cell": 3,
+        "x": 1.34,
+        "y": 1.71
+      }
+    ]
+  }
+}

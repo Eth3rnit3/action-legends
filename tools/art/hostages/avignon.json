@@ -1,0 +1,75 @@
+{
+ "output": "affichiste.png",
+ "columns": 4,
+ "rows": 3,
+ "cell": [
+  340,
+  340
+ ],
+ "feet": 12,
+ "pivotX": 0.45,
+ "ppu": 108,
+ "height": 1.85,
+ "defringe": true,
+ "sources": {
+  "A": {
+   "image": "avignon-A.png",
+   "grid": [
+    4,
+    3
+   ],
+   "reference": 3
+  }
+ },
+ "frames": [
+  [
+   "A",
+   0
+  ],
+  [
+   "A",
+   1
+  ],
+  [
+   "A",
+   2
+  ],
+  [
+   "A",
+   3
+  ],
+  [
+   "A",
+   4
+  ],
+  [
+   "A",
+   5
+  ],
+  [
+   "A",
+   6
+  ],
+  [
+   "A",
+   7
+  ],
+  [
+   "A",
+   8
+  ],
+  [
+   "A",
+   9
+  ],
+  [
+   "A",
+   10
+  ],
+  [
+   "A",
+   11
+  ]
+ ],
+ "anchors": {}
+}

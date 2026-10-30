@@ -1,0 +1,71 @@
+{
+ "output": "antipape.png",
+ "columns": 4,
+ "rows": 2,
+ "cell": [
+  512,
+  512
+ ],
+ "feet": 27,
+ "pivotX": 0.5,
+ "ppu": 146.7,
+ "height": 3.3,
+ "heightFrom": [
+  "R",
+  0
+ ],
+ "defringe": true,
+ "sources": {
+  "R": {
+   "image": "nostradamus-ref.png",
+   "grid": [
+    4,
+    2
+   ],
+   "exact": true
+  },
+  "N": {
+   "image": "antipape-new.png",
+   "grid": [
+    4,
+    2
+   ],
+   "reference": 0
+  }
+ },
+ "frames": [
+  [
+   "N",
+   0
+  ],
+  [
+   "N",
+   1
+  ],
+  [
+   "N",
+   2
+  ],
+  [
+   "N",
+   3
+  ],
+  [
+   "N",
+   4
+  ],
+  [
+   "N",
+   5
+  ],
+  [
+   "N",
+   6
+  ],
+  [
+   "N",
+   7
+  ]
+ ],
+ "anchors": {}
+}

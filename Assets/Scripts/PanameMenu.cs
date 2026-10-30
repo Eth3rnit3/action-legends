@@ -94,7 +94,8 @@ namespace Paname
             DrawDifficulty();DrawSoundOptions();DrawCodeButton();DrawBoardButton();
             IllustratedPanel(new Rect(913,27,315,155),Color.white);
             Panel(935,51,270,105,C("07192A"));
-            Label(938,53,265,18,"MISSION "+(MissionIndex+1).ToString("00"),13,Gold,true);
+            int number=CampaignNumber(MissionIndex);
+            Label(938,53,265,18,number>0?"MISSION "+number.ToString("00"):"MISSION SECRÈTE",13,Gold,true);
             // A mission logo takes the title's place; the location moves down under it.
             if(missionLogo)
             {
@@ -106,11 +107,11 @@ namespace Paname
                 Label(938,77,265,27,CurrentMission.title.ToUpperInvariant(),20,Cream,true);
                 Label(938,109,265,18,CurrentMission.location.ToUpperInvariant(),12,C("B2C7BD"),true);
             }
-            if(MissionCount>1)
+            if(ShownCount>1)
             {
                 bool browse=UnlockedCount>1;
                 if(browse&&Button(936,142,26,24,"<",C("304C56")))SelectMission(-1);
-                Label(969,142,204,24,UnlockedCount+" / "+MissionCount+" MISSIONS DÉBLOQUÉES",11,Gold,true,TextAnchor.MiddleCenter);
+                Label(969,142,204,24,UnlockedCount+" / "+ShownCount+" MISSIONS DÉBLOQUÉES",11,Gold,true,TextAnchor.MiddleCenter);
                 if(browse&&Button(1179,142,26,24,">",C("304C56")))SelectMission(1);
             }
             for(int i=0;i<4;i++)DrawPlayerCard(i);

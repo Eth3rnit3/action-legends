@@ -325,6 +325,11 @@ class MissionValidationTests(unittest.TestCase):
             with self.subTest(change=change):
                 self.assertTrue(self.rejected(change))
 
+    def test_hidden_mission(self):
+        self.assertFalse(self.rejected(lambda d: d.update(hidden=True, code="SECRET")))
+        self.assertTrue(self.rejected(lambda d: (d.update(hidden=True), d.pop("code", None))))
+        self.assertTrue(self.rejected(lambda d: d.update(hidden="yes")))
+
     def test_map_framing(self):
         self.assertFalse(self.rejected(lambda d: d["map"].update(horizon=0.1, groundBand=0.12, groundTop=-1.1, groundFade=0.5)))
         changes = (
@@ -366,12 +371,12 @@ class LibraryValidationTests(unittest.TestCase):
     def test_shipped_library_is_valid(self):
         self.assertEqual(LIBRARY_ERRORS, [])
         self.assertEqual(sorted(LIBRARY["heroes"]), ["arnold", "brigitte-bardot", "chuck-norris", "fernandel", "jean-claude", "jeanne-d-arc", "sylvester"])
-        self.assertEqual(len(LIBRARY["enemies"]), 9)
-        self.assertEqual(sorted(LIBRARY["bosses"]), ["armored-van", "combat-drone", "le-direct", "macron-helicopter", "mecha-shogun", "nostradamus",
+        self.assertEqual(len(LIBRARY["enemies"]), 11)
+        self.assertEqual(sorted(LIBRARY["bosses"]), ["antipape", "armored-van", "combat-drone", "le-direct", "macron-helicopter", "mecha-shogun", "nostradamus",
                                                      "speedboat", "taureau"])
         self.assertEqual(sorted(LIBRARY["carriers"]), ["black-minivan", "rusty-van"])
         self.assertEqual(sorted(LIBRARY["rules"]), ["default", "pow"])
-        self.assertEqual(sorted(LIBRARY["hostages"]), ["baker", "boules-player", "civilian", "office-worker", "peintre"])
+        self.assertEqual(sorted(LIBRARY["hostages"]), ["affichiste", "baker", "boules-player", "civilian", "office-worker", "peintre"])
 
     def test_extends_merges_objects_and_replaces_lists(self):
         direct = LIBRARY["bosses"]["le-direct"]

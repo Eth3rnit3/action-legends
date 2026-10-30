@@ -1,6 +1,7 @@
 {
   "schemaVersion": 2,
-  "order": 4,
+  "order": 5,
+  "hidden": true,
   "id": "tokyo-neon",
   "code": "SAKURA",
   "title": "Tokyo Néon",

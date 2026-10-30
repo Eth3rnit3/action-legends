@@ -129,6 +129,9 @@ namespace Paname
         public string id,title,location,intro,exitLabel,winTitle,code,music,bossMusic;
         // Optional: an image drawn in the lobby's mission card in place of the title.
         public string logo;
+        // A secret mission stays out of the campaign: the mission before it chains into the next one, and only its
+        // own code opens it (without opening the missions before it). It needs a code.
+        public bool hidden;
         public MissionMap map=new MissionMap();
         // Library enemy ids; waves refer to them by their position in this list.
         public string[] enemies;
@@ -325,6 +328,7 @@ namespace Paname
             if(string.IsNullOrWhiteSpace(intro)||string.IsNullOrWhiteSpace(exitLabel)||string.IsNullOrWhiteSpace(winTitle))throw new ArgumentException("intro, exitLabel et winTitle sont requis");
             if(id.Length>60||title.Length>45||location.Length>45||intro.Length>80||exitLabel.Length>40||winTitle.Length>80)throw new ArgumentException("Identifiants ou titres trop longs");
             if(!(length>=30&&length<=500&&exitX>10&&exitX<=length&&cameraMin>=0&&cameraMax>cameraMin&&cameraMax<=length))throw new ArgumentException("Limites de mission invalides");
+            if(hidden&&string.IsNullOrEmpty(code))throw new ArgumentException("hidden : une mission secrète a besoin d'un code");
             if(!string.IsNullOrEmpty(code)&&(code.Length<4||code.Length>10||!System.Text.RegularExpressions.Regex.IsMatch(code,"^[A-Z0-9]+$")))throw new ArgumentException("code : 4 à 10 lettres majuscules ou chiffres");
             Content.Path(music,"Audio/","music");Content.Require<AudioClip>(music,"Musique");
             if(!string.IsNullOrEmpty(logo)){Content.Path(logo,"Art/","logo");Content.Require<Texture2D>(logo,"Logo");}
@@ -385,6 +389,7 @@ namespace Paname
             }
             missions.Sort((a,b)=>a.order!=b.order?a.order.CompareTo(b.order):string.CompareOrdinal(a.id,b.id));
             if(missions.Count==0)throw new ArgumentException("Aucune mission dans Resources/Levels");
+            if(missions[0].hidden)throw new ArgumentException("La première mission ne peut pas être secrète : "+missions[0].id);
             return missions.ToArray();
         }
     }

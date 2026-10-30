@@ -6,6 +6,7 @@ namespace Paname
 {
     // Missions follow each other in catalog order. Winning one unlocks the next in this browser and
     // reveals its code; typing that code in the lobby unlocks it, and every mission before it, anywhere else.
+    // A secret mission (hidden) is left out of that chain: only its code opens it, and it opens nothing else.
     public sealed partial class PanameGame
     {
         const string UnlockKey="action-legends.unlocked.";
@@ -22,11 +23,26 @@ namespace Paname
         public bool IsUnlocked(int index)
         {
             if(index==0)return true;
-            for(int i=index;i<MissionCount;i++)if(PlayerPrefs.GetInt(UnlockKey+missions[i].id,0)==1)return true;
+            if(missions[index].hidden)return Unlocked(index);
+            for(int i=index;i<MissionCount;i++)if(!missions[i].hidden&&Unlocked(i))return true;
             return false;
         }
+        bool Unlocked(int index)=>PlayerPrefs.GetInt(UnlockKey+missions[index].id,0)==1;
         public int UnlockedCount{get{int n=0;for(int i=0;i<MissionCount;i++)if(IsUnlocked(i))n++;return n;}}
-        public MissionDefinition NextMissionDefinition=>missions!=null&&missionIndex+1<missions.Length?missions[missionIndex+1]:null;
+        // The missions the lobby counts: the campaign, and the secret ones already found.
+        public int ShownCount{get{int n=0;for(int i=0;i<MissionCount;i++)if(!missions[i].hidden||IsUnlocked(i))n++;return n;}}
+        // Its place in the campaign (1 for the first), 0 for a secret mission.
+        public int CampaignNumber(int index){if(missions[index].hidden)return 0;int n=0;for(int i=0;i<=index;i++)if(!missions[i].hidden)n++;return n;}
+        // The campaign mission after the current one, skipping the secret ones; none after a secret mission.
+        int NextIndex()
+        {
+            if(missions==null||CurrentMission.hidden)return -1;
+            for(int i=missionIndex+1;i<missions.Length;i++)if(!missions[i].hidden)return i;
+            return -1;
+        }
+        public MissionDefinition NextMissionDefinition{get{int next=NextIndex();return next<0?null:missions[next];}}
+        // The secret mission the end of the campaign hints at: the first one not found yet.
+        public MissionDefinition SecretHint{get{if(missions!=null)for(int i=0;i<missions.Length;i++)if(missions[i].hidden&&!IsUnlocked(i))return missions[i];return null;}}
         void Unlock(int index)
         {
             if(index<=0||index>=MissionCount||IsUnlocked(index))return;
@@ -36,13 +52,13 @@ namespace Paname
         void WinMission()
         {
             // A replay checked for the leaderboard must not unlock missions for the viewer.
-            TallyMission();phase=Phase.Won;Announce("MISSION ACCOMPLIE !");Speak(winVoice);if(!headless)Unlock(missionIndex+1);
+            TallyMission();phase=Phase.Won;Announce("MISSION ACCOMPLIE !");Speak(winVoice);if(!headless)Unlock(NextIndex());
         }
         // The team keeps its heroes and score; online, the host's restart message carries both to the guests.
         public void NextMission()
         {
             if(phase!=Phase.Won||NextMissionDefinition==null||(Online&&!IsHost))return;
-            carriedScore=Score;LoadMission(missionIndex+1);BeginRound();
+            carriedScore=Score;LoadMission(NextIndex());BeginRound();
         }
         bool ContinuePressed()
         {

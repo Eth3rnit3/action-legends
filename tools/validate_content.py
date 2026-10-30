@@ -847,6 +847,7 @@ def validate_enemy(data, resources):
         errors.number(throw, "damage", 1, 10, tl, 0, True)
         if throw.get("projectile") not in LOOKS:
             errors.append(f"{tl}.projectile: one of {', '.join(LOOKS)}")
+        validate_boss_sprite(throw.get("sprite"), resources, tl + ".sprite", errors)
         if pose is not None and not has_anchor(info, "hand", pose):
             errors.append(f"{label}: a hand anchor is required on the attack cell")
     if behavior == "gunman":
@@ -1187,6 +1188,11 @@ def validate_mission(data, resources, library=None):
     code = data.get("code")
     if code is not None and (not isinstance(code, str) or not re.fullmatch(r"[A-Z0-9]{4,10}", code)):
         errors.append("code must be 4 to 10 uppercase letters or digits")
+    hidden = data.get("hidden", False)
+    if not isinstance(hidden, bool):
+        errors.append("hidden must be true or false")
+    elif hidden and not code:
+        errors.append("a hidden mission needs a code")
     errors.resource(data.get("music"), "Audio/", SOUNDS, resources, "music")
     if data.get("logo") is not None:
         errors.resource(data.get("logo"), "Art/", IMAGES, resources, "logo")
@@ -1687,6 +1693,7 @@ def main():
     files = sorted((resources / "Levels").glob("*.json"))
     ids = set()
     codes = set()
+    first = None
     if not files:
         failures.append("No missions found")
     for file in files:
@@ -1703,9 +1710,14 @@ def main():
                     codes.add(data["code"])
                 if file.stem != data["id"]:
                     errors.append("Filename must match mission id")
+                key = (data.get("order", 1), data["id"])
+                if first is None or key < first[0]:
+                    first = (key, data.get("hidden", False), file.name)
             failures.extend(f"{file.name}: {error}" for error in errors)
         except (ValueError, OSError) as exc:
             failures.append(f"{file.name}: {exc}")
+    if first is not None and first[1]:
+        failures.append(f"{first[2]}: the first mission cannot be hidden")
     failures.extend(f"Mission name in engine code: {hit}" for hit in find_proper_nouns())
     failures.extend(f"Image never loaded, move it to Assets/ArtSources: {name}" for name in find_unused_art())
     if failures:

@@ -4,7 +4,7 @@ Le jeu publie et lit les scores sur des **relais Nostr publics**, sans serveur d
 
 ## Côté joueur
 
-- À la fin d’une mission, gagnée ou perdue, le jeu rejoue d’abord la partie en arrière-plan (« VÉRIFICATION DU REPLAY »). S’il retrouve le même score, **PUBLIER MON SCORE** devient disponible.
+- À la fin d’une mission, gagnée ou perdue, le jeu rejoue d’abord la partie en arrière-plan (« VÉRIFICATION DU REPLAY »). S’il retrouve le même score, le score est publié aussitôt, sans bouton à presser ; en cas d’échec d’envoi, **RÉESSAYER** le renvoie.
 - Le score est signé avec une clé Nostr créée pour ce navigateur et gardée dans son stockage local. Il est publié sous le pseudo saisi sur la page d’accueil, suivi de « J2 », « J3 »… pour les autres joueurs locaux ; en ligne, sous les pseudos de l’équipe. Seul l’hôte publie pour une partie en ligne.
 - Chaque navigateur garde **un score par classement** : publier un meilleur score remplace l’ancien, un score inférieur n’est pas envoyé.
 - **CLASSEMENT**, au menu, affiche le top 10 par mission et par difficulté, y compris le mode **SLUG** (difficulté 4, son propre tableau). Les scores sont triés, puis rejoués un par un dans le navigateur ; seuls ceux qui se reproduisent à l’identique sont affichés. Le verdict est mémorisé pour chaque version du jeu.

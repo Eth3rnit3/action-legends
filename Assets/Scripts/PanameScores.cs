@@ -56,7 +56,8 @@ namespace Paname
             // Never during play: a frame spent replaying someone else's run would stutter.
             if(phase==Phase.Playing)return;
             var result=verifier.StepVerify(4);if(result==null)return;
-            if(verifyingOwn){verifyingOwn=false;publish=result.Value?Publish.Ready:Publish.Invalid;}
+            // A run that replays identically is published at once: a button at the end of the run was easy to miss.
+            if(verifyingOwn){verifyingOwn=false;publish=result.Value?Publish.Ready:Publish.Invalid;PublishScore();}
             else
             {
                 verifyingEntry.verdict=result.Value?"ok":"ko";ALScoreVerdict(verifyingEntry.id,result.Value?1:0,Application.version);
@@ -141,7 +142,7 @@ namespace Paname
                 case Publish.Continued:Label(x-100,y,w+200,h,"PARTIE CONTINUÉE ("+LastReplay.continues+") : SEULES LES PARTIES SANS CONTINUE SONT CLASSÉES.",13,Cream,true,TextAnchor.MiddleCenter);break;
                 case Publish.Unavailable:Label(x-100,y,w+200,h,"LE CLASSEMENT MONDIAL EST DISPONIBLE DANS LA VERSION NAVIGATEUR.",13,Cream,true,TextAnchor.MiddleCenter);break;
             }
-            if(publish==Publish.Ready)Label(x-100,y+42,w+200,18,"Ton pseudo et ta partie seront publiés sur des relais Nostr publics.",11,C("9AAFB2"),false,TextAnchor.MiddleCenter);
+            if(publish==Publish.Checking||publish==Publish.Sending||publish==Publish.Sent)Label(x-100,y+42,w+200,18,"Ton pseudo et ta partie sont publiés sur des relais Nostr publics.",11,C("9AAFB2"),false,TextAnchor.MiddleCenter);
         }
         void DrawBoard()
         {

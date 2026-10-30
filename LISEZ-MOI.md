@@ -76,7 +76,7 @@ Les missions s’enchaînent : Paris, Marseille (code PASTIS), Saint-Rémy (FARA
 
 ## Classement mondial
 
-À la fin d’une mission, **PUBLIER MON SCORE** envoie le score et le replay de la partie sur des relais Nostr publics, sous le pseudo de la page d’accueil. **CLASSEMENT**, au menu, montre le top 10 de chaque mission et difficulté (Slug compris, parties sans continue seulement) ; chaque score est rejoué dans le navigateur avant d’être affiché. Depuis la version 0.7.0, le jeu local avance par pas fixes de 1/60 s comme le jeu en ligne. Chaque version a son propre classement, rappelé au bas du tableau : la 0.9.0 change le gameplay (relief, décors, véhicules, nouveaux héros), son classement repart donc de zéro, et les scores publiés en 0.8.0 ne sont ni rejoués ni affichés. Détails et limites dans [docs/CLASSEMENT.md](docs/CLASSEMENT.md).
+À la fin d’une mission, une fois la partie rejouée à l’identique, le jeu envoie de lui-même le score et le replay sur des relais Nostr publics, sous le pseudo de la page d’accueil. **CLASSEMENT**, au menu, montre le top 10 de chaque mission et difficulté (Slug compris, parties sans continue seulement) ; chaque score est rejoué dans le navigateur avant d’être affiché. Depuis la version 0.7.0, le jeu local avance par pas fixes de 1/60 s comme le jeu en ligne. Chaque version a son propre classement, rappelé au bas du tableau : la 0.9.0 change le gameplay (relief, décors, véhicules, nouveaux héros), son classement repart donc de zéro, et les scores publiés en 0.8.0 ne sont ni rejoués ni affichés. Détails et limites dans [docs/CLASSEMENT.md](docs/CLASSEMENT.md).
 
 ## État de cette version
 

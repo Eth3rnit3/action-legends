@@ -14,8 +14,9 @@ namespace Paname
             public CarrierDefinition type;public int encounter,facing,state,animState=-1;public float x,goal,timer,animTime,stride;
             public readonly List<EncounterSpawn> passengers=new List<EncounterSpawn>();public Transform root;public SpriteRenderer renderer;
         }
-        // Scenery shown for a moment: an opening, a folded parachute. Visual only.
-        sealed class Prop {public Transform root;public SpriteRenderer renderer;public float age,life,fadeIn;}
+        // Scenery shown for a moment: an opening, a folded parachute. Visual only. holder: the enemy who stays up in this
+        // opening; it is shown as long as he is alive, so he never stands in thin air in front of the scrolling panorama.
+        sealed class Prop {public Transform root;public SpriteRenderer renderer;public float age,life,fadeIn;public Enemy holder;}
         readonly List<Arrival> arrivals=new List<Arrival>();
         readonly List<Carrier> carriers=new List<Carrier>();
         readonly List<Prop> props=new List<Prop>();
@@ -37,7 +38,9 @@ namespace Paname
             if(encounterLock&&!EncounterHolds()){encounterLock=false;if(screenLocked&&!(waveLive&&CurrentMission.waves[Wave].@lock)){screenLocked=false;goFromX=cameraX;Announce("CONTINUEZ !  »");}}
             for(int i=props.Count-1;i>=0;i--)
             {
-                var p=props[i];p.age+=dt;var c=p.renderer.color;c.a=p.age<p.fadeIn?p.age/p.fadeIn:Mathf.Clamp01((p.life-p.age)/.3f);p.renderer.color=c;
+                var p=props[i];p.age+=dt;
+                if(p.holder!=null){if(p.holder.hp>0&&enemies.Contains(p.holder))p.age=Mathf.Min(p.age,p.life-.3f);else p.holder=null;}
+                var c=p.renderer.color;c.a=p.age<p.fadeIn?p.age/p.fadeIn:Mathf.Clamp01((p.life-p.age)/.3f);p.renderer.color=c;
                 if(p.age>=p.life){Destroy(p.root.gameObject);props.RemoveAt(i);}
             }
         }
@@ -114,7 +117,7 @@ namespace Paname
             if(entry==EntryDoor||entry==EntryWindow)
             {
                 e.stage=StageEmerge;e.fade=0;e.modeTime=s.look?.time??.45f;e.vertical=e.modeTime;
-                if(s.look!=null)ShowProp(s.look.sprite.Sprite,new Vector2(s.fromX,s.fromY+s.look.height*.5f),s.look.height,e.modeTime+1.1f,.2f,24);
+                if(s.look!=null){var opening=ShowProp(s.look.sprite.Sprite,new Vector2(s.fromX,s.fromY+s.look.height*.5f),s.look.height,e.modeTime+1.1f,.2f,24);if(opening!=null&&s.y>0)opening.holder=e;}
                 Sound(doorClip);
             }
             else if(entry==EntryWalk)e.stage=StageWalk;
@@ -197,12 +200,12 @@ namespace Paname
             c.renderer.sprite=set.Sprite(set.Cell(state,c.animTime,c.stride));c.root.position=new Vector3(c.x,0,0);c.root.localScale=new Vector3(c.facing,1,1);
         }
         // Visual only: an opening or a folded parachute shown for life seconds.
-        void ShowProp(Sprite sprite,Vector2 at,float height,float life,float fadeIn,int layer=28)
+        Prop ShowProp(Sprite sprite,Vector2 at,float height,float life,float fadeIn,int layer=28)
         {
-            if(!sprite)return;
+            if(!sprite)return null;
             var root=new GameObject("Décor de rencontre").transform;root.SetParent(actors,false);root.position=at;root.localScale=Vector3.one*height;
             var r=root.gameObject.AddComponent<SpriteRenderer>();r.sprite=sprite;r.sortingOrder=layer;r.color=new Color(1,1,1,fadeIn>0?0:1);
-            props.Add(new Prop{root=root,renderer=r,life=life,fadeIn=fadeIn});
+            var prop=new Prop{root=root,renderer=r,life=life,fadeIn=fadeIn};props.Add(prop);return prop;
         }
     }
 }

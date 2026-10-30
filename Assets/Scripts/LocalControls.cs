@@ -14,6 +14,8 @@ namespace Paname
     {
         public bool joined;
         public int hero;
+        // Lobby only: the mission starts once every joined player is ready.
+        public bool ready;
         public Gamepad pad;
         public bool Connected => pad != null && pad.added;
         public string DeviceName => Connected ? pad.displayName : "Clavier";

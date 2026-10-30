@@ -3,6 +3,7 @@
   "id": "panique-a-paname",
   "title": "Panique à Paname",
   "location": "Paris, 2026",
+  "logo": "Art/paris-logo",
   "intro": "DIRECTION BASTILLE !",
   "exitLabel": "BASTILLE",
   "winTitle": "PARIS VOUS DIT MERCI.",

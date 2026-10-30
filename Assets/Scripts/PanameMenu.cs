@@ -22,7 +22,7 @@ namespace Paname
                 Label(x+16,290,254,120,"?",96,new Color(.65f,.75f,.75f,.55f),true,TextAnchor.MiddleCenter);
                 Label(x+16,440,254,28,Online?"PLACE LIBRE":"REJOINDRE",21,Cream,true,TextAnchor.MiddleCenter);
                 Panel(x+18,499,250,40,C("07192A"));
-                Label(x+22,503,242,32,Online?"UN AMI REJOINT AVEC LE LIEN DE LA PARTIE":"APPUIE SUR A / CROIX D'UNE MANETTE",12,C("B2C7BD"),true,TextAnchor.MiddleCenter);
+                Label(x+22,503,242,32,Online?"UN AMI REJOINT AVEC LE LIEN DE LA PARTIE":"APPUIE SUR Y / TRIANGLE D'UNE MANETTE",12,C("B2C7BD"),true,TextAnchor.MiddleCenter);
                 return;
             }
             int index=Mod(slots[i].hero,HeroCount);var hero=Heroes[index];
@@ -31,10 +31,25 @@ namespace Paname
             Label(x+16,476,254,20,hero.role,11,accent,true,TextAnchor.MiddleCenter);
             Panel(x+18,499,250,40,C("07192A"));
             Label(x+22,503,242,32,hero.specialName,13,Cream,false,TextAnchor.MiddleCenter);
-            // Above the card's bevelled bottom edge.
-            Label(x+16,542,254,20,(index+1)+" / "+HeroCount,12,Gold,true,TextAnchor.MiddleCenter);
-            if(HeroCount<2||Online&&i!=LocalSlotIndex)return;
+            bool team=Online||JoinedCount>1,mine=!Online||i==LocalSlotIndex,ready=slots[i].ready;
+            // A ready player's card gets a stamp across the hero's legs.
+            if(team&&ready){Panel(x+41,400,204,42,Ink);Panel(x+44,403,198,36,ReadyGreen);Label(x+44,403,198,36,"PRÊT",24,Ink,true,TextAnchor.MiddleCenter);}
+            // Above the card's bevelled bottom edge: the hero's place in the list, or in a team the ready switch.
+            if(!team)Label(x+16,542,254,20,(index+1)+" / "+HeroCount,12,Gold,true,TextAnchor.MiddleCenter);
+            else if(!mine)Label(x+16,542,254,20,ready?"PRÊT":"PAS ENCORE PRÊT",12,ready?ReadyGreen:C("B2C7BD"),true,TextAnchor.MiddleCenter);
+            else if(Button(x+68,540,150,22,ready?"PLUS PRÊT":"PRÊT ?",ready?C("304C56"):ReadyGreen,!ready)){menuPlayer=i;SetReady(i,!ready);}
+            if(HeroCount<2||!mine)return;
             for(int d=-1;d<=1;d+=2){var r=HeroArrow(i,d);if(Button(r.x,r.y,r.width,r.height,d<0?"<":">",C("304C56")))MenuArrow(i,d);}
+        }
+        static readonly Color ReadyGreen=C("7DD58A");
+        // The big button belongs to this browser's player (J1 in local play): alone, it starts the mission; in a team,
+        // it says ready, then shows how many are, and a second click takes it back.
+        void DrawReadyButton(int slot)
+        {
+            if(slot<0||!slots[slot].joined){Panel(932,609,296,59,C("304C56"));Label(932,609,296,59,"CONNEXION...",16,Cream,true,TextAnchor.MiddleCenter);return;}
+            bool ready=slots[slot].ready;string count="  ("+ReadyCount+" / "+JoinedCount+")";
+            string text=!Online&&JoinedCount==1?"DÉPLOYER L'ÉQUIPE  »":ready?"PLUS PRÊT"+count:"JE SUIS PRÊT  »"+count;
+            if(Button(932,609,296,59,text,ready?C("304C56"):Coral,!ready)){menuPlayer=slot;SetReady(slot,!ready);}
         }
         // A card's arrow: this player goes to the previous or next hero (online, through the host).
         void MenuArrow(int slot,int direction)
@@ -101,9 +116,10 @@ namespace Paname
             for(int i=0;i<4;i++)DrawPlayerCard(i);
             if(!DrawOnlineLobbyFooter())
             {
-                Label(51,606,800,22,"MANETTE : A / CROIX POUR REJOINDRE  ·  CROIX GAUCHE / DROITE POUR CHANGER DE HÉROS",13,Cream);
-                Label(51,630,800,22,"J1 AU CLAVIER : Q / E OU FLÈCHES  ·  À LA SOURIS : LES FLÈCHES DE CHAQUE CARTE",13,C("B2C7BD"));
-                if(Button(932,609,296,59,"DÉPLOYER L'ÉQUIPE  »",Coral,true))BeginRound();
+                Label(51,598,860,22,"MANETTE : A / CROIX PREND J1 (PUIS LA PLACE SUIVANTE)  ·  Y / TRIANGLE : NOUVEAU JOUEUR  ·  CROIX : HÉROS",13,Cream);
+                Label(51,620,860,22,"J1 AU CLAVIER : Q / E OU FLÈCHES  ·  À LA SOURIS : LES FLÈCHES DE CHAQUE CARTE",13,C("B2C7BD"));
+                Label(51,642,860,22,"PRÊT : ENTRÉE, A / CROIX OU START  ·  LA MISSION PART QUAND TOUTE L'ÉQUIPE EST PRÊTE",13,Gold,true);
+                DrawReadyButton(0);
             }
         }
     }

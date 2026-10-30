@@ -16,6 +16,7 @@ Les deux planches générées passent ensuite par `tools/art/pack_sheet.py` (Pil
 | `Art/tokyo/akihabara.png` | 2172×724 | Décor 2 |
 | `Art/tokyo/asakusa.png` | 2172×724 | Décor 3, ajouté après la 0.9.0 (prompt dans [ART_RACCORDS.md](ART_RACCORDS.md)) |
 | `Art/tokyo/minato.png` | 2172×724 | Décor 4, arène du boss |
+| `Art/tokyo/mission-logo.png` | 2172×724, transparent | Logo « Tokyo Néon » de la fiche de mission (champ `logo`), ajouté en 0.9.1 (prompt dans [ART_LOGOS.md](ART_LOGOS.md)) |
 | `Art/tokyo/sol.png` | 2172×724 | Chaussée mouillée : seuls les 25 % inférieurs, sous la bordure, sont répétés |
 | `ArtSources/tokyo/enemies.png` (dans `Resources` jusqu’à la 0.8.0) | 1680×1086, transparent | Trois tireurs, quatre images chacun : attente, deux foulées, tir |
 | `Art/tokyo/mecha-shogun.png` | 1680×1024, transparent | Boss, six images : attente, deux pas, piétinement, gatling, missiles |

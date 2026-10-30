@@ -147,10 +147,10 @@ public static class VerifyLot3Heroes
             Press(kb,new KeyboardState(Key.RightArrow),new KeyboardState());keys&=g.slots[0].hero==0;
             Press(kb,new KeyboardState(Key.LeftArrow),new KeyboardState());keys&=g.slots[0].hero==n-1;
             Check(keys,"Clavier : E / D, Q / A et les flèches font défiler les douze héros de J1 ("+trace+")",checks);
-            // Three pads join with A / cross, then scroll with the d-pad.
-            for(int k=0;k<3;k++){var pad=InputSystem.AddDevice<Gamepad>();pads.Add(pad);Press(pad,new GamepadState().WithButton(GamepadButton.South),new GamepadState());}
+            // Three pads join as new players with Y / triangle (A / cross would hand the first one to J1), then scroll with the d-pad.
+            for(int k=0;k<3;k++){var pad=InputSystem.AddDevice<Gamepad>();pads.Add(pad);Press(pad,new GamepadState().WithButton(GamepadButton.North),new GamepadState());}
             bool joined=g.slots[1].joined&&g.slots[2].joined&&g.slots[3].joined&&g.slots[1].pad==pads[0]&&g.slots[3].pad==pads[2];
-            Check(joined,"Manettes virtuelles : A / croix fait rejoindre J2, J3 et J4 (leurs cartes « rejoindre » se remplissent)",checks);
+            Check(joined,"Manettes virtuelles : Y / triangle fait rejoindre J2, J3 et J4 (leurs cartes « rejoindre » se remplissent)",checks);
             bool padScroll=true;
             for(int i=1;i<4;i++)
             {

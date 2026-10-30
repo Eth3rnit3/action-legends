@@ -7,7 +7,7 @@ Jusqu’à quatre joueurs, chacun sur son navigateur, sans serveur de jeu.
 1. Sur la page du jeu, choisir un pseudo puis **Créer une partie en ligne**.
 2. Copier le lien d’invitation affiché sous le jeu et l’envoyer à ses amis.
 3. Ils ouvrent le lien, choisissent leur pseudo et cliquent sur **Rejoindre la partie**.
-4. Chacun choisit son héros. L’hôte choisit la mission et la difficulté, puis déploie l’équipe.
+4. Chacun choisit son héros. L’hôte choisit la mission et la difficulté. Chaque joueur se déclare prêt dans son navigateur (Entrée, A / croix, Start ou le bouton **JE SUIS PRÊT**) ; la mission part dès que toute l’équipe l’est. Changer de héros retire son « prêt » ; changer de mission ou de difficulté, ou l’arrivée d’un nouveau joueur, fait attendre de nouveau. Le salon partagé (`NetLobby.ready`) transmet l’état de chacun, et un invité l’envoie à l’hôte par un message `Y`.
 
 On rejoint uniquement depuis le salon : un joueur qui arrive pendant une mission doit attendre le retour au menu. L’hôte doit garder son onglet visible ; un onglet en arrière-plan met le jeu en pause pour tout le monde. Si l’hôte quitte, les autres joueurs peuvent continuer en local.
 

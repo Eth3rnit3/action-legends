@@ -36,7 +36,9 @@ namespace Paname
             if(world){world.gameObject.SetActive(false);Destroy(world.gameObject);}
             world=new GameObject("Décor de mission").transform;world.SetParent(transform,false);Street(world,CurrentMission.map,CurrentMission.length,ViewBottom);
             cameraX=CurrentMission.cameraMin;LoadMissionMusic();BuildLobbyActors();
-            missionLogo=string.IsNullOrEmpty(CurrentMission.logo)?null:Resources.Load<Texture2D>(CurrentMission.logo);
+            LoadMissionLogo();
+            // Ready for another mission is not ready for this one.
+            ClearReady();
         }
         public int Score {get;private set;}
         public int Wave {get;private set;}
@@ -129,8 +131,10 @@ namespace Paname
             foreach(var hero in Heroes){hero.animations.Prewarm();if(hero.special.kind==HeroSpecial.Summon)hero.special.ally.animations.Prewarm();}
             foreach(var mission in missions){foreach(var enemy in mission.roster)enemy.animations.Prewarm();foreach(var prop in mission.map.props)prop.definition.animations.Prewarm();foreach(var v in mission.map.vehicles)v.definition.animations.Prewarm();}
             for(int row=0;row<4;row++)for(int frame=0;frame<6;frame++)ArcadeEffects.Frame(row,frame);
-            LoadSoundtrack();BuildLobbyActors();
+            LoadSoundtrack();LoadMissionLogo();BuildLobbyActors();
         }
+        // Also at start-up: the first mission's card shows its logo too.
+        void LoadMissionLogo()=>missionLogo=string.IsNullOrEmpty(CurrentMission.logo)?null:Resources.Load<Texture2D>(CurrentMission.logo);
         void Sound(AudioClip clip){if(audioOut&&clip)audioOut.PlayOneShot(clip);}
         void ResetActors()
         {
@@ -154,15 +158,27 @@ namespace Paname
         {
             if(OnlineRound())return;
             ResetActors();PlaceProps();BuildTerrain();PlaceVehicles();Score=carriedScore;carriedScore=0;Wave=0;Reserves=StartingReserves;pending=0;waveLive=false;screenLocked=false;goFromX=-1;spawnTimer=0;SimulationTime=0;cameraX=CurrentMission.cameraMin;shake=0;bossFellAt=-99;
-            for(int i=0;i<4;i++)if(slots[i].joined)SpawnPlayer(i,2+i*1.3f);
+            for(int i=0;i<4;i++){slots[i].ready=false;if(slots[i].joined)SpawnPlayer(i,2+i*1.3f);}
             PlaceHostages();ResetContinue();StartReplay();
             phase=Phase.Playing;Announce(CurrentMission.intro);Sound(startClip);if(musicOut){musicOut.Stop();musicOut.clip=musicClip;}
         }
-        public void ReturnToLobby(){if(OnlineReturn())return;phase=Phase.Lobby;cameraX=CurrentMission.cameraMin;BuildLobbyActors();}
+        public void ReturnToLobby(){if(OnlineReturn())return;phase=Phase.Lobby;cameraX=CurrentMission.cameraMin;ClearReady();BuildLobbyActors();}
+        void ClearReady(){foreach(var s in slots)s.ready=false;}
+        public bool AllReady{get{foreach(var s in slots)if(s.joined&&!s.ready)return false;return JoinedCount>0;}}
+        public int ReadyCount{get{int n=0;foreach(var s in slots)if(s.joined&&s.ready)n++;return n;}}
+        // The lobby's way in: a player says they are ready (or no longer), and the mission starts once the whole team is.
+        // BeginRound itself stays unconditional, for the mission chain, the replays and the test scripts.
+        public void SetReady(int slot,bool ready)
+        {
+            if(OnlineReady(slot,ready)||phase!=Phase.Lobby||slot<0||slot>=4||!slots[slot].joined||slots[slot].ready==ready)return;
+            slots[slot].ready=ready;Sound(ready?coinClip:selectClip);
+            // Online, the host's BeginRound must go through OnlineRound to start every browser, even from a guest's message.
+            if(AllReady){bool bypass=netBypass;netBypass=false;BeginRound();netBypass=bypass;}
+        }
         public void SelectHero(int playerSlot,int hero)
         {
             if(OnlineHero(hero)||phase!=Phase.Lobby||playerSlot<0||playerSlot>=4||!slots[playerSlot].joined)return;
-            slots[playerSlot].hero=Mathf.Clamp(hero,0,HeroCount-1);BuildLobbyActors();Sound(selectClip);
+            slots[playerSlot].hero=Mathf.Clamp(hero,0,HeroCount-1);slots[playerSlot].ready=false;BuildLobbyActors();Sound(selectClip);
         }
         void Update()
         {
@@ -177,14 +193,16 @@ namespace Paname
             if(phase==Phase.Lobby)
             {
                 var k=Keyboard.current;
-                if(k!=null&&!LobbyKeysBlocked){if(k.qKey.wasPressedThisFrame||k.aKey.wasPressedThisFrame)ChangeHero(0,-1);if(k.eKey.wasPressedThisFrame||k.dKey.wasPressedThisFrame)ChangeHero(0,1);if(k.leftArrowKey.wasPressedThisFrame)ChangeHero(0,-1);if(k.rightArrowKey.wasPressedThisFrame)ChangeHero(0,1);if(k.enterKey.wasPressedThisFrame)BeginRound();}
-                for(int i=0;i<4;i++)if(slots[i].joined&&slots[i].Connected)
+                if(k!=null&&!LobbyKeysBlocked){if(k.qKey.wasPressedThisFrame||k.aKey.wasPressedThisFrame)ChangeHero(0,-1);if(k.eKey.wasPressedThisFrame||k.dKey.wasPressedThisFrame)ChangeHero(0,1);if(k.leftArrowKey.wasPressedThisFrame)ChangeHero(0,-1);if(k.rightArrowKey.wasPressedThisFrame)ChangeHero(0,1);if(k.enterKey.wasPressedThisFrame)SetReady(0,!slots[0].ready);}
+                for(int i=0;i<4&&phase==Phase.Lobby;i++)if(slots[i].joined&&slots[i].Connected&&(padJoined&(1<<i))==0)
                 {
-                    if(i==0&&slots[i].pad.leftShoulder.wasPressedThisFrame)SelectMission(-1);
-                    if(i==0&&slots[i].pad.rightShoulder.wasPressedThisFrame)SelectMission(1);
-                    if(slots[i].pad.dpad.left.wasPressedThisFrame)ChangeHero(i,-1);
-                    if(slots[i].pad.dpad.right.wasPressedThisFrame)ChangeHero(i,1);
-                    if(slots[i].pad.startButton.wasPressedThisFrame){BeginRound();break;}
+                    var pad=slots[i].pad;
+                    if(i==0&&pad.leftShoulder.wasPressedThisFrame)SelectMission(-1);
+                    if(i==0&&pad.rightShoulder.wasPressedThisFrame)SelectMission(1);
+                    if(pad.dpad.left.wasPressedThisFrame)ChangeHero(i,-1);
+                    if(pad.dpad.right.wasPressedThisFrame)ChangeHero(i,1);
+                    if(pad.buttonSouth.wasPressedThisFrame)SetReady(i,!slots[i].ready);
+                    else if(pad.startButton.wasPressedThisFrame)SetReady(i,true);
                 }
             }
             else if(phase==Phase.Won&&NextMissionDefinition!=null&&ContinuePressed())NextMission();
@@ -197,24 +215,31 @@ namespace Paname
         {
             if(phase==Phase.Lobby)
             {
+                // A lost J1 pad leaves J1 on the keyboard; the other players leave the team.
+                if(slots[0].pad!=null&&!slots[0].Connected){slots[0].pad=null;slots[0].ready=false;}
                 for(int i=1;i<4;i++)if(slots[i].joined&&!slots[i].Connected)
                 {
-                    slots[i].joined=false;slots[i].pad=null;
+                    slots[i].joined=false;slots[i].pad=null;slots[i].ready=false;
                     if(players[i]!=null){players[i].root.gameObject.SetActive(false);Destroy(players[i].root.gameObject);players[i]=null;}
                 }
             }
+            padJoined=0;
             foreach(var pad in Gamepad.all)
             {
                 bool assigned=false;for(int i=0;i<4;i++)if(slots[i].pad==pad){assigned=true;break;}
                 if(assigned)continue;
-                if(pad.buttonSouth.wasPressedThisFrame && (phase==Phase.Lobby||phase==Phase.Playing))
+                // A / cross: J1 takes the first pad and keeps the keyboard. Y / triangle: a new player, so J1 can stay
+                // on the keyboard while a friend plays on the only pad.
+                bool take=pad.buttonSouth.wasPressedThisFrame,add=pad.buttonNorth.wasPressedThisFrame;
+                if((take||add) && (phase==Phase.Lobby||phase==Phase.Playing))
                 {
                     int index=-1;
                     for(int i=0;i<4;i++)if(slots[i].pad!=null&&!slots[i].Connected){index=i;break;}
+                    if(index<0&&take&&slots[0].pad==null)index=0;
                     if(index<0)for(int i=1;i<4;i++)if(!slots[i].joined){index=i;break;}
                     if(index<0&&slots[0].pad==null)index=0;
                     if(index<0)continue;
-                    slots[index].joined=true;slots[index].pad=pad;Sound(coinClip);
+                    slots[index].joined=true;slots[index].pad=pad;slots[index].ready=false;padJoined|=1<<index;Sound(coinClip);
                     if(players[index]==null){if(phase==Phase.Lobby)BuildLobbyActors();else{SpawnPlayer(index,LeaderX()-1);ReplayBroken("UN JOUEUR A REJOINT EN COURS DE MISSION");}}
                 }
             }
@@ -223,9 +248,11 @@ namespace Paname
                 if(phase==Phase.Playing)phase=Phase.Paused;else if(phase==Phase.Paused)phase=Phase.Playing;
             }
         }
+        // The pads that took a place this frame: the same press does not also say ready.
+        int padJoined;
         void ChangeHero(int slot,int direction)
         {
-            slots[slot].hero=Mod(slots[slot].hero+direction,HeroCount);BuildLobbyActors();
+            slots[slot].hero=Mod(slots[slot].hero+direction,HeroCount);slots[slot].ready=false;BuildLobbyActors();
         }
         public Vector2 GetPlayerPosition(int slot)=>players[slot]?.position??Vector2.zero;
         public int GetPlayerHealth(int slot)=>players[slot]?.hp??0;

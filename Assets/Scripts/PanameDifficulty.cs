@@ -25,7 +25,8 @@ namespace Paname
         public void SetDifficulty(int index)
         {
             if(HostOnly(()=>SetDifficulty(index))||phase!=Phase.Lobby)return;
-            SelectedDifficulty=Mathf.Clamp(index,0,DifficultyCount-1);
+            int previous=SelectedDifficulty;SelectedDifficulty=Mathf.Clamp(index,0,DifficultyCount-1);
+            if(SelectedDifficulty!=previous)ClearReady();
         }
         void DrawDifficulty()
         {

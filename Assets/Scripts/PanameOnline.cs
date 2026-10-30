@@ -25,7 +25,7 @@ namespace Paname
         const float NetStep=1f/60;
         const int HashInterval=60;
         [Serializable] sealed class NetConfig {public string mode,code,name,self;}
-        [Serializable] sealed class NetLobby {public string build;public int mission,difficulty,score;public bool[] joined=new bool[4];public int[] heroes=new int[4];public string[] peers=new string[4],names=new string[4];}
+        [Serializable] sealed class NetLobby {public string build;public int mission,difficulty,score;public bool[] joined=new bool[4],ready=new bool[4];public int[] heroes=new int[4];public string[] peers=new string[4],names=new string[4];}
         struct NetInput {public int move,flags,jumps,specials,grenades,usedJumps,usedSpecials,usedGrenades;}
         sealed class NetFrame {public int left;public readonly int[] moves=new int[4],flags=new int[4];}
         public bool Online {get;private set;}
@@ -97,14 +97,15 @@ namespace Paname
                     if(phase!=Phase.Lobby){NetSend(peer,"RSTARTED");return;}
                     slot=Array.FindIndex(slots,s=>!s.joined);
                     if(slot<0){NetSend(peer,"RFULL");return;}
-                    slots[slot].joined=true;slots[slot].pad=null;slots[slot].hero=FreeHero(slot);slotPeers[slot]=peer;netInputs[slot]=default;
+                    slots[slot].joined=true;slots[slot].pad=null;slots[slot].ready=false;slots[slot].hero=FreeHero(slot);slotPeers[slot]=peer;netInputs[slot]=default;
                     BuildLobbyActors();
                 }
                 playerNames[slot]=CleanName(parts.Length>1?parts[1]:"");
                 HostSendLobby();
             }
             else if(slot<=0)return;
-            else if(type=='P'&&phase==Phase.Lobby&&int.TryParse(body,out int hero)){slots[slot].hero=Mod(hero,HeroCount);BuildLobbyActors();HostSendLobby();}
+            else if(type=='P'&&phase==Phase.Lobby&&int.TryParse(body,out int hero)){slots[slot].hero=Mod(hero,HeroCount);slots[slot].ready=false;BuildLobbyActors();HostSendLobby();}
+            else if(type=='Y'&&phase==Phase.Lobby){netBypass=true;SetReady(slot,body=="1");netBypass=false;if(phase==Phase.Lobby)HostSendLobby();}
             else if(type=='I')ParseInput(body,ref netInputs[slot]);
             else if(type=='H')CheckHash(body);
         }
@@ -123,7 +124,7 @@ namespace Paname
         string LobbyJson()
         {
             var lobby=new NetLobby{build=BuildId,mission=missionIndex,difficulty=SelectedDifficulty,score=carriedScore};
-            for(int i=0;i<4;i++){lobby.joined[i]=slots[i].joined;lobby.heroes[i]=slots[i].hero;lobby.peers[i]=slotPeers[i]??"";lobby.names[i]=playerNames[i]??"";}
+            for(int i=0;i<4;i++){lobby.joined[i]=slots[i].joined;lobby.ready[i]=slots[i].ready;lobby.heroes[i]=slots[i].hero;lobby.peers[i]=slotPeers[i]??"";lobby.names[i]=playerNames[i]??"";}
             return JsonUtility.ToJson(lobby);
         }
         void HostSendLobby(){if(Online&&IsHost){NetSendAll("L"+LobbyJson());ReportStatus();}}
@@ -139,6 +140,15 @@ namespace Paname
             if(!Online||netBypass)return false;
             if(IsHost){netBypass=true;SelectHero(0,hero);netBypass=false;HostSendLobby();}
             else NetSend(netHost,"P"+hero);
+            return true;
+        }
+        // Each player says ready from their own browser; the host starts the mission once the whole team is.
+        bool OnlineReady(int slot,bool ready)
+        {
+            if(!Online||netBypass)return false;
+            if(slot!=LocalSlotIndex||phase!=Phase.Lobby)return true;
+            if(IsHost){netBypass=true;SetReady(slot,ready);netBypass=false;if(phase==Phase.Lobby)HostSendLobby();}
+            else NetSend(netHost,"Y"+(ready?1:0));
             return true;
         }
         bool OnlineRound()
@@ -199,11 +209,11 @@ namespace Paname
             netInputs[slot]=default;
             // During a mission the departure is applied at the same tick in every browser.
             if(phase==Phase.Playing){slotPeers[slot]=null;netLeftMask|=1<<slot;return;}
-            DropPlayer(slot);if(phase==Phase.Lobby){BuildLobbyActors();HostSendLobby();}
+            DropPlayer(slot);if(phase==Phase.Lobby){BuildLobbyActors();HostSendLobby();if(AllReady)BeginRound();}
         }
         void DropPlayer(int slot)
         {
-            slots[slot].joined=false;slotPeers[slot]=null;playerNames[slot]=null;
+            slots[slot].joined=false;slots[slot].ready=false;slotPeers[slot]=null;playerNames[slot]=null;
             if(players[slot]!=null){players[slot].root.gameObject.SetActive(false);Destroy(players[slot].root.gameObject);players[slot]=null;}
         }
 
@@ -234,7 +244,7 @@ namespace Paname
             LocalSlotIndex=-1;
             for(int i=0;i<4;i++)
             {
-                slots[i].joined=lobby.joined[i];slots[i].pad=null;slots[i].hero=Mod(lobby.heroes[i],HeroCount);
+                slots[i].joined=lobby.joined[i];slots[i].ready=lobby.ready!=null&&lobby.ready.Length>i&&lobby.ready[i];slots[i].pad=null;slots[i].hero=Mod(lobby.heroes[i],HeroCount);
                 slotPeers[i]=lobby.peers[i];playerNames[i]=lobby.names[i];
                 if(lobby.joined[i]&&lobby.peers[i]==netSelf)LocalSlotIndex=i;
             }
@@ -290,8 +300,11 @@ namespace Paname
             if(k!=null&&!LobbyKeysBlocked){if(k.qKey.wasPressedThisFrame||k.aKey.wasPressedThisFrame||k.leftArrowKey.wasPressedThisFrame)direction=-1;if(k.eKey.wasPressedThisFrame||k.dKey.wasPressedThisFrame||k.rightArrowKey.wasPressedThisFrame)direction=1;}
             if(pad!=null){if(pad.dpad.left.wasPressedThisFrame)direction=-1;if(pad.dpad.right.wasPressedThisFrame)direction=1;}
             if(direction!=0&&LocalSlotIndex>=0)OnlineHero(Mod(slots[LocalSlotIndex].hero+direction,HeroCount));
-            if(!IsHost||LobbyKeysBlocked)return;
-            if((k!=null&&k.enterKey.wasPressedThisFrame)||(pad!=null&&pad.startButton.wasPressedThisFrame))BeginRound();
+            if(LobbyKeysBlocked||LocalSlotIndex<0)return;
+            bool ready=slots[LocalSlotIndex].ready;
+            if((k!=null&&k.enterKey.wasPressedThisFrame)||(pad!=null&&pad.buttonSouth.wasPressedThisFrame))SetReady(LocalSlotIndex,!ready);
+            else if(pad!=null&&pad.startButton.wasPressedThisFrame&&!ready)SetReady(LocalSlotIndex,true);
+            if(!IsHost)return;
             if(pad!=null&&pad.leftShoulder.wasPressedThisFrame)SelectMission(-1);
             if(pad!=null&&pad.rightShoulder.wasPressedThisFrame)SelectMission(1);
         }
@@ -340,7 +353,7 @@ namespace Paname
         void LeaveOnline()
         {
             Online=false;IsHost=false;netError="";netStatus="";netHost="";LocalSlotIndex=-1;
-            for(int i=0;i<4;i++){slots[i].joined=i==0;slots[i].pad=null;slotPeers[i]=null;playerNames[i]=null;}
+            for(int i=0;i<4;i++){slots[i].joined=i==0;slots[i].ready=false;slots[i].pad=null;slotPeers[i]=null;playerNames[i]=null;}
             phase=Phase.Lobby;cameraX=CurrentMission.cameraMin;BuildLobbyActors();ReportStatus();
         }
 
@@ -350,9 +363,8 @@ namespace Paname
         {
             if(!Online)return false;
             Label(51,633,860,22,"PARTIE EN LIGNE  ·  CODE "+netCode,13,Cream,true);
-            if(!IsHost)Label(51,659,860,20,"L'hôte lance la partie.",12,Gold,true);
-            if(IsHost){if(Button(932,609,296,59,"DÉPLOYER L'ÉQUIPE  »",Coral,true))BeginRound();}
-            else{Panel(932,609,296,59,C("304C56"));Label(932,609,296,59,"EN ATTENTE DE L'HÔTE...",16,Cream,true,TextAnchor.MiddleCenter);}
+            Label(51,659,860,20,"Entrée, A / croix ou le bouton : prêt. La mission part quand toute l'équipe est prête.",12,Gold,true);
+            DrawReadyButton(LocalSlotIndex);
             return true;
         }
         string SlotLabel(int slot)=>Online?PlayerTag(slot)+(slot==0?"  (HÔTE)":slot==LocalSlotIndex?"  (TOI)":""):"J"+(slot+1)+"  "+slots[slot].DeviceName;
